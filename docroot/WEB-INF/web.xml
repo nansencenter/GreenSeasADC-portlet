@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:jsp="http://java.sun.com/xml/ns/javaee/jsp" xmlns:web="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" id="WebApp_ID" version="2.4">
+  <display-name>GreenseasV.1-portlet</display-name>
+  <servlet>
+    <servlet-name>OpenLayersProxy</servlet-name>
+    <servlet-class>nersc.greenseas.openlayersProxy.GwtOpenLayersProxyServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>OpenLayersProxy</servlet-name>
+    <url-pattern>/openLayersProxy/*</url-pattern>
+  </servlet-mapping>
+  <jsp-config>
+    <taglib>
+      <taglib-uri>http://java.sun.com/portlet_2_0</taglib-uri>
+      <taglib-location>/WEB-INF/tld/liferay-portlet.tld</taglib-location>
+    </taglib>
+  </jsp-config>
+</web-app>

@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!DOCTYPE liferay-portlet-app PUBLIC "-//Liferay//DTD Portlet Application 6.1.0//EN" "http://www.liferay.com/dtd/liferay-portlet-app_6_1_0.dtd">
+
+<liferay-portlet-app>
+	<portlet>
+		<portlet-name>GreenseasV.1</portlet-name>
+		<icon>/icon.png</icon>
+		<instanceable>false</instanceable>
+		<!-- jquery ui css-->
+		<header-portlet-css>/css/jquery-ui.css</header-portlet-css>
+		<header-portlet-css>/css/jquery.dataTables.css</header-portlet-css>
+		<!-- qUnit css-->
+		<header-portlet-css>/css/qunit-1.11.0.css</header-portlet-css>
+		<!-- application css-->
+		<header-portlet-css>/css/main.css</header-portlet-css>
+		<!-- application libs -->
+		<header-portlet-javascript>/js/lib/jquery.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/lib/highcharts.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/lib/highcharts-more.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/lib/exporting.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/lib/jquery-ui.min.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/lib/jquery.dataTables.min.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/lib/OpenLayers.js</header-portlet-javascript>
+		<!-- testing lib -->
+		<header-portlet-javascript>/js/lib/qunit-1.11.0.js</header-portlet-javascript>
+		<!-- application script files -->
+		<header-portlet-javascript>/js/src/control.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/src/mapViewer.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/src/charter.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/src/buttonEventHandlers.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/src/errorMessage.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/src/query.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/src/webFeatureService.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/src/tableConstructor.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/src/density.js</header-portlet-javascript>
+		<!-- test script files-->
+		<header-portlet-javascript>/js/test/test.js</header-portlet-javascript>
+		<css-class-wrapper>test-portlet</css-class-wrapper>
+	</portlet>
+	<role-mapper>
+		<role-name>administrator</role-name>
+		<role-link>Administrator</role-link>
+	</role-mapper>
+	<role-mapper>
+		<role-name>guest</role-name>
+		<role-link>Guest</role-link>
+	</role-mapper>
+	<role-mapper>
+		<role-name>power-user</role-name>
+		<role-link>Power User</role-link>
+	</role-mapper>
+	<role-mapper>
+		<role-name>user</role-name>
+		<role-link>User</role-link>
+	</role-mapper>
+</liferay-portlet-app>
