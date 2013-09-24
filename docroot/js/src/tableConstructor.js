@@ -122,6 +122,46 @@ myNamespace.tableConstructor = (function($) {
 		return concatTable(header, tableHeader, rows, footer);
 	}
 	
+	function selectedParameterTable(tableId, features) {
+		var header = "<table id='" + tableId + "'class='table'>", tableHeader, footer = "</tbody></table>", rows = "", row = "";
+		tableHeader = headerFrom([ "ID", "Lat (dec.deg)", "Long (dec.deg)", "Date", "Depth of sample (m)", 
+		                           "Flagellate 2-20 micro-m (# per ml)", "Flagellate 2 micro-m (# per ml)",
+		                           "Silico flag. (# per ml)",
+		                           "Choano- flagellida (# per ml)", "Flagellate 5 micro-m (# per ml)",
+		                           "Flagellate 15 micro-m (# per ml)", "Dinophyceae >20 m-m (# per ml)",
+		                           "Dinophyceae >20 m-m hetero. (# per ml)", "Strom- bidium spp. (# per ml)",
+		                           "Stro- bilidium spp. (# per ml)",
+		                           "Ciliatea (# per ml)"]) + "\n<tbody>";
+
+		// iterate through all features, generate table row for each
+		$.each(features, function(i, val) {
+			var property = val.properties;
+			row = "<tr>";
+
+			row += data(property.id);
+			var pos = val.geometry.coordinates;
+			row += data(pos[0]);
+			row += data(pos[1]);
+			row += data(property.date);
+			row += data(property.depth_of_sample);
+			row += data(property.p400e00b);
+			row += data(property.p400m00a);
+			row += data(property.p400m00e);
+			row += data(property.p400m00f);
+			row += data(property.p400m00k);
+			row += data(property.p400m00r);
+			row += data(property.c1a61382);
+			row += data(property.b4116767);
+			row += data(property.p985m00z);
+			row += data(property.p861m00z);
+			row += data(property.p500m17z);
+
+			rows += row + "</tr>\n";
+		});
+
+		return concatTable(header, tableHeader, rows, footer);
+	}
+	
 	function parameterTableFlagellate(tableId, features) {
 		var header = "<table id='" + tableId + "'class='table'>", tableHeader, footer = "</tbody></table>", rows = "", row = "";
 		tableHeader = headerFrom([ "ID", "Lat (dec.deg)", "Long (dec.deg)", "Date", "Depth of sample (m)", 
@@ -262,6 +302,7 @@ myNamespace.tableConstructor = (function($) {
 		parameterTableChlorophyll: parameterTableChlorophyll,
 		parameterTablePlankton : parameterTablePlankton,
 		parameterTableFlagellate: parameterTableFlagellate,
+		selectedParameterTable: selectedParameterTable,
 		parameterTable : parameterTable,
 		featureTable : featureTable
 	};

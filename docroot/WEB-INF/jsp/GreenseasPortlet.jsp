@@ -19,6 +19,7 @@
 			<li><a href="#chlorophyllTab">Chlorophyll</a></li>
 			<li><a href="#planktonTab">Plankton</a></li>
 			<li><a href="#flagellateTab">Flagellate</a></li>
+			<li><a href="#selectedParametersTab">Selected Parameters</a></li>
 
 		</ul>
 		<div id="queryTab">
@@ -64,7 +65,7 @@
 					</h3>
 					<div id='datetime'>
 
-						<input type="checkbox" id="dateEnabledCheck"> Enable in
+						<input type="checkbox" id="dateEnabledCheck" checked="checked"> Enable in
 						query <br> <br> <em>Date (Use yyyy-mm-dd format if
 							no date picker appears)</em> <br> Between <input type="date"
 							id="fromDate" value="2006-01-01"> and <input type="date"
@@ -131,8 +132,25 @@
 							</select>
 						</div>
 
+						</div>
+						<h3>
+							<span id='parametersHeaderText'>Parameters <em>(disabled)</em></span>
+						</h3>
+						<div id='Parameters'>
+
+							<div>
+								<input type="checkbox" id="parametersEnabledCheck">
+								Enable in query
+							</div>
+
+							<div>
+								<div>Area</div>
+									<input type="checkbox" id="temperatureEnabledCheck"> Temperature <br>
+									<input type="checkbox" id="chlorophyllEnabledCheck"> Chlorophyll <br>
+							</div>
+						</div>
+
 					</div>
-				</div>
 
 				<input type='button' id='filter' value="Run query" /> <!-- <input
 					type='button' id='showRawQueryButton' value="Show raw query" />  -->
@@ -249,7 +267,24 @@
 			</div>
 		</div>
 	</div>
-
+		<div id="selectedParametersTab">
+			<p>Run a query and select a feature (click a row) to view the parameter values
+				here.</p>
+			<div id="selectedParametersTables">
+				<div id="selectedParameters" class="container">
+					<div id="selectedParameter" class="floatLeft"></div>
+				</div>
+			</div>
+			<div id="exportSelectedParametersDiv">
+				<input type='button' id='exportSelectedParameters' value="Export selected parameters" disabled />
+				<select id="exportSelectedParametersFormats">
+					<option value="csv">CSV</option>
+					<option value="gml2">GML2</option>
+					<option value="shape-zip">Shapefile</option>
+					<option value="json">GeoJSON</option>
+				</select>
+			</div>
+		</div>
 </div>
 
 

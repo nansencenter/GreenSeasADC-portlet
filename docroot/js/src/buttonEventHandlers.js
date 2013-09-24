@@ -55,6 +55,8 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 				"Date/Time", "#dateHeaderText"));
 		add("#attributesEnabledCheck", checkParameter("attributesEnabledCheck",
 				"Attributes", "#attributesHeaderText"));
+		add("#parametersEnabledCheck", checkParameter("parametersEnabledCheck",
+				"Parameters", "#parametersHeaderText"));
 
 		// buttons that call methods of control - should have control as "this"
 		var c = myNamespace.control;

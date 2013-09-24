@@ -191,6 +191,7 @@ myNamespace.mapViewer = (function(OL) {
 	}
 
 	function addContourLayerOfPreviousFilter() {
+		alert("addContourLayerOfPreviousFilter");
 		mapLayers.contour = new OpenLayers.Layer.WMS.Untiled("Contour plot",
 				myNamespace.WMSserver, {
 					layers : 'greensad:temperature_atlevel',

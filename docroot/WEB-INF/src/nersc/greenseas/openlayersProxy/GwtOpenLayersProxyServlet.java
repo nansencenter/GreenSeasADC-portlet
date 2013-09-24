@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 /**
  * This is a transparent HTTP proxy written in Java that is similar to the proxy in
  * the OpenLayers examples, which is written in Python. These proxies are used
@@ -33,6 +35,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 @SuppressWarnings("serial")
 public class GwtOpenLayersProxyServlet extends HttpServlet {
+
+	Logger logger = Logger.getLogger(GwtOpenLayersProxyServlet.class);
 	
 	static private String[] allowedHosts = {"127.0.0.1","localhost:8080", "localhost:8081", "tomcat.nersc.no", "tomcat.ad.nersc.no:8080"};
 
@@ -49,6 +53,7 @@ public class GwtOpenLayersProxyServlet extends HttpServlet {
         private void processRequest(HttpServletRequest request,
                         HttpServletResponse response) throws ServletException, IOException {
 
+        	logger.info("Incoming proxy request to: " + request.getParameter("targetURL"));
                 HttpURLConnection connection = null;
                 //input to proxy
                 InputStream istream = null;

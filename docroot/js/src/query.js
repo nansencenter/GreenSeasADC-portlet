@@ -6,10 +6,10 @@ myNamespace.query = (function(OL) {
 	var previousFilter;
 
 	// construct an OGC XML filter object from attributes
-	function constructFilter(bbox, date, attributes) {
+	function constructFilter(bbox, date, attributes, par) {
 
 		// should we filter at all?
-		if (bbox || date || attributes) {
+		if (bbox || date || attributes || par) {
 			var filterArray = [];
 
 			// bbox filter
@@ -24,11 +24,24 @@ myNamespace.query = (function(OL) {
 
 			if (attributes) {
 				var attrFilter = attributeFilter(attributes);
-
+				
 				// only add the filter if it produced a result
 				if (attrFilter !== null) {
 					filterArray.push(attrFilter);
 				}
+			}
+			
+			if (par) {
+				if (par.temperature){
+					filterArray.push(new OL.Filter.Comparison({
+				type : OL.Filter.Comparison.NOT_EQUAL_TO,
+				property : "temperature",
+				value : ""
+			}));
+				}		
+				if (par.chlorophyll ){
+					
+				}		
 			}
 
 			// combine all filters together by logical AND
@@ -39,10 +52,10 @@ myNamespace.query = (function(OL) {
 
 	}
 
-	function constructFilterString(bbox, date, attributes) {
+	function constructFilterString(bbox, date, attributes, par) {
 
 		// generate filter object
-		var filterObject = constructFilter(bbox, date, attributes);
+		var filterObject = constructFilter(bbox, date, attributes, par);
 
 		if (filterObject !== null) {
 			// to string representation
@@ -96,7 +109,7 @@ myNamespace.query = (function(OL) {
 	function attributeFilter(attr) {
 		var attrFilterArray = [];
 
-		var countryFilter = addStringAttribute("stcountryname",
+		var countryFilter = addStringAttribute("location",
 				attr.countryname, attr.notcountry);
 		if (countryFilter !== null) {
 			attrFilterArray.push(countryFilter);

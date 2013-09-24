@@ -113,9 +113,17 @@ myNamespace.control = (function($, OL, ns) {
 			attr.sourcename = $('#sourceAttribute').find(":selected").val();
 			attr.notsource = document.getElementById("notSource").checked;
 		}
-
+		
+		// Parameters
+		var par = null;
+		if (document.getElementById('parametersEnabledCheck').checked) {
+			par = {};
+			par.temperature = document.getElementById('temperatureEnabledCheck').checked;
+			par.chlorophyll = document.getElementById('chlorophyllEnabledCheck').checked;
+		}
+		
 		//if (debugc) alert("control.js: calling ns.query.constructFilterString()"); //TEST
-		var filter = ns.query.constructFilterString(filterBbox, date, attr);
+		var filter = ns.query.constructFilterString(filterBbox, date, attr, par);
 
 		// GetFeature request with filter, callback handles result
 		//if (debugc) alert("control.js: calling ns.WebFeatureService.getFeature()"); // TEST
@@ -374,89 +382,108 @@ myNamespace.control = (function($, OL, ns) {
 
 	// known parameters, and how they are prefixed in the backend
 	// e.g. concatenation of prefix and element must be a valid layer in backend
-	var knownParameters = [ "temperature", "chlorophyll", "plankton", "flagellate" ], 
+	var knownParameters = [ "temperature", "chlorophyll", "plankton", "flagellate", ], 
 	    parameterPrefix = "v3_"/*"list_"*/;
 
 	// view all parameters of a feature
 	function viewParams(id) {
-		//if (debugc) alert("TEST: viewParams started... - currentFeatureIds="+currentFeatureIds); //TEST
-		
+		// if (debugc) alert("TEST: viewParams started... -
+		// currentFeatureIds="+currentFeatureIds); //TEST
+
 		// new request, reset loaded-status
 		salinityResponse = null;
 		temperatureResponse = null;
-		
+
 		// format list of point IDs for WFS query
-		var idList="";
-		$.each(currentFeatureIds, function(i, val) { 
-			idList+=val+"\\,";
+		var idList = "";
+		$.each(currentFeatureIds, function(i, val) {
+			idList += val + "\\,";
 		});
-		idList=idList.substring(0, idList.length - 2);
-		//if (debugc) alert("TEST: viewParams: idList="+idList); //TEST
-		
+		idList = idList.substring(0, idList.length - 2);
+		// if (debugc) alert("TEST: viewParams: idList="+idList); //TEST
+
 		// extract filter
 		var paramFilter = prevFilter;
-		//if (debugc) alert("TEST: viewParams: prevFilter="+prevFilter); //TEST
+		// if (debugc) alert("TEST: viewParams: prevFilter="+prevFilter); //TEST
 		paramFilter = "left:-63.0;bottom:-53.0;right:-55.0;top:-48.0";
-		//if (debugc) alert("TEST: viewParams: dummy paramFilter="+paramFilter); //TEST
+		// if (debugc) alert("TEST: viewParams: dummy
+		// paramFilter="+paramFilter); //TEST
 		// extract each value and insert into view param string
 		var str2 = "";
 		if (document.getElementById('bboxEnabledCheck').checked) {
-			str2="left:"+$('#left').val()+";bottom:"+$('#bottom').val()
-			     +";right:"+$('#right').val()+";top:"+$('#top').val();
+			str2 = "left:" + $('#left').val() + ";bottom:" + $('#bottom').val()
+					+ ";right:" + $('#right').val() + ";top:" + $('#top').val();
 		} else {
-			str2="left:-180.0;bottom:-90.0;right:180.0;top:90.0";// default bbox, global
+			str2 = "left:-180.0;bottom:-90.0;right:180.0;top:90.0";// default
+																	// bbox,
+																	// global
 		}
 		if (document.getElementById('dateEnabledCheck').checked) {
-			str2+=";sdate:"+$('#fromDate').val()+";edate:"+$('#toDate').val();
+			str2 += ";sdate:" + $('#fromDate').val() + ";edate:"
+					+ $('#toDate').val();
 		} else {
-			//do nothing, we don't search for dates
+			// do nothing, we don't search for dates
 		}
-		//if (debugc) alert("TEST: viewParams: new FILTER="+str2); //TEST
+		// if (debugc) alert("TEST: viewParams: new FILTER="+str2); //TEST
 		paramFilter = str2;
-		
 
 		// iterate through all known parameters, request and display result
 		// through callback
 		$.each(knownParameters, function(i, val) {
-			//if (debugc) alert("TEST: viewParams: TYPENAME="+parameterPrefix + val); //TEST
+			// if (debugc) alert("TEST: viewParams: TYPENAME="+parameterPrefix +
+			// val); //TEST
 			ns.WebFeatureService.getFeature({
 				TYPENAME : parameterPrefix + val,
-				//VIEWPARAMS : 'n:' + id
-				////VIEWPARAMS : 'list:' + idList
+				// VIEWPARAMS : 'n:' + id
+				// //VIEWPARAMS : 'list:' + idList
 				VIEWPARAMS : '' + paramFilter
 			}, function(response) {
 				displayParameter(response, val);
 			});
 			switch (val) {
 			case "flagellate":
-				previousFlagellateFilterParams = ns.WebFeatureService.getPreviousRequestParameters();
+				previousFlagellateFilterParams = ns.WebFeatureService
+						.getPreviousRequestParameters();
 				break;
 			case "plankton":
-				previousPlanktonFilterParams = ns.WebFeatureService.getPreviousRequestParameters();
+				previousPlanktonFilterParams = ns.WebFeatureService
+						.getPreviousRequestParameters();
 				break;
 			case "chlorophyll":
-				previousChlorophyllFilterParams = ns.WebFeatureService.getPreviousRequestParameters();
+				previousChlorophyllFilterParams = ns.WebFeatureService
+						.getPreviousRequestParameters();
 				break;
 			case "temperature":
-				previousTemperatureFilterParams = ns.WebFeatureService.getPreviousRequestParameters();
+				previousTemperatureFilterParams = ns.WebFeatureService
+						.getPreviousRequestParameters();
+				break;
+			case "selectedParameters":
+				previousSelectedParametersFilterParams = ns.WebFeatureService
+						.getPreviousRequestParameters();
+				alert("got in the first switch");
 				break;
 			}
 		});
-		
-		//previousTemperatureFilterParams = ns.WebFeatureService.getPreviousRequestParameters();
-		//if (debugc) alert("TEST: viewParams: previousTemperatureFilterParams="+JSON.stringify(previousTemperatureFilterParams)); //TEST
-		
+
+				
+		// previousTemperatureFilterParams =
+		// ns.WebFeatureService.getPreviousRequestParameters();
+		// if (debugc) alert("TEST: viewParams:
+		// previousTemperatureFilterParams="+JSON.stringify(previousTemperatureFilterParams));
+		// //TEST
+
 		// link the buttons for exporting parameter values
-		linkTemperatureExportButton(); //TODO-turn into array of buttons, previous-variables
+		linkTemperatureExportButton(); // TODO-turn into array of buttons,
+										// previous-variables
 		linkChlorophyllExportButton();
 		linkPlanktonExportButton();
 		linkFlagellateExportButton();
-		
+
 		// jump to the parameters tab
-		$('#tabs').tabs( "option", "active", 1);
+		$('#tabs').tabs("option", "active", 1);
 
 		$("#densityButton").show();
-		
+
 		document.getElementById('exportTemperature').disabled = false;
 		$("#exportTemperatureDiv").show();
 		document.getElementById('exportChlorophyll').disabled = false;
@@ -467,7 +494,8 @@ myNamespace.control = (function($, OL, ns) {
 		$("#exportFlagellateDiv").show();
 	}
 
-	// plot a density graph based on currently loaded salinity and temperature-----
+	// plot a density graph based on currently loaded salinity and
+	// temperature-----
 	function plotDensity() {
 
 		if (!salinityResponse || !temperatureResponse) {
@@ -557,6 +585,9 @@ myNamespace.control = (function($, OL, ns) {
 		case "temperature":
 			constructedTable = ns.tableConstructor.parameterTableTemperatures(tableId,
 					response.features);
+			break;
+		case "parameters":
+			alert("got into parameters-case");
 			break;
 		}
 		//var constructedTable = ns.tableConstructor.parameterTableTemperatures(tableId,
