@@ -53,10 +53,6 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 				"Bounding box", "#bboxHeaderText"));
 		add("#dateEnabledCheck", checkParameter("dateEnabledCheck",
 				"Date/Time", "#dateHeaderText"));
-		add("#attributesEnabledCheck", checkParameter("attributesEnabledCheck",
-				"Attributes", "#attributesHeaderText"));
-		add("#parametersEnabledCheck", checkParameter("parametersEnabledCheck",
-				"Parameters", "#parametersHeaderText"));
 
 		// buttons that call methods of control - should have control as "this"
 		var c = myNamespace.control;
@@ -64,9 +60,6 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		callFromControl("#toCurrentExtent", c.setBboxInputToCurrentMapExtent);
 		callFromControl("#anywhereButton", c.lonLatAnywhere);
 		callFromControl("#showRawQueryButton", c.setRawRequestDialog);
-		callFromControl("#multiPlot", c.multiParamPlot);
-		callFromControl("#densityButton", c.plotDensity);
-
 		
 		add("#downloadCurrentContour", setThisOfFunction(
 				myNamespace.mapViewer.downloadCurrentContourImage,
@@ -85,21 +78,6 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 			var s = document.getElementById('exportTemperatureFormats');
 			c.setSelectedTemperatureFormat(s.options[s.selectedIndex].value);
 			c.linkTemperatureExportButton();
-		});
-		jQ("#exportChlorophyllFormats").change(function() {
-			var s = document.getElementById('exportChlorophyllFormats');
-			c.setSelectedChlorophyllFormat(s.options[s.selectedIndex].value);
-			c.linkTemperatureExportButton();
-		});
-		jQ("#exportPlanktonFormats").change(function() {
-			var s = document.getElementById('exportPlanktonFormats');
-			c.setSelectedPlanktonFormat(s.options[s.selectedIndex].value);
-			c.linkPlanktonExportButton();
-		});
-		jQ("#exportFlagellateFormats").change(function() {
-			var s = document.getElementById('exportFlagellateFormats');
-			c.setSelectedFlagellateFormat(s.options[s.selectedIndex].value);
-			c.linkFlagellateExportButton();
 		});
 	}
 	
@@ -123,44 +101,11 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		});
 	}
 
-	function linkChlorophyllExportButton(URL) {
-		//alert("buttonEventHandlers.js: linkChlorophyllExportButton: URL="+URL);//TEST
-		// remove previous
-		jQ("#exportChlorophyll").unbind("click");
-		
-		add("#exportChlorophyll", function() {
-			window.open(URL);
-		});
-	}
-
-	function linkPlanktonExportButton(URL) {
-		//alert("buttonEventHandlers.js: linkPlanktonExportButton: URL="+URL);//TEST
-		// remove previous
-		jQ("#exportPlankton").unbind("click");
-		
-		add("#exportPlankton", function() {
-			window.open(URL);
-		});
-	}
-
-	function linkFlagellateExportButton(URL) {
-		//alert("buttonEventHandlers.js: linkFlagellateExportButton: URL="+URL);//TEST
-		// remove previous
-		jQ("#exportFlagellate").unbind("click");
-		
-		add("#exportFlagellate", function() {
-			window.open(URL);
-		});
-	}
-	
 	// public interface
 	return {
 		initHandlers : initHandlers,
 		linkExportButton : linkExportButton,
 		linkTemperatureExportButton : linkTemperatureExportButton,
-		linkChlorophyllExportButton : linkChlorophyllExportButton,
-		linkPlanktonExportButton : linkPlanktonExportButton,
-		linkFlagellateExportButton : linkFlagellateExportButton
 	};
 
 }(jQuery));

@@ -1,15 +1,17 @@
 var myNamespace = myNamespace || {};
 
+var debugm=false;// debug flag
+
 myNamespace.query = (function(OL) {
 	"use strict";
 
 	var previousFilter;
 
 	// construct an OGC XML filter object from attributes
-	function constructFilter(bbox, date, attributes, par) {
+	function constructFilter(bbox, date, attributes) {
 
 		// should we filter at all?
-		if (bbox || date || attributes || par) {
+		if (bbox || date || attributes) {
 			var filterArray = [];
 
 			// bbox filter
@@ -24,24 +26,11 @@ myNamespace.query = (function(OL) {
 
 			if (attributes) {
 				var attrFilter = attributeFilter(attributes);
-				
+
 				// only add the filter if it produced a result
 				if (attrFilter !== null) {
 					filterArray.push(attrFilter);
 				}
-			}
-			
-			if (par) {
-				if (par.temperature){
-					filterArray.push(new OL.Filter.Comparison({
-				type : OL.Filter.Comparison.NOT_EQUAL_TO,
-				property : "temperature",
-				value : ""
-			}));
-				}		
-				if (par.chlorophyll ){
-					
-				}		
 			}
 
 			// combine all filters together by logical AND
@@ -52,10 +41,10 @@ myNamespace.query = (function(OL) {
 
 	}
 
-	function constructFilterString(bbox, date, attributes, par) {
-
+	function constructFilterString(bbox, date, attributes) {
+		if (debugc) alert("constructFilterString");// TEST
 		// generate filter object
-		var filterObject = constructFilter(bbox, date, attributes, par);
+		var filterObject = constructFilter(bbox, date, attributes);
 
 		if (filterObject !== null) {
 			// to string representation
@@ -64,7 +53,7 @@ myNamespace.query = (function(OL) {
 			// save filter string for use in contour plots
 			previousFilter = strFilter;
 
-				//alert("query.js: strFilter="+strFilter);//TEST
+			if (debugc) alert("query.js: strFilter="+strFilter);// TEST
 			return strFilter;
 		} else
 			return null;
@@ -109,7 +98,7 @@ myNamespace.query = (function(OL) {
 	function attributeFilter(attr) {
 		var attrFilterArray = [];
 
-		var countryFilter = addStringAttribute("location",
+		var countryFilter = addStringAttribute("stcountryname",
 				attr.countryname, attr.notcountry);
 		if (countryFilter !== null) {
 			attrFilterArray.push(countryFilter);
@@ -136,10 +125,10 @@ myNamespace.query = (function(OL) {
 			return null;
 		}
 	}
-
+	
 	// write OpenLayers filter object to OGC XML filter encoding
 	function filterToXmlString(filter) {
-		//alert("query.js: filter"+JSON.stringify(filter));//TEST
+		// alert("query.js: filter"+JSON.stringify(filter));//TEST
 		var formatter = new OL.Format.Filter(), xmlFormat = new OL.Format.XML();
 		return xmlFormat.write(formatter.write(filter));
 	}

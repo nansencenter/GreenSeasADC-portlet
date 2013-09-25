@@ -1,13 +1,13 @@
 var myNamespace = myNamespace || {};
 
-//var debugwfs=true;//debug flag
+var debugwfs=false;//debug flag
 
 myNamespace.WebFeatureService = (function(jQ, OL) {
 	"use strict";
 
 	var server = "http://localhost:8080/geoserver/cite/wfs", previousRequestParameters = null;
 	server = "http://tomcat.nersc.no:8080/geoserver/greensad/wfs"; //NERSC 
-	//if (debugwfs) alert("webFeatureService.js: server="+server);//TEST
+	if (debugwfs) alert("webFeatureService.js: server="+server);//TEST
 
 	// fires an asyn. HTTP GET request to server
 	function asyncGetRequest(parameters, callback) {
@@ -22,7 +22,7 @@ myNamespace.WebFeatureService = (function(jQ, OL) {
 
 	// fires a GetFeature WFS request to server
 	function getFeature(extraParameters, callback) {
-		//if (debugwfs) alert("webFeatureService.js: start of getFeature()");//TEST
+		if (debugwfs) alert("webFeatureService.js: start of getFeature()");//TEST
 		// some default parameters that will be set automatically if not
 		// overridden in extraParams
 		var parameters = {
@@ -33,7 +33,7 @@ myNamespace.WebFeatureService = (function(jQ, OL) {
 		};
 
 		// extend provided parameters onto default parameters, make request
-		//if (debugwfs) alert("webFeatureService.js: calling asyncGetRequest()");//TEST
+		if (debugwfs) alert("webFeatureService.js: calling asyncGetRequest()");//TEST
 		asyncGetRequest(jQ.extend(parameters, extraParameters), callback);
 	}
 
