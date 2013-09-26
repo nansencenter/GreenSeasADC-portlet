@@ -1,12 +1,13 @@
 var myNamespace = myNamespace || {};
 
-var debugc = false;// debug flag
+var debugc = true;// debug flag
 
 myNamespace.control = (function($, OL, ns) {
 	"use strict";
 
 	function init() {
-		 if (debugc) alert("control.js: starting init() method...");//TEST
+		if (debugc)
+			console.log("control.js: starting init() method...");// TEST
 		// hide export option until we have something to export
 		$("#exportDiv").hide();
 		$("#exportTemperatureDiv").hide();
@@ -38,7 +39,8 @@ myNamespace.control = (function($, OL, ns) {
 	var prevFilter = "";
 
 	function filterButton() {
-		 if (debugc) alert("control.js: start of filterButton()");//TEST
+		if (debugc)
+			console.log("control.js: start of filterButton()");// TEST
 		// set loading text and empty parameter HTML
 		$("#featuresAndParams").hide();
 		$("#loadingText").html("Loading data, please wait...");
@@ -46,9 +48,10 @@ myNamespace.control = (function($, OL, ns) {
 		$("#temperature").html("");
 
 		// delete any multiPlot chart
-//		 if (debugc) alert("control.js: calling ns.Charter.resetMultiPlot()");
+		// if (debugc) console.log("control.js: calling
+		// ns.Charter.resetMultiPlot()");
 		// //TEST
-//		ns.Charter.resetMultiPlot();
+		// ns.Charter.resetMultiPlot();
 
 		// should be currently selected layer, e.g. floats or station etc.
 		var layer = "gsadb3"; // MOD (floats)
@@ -76,7 +79,8 @@ myNamespace.control = (function($, OL, ns) {
 		// add date?
 		var date = null;
 		if (document.getElementById('dateEnabledCheck').checked) {
-			 if (debugc) alert("Date is enabled");
+			if (debugc)
+				console.log("Date is enabled");
 			date = {};
 
 			date.fromDate = $('#fromDate').val();
@@ -87,11 +91,13 @@ myNamespace.control = (function($, OL, ns) {
 		}
 
 		var attr = null;
-		 if (debugc) alert("control.js: calling ns.query.constructFilterString()"); //TEST
+		if (debugc)
+			console.log("control.js: calling ns.query.constructFilterString()"); // TEST
 		var filter = ns.query.constructFilterString(filterBbox, date, attr);
 
 		// GetFeature request with filter, callback handles result
-		 if (debugc) alert("control.js: calling ns.WebFeatureService.getFeature()"); // TEST
+		if (debugc)
+			console.log("control.js: calling ns.WebFeatureService.getFeature()"); // TEST
 		ns.WebFeatureService.getFeature({
 			TYPENAME : "gsadb3", // MOD (station)
 			FILTER : filter
@@ -99,18 +105,21 @@ myNamespace.control = (function($, OL, ns) {
 
 		prevFilter = filter; // store for parameter retrieval
 
-		 if (debugc) alert("control.js: calling ns.WebFeatureService.getPreviousRequestParameters()"); //TEST
+		if (debugc)
+			console.log("control.js: calling ns.WebFeatureService.getPreviousRequestParameters()"); // TEST
 		previousFilterParams = ns.WebFeatureService.getPreviousRequestParameters();
 
 		$("#featuresAndParams").show();
 
 		// link the button for exporting with new params
-		 if (debugc) alert("control.js: calling linkExportButton()"); //TEST
+		if (debugc)
+			console.log("control.js: calling linkExportButton()"); // TEST
 		linkExportButton();
 
 		// construct query string for display
 		queryString = ns.WFSserver + "?" + OL.Util.getParameterString(previousFilterParams);
-		 if (debugc) alert("queryString:"+queryString); //TEST
+		if (debugc)
+			console.log("queryString:" + queryString); // TEST
 
 	}
 
@@ -144,7 +153,7 @@ myNamespace.control = (function($, OL, ns) {
 
 		// construct URL
 		exportButtonURL = ns.WFSserver + "?" + OL.Util.getParameterString(params);
-		// alert("TEST: linkExportBUtton:
+		// console.log("TEST: linkExportBUtton:
 		// exportButtonURL="+exportButtonURL);//TEST
 
 		ns.buttonEventHandlers.linkExportButton(exportButtonURL);
@@ -162,14 +171,14 @@ myNamespace.control = (function($, OL, ns) {
 
 		// construct URL
 		exportTemperatureButtonURL = ns.WFSserver + "?" + OL.Util.getParameterString(params);
-		// alert("TEST: linkTemperatureExportBUtton:
+		// console.log("TEST: linkTemperatureExportBUtton:
 		// exportTemperatureButtonURL="+exportTemperatureButtonURL);//TEST
 
 		ns.buttonEventHandlers.linkTemperatureExportButton(exportTemperatureButtonURL);
 
-		// alert("TEST:
+		// console.log("TEST:
 		// exportTemperatureDiv="+$("#exportTemperatureDiv").html());//TEST
-		// alert("TEST: exportDiv="+$("#exportDiv").html());//TEST
+		// console.log("TEST: exportDiv="+$("#exportDiv").html());//TEST
 	}
 
 	function displayFeatures(input) {
@@ -215,17 +224,17 @@ myNamespace.control = (function($, OL, ns) {
 			document.getElementById('export').disabled = true;
 			$("#exportDiv").hide();
 		} else {
-			// if (debugc) alert("TEST-displayFeatures:
+			// if (debugc) console.log("TEST-displayFeatures:
 			// jsonObject.features="+JSON.stringify(jsonObject)); //TEST
 			var headers = [ "ID", "Lat (dec.deg)", "Long (dec.deg)", "Area", "Depth of Sea (m)", "Depth of Sample (m)",
 					"Date", "Time", ];
 
 			var tableAndIds = ns.tableConstructor.featureTable("filterTable", jsonObject.features, headers);
-			// if (debugc) alert("TEST-displayFeatures:
+			// if (debugc) console.log("TEST-displayFeatures:
 			// tableAndIds="+JSON.stringify(tableAndIds)); //TEST
 			var constructedTable = tableAndIds.table;
 			currentFeatureIds = tableAndIds.ids;
-			// if (debugc) alert("TEST-displayFeatures:
+			// if (debugc) console.log("TEST-displayFeatures:
 			// currentFeatureIds="+JSON.stringify(currentFeatureIds)); //TEST
 
 			document.getElementById('list').innerHTML = "Click a row to view parameters<br> " + "<div>"
@@ -240,11 +249,14 @@ myNamespace.control = (function($, OL, ns) {
 
 	// known parameters, and how they are prefixed in the backend
 	// e.g. concatenation of prefix and element must be a valid layer in backend
-	var knownParameters = [ "temperature", "chlorophyll", "plankton", "flagellate", ], parameterPrefix = "v3_"/* "list_" */;
+	var knownParameters = [ "temperature" ] // , "chlorophyll", "plankton",
+	// "flagellate", ],
+	var parameterPrefix = "v3_"/* "list_" */;
 
 	// view all parameters of a feature
 	function viewParams(id) {
-		if (debugc) alert("TEST: viewParams started...  currentFeatureIds=" + currentFeatureIds); // TEST
+		if (debugc)
+			console.log("TEST: viewParams started...  currentFeatureIds=" + currentFeatureIds); // TEST
 
 		// format list of point IDs for WFS query
 		var idList = "";
@@ -253,15 +265,19 @@ myNamespace.control = (function($, OL, ns) {
 		});
 		idList = idList.substring(0, idList.length - 2);
 		if (debugc)
-			alert("TEST: viewParams: idList=" + idList); // TEST
+			console.log("TEST: viewParams: idList=" + idList); // TEST
 
 		// extract filter
 		var paramFilter = prevFilter;
+
 		if (debugc)
-			alert("TEST: viewParams: prevFilter=" + prevFilter); // TEST
+			console.log("TEST: viewParams: prevFilter=" + prevFilter); // TEST
+
 		paramFilter = "left:-63.0;bottom:-53.0;right:-55.0;top:-48.0";
+
 		if (debugc)
-			alert("TEST: viewParams: dummy paramFilter=" + paramFilter); // TEST
+			console.log("TEST: viewParams: dummy paramFilter=" + paramFilter); // TEST
+
 		// extract each value and insert into view param string
 		var str2 = "";
 		if (document.getElementById('bboxEnabledCheck').checked) {
@@ -277,29 +293,38 @@ myNamespace.control = (function($, OL, ns) {
 		} else {
 			// do nothing, we don't search for dates
 		}
+
 		if (debugc)
-			alert("TEST: viewParams: new FILTER=" + str2); // TEST
+			console.log("TEST: viewParams: new FILTER=" + str2); // TEST
+
 		paramFilter = str2;
 
 		// iterate through all known parameters, request and display result
 		// through callback
-		$.each(knownParameters, function(i, val) {
-			if (debugc)
-				alert("TEST: viewParams: TYPENAME=" + parameterPrefix + val); // TEST
-			ns.WebFeatureService.getFeature({
-				TYPENAME : parameterPrefix + val,
-				// VIEWPARAMS : 'n:' + id
-				// //VIEWPARAMS : 'list:' + idList
-				VIEWPARAMS : '' + paramFilter
-			}, function(response) {
-				displayParameter(response, val);
-			});
-			switch (val) {
-			case "temperature":
-				previousTemperatureFilterParams = ns.WebFeatureService.getPreviousRequestParameters();
-				break;
-			}
-		});
+		$
+				.each(
+						knownParameters,
+						function(i, val) {
+							if (debugc)
+								console.log("TEST: viewParams: TYPENAME=" + parameterPrefix + val); // TEST
+							ns.WebFeatureService.getFeature(
+											{
+												TYPENAME : parameterPrefix + val,
+												PROPERTYNAME : 'point,date,depth_of_sample,tempwbod,tempsst,temp5m,temp10m,tempcu01,tempcu02,tempst01,tempst02,tempmld,mixedld',
+												// VIEWPARAMS : 'n:' + id,
+												// VIEWPARAMS : 'list:' +
+												// idList,
+												FILTER : ns.query.constructParameterFilterString(["tempwbod", "tempsst"]),
+												VIEWPARAMS : '' + paramFilter
+											}, function(response) {
+												displayParameter(response, val);
+											});
+							switch (val) {
+							case "temperature":
+								previousTemperatureFilterParams = ns.WebFeatureService.getPreviousRequestParameters();
+								break;
+							}
+						});
 
 		// link the buttons for exporting parameter values
 		linkTemperatureExportButton(); // TODO-turn into array of buttons,
@@ -314,8 +339,8 @@ myNamespace.control = (function($, OL, ns) {
 
 	// display a parameter as a table
 	function displayParameter(response, parameter) {
-		// if (debugc) alert("control.js: displayParameter:
-		// parameter="+parameter);//TEST
+		if (debugc)
+			console.log("control.js: displayParameter: parameter=" + parameter);// TEST
 		try {
 			response = JSON.parse(response.responseText);
 		} catch (SyntaxError) {
@@ -323,20 +348,18 @@ myNamespace.control = (function($, OL, ns) {
 			return;
 		}
 
-		// TODO: plot scatterplot of points with _real_ values
-		// ns.Charter.plotParameter(response, parameter + "Plot", parameter,
-		// parameter + " by level");
-
 		var tableId = parameter + "Table";
 		switch (parameter) {
 		case "temperature":
 			constructedTable = ns.tableConstructor.parameterTableTemperatures(tableId, response.features);
 			break;
 		}
-		alert("control.js: displayParameter: constructedTable="+constructedTable);//TEST
+		if (debugc)
+			console.log("control.js: displayParameter: constructedTable=" + constructedTable);// TEST
 
 		$("#" + parameter).html(parameter + "<br>" + "<div class='scrollArea'>" + constructedTable + "</div>");
-		 if (debugc) alert("control.js: parameter table html="+$("#" +parameter).html());//TEST
+		if (debugc)
+			console.log("control.js: parameter table html=" + $("#" + parameter).html());// TEST
 
 		$("#" + tableId).dataTable({
 			// search functionality not needed for parameter tables

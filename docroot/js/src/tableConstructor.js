@@ -1,91 +1,49 @@
 var myNamespace = myNamespace || {};
 
+var debugtC=true;// debug flag
+
 myNamespace.tableConstructor = (function($) {
 	"use strict";
 
-	function parameterTableTemperatures(tableId, features) {
-		//alert("tableConstructor.js: parameterTableTemperatures: tableId="+tableId);//TEST
-		//alert("tableConstructor.js: parameterTableTemperatures: features="+JSON.stringify(features));//TEST
-
-		var header = "<table id='" + tableId + "'class='table'>", tableHeader, footer = "</tbody></table>", rows = "", row = "";
-		tableHeader = headerFrom([ "ID", "Lat (dec.deg)", "Long  (dec.deg)", "Date",
-		                           "Depth of sample (m)", "Temp. water body (deg.C)", "SST water body (deg.C)",
+	var allParameters = ["date","depth_of_sample","tempwbod","tempsst","temp5m","temp10m","tempcu01","tempcu02","tempst01","tempst02","tempmld","mixedld"];
+	var allParametersHeader = [ "Date","Depth of sample (m)", "Temp. water body (deg.C)", "SST water body (deg.C)",
 		                           "Temp. 5m (deg.C)", "Temp. 10m (deg.C)", "Temp CU01 (deg.C)",
 		                           "Temp CU02 (deg.C)", "Temp ST01 (deg.C)", "Temp ST02 (deg.C)",
-		                           "Temp MLD (deg.C)", "Depth Temp MLD (m)"]) + "\n<tbody>";
-
-		// iterate through all features, generate table row for each
-		$.each(features, function(i, val) {
-			var property = val.properties;
-			//alert("tableConstructor.js: parameterTable: val.properties="+JSON.stringify(val.properties));//TEST
-			row = "<tr>";
-
-			row += data(property.id);
-			var pos = val.geometry.coordinates;
-			//alert("tableConstructor.js: parameterTableTemperatures: pos="+pos);//TEST
-			row += data(pos[0]);
-			row += data(pos[1]);
-			row += data(property.date);
-			row += data(property.depth_of_sample);
-			row += data(property.tempwbod);
-			row += data(property.tempsst);
-			row += data(property.temp5m);
-			row += data(property.temp10m);
-			row += data(property.tempcu01);
-			row += data(property.tempcu02);
-			row += data(property.tempst01);
-			row += data(property.tempst02);
-			row += data(property.tempmld);
-			row += data(property.mixedld);
-
-			rows += row + "</tr>\n";
-		});
-		//alert("tableConstrucktor: parameterTableTemperatures: tableHeader="+tableHeader);//TEST
-		//alert("tableConstrucktor: parameterTableTemperatures: rows="+rows);//TEST
-
-		return concatTable(header, tableHeader, rows, footer);
-	}
-
-	function parameterTable(tableId, features) {
-		//alert("tableConstructor.js: parameterTable: tableId="+tableId);//TEST
-		//alert("tableConstructor.js: parameterTable: features="+JSON.stringify(features));//TEST
+		                           "Temp MLD (deg.C)", "Depth Temp MLD (m)"];
+	var basicHeader = [ "ID", "Lat (dec.deg)", "Long  (dec.deg)"];
+		                       	
+	
+	function parameterTableTemperatures(tableId, features) {
+		if (debugtC) console.log("tableConstructor.js: parameterTableTemperatures: tableId="+tableId);//TEST
+		if (debugtC) console.log("tableConstructor.js: parameterTableTemperatures: features="+JSON.stringify(features));//TEST
 
 		var header = "<table id='" + tableId + "'class='table'>", tableHeader, footer = "</tbody></table>", rows = "", row = "";
-		tableHeader = headerFrom([ "ID", "Lat", "Long", "Date", "Temp. swater body", "SST water body",
-		                           "Temp. 5m", "Temp. 10m", "Temp CU01", "Temp CU02", "Temp ST01", "Temp ST02",
-		                           "Temp MLD", "Depth Temp MLD"]) + "\n<tbody>";
+		tableHeader = headerFrom(basicHeader.concat(allParametersHeader)),  + "\n<tbody>";
+
 
 		// iterate through all features, generate table row for each
 		$.each(features, function(i, val) {
 			var property = val.properties;
-			//alert("tableConstructor.js: parameterTable: val.properties="+JSON.stringify(val.properties));//TEST
+			if (debugtC) console.log("tableConstructor.js: parameterTable: val.properties="+JSON.stringify(val.properties));//TEST
+			if (debugtC) console.log("tableConstructor.js: parameterTable: val="+JSON.stringify(val));//TEST
+			
 			row = "<tr>";
-
 			row += data(property.id);
 			var pos = val.geometry.coordinates;
-			//alert("tableConstructor.js: parameterTable: pos="+pos);//TEST
+			if (debugtC) console.log("tableConstructor.js: parameterTableTemperatures: pos="+pos);//TEST
 			row += data(pos[0]);
 			row += data(pos[1]);
-			row += data(property.date);
-			row += data(property.tempwbod);
-			row += data(property.tempsst);
-			row += data(property.temp5m);
-			row += data(property.temp10m);
-			row += data(property.tempcu01);
-			row += data(property.tempcu02);
-			row += data(property.tempst01);
-			row += data(property.tempst02);
-			row += data(property.tempmld);
-			row += data(property.mixedld);
-
+			$.each(allParameters, function(i,val) {
+				row += data(property[val]);
+			});
 			rows += row + "</tr>\n";
 		});
-		//alert("tableConstrucktor: parameterTable: tableHeader="+tableHeader);//TEST
-		//alert("tableConstrucktor: parameterTable: rows="+rows);//TEST
+		if (debugtC) console.log("tableConstrucktor: parameterTableTemperatures: tableHeader="+tableHeader);//TEST
+		if (debugtC) console.log("tableConstrucktor: parameterTableTemperatures: rows="+rows);//TEST
 
 		return concatTable(header, tableHeader, rows, footer);
 	}
-	
+
 	function featureTable(tableId, features, headers) {
 
 		var header = "<table id='" + tableId + "'class='table'>", tableHeader, footer = "</tbody></table>", rows = "", row = "";
@@ -143,7 +101,6 @@ myNamespace.tableConstructor = (function($) {
 
 	return {
 		parameterTableTemperatures : parameterTableTemperatures,
-		parameterTable : parameterTable,
 		featureTable : featureTable
 	};
 

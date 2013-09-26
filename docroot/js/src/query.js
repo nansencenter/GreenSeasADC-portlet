@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugm=false;// debug flag
+var debugq=true;// debug flag
 
 myNamespace.query = (function(OL) {
 	"use strict";
@@ -42,23 +42,36 @@ myNamespace.query = (function(OL) {
 	}
 
 	function constructFilterString(bbox, date, attributes) {
-		if (debugc) alert("constructFilterString");// TEST
+		if (debugq) console.log("constructFilterString");// TEST
 		// generate filter object
 		var filterObject = constructFilter(bbox, date, attributes);
 
-		if (filterObject !== null) {
+		return constructString(filterObject);
+
+	}
+	
+	function constructParameterFilterString(parameters) {
+		if (debugq) console.log("constructFilterString");// TEST
+		// generate filter object
+		var filterObject = requiredParameters(parameters);
+
+		return constructString(filterObject);
+
+	}
+
+	function constructString(filter) {
+		if (filter !== null) {
 			// to string representation
-			var strFilter = filterToXmlString(filterObject);
+			var strFilter = filterToXmlString(filter);
 
 			// save filter string for use in contour plots
 			previousFilter = strFilter;
 
-			if (debugc) alert("query.js: strFilter="+strFilter);// TEST
+			if (debugq) console.log("query.js: strFilter="+strFilter);// TEST
 			return strFilter;
 		} else
 			return null;
 	}
-
 	function bboxFilter(bbox) {
 		return new OL.Filter.Spatial({
 			type : OL.Filter.Spatial.BBOX,
@@ -91,6 +104,29 @@ myNamespace.query = (function(OL) {
 		dateTimeFilterArray.push(timeFilter);
 
 		return combineFilters(dateTimeFilterArray);
+	}
+	
+	function requiredParameters(parameters) {
+		var requiredParamtersArray = [];
+		for (var i = 0,len=parameters.length;i<len;i++){
+			requiredParamtersArray.push(createRequiredParameterFilter(parameters[i]));
+		}
+		return combineFilters(requiredParamtersArray);
+	}
+	
+	function createRequiredParameterFilter(parameter) {
+		 var requiredArray = [];
+		 requiredArray.push(new OL.Filter.Comparison({
+	            type: OpenLayers.Filter.Comparison.NOT_EQUAL_TO,
+	            property: parameter,
+	            value: ""
+	        }));
+		 requiredArray.push(new OL.Filter.Comparison({
+	            type: OpenLayers.Filter.Comparison.IS_NULL,
+	            property: parameter,
+	        }));
+		 
+		 return combineFiltersOr(requiredArray);
 	}
 
 	// "other attribute" filter
@@ -128,7 +164,7 @@ myNamespace.query = (function(OL) {
 	
 	// write OpenLayers filter object to OGC XML filter encoding
 	function filterToXmlString(filter) {
-		// alert("query.js: filter"+JSON.stringify(filter));//TEST
+		// console.log("query.js: filter"+JSON.stringify(filter));//TEST
 		var formatter = new OL.Format.Filter(), xmlFormat = new OL.Format.XML();
 		return xmlFormat.write(formatter.write(filter));
 	}
@@ -137,6 +173,13 @@ myNamespace.query = (function(OL) {
 	function combineFilters(filtersToCombine) {
 		return new OL.Filter.Logical({
 			type : OL.Filter.Logical.AND,
+			filters : filtersToCombine
+		});
+	}
+	
+	function combineFiltersOr(filtersToCombine) {
+		return new OL.Filter.Logical({
+			type : OL.Filter.Logical.OR,
 			filters : filtersToCombine
 		});
 	}
@@ -174,7 +217,8 @@ myNamespace.query = (function(OL) {
 	// public interface
 	return {
 		constructFilter : constructFilter,
-		constructFilterString : constructFilterString
+		constructFilterString : constructFilterString,
+		constructParameterFilterString : constructParameterFilterString
 	};
 
 }(OpenLayers));
