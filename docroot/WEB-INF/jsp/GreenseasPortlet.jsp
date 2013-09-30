@@ -55,8 +55,8 @@
 					</h3>
 					<div id='datetime'>
 
-						<input type="checkbox" id="dateEnabledCheck"> Enable in query <br> <br> <em>Date
-							(Use yyyy-mm-dd format if no date picker appears)</em> <br> Between <input type="date" id="fromDate"
+						<input type="checkbox" id="dateEnabledCheck"> Enable in query <br> <br> <em>Date (Use
+							yyyy-mm-dd format if no date picker appears)</em> <br> Between <input type="date" id="fromDate"
 							value="2006-01-01"> and <input type="date" id="toDate" value="2007-01-01"><br> <br> <em>Time</em>
 						<br> Between <input type="time" id="fromTime" value="00:00"> and <input type="time" id="toTime"
 							value="23:59"> <br>
@@ -66,19 +66,15 @@
 					<h3>
 						<span id='parametersHeaderText'>Parameters <em>(disabled)</em></span>
 					</h3>
-					<div id='parameters'>
+					<div id='parametersNeeded'>
 
 						<div>
 							<input type="checkbox" id="parametersEnabledCheck"> Enable in query
 						</div>
 
-						<div>
-							<div>Parameters needed</div>
-							<input type="checkbox" id="tempwbodEnabledCheck"> tempwbod <br> <input type="checkbox"
-								id="totchlaEnabledCheck"> totchla <br>
+						<div id="parameters">
 						</div>
 					</div>
-
 				</div>
 
 				<input type='button' id='filter' value="Run query" /> <input type='button' id='showRawQueryButton'
@@ -107,7 +103,6 @@
 			</div>
 
 			<div id="errorMessageDialog" title="An error occured"></div>
-
 		</div>
 
 		<div id="temperatureTab">

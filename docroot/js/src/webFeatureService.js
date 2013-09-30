@@ -37,6 +37,22 @@ myNamespace.WebFeatureService = (function(jQ, OL) {
 		if (debugwfs) console.log("webFeatureService.js: calling asyncGetRequest()");//TEST
 		asyncGetRequest(jQ.extend(parameters, extraParameters), callback);
 	}
+	
+	function describeFeatureType(extraParameters, callback) {
+		if (debugwfs) console.log("webFeatureService.js: start of describeFeatureType()");//TEST
+		// some default parameters that will be set automatically if not
+		// overridden in extraParams
+		var parameters = {
+			REQUEST : "DescribeFeatureType",
+			SERVICE : "WFS",
+			VERSION : "1.1.0",
+			OUTPUTFORMAT : "XMLSCHEMA"
+		};
+
+		// extend provided parameters onto default parameters, make request
+		if (debugwfs) console.log("webFeatureService.js: calling asyncGetRequest()");//TEST
+		asyncGetRequest(jQ.extend(parameters, extraParameters), callback);
+	}
 
 	function getPreviousRequestParameters() {
 		return previousRequestParameters;
@@ -45,6 +61,7 @@ myNamespace.WebFeatureService = (function(jQ, OL) {
 	// public interface
 	return {
 		getFeature : getFeature,
+		describeFeatureType:describeFeatureType,
 		getPreviousRequestParameters : getPreviousRequestParameters
 	};
 

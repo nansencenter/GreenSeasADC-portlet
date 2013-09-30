@@ -1,11 +1,19 @@
 var myNamespace = myNamespace || {};
 
 var debugc = true;// debug flag
+var tablesDone;
 
 myNamespace.control = (function($, OL, ns) {
 	"use strict";
 
 	function init() {
+		tablesDone = {
+			v3_chlorophyll : false,
+			v3_temperature : false,
+			v3_plankton : false,
+			v3_flagellate : false
+		};
+
 		if (debugc)
 			console.log("control.js: starting init() method...");// TEST
 		// hide export option until we have something to export
@@ -14,6 +22,14 @@ myNamespace.control = (function($, OL, ns) {
 
 		// initialize map viewer
 		ns.mapViewer.initMap();
+
+		for ( var table in tablesDone) {
+			ns.WebFeatureService.describeFeatureType({
+				TYPENAME : table, // MOD (station)
+			}, function(response) {
+				initiateParameters(response);
+			});
+		}
 
 		// set event handlers on buttons
 		ns.buttonEventHandlers.initHandlers();
@@ -24,7 +40,8 @@ myNamespace.control = (function($, OL, ns) {
 
 		$("#queryOptions").accordion({
 			collapsible : true,
-			active : false
+			active : false,
+			heightStyle : "content"
 		});
 
 		$("#rawRequestDialog").dialog({
@@ -88,6 +105,15 @@ myNamespace.control = (function($, OL, ns) {
 
 			date.fromTime = $('#fromTime').val();
 			date.toTime = $('#toTime').val();
+		}
+
+		var par = null;
+		if (document.getElementById('parametersEnabledCheck').checked) {
+			par = new Array();
+			for (parameter in document.getElementById('parameters')) {
+				par.push(parameter);
+			}
+			console.log(par.toString());
 		}
 
 		var attr = null;
@@ -249,82 +275,60 @@ myNamespace.control = (function($, OL, ns) {
 
 	// known parameters, and how they are prefixed in the backend
 	// e.g. concatenation of prefix and element must be a valid layer in backend
-	var knownParameters = [ "temperature" ] // , "chlorophyll", "plankton",
+	var knownParameters = [ "temperature" ]; // , "chlorophyll", "plankton",
 	// "flagellate", ],
 	var parameterPrefix = "v3_"/* "list_" */;
 
 	// view all parameters of a feature
-	function viewParams(id) {
-		if (debugc)
-			console.log("TEST: viewParams started...  currentFeatureIds=" + currentFeatureIds); // TEST
-
-		// format list of point IDs for WFS query
-		var idList = "";
-		$.each(currentFeatureIds, function(i, val) {
-			idList += val + "\\,";
-		});
-		idList = idList.substring(0, idList.length - 2);
-		if (debugc)
-			console.log("TEST: viewParams: idList=" + idList); // TEST
-
-		// extract filter
-		var paramFilter = prevFilter;
-
-		if (debugc)
-			console.log("TEST: viewParams: prevFilter=" + prevFilter); // TEST
-
-		paramFilter = "left:-63.0;bottom:-53.0;right:-55.0;top:-48.0";
-
-		if (debugc)
-			console.log("TEST: viewParams: dummy paramFilter=" + paramFilter); // TEST
+	function viewParams() {
 
 		// extract each value and insert into view param string
-		var str2 = "";
+		var paramString = "";
 		if (document.getElementById('bboxEnabledCheck').checked) {
-			str2 = "left:" + $('#left').val() + ";bottom:" + $('#bottom').val() + ";right:" + $('#right').val()
+			paramString = "left:" + $('#left').val() + ";bottom:" + $('#bottom').val() + ";right:" + $('#right').val()
 					+ ";top:" + $('#top').val();
 		} else {
-			str2 = "left:-180.0;bottom:-90.0;right:180.0;top:90.0";// default
+			paramString = "left:-180.0;bottom:-90.0;right:180.0;top:90.0";// default
 			// bbox,
 			// global
 		}
 		if (document.getElementById('dateEnabledCheck').checked) {
-			str2 += ";sdate:" + $('#fromDate').val() + ";edate:" + $('#toDate').val();
+			paramString += ";sdate:" + $('#fromDate').val() + ";edate:" + $('#toDate').val();
 		} else {
 			// do nothing, we don't search for dates
 		}
 
 		if (debugc)
-			console.log("TEST: viewParams: new FILTER=" + str2); // TEST
+			console.log("TEST: viewParams: new FILTER=" + paramString); // TEST
 
-		paramFilter = str2;
+		var paramFilter = paramString;
 
+		if (document.getElementById('parametersEnabledCheck').checked) {
+			ns.handleParameters.selectParameters($("#parameters").jstree("get_checked", null, true));
+		}
+		if (debugc) {
+			console.log("ns.handleParameters.getChosenParameters:" + ns.handleParameters.getChosenParameters());
+		}
 		// iterate through all known parameters, request and display result
 		// through callback
-		$
-				.each(
-						knownParameters,
-						function(i, val) {
-							if (debugc)
-								console.log("TEST: viewParams: TYPENAME=" + parameterPrefix + val); // TEST
-							ns.WebFeatureService.getFeature(
-											{
-												TYPENAME : parameterPrefix + val,
-												PROPERTYNAME : 'point,date,depth_of_sample,tempwbod,tempsst,temp5m,temp10m,tempcu01,tempcu02,tempst01,tempst02,tempmld,mixedld',
-												// VIEWPARAMS : 'n:' + id,
-												// VIEWPARAMS : 'list:' +
-												// idList,
-												FILTER : ns.query.constructParameterFilterString(["tempwbod", "tempsst"]),
-												VIEWPARAMS : '' + paramFilter
-											}, function(response) {
-												displayParameter(response, val);
-											});
-							switch (val) {
-							case "temperature":
-								previousTemperatureFilterParams = ns.WebFeatureService.getPreviousRequestParameters();
-								break;
-							}
-						});
+		$.each(knownParameters, function(i, val) {
+			if (debugc)
+				console.log("TEST: viewParams: TYPENAME=" + parameterPrefix + val); // TEST
+			ns.WebFeatureService.getFeature({
+				TYPENAME : parameterPrefix + val,
+				PROPERTYNAME : ns.handleParameters.getChosenParameters().concat(ns.handleParameters.alwaysSelect)
+						.toString(),
+				FILTER : ns.query.constructParameterFilterString(ns.handleParameters.getChosenParameters()),
+				VIEWPARAMS : '' + paramFilter
+			}, function(response) {
+				displayParameter(response, val);
+			});
+			switch (val) {
+			case "temperature":
+				previousTemperatureFilterParams = ns.WebFeatureService.getPreviousRequestParameters();
+				break;
+			}
+		});
 
 		// link the buttons for exporting parameter values
 		linkTemperatureExportButton(); // TODO-turn into array of buttons,
@@ -389,9 +393,61 @@ myNamespace.control = (function($, OL, ns) {
 		$("#rawRequestDialog").dialog('open');
 	}
 
+	function initiateParameters(input) {
+		var table = ns.handleParameters.initiateParameters(input);
+		tablesDone[table] = true;
+		var done = true;
+		// for ( var tableCheck in tablesDone) {
+		// if (debugc)
+		// console.log("Checking done for table:"+tableCheck+" and
+		// tablesDone[table]:"+tablesDone[tableCheck]); // TEST
+		// done &= tablesDone[tableCheck];
+		// }
+		// if (done) {
+//		if (debugc)
+//			console.log("Done!"); // TEST
+		$("#parameters").html(ns.tableConstructor.parametersList(tablesDone));
+		// init the parameters tree
+		// TO CREATE AN INSTANCE
+		// select the tree container using jQuery
+
+		$("#parameters")
+		// call `.jstree` with the options object
+		.jstree({
+			// the `plugins` array allows you to configure the active
+			// plugins on
+			// this instance
+			"plugins" : [ "themes", "html_data", "ui", "checkbox" ],
+			"themes" : {
+				"theme" : "default",
+				"dots" : false,
+				"icons" : false
+			}
+		// each plugin you have included can have its own config object
+		// "core" : { "initially_open" : [ "phtml_1" ] }
+		// it makes sense to configure a plugin only if overriding the
+		// defaults
+		})
+		// EVENTS
+		// each instance triggers its own events - to process those listen
+		// on
+		// the container
+		// all events are in the `.jstree` namespace
+		// so listen for `function_name`.`jstree` - you can function names
+		// from
+		// the docs
+		.bind("loaded.jstree", function(event, data) {
+			// you get two params - event & data - check the core docs for a
+			// detailed description
+		});
+		// }
+		// }
+	}
+
 	// public interface
 	return {
 		init : init,
+		initiateParameters : initiateParameters,
 		setLonLatInput : setLonLatInput,
 		filterButton : filterButton,
 		viewParams : viewParams,
