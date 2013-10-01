@@ -9,9 +9,9 @@ myNamespace.control = (function($, OL, ns) {
 	function init() {
 		tablesDone = {
 			v3_chlorophyll : false,
-			v3_temperature : false,
+			v4_temperature : false,
 			v3_plankton : false,
-			v3_flagellate : false
+			v4_flagellate : false
 		};
 
 		if (debugc)
@@ -23,19 +23,26 @@ myNamespace.control = (function($, OL, ns) {
 		// initialize map viewer
 		ns.mapViewer.initMap();
 
+		// Initialize the data from layers in WFS
 		for ( var table in tablesDone) {
 			ns.WebFeatureService.describeFeatureType({
-				TYPENAME : table, // MOD (station)
+				TYPENAME : table,
 			}, function(response) {
 				initiateParameters(response);
 			});
 		}
+		ns.WebFeatureService.describeFeatureType({
+			TYPENAME : ns.handleParameters.mainTable.name,
+		}, function(response) {
+			initiateParameters(response);
+		});
 
 		// set event handlers on buttons
 		ns.buttonEventHandlers.initHandlers();
 
 		setBboxInputToCurrentMapExtent();
 
+		// Make the tabs jquery-tabs
 		$("#tabs").tabs();
 
 		$("#queryOptions").accordion({
@@ -51,49 +58,26 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	var queryString = "No query run yet!";
-	var currentBbox = null;
-	var currentFeatureIds = [];
-	var prevFilter = "";
 
-	function filterButton() {
-		if (debugc)
-			console.log("control.js: start of filterButton()");// TEST
-		// set loading text and empty parameter HTML
-		$("#featuresAndParams").hide();
-		$("#loadingText").html("Loading data, please wait...");
-
-		$("#temperature").html("");
-
-		// delete any multiPlot chart
-		// if (debugc) console.log("control.js: calling
-		// ns.Charter.resetMultiPlot()");
-		// //TEST
-		// ns.Charter.resetMultiPlot();
-
-		// should be currently selected layer, e.g. floats or station etc.
-		var layer = "gsadb3"; // MOD (floats)
-
-		var filterBbox = null, zoomBbox;
-		// add bbox?
+	function createfilterBoxHashMap() {
+		var filterBbox = null;
 		if (document.getElementById('bboxEnabledCheck').checked) {
-
 			var top = $('#top').val(), left = $('#left').val(), right = $('#right').val(), bottom = $('#bottom').val();
-
-			// for use in contouring
-			currentBbox = bottom + "," + left + "," + top + "," + right;
 
 			// bbox for filter
 			filterBbox = new OL.Bounds(bottom, left, top, right);
 
 			// bbox for zoom
-			zoomBbox = new OL.Bounds(left, bottom, right, top);
+			var zoomBbox = new OL.Bounds(left, bottom, right, top);
 
 			if (document.lonlatform.updatemapcheck.checked) {
 				ns.mapViewer.zoomToExtent(zoomBbox, true);
 			}
 		}
+		return filterBbox;
+	}
 
-		// add date?
+	function createDateHashMap() {
 		var date = null;
 		if (document.getElementById('dateEnabledCheck').checked) {
 			if (debugc)
@@ -103,20 +87,47 @@ myNamespace.control = (function($, OL, ns) {
 			date.fromDate = $('#fromDate').val();
 			date.toDate = $('#toDate').val();
 
-			date.fromTime = $('#fromTime').val();
-			date.toTime = $('#toTime').val();
+			// date.fromTime = $('#fromTime').val();
+			// date.toTime = $('#toTime').val();
 		}
+		return date;
+	}
 
+	function createParameterArray() {
 		var par = null;
 		if (document.getElementById('parametersEnabledCheck').checked) {
 			par = new Array();
 			for (parameter in document.getElementById('parameters')) {
 				par.push(parameter);
 			}
-			console.log(par.toString());
+			if (debugc)
+				console.log(par.toString());
 		}
+		return par;
+	}
+	function filterButton() {
+		if (debugc)
+			console.log("control.js: start of filterButton()");// TEST
+		// set loading text and empty parameter HTML
+		$("#featuresAndParams").hide();
+		$("#loadingText").html("Loading data, please wait...");
 
-		var attr = null;
+		$("#temperature").html("");
+
+		// should be currently selected layer
+		var layer = ns.handleParameters.mainTable.name;
+
+		// add bbox?
+		var filterBbox = createfilterBoxHashMap();
+
+		// add date?
+		var date = createDateHashMap();
+
+		// add parameters
+		var par = createParameterArray();
+
+		var attr = null; // no attributes are currently supported
+
 		if (debugc)
 			console.log("control.js: calling ns.query.constructFilterString()"); // TEST
 		var filter = ns.query.constructFilterString(filterBbox, date, attr);
@@ -125,11 +136,9 @@ myNamespace.control = (function($, OL, ns) {
 		if (debugc)
 			console.log("control.js: calling ns.WebFeatureService.getFeature()"); // TEST
 		ns.WebFeatureService.getFeature({
-			TYPENAME : "gsadb3", // MOD (station)
+			TYPENAME : layer,
 			FILTER : filter
 		}, displayFeatures);
-
-		prevFilter = filter; // store for parameter retrieval
 
 		if (debugc)
 			console.log("control.js: calling ns.WebFeatureService.getPreviousRequestParameters()"); // TEST
@@ -207,17 +216,7 @@ myNamespace.control = (function($, OL, ns) {
 		// console.log("TEST: exportDiv="+$("#exportDiv").html());//TEST
 	}
 
-	function displayFeatures(input) {
-
-		// did an error occur?
-		if (input.status != 200) {
-			// print error message and terminate
-			ns.errorMessage.showErrorMessage(input.responseText);
-			return;
-		}
-
-		// if response status is OK, parse result
-
+	function highLightFeatures(input) {
 		// highlight on map
 		var gformat = new OL.Format.GeoJSON();
 		var features = gformat.read(input.responseText);
@@ -231,11 +230,22 @@ myNamespace.control = (function($, OL, ns) {
 			a.x = a.y;
 			a.y = tmp;
 		});
-
 		ns.mapViewer.highlightFeatures(features);
+	}
 
-		// wipe currentFeatureIds before rebuilding
-		currentFeatureIds = [];
+	function displayFeatures(input) {
+		if (debugc)
+			console.log("DisplayFeatures");
+		// did an error occur?
+		if (input.status != 200) {
+			// print error message and terminate
+			ns.errorMessage.showErrorMessage(input.responseText);
+			return;
+		}
+
+		// if response status is OK, parse result
+
+		highLightFeatures(input);
 
 		// remove "loading..." text
 		$("#loadingText").html("");
@@ -243,6 +253,10 @@ myNamespace.control = (function($, OL, ns) {
 		// **** output to table ****
 		var jsonObject = JSON.parse(input.responseText);
 
+		// saving the data for merging
+		basicData = jsonObject.features;
+
+		replaceId(basicData);
 		var length = jsonObject.features.length;
 
 		if (length < 1) {
@@ -252,16 +266,8 @@ myNamespace.control = (function($, OL, ns) {
 		} else {
 			// if (debugc) console.log("TEST-displayFeatures:
 			// jsonObject.features="+JSON.stringify(jsonObject)); //TEST
-			var headers = [ "ID", "Lat (dec.deg)", "Long (dec.deg)", "Area", "Depth of Sea (m)", "Depth of Sample (m)",
-					"Date", "Time", ];
 
-			var tableAndIds = ns.tableConstructor.featureTable("filterTable", jsonObject.features, headers);
-			// if (debugc) console.log("TEST-displayFeatures:
-			// tableAndIds="+JSON.stringify(tableAndIds)); //TEST
-			var constructedTable = tableAndIds.table;
-			currentFeatureIds = tableAndIds.ids;
-			// if (debugc) console.log("TEST-displayFeatures:
-			// currentFeatureIds="+JSON.stringify(currentFeatureIds)); //TEST
+			var constructedTable = ns.tableConstructor.featureTable("filterTable", jsonObject.features);
 
 			document.getElementById('list').innerHTML = "Click a row to view parameters<br> " + "<div>"
 					+ constructedTable + "</div><br>";
@@ -272,12 +278,6 @@ myNamespace.control = (function($, OL, ns) {
 			});
 		}
 	}
-
-	// known parameters, and how they are prefixed in the backend
-	// e.g. concatenation of prefix and element must be a valid layer in backend
-	var knownParameters = [ "temperature" ]; // , "chlorophyll", "plankton",
-	// "flagellate", ],
-	var parameterPrefix = "v3_"/* "list_" */;
 
 	// view all parameters of a feature
 	function viewParams() {
@@ -307,27 +307,52 @@ myNamespace.control = (function($, OL, ns) {
 			ns.handleParameters.selectParameters($("#parameters").jstree("get_checked", null, true));
 		}
 		if (debugc) {
-			console.log("ns.handleParameters.getChosenParameters:" + ns.handleParameters.getChosenParameters());
+			console.log("ns.handleParameters.chosenParameters:" + ns.handleParameters.chosenParameters);
 		}
-		// iterate through all known parameters, request and display result
+		// go through all the first requested tables/parameters, request and
+		// display
+		// result
 		// through callback
-		$.each(knownParameters, function(i, val) {
-			if (debugc)
-				console.log("TEST: viewParams: TYPENAME=" + parameterPrefix + val); // TEST
-			ns.WebFeatureService.getFeature({
-				TYPENAME : parameterPrefix + val,
-				PROPERTYNAME : ns.handleParameters.getChosenParameters().concat(ns.handleParameters.alwaysSelect)
-						.toString(),
-				FILTER : ns.query.constructParameterFilterString(ns.handleParameters.getChosenParameters()),
-				VIEWPARAMS : '' + paramFilter
-			}, function(response) {
-				displayParameter(response, val);
-			});
-			switch (val) {
-			case "temperature":
-				previousTemperatureFilterParams = ns.WebFeatureService.getPreviousRequestParameters();
-				break;
-			}
+		tablesToQuery = [];
+		data = convertArrayToHashMap(basicData);
+		if (debugc)
+			console.log("Going through all selected tables");
+		// $.each(ns.handleParameters.chosenParameters.tablesSelected,
+		// function(i, layer) {
+		// tablesToQuery.push(layer);
+		// var propertyName = [];
+		// if (debugc)
+		// console.log("Going through all parameters in:" + layer);
+		// $.each(ns.handleParameters.chosenParameters.parametersByTable[layer],
+		// function(j, parameter) {
+		// propertyName.push(parameter);
+		// });
+		// ns.WebFeatureService.getFeature({
+		// TYPENAME : layer,
+		// PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
+		// FILTER : ns.query.constructParameterFilterString(propertyName),
+		// VIEWPARAMS : '' + paramFilter
+		// }, function(response) {
+		// displayParameter(response, layer);
+		// });
+		// });
+		$.each(ns.handleParameters.chosenParameters.tablesSelected, function(i, table) {
+			tablesToQuery.push(table);
+		});
+		var layer = tablesToQuery.pop();
+		var propertyName = [];
+		if (debugc)
+			console.log("Going through all parameters in:" + layer);
+		$.each(ns.handleParameters.chosenParameters.parametersByTable[layer], function(j, parameter) {
+			propertyName.push(parameter);
+		});
+		ns.WebFeatureService.getFeature({
+			TYPENAME : layer,
+			PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
+			FILTER : ns.query.constructParameterFilterString(propertyName),
+			VIEWPARAMS : '' + paramFilter
+		}, function(response) {
+			displayParameter(response, layer);
 		});
 
 		// link the buttons for exporting parameter values
@@ -341,34 +366,155 @@ myNamespace.control = (function($, OL, ns) {
 		$("#exportTemperatureDiv").show();
 	}
 
+	var tablesToQuery = [];
+	var data = null;
+	var basicData = null;
+
 	// display a parameter as a table
-	function displayParameter(response, parameter) {
+	function displayParameter(response, layer) {
+		highLightFeatures(response);
 		if (debugc)
-			console.log("control.js: displayParameter: parameter=" + parameter);// TEST
+			console.log("qmeter: parameter=" + layer);// TEST
 		try {
 			response = JSON.parse(response.responseText);
 		} catch (SyntaxError) {
 			console.error("Could not parse response to parameter data request");
 			return;
 		}
+		addData(response);
+		// if (debugc) {
+		// console.log("DATA VALUES:");
+		// $.each(data, function(i, dataValue) {
+		// console.log(dataValue);
+		// });
+		// }
+		if (tablesToQuery.length == 0) {
+			if (debugc)
+				console.log("tablesToQuery.length == 0");
+			var constructedTable = ns.tableConstructor.parameterTableTemperatures(layer, data);
+			// if (debugc)
+			// console.log("control.js: displayParameter: constructedTable=" +
+			// constructedTable);// TEST
 
-		var tableId = parameter + "Table";
-		switch (parameter) {
-		case "temperature":
-			constructedTable = ns.tableConstructor.parameterTableTemperatures(tableId, response.features);
-			break;
+			$("#temperature").html(layer + "<br>" + "<div class='scrollArea'>" + constructedTable + "</div>");
+			// if (debugc)
+			// console.log("control.js: parameter table html=" +
+			// $("#temperature").html());// TEST
+
+			$("#" + layer + "Table").dataTable({
+				// search functionality not needed for parameter tables
+				'bFilter' : false
+			});
+		} else {
+			var layer = tablesToQuery.pop();
+			var paramString = "";
+			if (document.getElementById('bboxEnabledCheck').checked) {
+				paramString = "left:" + $('#left').val() + ";bottom:" + $('#bottom').val() + ";right:" + $('#right').val()
+						+ ";top:" + $('#top').val();
+			} else {
+				paramString = "left:-180.0;bottom:-90.0;right:180.0;top:90.0";// default
+				// bbox,
+				// global
+			}
+			if (document.getElementById('dateEnabledCheck').checked) {
+				paramString += ";sdate:" + $('#fromDate').val() + ";edate:" + $('#toDate').val();
+			} else {
+				// do nothing, we don't search for dates
+			}
+
+			if (debugc)
+				console.log("TEST: viewParams: new FILTER=" + paramString); // TEST
+
+			var paramFilter = paramString;
+			if (debugc)
+				console.log("tablesToQuery.length != 0 AND layer=" + layer);
+			var propertyName = [];
+			if (debugc)
+				console.log("Going through all parameters in:" + layer);
+			$.each(ns.handleParameters.chosenParameters.parametersByTable[layer], function(j, parameter) {
+				propertyName.push(parameter);
+			});
+			ns.WebFeatureService.getFeature({
+				TYPENAME : layer,
+				PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
+				FILTER : ns.query.constructParameterFilterString(propertyName),
+				VIEWPARAMS : '' + paramFilter
+			}, function(response) {
+				displayParameter(response, layer);
+			});
 		}
-		if (debugc)
-			console.log("control.js: displayParameter: constructedTable=" + constructedTable);// TEST
+	}
 
-		$("#" + parameter).html(parameter + "<br>" + "<div class='scrollArea'>" + constructedTable + "</div>");
+	function replaceId(features) {
 		if (debugc)
-			console.log("control.js: parameter table html=" + $("#" + parameter).html());// TEST
-
-		$("#" + tableId).dataTable({
-			// search functionality not needed for parameter tables
-			'bFilter' : false
+			console.log("Replacing ID's");
+		var featureArray = null;
+		$.each(features, function(i, feature) {
+			featureArray = feature.id.split(".");
+			feature.id = featureArray[1];
 		});
+		if (debugc)
+			console.log("Replaced ID's");
+		return featureArray[0];
+	}
+
+	function convertArrayToHashMap(inputArray) {
+		if (debugc)
+			console.log("Converting the Array: " + inputArray);
+		var output = {};
+		$.each(inputArray, function(k, dataValue) {
+			output[dataValue.id] = dataValue;
+		});
+		if (debugc)
+			console.log("Converted Array");
+		return output;
+	}
+	function addData(response) {
+		if (debugc) {
+			console.log("addData:");
+			console.log("DATA VALUES:");
+			$.each(data, function(i, dataValue) {
+				console.log(dataValue);
+			});
+		}
+		if (debugc) {
+			console.log("response VALUES:");
+			$.each(response, function(i, dataValue) {
+				console.log(dataValue);
+			});
+		}
+		var features = response.features;
+		if (debugc) {
+			console.log("features VALUES:");
+			$.each(features, function(i, dataValue) {
+				console.log(dataValue);
+			});
+		}
+		var layer = replaceId(features);
+		if (debugc) {
+			console.log("features VALUES:");
+			$.each(features, function(i, dataValue) {
+				console.log(dataValue);
+			});
+		}
+		var newData = {};
+		$.each(features, function(i, feature) {
+			$.each(feature.properties, function(j, parameter) {
+				// if (debugc)
+				// console.log("feature.id:" + feature.id);
+				if (feature.id in data) {
+					newData[feature.id] = data[feature.id];
+					newData[feature.id].properties[layer + ":" + j] = parameter;
+				}
+			});
+		});
+		data = newData;
+		if (debugc) {
+			console.log("DATA VALUES:");
+			$.each(data, function(i, dataValue) {
+				console.log(dataValue);
+			});
+		}
 	}
 
 	function setBboxInputToCurrentMapExtent() {
@@ -395,22 +541,11 @@ myNamespace.control = (function($, OL, ns) {
 
 	function initiateParameters(input) {
 		var table = ns.handleParameters.initiateParameters(input);
-		tablesDone[table] = true;
-		var done = true;
-		// for ( var tableCheck in tablesDone) {
-		// if (debugc)
-		// console.log("Checking done for table:"+tableCheck+" and
-		// tablesDone[table]:"+tablesDone[tableCheck]); // TEST
-		// done &= tablesDone[tableCheck];
-		// }
-		// if (done) {
-//		if (debugc)
-//			console.log("Done!"); // TEST
+		if (table != ns.handleParameters.mainTable.name) {
+			tablesDone[table] = true;
+		}
 		$("#parameters").html(ns.tableConstructor.parametersList(tablesDone));
 		// init the parameters tree
-		// TO CREATE AN INSTANCE
-		// select the tree container using jQuery
-
 		$("#parameters")
 		// call `.jstree` with the options object
 		.jstree({
@@ -423,25 +558,7 @@ myNamespace.control = (function($, OL, ns) {
 				"dots" : false,
 				"icons" : false
 			}
-		// each plugin you have included can have its own config object
-		// "core" : { "initially_open" : [ "phtml_1" ] }
-		// it makes sense to configure a plugin only if overriding the
-		// defaults
-		})
-		// EVENTS
-		// each instance triggers its own events - to process those listen
-		// on
-		// the container
-		// all events are in the `.jstree` namespace
-		// so listen for `function_name`.`jstree` - you can function names
-		// from
-		// the docs
-		.bind("loaded.jstree", function(event, data) {
-			// you get two params - event & data - check the core docs for a
-			// detailed description
 		});
-		// }
-		// }
 	}
 
 	// public interface

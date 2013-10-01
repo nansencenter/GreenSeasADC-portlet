@@ -1,10 +1,10 @@
 var myNamespace = myNamespace || {};
 
-//var debugm=true;//debug flag
+// var debugm=true;//debug flag
 
 // local service URLs
-//myNamespace.WMSserver = "http://localhost:8080/geoserver/cite/wms";//MOD
-//myNamespace.WFSserver = "http://localhost:8080/geoserver/cite/wfs";//MOD
+// myNamespace.WMSserver = "http://localhost:8080/geoserver/cite/wms";//MOD
+// myNamespace.WFSserver = "http://localhost:8080/geoserver/cite/wfs";//MOD
 myNamespace.WFSformat = "image/png";
 
 // NERSC services
@@ -12,12 +12,13 @@ myNamespace.WMSserver = "http://tomcat.nersc.no:8080/geoserver/greensad/wms";
 myNamespace.WFSserver = "http://tomcat.nersc.no:8080/geoserver/greensad/wfs";
 
 myNamespace.mapViewer = (function(OL) {
-	//if (debugm) alert("mapViewer.js: WFSserver="+myNamespace.WFSserver);//TEST
+	// if (debugm) alert("mapViewer.js:
+	// WFSserver="+myNamespace.WFSserver);//TEST
 	"use strict";
 	// TODO fix bound
-	var currentBounds = new OpenLayers.Bounds(-60, -72, 82, 88), 
-	    maxExtent = new OpenLayers.Bounds(-120, -88, 120, 88);
-			// from layer preview -58.2311019897461,-71.0900039672852,80.9666748046875,86.3916702270508
+	var currentBounds = new OpenLayers.Bounds(-60, -72, 82, 88), maxExtent = new OpenLayers.Bounds(-120, -88, 120, 88);
+	// from layer preview
+	// -58.2311019897461,-71.0900039672852,80.9666748046875,86.3916702270508
 
 	// map on which layers are drawn
 	var map;
@@ -25,14 +26,13 @@ myNamespace.mapViewer = (function(OL) {
 	// front layers drawn on the map widget, can be toggled on/off
 	var mapLayers = {
 		contour : undefined,
-		datapoints : new OpenLayers.Layer.WMS("Data points",
-				myNamespace.WMSserver, {
-					layers : 'greensad:gsadb3',
-					format : myNamespace.WMSformat,
-					transparent : true
-				}, {
-					isBaseLayer : false
-				}),
+		datapoints : new OpenLayers.Layer.WMS("Data points", myNamespace.WMSserver, {
+			layers : 'greensad:gsadb3',
+			format : myNamespace.WMSformat,
+			transparent : true
+		}, {
+			isBaseLayer : false
+		}),
 		highlights : new OpenLayers.Layer.Vector("Highlighted features", {
 			// highlight style: golden circles
 			styleMap : new OpenLayers.StyleMap({
@@ -49,36 +49,33 @@ myNamespace.mapViewer = (function(OL) {
 				// representation
 				zIndexing : true
 			},
-			projection : new OpenLayers.Projection("EPSG:4326") // MOD (Was: EPSG:4269)
+			projection : new OpenLayers.Projection("EPSG:4326")
+		// MOD (Was: EPSG:4269)
 		})
 	};
 
 	// some background layers, user may select one
 	var backgroundLayers = {
 
-		generic : new OpenLayers.Layer.WMS("Generic background",
-				"http://vmap0.tiles.osgeo.org/wms/vmap0", {
-					layers : 'basic',
-					format : myNamespace.WMSformat
-				}),
+		generic : new OpenLayers.Layer.WMS("Generic background", "http://vmap0.tiles.osgeo.org/wms/vmap0", {
+			layers : 'basic',
+			format : myNamespace.WMSformat
+		}),
 
-		marble : new OpenLayers.Layer.WMS('Blue Marble',
-				'http://disc1.gsfc.nasa.gov/daac-bin/wms_ogc', {
-					layers : 'bluemarble',
-					format : myNamespace.WMSformat
-				}),
+		marble : new OpenLayers.Layer.WMS('Blue Marble', 'http://disc1.gsfc.nasa.gov/daac-bin/wms_ogc', {
+			layers : 'bluemarble',
+			format : myNamespace.WMSformat
+		}),
 
-		ocean : new OpenLayers.Layer.WMS(
-				'GEBCO Bathymetry',
-				'http://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?',
-				{
+		ocean : new OpenLayers.Layer.WMS('GEBCO Bathymetry',
+				'http://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?', {
 					layers : 'gebco_08_grid',
 					format : myNamespace.WMSformat
 				})
 	};
 
 	function initMap() {
-		//if (debugm) alert("mapViewer.js: starting initMap()...");
+		// if (debugm) alert("mapViewer.js: starting initMap()...");
 		// set some OpenLayers settings
 		OpenLayers.ProxyHost = "/GreenseasV.1-portlet/openLayersProxy?targetURL=";
 		OpenLayers.DOTS_PER_INCH = (25.4 / 0.28);
@@ -90,8 +87,7 @@ myNamespace.mapViewer = (function(OL) {
 			units : 'degrees',
 			// actively excluding the standard zoom control, which is there by
 			// default
-			controls : [ new OpenLayers.Control.Navigation(),
-					new OpenLayers.Control.ArgParser(),
+			controls : [ new OpenLayers.Control.Navigation(), new OpenLayers.Control.ArgParser(),
 					new OpenLayers.Control.Attribution() ]
 		});
 
@@ -111,8 +107,7 @@ myNamespace.mapViewer = (function(OL) {
 		// fg.highlights]);
 
 		// TODO: rewrite to avoid hardcoding!!!
-		map.addLayers([ bg.generic, bg.marble, bg.ocean, fg.datapoints,
-				fg.highlights ]);
+		map.addLayers([ bg.generic, bg.ocean, bg.marble, fg.datapoints, fg.highlights ]);
 
 		map.zoomToExtent(currentBounds, true);
 
@@ -131,14 +126,12 @@ myNamespace.mapViewer = (function(OL) {
 			},
 
 			notice : function(genbounds) {
-				var ll = map.getLonLatFromPixel(new OpenLayers.Pixel(
-						genbounds.left, genbounds.bottom)), ur = map
-						.getLonLatFromPixel(new OpenLayers.Pixel(
-								genbounds.right, genbounds.top));
+				var ll = map.getLonLatFromPixel(new OpenLayers.Pixel(genbounds.left, genbounds.bottom)), ur = map
+						.getLonLatFromPixel(new OpenLayers.Pixel(genbounds.right, genbounds.top));
 
 				// left bottom top right
-				myNamespace.control.setLonLatInput(ll.lon.toFixed(4), ll.lat
-						.toFixed(4), ur.lat.toFixed(4), ur.lon.toFixed(4));
+				myNamespace.control.setLonLatInput(ll.lon.toFixed(4), ll.lat.toFixed(4), ur.lat.toFixed(4), ur.lon
+						.toFixed(4));
 			}
 		});
 
@@ -156,9 +149,8 @@ myNamespace.mapViewer = (function(OL) {
 			maxFeatures : 1,
 			eventListeners : {
 				getfeatureinfo : function(event) {
-					map.addPopup(new OpenLayers.Popup.FramedCloud("chicken",
-							map.getLonLatFromPixel(event.xy), null, event.text,
-							null, true));
+					map.addPopup(new OpenLayers.Popup.FramedCloud("chicken", map.getLonLatFromPixel(event.xy), null,
+							event.text, null, true));
 				}
 			}
 		});
@@ -192,15 +184,14 @@ myNamespace.mapViewer = (function(OL) {
 
 	function addContourLayerOfPreviousFilter() {
 		alert("addContourLayerOfPreviousFilter");
-		mapLayers.contour = new OpenLayers.Layer.WMS.Untiled("Contour plot",
-				myNamespace.WMSserver, {
-					layers : 'greensad:temperature_atlevel',
-					format : myNamespace.WMSformat,
-					transparent : true,
-					filter : myNamespace.query.previousFilter
-				}, {
-					isBaseLayer : false
-				});
+		mapLayers.contour = new OpenLayers.Layer.WMS.Untiled("Contour plot", myNamespace.WMSserver, {
+			layers : 'greensad:temperature_atlevel',
+			format : myNamespace.WMSformat,
+			transparent : true,
+			filter : myNamespace.query.previousFilter
+		}, {
+			isBaseLayer : false
+		});
 
 		map.addLayer(mapLayers.contour);
 

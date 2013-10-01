@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugq=true;// debug flag
+var debugq=false;// debug flag
 
 myNamespace.query = (function(OL) {
 	"use strict";
@@ -83,27 +83,28 @@ myNamespace.query = (function(OL) {
 	// dates returned from geoserver currently one day off due to time zone
 	// issues
 	function dateFilter(date) {
-		var dateTimeFilterArray = [];
+//		var dateTimeFilterArray = [];
 
 		var dateFilter = new OL.Filter.Comparison({
 			type : OL.Filter.Comparison.BETWEEN,
-			property : "date", // Was: stdate
+			property : "date",
 			lowerBoundary : date.fromDate,
 			upperBoundary : date.toDate
 		});
 
-		dateTimeFilterArray.push(dateFilter);
+//		dateTimeFilterArray.push(dateFilter);
 
-		var timeFilter = new OL.Filter.Comparison({
-			type : OL.Filter.Comparison.BETWEEN,
-			property : "time", // Was: sttime
-			lowerBoundary : date.fromTime,
-			upperBoundary : date.toTime
-		});
+//		var timeFilter = new OL.Filter.Comparison({
+//			type : OL.Filter.Comparison.BETWEEN,
+//			property : "time", // Was: sttime
+//			lowerBoundary : date.fromTime,
+//			upperBoundary : date.toTime
+//		});
 
-		dateTimeFilterArray.push(timeFilter);
+//		dateTimeFilterArray.push(timeFilter);
 
-		return combineFilters(dateTimeFilterArray);
+		return dateFilter;
+//		return combineFilters(dateTimeFilterArray);
 	}
 	
 	function requiredParameters(parameters) {
