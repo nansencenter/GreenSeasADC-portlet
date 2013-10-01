@@ -77,6 +77,8 @@ myNamespace.mapViewer = (function(OL) {
 	function initMap() {
 		// if (debugm) alert("mapViewer.js: starting initMap()...");
 		// set some OpenLayers settings
+		//This one is currently used on production since the portlet is hosted with a cgi already there
+		//OpenLayers.ProxyHost = "/greenseas-portlet/cgi-bin/proxy.cgi?url=";
 		OpenLayers.ProxyHost = "/GreenseasV.1-portlet/openLayersProxy?targetURL=";
 		OpenLayers.DOTS_PER_INCH = (25.4 / 0.28);
 		OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
