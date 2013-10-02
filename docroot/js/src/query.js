@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugq=false;// debug flag
+var debugq = true;// debug flag
 
 myNamespace.query = (function(OL) {
 	"use strict";
@@ -42,32 +42,41 @@ myNamespace.query = (function(OL) {
 	}
 
 	function constructFilterString(bbox, date, attributes) {
-		if (debugq) console.log("constructFilterString");// TEST
+		if (debugq)
+			console.log("constructFilterString");// TEST
 		// generate filter object
 		var filterObject = constructFilter(bbox, date, attributes);
 
 		return constructString(filterObject);
 
 	}
-	
+
 	function constructParameterFilterString(parameters) {
-		if (debugq) console.log("constructFilterString");// TEST
+		if (debugq)
+			console.log("constructFilterString starting");// TEST
 		// generate filter object
 		var filterObject = requiredParameters(parameters);
 
+		if (debugq)
+			console.log("constructFilterString ending");// TEST
 		return constructString(filterObject);
 
 	}
 
 	function constructString(filter) {
+		if (debugq)
+			console.log("constructString starting");// TEST
 		if (filter !== null) {
 			// to string representation
+			if (debugq)
+				console.log("trying filterToXmlString");// TEST
 			var strFilter = filterToXmlString(filter);
 
 			// save filter string for use in contour plots
 			previousFilter = strFilter;
 
-			if (debugq) console.log("query.js: strFilter="+strFilter);// TEST
+			if (debugq)
+				console.log("query.js: strFilter=" + strFilter);// TEST
 			return strFilter;
 		} else
 			return null;
@@ -83,7 +92,7 @@ myNamespace.query = (function(OL) {
 	// dates returned from geoserver currently one day off due to time zone
 	// issues
 	function dateFilter(date) {
-//		var dateTimeFilterArray = [];
+		// var dateTimeFilterArray = [];
 
 		var dateFilter = new OL.Filter.Comparison({
 			type : OL.Filter.Comparison.BETWEEN,
@@ -92,42 +101,50 @@ myNamespace.query = (function(OL) {
 			upperBoundary : date.toDate
 		});
 
-//		dateTimeFilterArray.push(dateFilter);
+		// dateTimeFilterArray.push(dateFilter);
 
-//		var timeFilter = new OL.Filter.Comparison({
-//			type : OL.Filter.Comparison.BETWEEN,
-//			property : "time", // Was: sttime
-//			lowerBoundary : date.fromTime,
-//			upperBoundary : date.toTime
-//		});
+		// var timeFilter = new OL.Filter.Comparison({
+		// type : OL.Filter.Comparison.BETWEEN,
+		// property : "time", // Was: sttime
+		// lowerBoundary : date.fromTime,
+		// upperBoundary : date.toTime
+		// });
 
-//		dateTimeFilterArray.push(timeFilter);
+		// dateTimeFilterArray.push(timeFilter);
 
 		return dateFilter;
-//		return combineFilters(dateTimeFilterArray);
+		// return combineFilters(dateTimeFilterArray);
 	}
-	
+
 	function requiredParameters(parameters) {
 		var requiredParamtersArray = [];
-		for (var i = 0,len=parameters.length;i<len;i++){
+		for ( var i = 0, len = parameters.length; i < len; i++) {
 			requiredParamtersArray.push(createRequiredParameterFilter(parameters[i]));
 		}
 		return combineFilters(requiredParamtersArray);
 	}
-	
+
 	function createRequiredParameterFilter(parameter) {
-		 var requiredArray = [];
-		 requiredArray.push(new OL.Filter.Comparison({
-	            type: OpenLayers.Filter.Comparison.NOT_EQUAL_TO,
-	            property: parameter,
-	            value: ""
-	        }));
-		 requiredArray.push(new OL.Filter.Comparison({
-	            type: OpenLayers.Filter.Comparison.IS_NULL,
-	            property: parameter,
-	        }));
-		 
-		 return combineFiltersOr(requiredArray);
+		if (debugq)
+			console.log("createRequiredParameterFilter starting");// TEST
+		var requiredArray = [];
+		requiredArray.push(combineFilters([ new OL.Filter.Comparison({
+			type : OpenLayers.Filter.Comparison.NOT_EQUAL_TO,
+			property : parameter,
+			value : ""
+		}), new OL.Filter.Comparison({
+			type : OpenLayers.Filter.Comparison.NOT_EQUAL_TO,
+			property : parameter,
+			value : "null"
+		}) ]));
+		requiredArray.push(negateFilter([new OL.Filter.Comparison({
+			type : OpenLayers.Filter.Comparison.IS_NULL,
+			property : parameter,
+		})]));
+
+		if (debugq)
+			console.log("createRequiredParameterFilter ending");// TEST
+		return combineFilters(requiredArray);
 	}
 
 	// "other attribute" filter
@@ -135,20 +152,17 @@ myNamespace.query = (function(OL) {
 	function attributeFilter(attr) {
 		var attrFilterArray = [];
 
-		var countryFilter = addStringAttribute("stcountryname",
-				attr.countryname, attr.notcountry);
+		var countryFilter = addStringAttribute("stcountryname", attr.countryname, attr.notcountry);
 		if (countryFilter !== null) {
 			attrFilterArray.push(countryFilter);
 		}
 
-		var vesselFilter = addStringAttribute("stvesselname", attr.vesselname,
-				attr.notvessel);
+		var vesselFilter = addStringAttribute("stvesselname", attr.vesselname, attr.notvessel);
 		if (vesselFilter !== null) {
 			attrFilterArray.push(vesselFilter);
 		}
 
-		var sourceFilter = addStringAttribute("stsource", attr.sourcename,
-				attr.notsource);
+		var sourceFilter = addStringAttribute("stsource", attr.sourcename, attr.notsource);
 		if (sourceFilter !== null) {
 			attrFilterArray.push(sourceFilter);
 		}
@@ -162,12 +176,22 @@ myNamespace.query = (function(OL) {
 			return null;
 		}
 	}
-	
+
 	// write OpenLayers filter object to OGC XML filter encoding
 	function filterToXmlString(filter) {
-		// console.log("query.js: filter"+JSON.stringify(filter));//TEST
-		var formatter = new OL.Format.Filter(), xmlFormat = new OL.Format.XML();
-		return xmlFormat.write(formatter.write(filter));
+		if (debugq)
+		 console.log("filterToXmlString starting with filter:"+JSON.stringify(filter));//TEST
+		var formatter = new OL.Format.Filter();
+		if (debugq)
+			 console.log("came thus far formatter:"+formatter);//TE
+		var xmlFormat = new OL.Format.XML();
+		if (debugq)
+			 console.log("came thus far xmlFormat:"+xmlFormat);//TE
+		var written = formatter.write(filter);
+		if (debugq)
+			 console.log("written:"+written);//TEST
+		var writtenXML = xmlFormat.write(written);
+		return writtenXML;
 	}
 
 	// combine array of filters to single filter
@@ -177,7 +201,7 @@ myNamespace.query = (function(OL) {
 			filters : filtersToCombine
 		});
 	}
-	
+
 	function combineFiltersOr(filtersToCombine) {
 		return new OL.Filter.Logical({
 			type : OL.Filter.Logical.OR,

@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-// var debugm=true;//debug flag
+var debugmW = true;// debug flag
 
 // local service URLs
 // myNamespace.WMSserver = "http://localhost:8080/geoserver/cite/wms";//MOD
@@ -77,8 +77,9 @@ myNamespace.mapViewer = (function(OL) {
 	function initMap() {
 		// if (debugm) alert("mapViewer.js: starting initMap()...");
 		// set some OpenLayers settings
-		//This one is currently used on production since the portlet is hosted with a cgi already there
-		//OpenLayers.ProxyHost = "/greenseas-portlet/cgi-bin/proxy.cgi?url=";
+		// This one is currently used on production since the portlet is hosted
+		// with a cgi already there
+		// OpenLayers.ProxyHost = "/greenseas-portlet/cgi-bin/proxy.cgi?url=";
 		OpenLayers.ProxyHost = "/GreenseasV.1-portlet/openLayersProxy?targetURL=";
 		OpenLayers.DOTS_PER_INCH = (25.4 / 0.28);
 		OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
@@ -164,6 +165,40 @@ myNamespace.mapViewer = (function(OL) {
 		// remove old highlights, add the new ones
 		mapLayers.highlights.removeAllFeatures();
 		mapLayers.highlights.addFeatures(features);
+		map.setLayerIndex(mapLayers.highlights,9999);
+		if (debugmW)
+			console.log("Layer index for highlights: "+map.getLayerIndex(mapLayers.highlights));
+	}
+
+	function addLayer(features, name) {
+		if (debugmW)
+			console.log("Adding a layer: " + name);
+		var layer = new OpenLayers.Layer.Vector(name, {
+			// highlight style: golden circles
+			styleMap : new OpenLayers.StyleMap({
+				"default" : new OpenLayers.Style({
+					pointRadius : 2,
+					fillColor : "#C0FF66",
+					strokeColor : "#C0FF66",
+					strokeWidth : 1,
+					graphicZIndex : 1
+				})
+			}),
+			rendererOptions : {
+				// for guaranteeing highlights are drawn on top of WMS
+				// representation
+				zIndexing : true
+			},
+			projection : new OpenLayers.Projection("EPSG:4326")
+		// MOD (Was: EPSG:4269)
+		});
+		layer.addFeatures(features);
+		var oldLayers = map.getLayersByName(name);
+		if (oldLayers.length != 0)
+			map.removeLayer(oldLayers[0]);
+		map.addLayer(layer);
+		if (debugmW)
+			console.log("Layer index for "+name+": "+map.getLayerIndex(layer));
 	}
 
 	function downloadCurrentContourImage() {
@@ -184,22 +219,6 @@ myNamespace.mapViewer = (function(OL) {
 		window.open(request);
 	}
 
-	function addContourLayerOfPreviousFilter() {
-		alert("addContourLayerOfPreviousFilter");
-		mapLayers.contour = new OpenLayers.Layer.WMS.Untiled("Contour plot", myNamespace.WMSserver, {
-			layers : 'greensad:temperature_atlevel',
-			format : myNamespace.WMSformat,
-			transparent : true,
-			filter : myNamespace.query.previousFilter
-		}, {
-			isBaseLayer : false
-		});
-
-		map.addLayer(mapLayers.contour);
-
-		map.setLayerIndex(mapLayers.contour, 0);
-	}
-
 	function getExtent() {
 		return map.getExtent();
 	}
@@ -210,11 +229,11 @@ myNamespace.mapViewer = (function(OL) {
 
 	// public interface
 	return {
+		addLayer : addLayer,
 		initMap : initMap,
 		highlightFeatures : highlightFeatures,
 		getExtent : getExtent,
 		zoomToExtent : zoomToExtent,
-		addContourLayerOfPreviousFilter : addContourLayerOfPreviousFilter
 	};
 
 }(OpenLayers));

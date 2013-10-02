@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugfC = true;// debug flag
+var debugfC = false;// debug flag
 
 myNamespace.fileCreation = (function($) {
 

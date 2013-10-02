@@ -58,11 +58,6 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		callFromControl("#anywhereButton", c.lonLatAnywhere);
 		callFromControl("#showRawQueryButton", c.setRawRequestDialog);
 
-		add("#downloadCurrentContour", setThisOfFunction(myNamespace.mapViewer.downloadCurrentContourImage,
-				myNamespace.mapViewer));
-		add("#mapCurrentContour", setThisOfFunction(myNamespace.mapViewer.addContourLayerOfPreviousFilter,
-				myNamespace.mapViewer));
-
 		// on change events
 		jQ("#exportFormats").change(function() {
 			var s = document.getElementById('exportFormats');

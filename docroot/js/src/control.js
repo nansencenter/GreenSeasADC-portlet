@@ -218,7 +218,7 @@ myNamespace.control = (function($, OL, ns) {
 		// console.log("TEST: exportDiv="+$("#exportDiv").html());//TEST
 	}
 
-	function highLightFeatures(input) {
+	function highLightFeatures(input, mainSearch) {
 		// highlight on map
 		var gformat = new OL.Format.GeoJSON();
 		var features = gformat.read(input.responseText);
@@ -232,7 +232,11 @@ myNamespace.control = (function($, OL, ns) {
 			a.x = a.y;
 			a.y = tmp;
 		});
-		ns.mapViewer.highlightFeatures(features);
+		if (!mainSearch) {
+			ns.mapViewer.highlightFeatures(features);
+		} else {
+			ns.mapViewer.addLayer(features,"Main search");
+		}
 	}
 
 	function displayFeatures(input) {
@@ -244,10 +248,9 @@ myNamespace.control = (function($, OL, ns) {
 			ns.errorMessage.showErrorMessage(input.responseText);
 			return;
 		}
-
 		// if response status is OK, parse result
-
-		highLightFeatures(input);
+		
+		highLightFeatures(input, true);
 
 		// remove "loading..." text
 		$("#loadingText").html("");
@@ -308,9 +311,6 @@ myNamespace.control = (function($, OL, ns) {
 		if (document.getElementById('parametersEnabledCheck').checked) {
 			ns.handleParameters.selectParameters($("#parameters").jstree("get_checked", null, true));
 		}
-		if (debugc) {
-			console.log("ns.handleParameters.chosenParameters:" + ns.handleParameters.chosenParameters);
-		}
 		// go through all the first requested tables/parameters, request and
 		// display
 		// result
@@ -319,25 +319,6 @@ myNamespace.control = (function($, OL, ns) {
 		data = convertArrayToHashMap(basicData);
 		if (debugc)
 			console.log("Going through all selected tables");
-		// $.each(ns.handleParameters.chosenParameters.tablesSelected,
-		// function(i, layer) {
-		// tablesToQuery.push(layer);
-		// var propertyName = [];
-		// if (debugc)
-		// console.log("Going through all parameters in:" + layer);
-		// $.each(ns.handleParameters.chosenParameters.parametersByTable[layer],
-		// function(j, parameter) {
-		// propertyName.push(parameter);
-		// });
-		// ns.WebFeatureService.getFeature({
-		// TYPENAME : layer,
-		// PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
-		// FILTER : ns.query.constructParameterFilterString(propertyName),
-		// VIEWPARAMS : '' + paramFilter
-		// }, function(response) {
-		// displayParameter(response, layer);
-		// });
-		// });
 		$.each(ns.handleParameters.chosenParameters.tablesSelected, function(i, table) {
 			tablesToQuery.push(table);
 		});
@@ -348,6 +329,8 @@ myNamespace.control = (function($, OL, ns) {
 		$.each(ns.handleParameters.chosenParameters.parametersByTable[layer], function(j, parameter) {
 			propertyName.push(parameter);
 		});
+		if (debugc)
+			console.log("Went through all parameters in:" + layer);
 		ns.WebFeatureService.getFeature({
 			TYPENAME : layer,
 			PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
@@ -356,6 +339,8 @@ myNamespace.control = (function($, OL, ns) {
 		}, function(response) {
 			displayParameter(response, layer);
 		});
+		if (debugc)
+			console.log("Sendt request:" + layer);
 
 		// jump to the parameters tab
 		$('#tabs').tabs("option", "active", 1);
@@ -370,7 +355,7 @@ myNamespace.control = (function($, OL, ns) {
 
 	// display a parameter as a table
 	function displayParameter(response, layer) {
-		highLightFeatures(response);
+		highLightFeatures(response,false,layer);
 		if (debugc)
 			console.log("qmeter: parameter=" + layer);// TEST
 		try {
