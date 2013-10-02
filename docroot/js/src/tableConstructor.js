@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugtC = true;// debug flag
+var debugtC = false;// debug flag
 
 myNamespace.tableConstructor = (function($, hP) {
 	"use strict";

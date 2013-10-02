@@ -17,6 +17,7 @@
 		<header-portlet-css>/css/main.css</header-portlet-css>
 		<!-- application libs -->
 		<header-portlet-javascript>/js/lib/jquery.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/lib/FileSaver.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/lib/jquery.jstree.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/lib/highcharts.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/lib/highcharts-more.js</header-portlet-javascript>
@@ -28,6 +29,7 @@
 		<header-portlet-javascript>/js/lib/qunit-1.11.0.js</header-portlet-javascript>
 		<!-- application script files -->
 		<header-portlet-javascript>/js/src/XMLParser.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/src/fileCreation.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/src/control.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/src/handleParameters.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/src/mapViewer.js</header-portlet-javascript>

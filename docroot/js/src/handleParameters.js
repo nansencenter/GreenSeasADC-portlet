@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debughP = true;// debug flag
+var debughP = false;// debug flag
 
 myNamespace.handleParameters = (function($) {
 	// TODO: make this a hashtable of hashtable, it must store the type of the

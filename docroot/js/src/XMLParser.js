@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugXML = true;// debug flag
+var debugXML = false;// debug flag
 
 myNamespace.XMLParser = (function($) {
 
@@ -15,10 +15,13 @@ myNamespace.XMLParser = (function($) {
 	}
 
 	function extractParameters(xmlSchema) {
-		console.log("extractParameters");
+		if (debugXML)
+			console.log("extractParameters");
 		var browser = findBrowser();
-		console.log("browser: " + browser);
-		console.log(xmlSchema);
+		if (debugXML)
+			console.log("browser: " + browser);
+		if (debugXML)
+			console.log(xmlSchema);
 		var parameters = [];
 		var xmlDoc
 		if (browser == "Chrome" || browser == "Firefox") {
@@ -26,7 +29,8 @@ myNamespace.XMLParser = (function($) {
 		} else {
 			xmlDoc = xmlSchema._object.responseXML;
 		}
-		console.log(xmlDoc);
+		if (debugXML)
+			console.log(xmlDoc);
 
 		if (debugXML) {
 			console.log(xmlDoc.documentElement.childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes[1]
@@ -36,7 +40,8 @@ myNamespace.XMLParser = (function($) {
 		var sequence = xmlDoc.documentElement.childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes;
 		var numberOfParameters = sequence.length;
 		for ( var i = 1; i < numberOfParameters; i += 2) {
-			console.log("extractParameters FOUND PARAMETER: " + sequence.item(i).getAttribute("name"));
+			if (debugXML)
+				console.log("extractParameters FOUND PARAMETER: " + sequence.item(i).getAttribute("name"));
 			parameters.push(sequence.item(i).getAttribute("name"));
 		}
 		if (debugXML)

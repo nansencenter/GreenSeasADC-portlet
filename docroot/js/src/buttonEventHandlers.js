@@ -21,8 +21,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		return function() {
 			jQ(div).toggle("blind");
 
-			var shownName = "Hide " + buttonName, hiddenName = "Show "
-					+ buttonName, isShown = jQ(buttonId).val() === hiddenName;
+			var shownName = "Hide " + buttonName, hiddenName = "Show " + buttonName, isShown = jQ(buttonId).val() === hiddenName;
 
 			if (isShown) {
 				jQ(buttonId).val(shownName);
@@ -46,15 +45,11 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		// on click events
 		add("#toggleMap", toggleButton("#toggleMap", "map", "#simple_map"));
 		add("#toggleQuery", toggleButton("#toggleQuery", "query", "#search"));
-		add("#toggleResults", toggleButton("#toggleResults", "results",
-				"#featuresAndParams"));
+		add("#toggleResults", toggleButton("#toggleResults", "results", "#featuresAndParams"));
 
-		add("#bboxEnabledCheck", checkParameter("bboxEnabledCheck",
-				"Bounding box", "#bboxHeaderText"));
-		add("#dateEnabledCheck", checkParameter("dateEnabledCheck",
-				"Date/Time", "#dateHeaderText"));
-		add("#parametersEnabledCheck", checkParameter("parametersEnabledCheck",
-				"Parameters", "#parametersHeaderText"));
+		add("#bboxEnabledCheck", checkParameter("bboxEnabledCheck", "Bounding box", "#bboxHeaderText"));
+		add("#dateEnabledCheck", checkParameter("dateEnabledCheck", "Date/Time", "#dateHeaderText"));
+		add("#parametersEnabledCheck", checkParameter("parametersEnabledCheck", "Parameters", "#parametersHeaderText"));
 
 		// buttons that call methods of control - should have control as "this"
 		var c = myNamespace.control;
@@ -62,12 +57,10 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		callFromControl("#toCurrentExtent", c.setBboxInputToCurrentMapExtent);
 		callFromControl("#anywhereButton", c.lonLatAnywhere);
 		callFromControl("#showRawQueryButton", c.setRawRequestDialog);
-		
-		add("#downloadCurrentContour", setThisOfFunction(
-				myNamespace.mapViewer.downloadCurrentContourImage,
+
+		add("#downloadCurrentContour", setThisOfFunction(myNamespace.mapViewer.downloadCurrentContourImage,
 				myNamespace.mapViewer));
-		add("#mapCurrentContour", setThisOfFunction(
-				myNamespace.mapViewer.addContourLayerOfPreviousFilter,
+		add("#mapCurrentContour", setThisOfFunction(myNamespace.mapViewer.addContourLayerOfPreviousFilter,
 				myNamespace.mapViewer));
 
 		// on change events
@@ -82,24 +75,27 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 			c.linkTemperatureExportButton();
 		});
 	}
-	
-	function linkExportButton(URL) {
-		//alert("buttonEventHandlers.js: linkExportButton: URL="+URL);//TEST
+
+	function linkExportButton(csvContent) {
+		// alert("buttonEventHandlers.js: linkExportButton: URL="+URL);//TEST
 		// remove previous
 		jQ("#export").unbind("click");
-		
+
 		add("#export", function() {
-			window.open(URL);
+			saveAs(new Blob([ csvContent ]), "DownloadedData.csv");
 		});
 	}
 
-	function linkTemperatureExportButton(URL) {
-		//alert("buttonEventHandlers.js: linkTemperatureExportButton: URL="+URL);//TEST
+	function linkTemperatureExportButton(csvContent,type,name) {
+		// alert("buttonEventHandlers.js: linkTemperatureExportButton:
+		// URL="+URL);//TEST
 		// remove previous
 		jQ("#exportTemperature").unbind("click");
-		
+
 		add("#exportTemperature", function() {
-			window.open(URL);
+			saveAs(new Blob([ csvContent ], {
+				type : type
+			}), name);
 		});
 	}
 

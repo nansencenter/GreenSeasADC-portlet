@@ -15,7 +15,7 @@
 	<div id="tabs">
 		<ul>
 			<li><a href="#queryTab">Query and features</a></li>
-			<li><a href="#temperatureTab">Temperature</a></li>
+			<li><a href="#temperatureTab">Parameters</a></li>
 
 		</ul>
 		<div id="queryTab">
@@ -72,13 +72,14 @@
 							<input type="checkbox" id="parametersEnabledCheck"> Enable in query
 						</div>
 
-						<div id="parameters">
-						</div>
+						<div id="parameters"></div>
 					</div>
 				</div>
 
-				<input type='button' id='filter' value="Run query" /> <input type='button' id='showRawQueryButton'
-					value="Show raw query" />
+				<input type='button' id='filter' value="Run query" /> 
+				
+				<!-- <input type='button' id='showRawQueryButton'
+					value="Show raw query" /> -->
 
 			</div>
 
@@ -106,19 +107,15 @@
 		</div>
 
 		<div id="temperatureTab">
-			<p>Run a query and select a feature (click a row) to view the temperature values here.</p>
+			<p>Run a query and select a feature (click a row) to view the parameter values here.</p>
 			<div id="singlePlots">
 				<div id="parameters" class="container">
 					<div id="temperature" class="floatLeft"></div>
 				</div>
 			</div>
 			<div id="exportTemperatureDiv">
-				<input type='button' id='exportTemperature' value="Export temperature" disabled /> <select
-					id="exportTemperatureFormats">
+				<input type='button' id='exportTemperature' value="Export data" disabled /> <select id="exportTemperatureFormats">
 					<option value="csv">CSV</option>
-					<option value="gml2">GML2</option>
-					<option value="shape-zip">Shapefile</option>
-					<option value="json">GeoJSON</option>
 				</select>
 			</div>
 		</div>

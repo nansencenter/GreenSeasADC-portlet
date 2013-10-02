@@ -199,17 +199,19 @@ myNamespace.control = (function($, OL, ns) {
 
 	function linkTemperatureExportButton() {
 		// get a copy of params so we don't change the original
-		var params = $.extend({}, previousTemperatureFilterParams);
+		// var params = $.extend({}, previousTemperatureFilterParams);
 
 		// update params to selected format instead of json
-		params.OUTPUTFORMAT = selectedTemperatureFormat;
+		// params.OUTPUTFORMAT = selectedTemperatureFormat;
 
 		// construct URL
-		exportTemperatureButtonURL = ns.WFSserver + "?" + OL.Util.getParameterString(params);
+		// exportTemperatureButtonURL = ns.WFSserver + "?" +
+		// OL.Util.getParameterString(params);
 		// console.log("TEST: linkTemperatureExportBUtton:
 		// exportTemperatureButtonURL="+exportTemperatureButtonURL);//TEST
 
-		ns.buttonEventHandlers.linkTemperatureExportButton(exportTemperatureButtonURL);
+		ns.buttonEventHandlers.linkTemperatureExportButton(ns.fileCreation.createCSV(data),
+				"data:attachment/csv;charset=utf-8", "Greenseas_Downloaded_Parameters.csv");
 
 		// console.log("TEST:
 		// exportTemperatureDiv="+$("#exportTemperatureDiv").html());//TEST
@@ -272,7 +274,7 @@ myNamespace.control = (function($, OL, ns) {
 			document.getElementById('list').innerHTML = "Click a row to view parameters<br> " + "<div>"
 					+ constructedTable + "</div><br>";
 			document.getElementById('export').disabled = false;
-			$("#exportDiv").show();
+			// $("#exportDiv").show();
 			$('#filterTable').dataTable({
 				'aaSorting' : []
 			});
@@ -355,10 +357,6 @@ myNamespace.control = (function($, OL, ns) {
 			displayParameter(response, layer);
 		});
 
-		// link the buttons for exporting parameter values
-		linkTemperatureExportButton(); // TODO-turn into array of buttons,
-		// previous-variables
-
 		// jump to the parameters tab
 		$('#tabs').tabs("option", "active", 1);
 
@@ -405,12 +403,13 @@ myNamespace.control = (function($, OL, ns) {
 				// search functionality not needed for parameter tables
 				'bFilter' : false
 			});
+			linkTemperatureExportButton();
 		} else {
 			var layer = tablesToQuery.pop();
 			var paramString = "";
 			if (document.getElementById('bboxEnabledCheck').checked) {
-				paramString = "left:" + $('#left').val() + ";bottom:" + $('#bottom').val() + ";right:" + $('#right').val()
-						+ ";top:" + $('#top').val();
+				paramString = "left:" + $('#left').val() + ";bottom:" + $('#bottom').val() + ";right:"
+						+ $('#right').val() + ";top:" + $('#top').val();
 			} else {
 				paramString = "left:-180.0;bottom:-90.0;right:180.0;top:90.0";// default
 				// bbox,
@@ -470,33 +469,33 @@ myNamespace.control = (function($, OL, ns) {
 		return output;
 	}
 	function addData(response) {
-		if (debugc) {
-			console.log("addData:");
-			console.log("DATA VALUES:");
-			$.each(data, function(i, dataValue) {
-				console.log(dataValue);
-			});
-		}
-		if (debugc) {
-			console.log("response VALUES:");
-			$.each(response, function(i, dataValue) {
-				console.log(dataValue);
-			});
-		}
+		// if (debugc) {
+		// console.log("addData:");
+		// console.log("DATA VALUES:");
+		// $.each(data, function(i, dataValue) {
+		// console.log(dataValue);
+		// });
+		// }
+		// if (debugc) {
+		// console.log("response VALUES:");
+		// $.each(response, function(i, dataValue) {
+		// console.log(dataValue);
+		// });
+		// }
 		var features = response.features;
-		if (debugc) {
-			console.log("features VALUES:");
-			$.each(features, function(i, dataValue) {
-				console.log(dataValue);
-			});
-		}
+		// if (debugc) {
+		// console.log("features VALUES:");
+		// $.each(features, function(i, dataValue) {
+		// console.log(dataValue);
+		// });
+		// }
 		var layer = replaceId(features);
-		if (debugc) {
-			console.log("features VALUES:");
-			$.each(features, function(i, dataValue) {
-				console.log(dataValue);
-			});
-		}
+		// if (debugc) {
+		// console.log("features VALUES:");
+		// $.each(features, function(i, dataValue) {
+		// console.log(dataValue);
+		// });
+		// }
 		var newData = {};
 		$.each(features, function(i, feature) {
 			$.each(feature.properties, function(j, parameter) {
@@ -509,12 +508,12 @@ myNamespace.control = (function($, OL, ns) {
 			});
 		});
 		data = newData;
-		if (debugc) {
-			console.log("DATA VALUES:");
-			$.each(data, function(i, dataValue) {
-				console.log(dataValue);
-			});
-		}
+		// if (debugc) {
+		// console.log("DATA VALUES:");
+		// $.each(data, function(i, dataValue) {
+		// console.log(dataValue);
+		// });
+		// }
 	}
 
 	function setBboxInputToCurrentMapExtent() {
