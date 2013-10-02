@@ -28,9 +28,9 @@ myNamespace.handleParameters = (function($) {
 	};
 	var tableHeader = {
 		v4_temperature : "Physical",
-		v3_plankton : "Plankton",
+		v4_plankton : "Plankton",
 		v4_flagellate : "Flagellate",
-		v3_chlorophyll : "Light/Chlorophyll"
+		v4_chlorophyll : "Light/Chlorophyll"
 	};
 	var chosenParameters = {
 		parametersByTable : {},

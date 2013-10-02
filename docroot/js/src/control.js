@@ -8,9 +8,9 @@ myNamespace.control = (function($, OL, ns) {
 
 	function init() {
 		tablesDone = {
-			v3_chlorophyll : false,
+			v4_chlorophyll : false,
 			v4_temperature : false,
-			v3_plankton : false,
+			v4_plankton : false,
 			v4_flagellate : false
 		};
 
@@ -540,6 +540,12 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function initiateParameters(input) {
+		if (debugc) {
+			console.log("Input values of initiateparameters");
+			$.each(input, function(i, dataValue) {
+				console.log(dataValue);
+			});
+		}
 		var table = ns.handleParameters.initiateParameters(input);
 		if (table != ns.handleParameters.mainTable.name) {
 			tablesDone[table] = true;
