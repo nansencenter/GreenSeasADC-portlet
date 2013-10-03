@@ -218,7 +218,7 @@ myNamespace.control = (function($, OL, ns) {
 		// console.log("TEST: exportDiv="+$("#exportDiv").html());//TEST
 	}
 
-	function highLightFeatures(input, mainSearch) {
+	function highLightFeatures(input, mainSearch,layer) {
 		// highlight on map
 		var gformat = new OL.Format.GeoJSON();
 		var features = gformat.read(input.responseText);
@@ -232,10 +232,10 @@ myNamespace.control = (function($, OL, ns) {
 			a.x = a.y;
 			a.y = tmp;
 		});
-		if (!mainSearch) {
+		if (mainSearch) {
 			ns.mapViewer.highlightFeatures(features);
 		} else {
-			ns.mapViewer.addLayer(features,"Main search");
+			ns.mapViewer.addLayer(features,ns.handleParameters.getTableHeader(layer));
 		}
 	}
 
@@ -356,15 +356,16 @@ myNamespace.control = (function($, OL, ns) {
 	// display a parameter as a table
 	function displayParameter(response, layer) {
 		highLightFeatures(response,false,layer);
+		var responseAsJSON;
 		if (debugc)
 			console.log("qmeter: parameter=" + layer);// TEST
 		try {
-			response = JSON.parse(response.responseText);
+			responseAsJSON = JSON.parse(response.responseText);
 		} catch (SyntaxError) {
 			console.error("Could not parse response to parameter data request");
 			return;
 		}
-		addData(response);
+		addData(responseAsJSON);
 		// if (debugc) {
 		// console.log("DATA VALUES:");
 		// $.each(data, function(i, dataValue) {

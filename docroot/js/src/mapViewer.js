@@ -33,13 +33,13 @@ myNamespace.mapViewer = (function(OL) {
 		}, {
 			isBaseLayer : false
 		}),
-		highlights : new OpenLayers.Layer.Vector("Highlighted features", {
+		highlights : new OpenLayers.Layer.Vector("Basic search results", {
 			// highlight style: golden circles
 			styleMap : new OpenLayers.StyleMap({
 				"default" : new OpenLayers.Style({
 					pointRadius : 2,
-					fillColor : "#FFFF66",
-					strokeColor : "#ffcc66",
+					fillColor : "#610B0B",
+					strokeColor : "#610B0B",
 					strokeWidth : 1,
 					graphicZIndex : 1
 				})
@@ -53,6 +53,15 @@ myNamespace.mapViewer = (function(OL) {
 		// MOD (Was: EPSG:4269)
 		})
 	};
+	
+	function getRandomColor() {
+	    var letters = '0123456789ABCDEF'.split('');
+	    var color = '#';
+	    for (var i = 0; i < 6; i++ ) {
+	        color += letters[Math.round(Math.random() * 15)];
+	    }
+	    return color;
+	}
 
 	// some background layers, user may select one
 	var backgroundLayers = {
@@ -164,22 +173,26 @@ myNamespace.mapViewer = (function(OL) {
 	function highlightFeatures(features) {
 		// remove old highlights, add the new ones
 		mapLayers.highlights.removeAllFeatures();
+		for (layer in parameterLayers)
+			map.removeLayer(parameterLayers[layer]);
+		parameterLayers = {};
 		mapLayers.highlights.addFeatures(features);
-		map.setLayerIndex(mapLayers.highlights,9999);
 		if (debugmW)
 			console.log("Layer index for highlights: "+map.getLayerIndex(mapLayers.highlights));
 	}
 
+	var parameterLayers = {};
 	function addLayer(features, name) {
 		if (debugmW)
 			console.log("Adding a layer: " + name);
+		var color = getRandomColor();
 		var layer = new OpenLayers.Layer.Vector(name, {
 			// highlight style: golden circles
 			styleMap : new OpenLayers.StyleMap({
 				"default" : new OpenLayers.Style({
 					pointRadius : 2,
-					fillColor : "#C0FF66",
-					strokeColor : "#C0FF66",
+					fillColor : color,
+					strokeColor : color,
 					strokeWidth : 1,
 					graphicZIndex : 1
 				})
@@ -193,12 +206,11 @@ myNamespace.mapViewer = (function(OL) {
 		// MOD (Was: EPSG:4269)
 		});
 		layer.addFeatures(features);
-		var oldLayers = map.getLayersByName(name);
-		if (oldLayers.length != 0)
-			map.removeLayer(oldLayers[0]);
+		if (name in parameterLayers)
+			map.removeLayer(parameterLayers.name);
 		map.addLayer(layer);
-		if (debugmW)
-			console.log("Layer index for "+name+": "+map.getLayerIndex(layer));
+		map.setLayerIndex(layer,9999);
+		parameterLayers.name = layer;
 	}
 
 	function downloadCurrentContourImage() {
