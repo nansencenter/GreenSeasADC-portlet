@@ -210,7 +210,7 @@ myNamespace.mapViewer = (function(OL) {
 			map.removeLayer(parameterLayers.name);
 		map.addLayer(layer);
 		map.setLayerIndex(layer,9999);
-		parameterLayers.name = layer;
+		parameterLayers[name] = layer;
 	}
 
 	function downloadCurrentContourImage() {
