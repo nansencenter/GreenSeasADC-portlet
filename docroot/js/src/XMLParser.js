@@ -23,7 +23,7 @@ myNamespace.XMLParser = (function($) {
 		if (debugXML)
 			console.log(xmlSchema);
 		var parameters = [];
-		var xmlDoc
+		var xmlDoc;
 		if (browser == "Chrome" || browser == "Firefox") {
 			xmlDoc = xmlSchema.responseXML;
 		} else {

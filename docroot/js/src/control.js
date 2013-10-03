@@ -211,14 +211,14 @@ myNamespace.control = (function($, OL, ns) {
 		// exportTemperatureButtonURL="+exportTemperatureButtonURL);//TEST
 
 		ns.buttonEventHandlers.linkTemperatureExportButton(ns.fileCreation.createCSV(data),
-				"data:attachment/csv;charset=utf-8", "Greenseas_Downloaded_Parameters.csv");
+				"data:text/csv;charset=utf-8", "Greenseas_Downloaded_Parameters.csv");
 
 		// console.log("TEST:
 		// exportTemperatureDiv="+$("#exportTemperatureDiv").html());//TEST
 		// console.log("TEST: exportDiv="+$("#exportDiv").html());//TEST
 	}
 
-	function highLightFeatures(input, mainSearch,layer) {
+	function highLightFeatures(input, mainSearch, layer) {
 		// highlight on map
 		var gformat = new OL.Format.GeoJSON();
 		var features = gformat.read(input.responseText);
@@ -235,7 +235,7 @@ myNamespace.control = (function($, OL, ns) {
 		if (mainSearch) {
 			ns.mapViewer.highlightFeatures(features);
 		} else {
-			ns.mapViewer.addLayer(features,ns.handleParameters.getTableHeader(layer));
+			ns.mapViewer.addLayer(features, ns.handleParameters.getTableHeader(layer));
 		}
 	}
 
@@ -249,7 +249,7 @@ myNamespace.control = (function($, OL, ns) {
 			return;
 		}
 		// if response status is OK, parse result
-		
+
 		highLightFeatures(input, true);
 
 		// remove "loading..." text
@@ -355,7 +355,7 @@ myNamespace.control = (function($, OL, ns) {
 
 	// display a parameter as a table
 	function displayParameter(response, layer) {
-		highLightFeatures(response,false,layer);
+		highLightFeatures(response, false, layer);
 		var responseAsJSON;
 		if (debugc)
 			console.log("qmeter: parameter=" + layer);// TEST
@@ -440,12 +440,12 @@ myNamespace.control = (function($, OL, ns) {
 		});
 		if (debugc)
 			console.log("Replaced ID's");
-		return featureArray[0];
+		return (featureArray == null)? null:featureArray[0];
 	}
 
 	function convertArrayToHashMap(inputArray) {
 		if (debugc)
-			console.log("Converting the Array: " + inputArray);
+			console.log("convertArrayToHashMap");
 		var output = {};
 		$.each(inputArray, function(k, dataValue) {
 			output[dataValue.id] = dataValue;
@@ -455,6 +455,9 @@ myNamespace.control = (function($, OL, ns) {
 		return output;
 	}
 	function addData(response) {
+		if (debugc) {
+			console.log("Startet adding Data:");
+		}
 		// if (debugc) {
 		// console.log("addData:");
 		// console.log("DATA VALUES:");
@@ -483,6 +486,14 @@ myNamespace.control = (function($, OL, ns) {
 		// });
 		// }
 		var newData = {};
+
+		if (layer == null){
+			data = {};
+			return;
+		}
+		if (debugc) {
+			console.log(features);
+		}
 		$.each(features, function(i, feature) {
 			$.each(feature.properties, function(j, parameter) {
 				// if (debugc)
@@ -494,12 +505,9 @@ myNamespace.control = (function($, OL, ns) {
 			});
 		});
 		data = newData;
-		// if (debugc) {
-		// console.log("DATA VALUES:");
-		// $.each(data, function(i, dataValue) {
-		// console.log(dataValue);
-		// });
-		// }
+		if (debugc) {
+			console.log("Ended adding Data:");
+		}
 	}
 
 	function setBboxInputToCurrentMapExtent() {

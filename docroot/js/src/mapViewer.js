@@ -206,11 +206,20 @@ myNamespace.mapViewer = (function(OL) {
 		// MOD (Was: EPSG:4269)
 		});
 		layer.addFeatures(features);
-		if (name in parameterLayers)
-			map.removeLayer(parameterLayers.name);
+		if (debugmW)
+			console.log(parameterLayers);
+		if (name in parameterLayers){
+			if (debugmW)
+				console.log("name in parameterLayers: "+ parameterLayers[name] );
+			map.removeLayer(parameterLayers[name]);
+			}
+		if (debugmW)
+			console.log("Came here also");
 		map.addLayer(layer);
 		map.setLayerIndex(layer,9999);
 		parameterLayers[name] = layer;
+		if (debugmW)
+			console.log("Added the layer: " + name);
 	}
 
 	function downloadCurrentContourImage() {
