@@ -1,1 +1,1 @@
-Directions for deployment: make war and deploy to liferay. Note: the proxy service might not work out of the box.
+Directions for deployment: make war with liferay sdk and deploy as a plugin in liferay

@@ -19,74 +19,18 @@
  */
 package nersc.greenseas.portlet;
 
-import java.io.IOException;
-import java.util.ResourceBundle;
+import com.liferay.util.bridges.mvc.MVCPortlet;
 
-import javax.portlet.ActionRequest;
-import javax.portlet.ActionResponse;
-import javax.portlet.GenericPortlet;
-import javax.portlet.PortletException;
-import javax.portlet.PortletURL;
-import javax.portlet.ProcessAction;
-import javax.portlet.RenderMode;
-import javax.portlet.RenderRequest;
-import javax.portlet.RenderResponse;
-
-//import org.apache.log4j.Logger;
 
 /**
  * GreenSeasPortlet displays the location of oceanographic measurements on
  * a map and allows extraction of data within a user defined geographic area.
  * 
- * @author torillh
+ * @author Aleksander Vines
  * 
  */
-public class GreenseasPortlet extends GenericPortlet {
+public class GreenseasPortlet extends MVCPortlet {
 	
 	
-	/* TODO: define private parameters for portlet configuration, if needed */
-	/*
-	private String a;
-	*/
-	
-	/*
-	 * Overrides the init method of the GenericPortlet class to get
-	 * text strings and URL parameters specified in portlet.xml.
-	 * 
-	 * @see javax.portlet.GenericPortlet#init()
-	 */
-	public void init() {
-		/* TODO: get parameters (if any) */ 
-		/* a = getPortletConfig().getInitParameter("a"); */
-//		logger.debug("initiating");
-	}
-
-	/**
-	 * Renders input parameters (if any), and dispatch control to a JSP file.
-	 * 
-	 * @param request
-	 * @param response
-	 * @throws PortletException
-	 * @throws IOException
-	 */
-	@RenderMode(name = "VIEW")
-	public void renderForm(RenderRequest request, RenderResponse response)
-			throws PortletException, IOException {
-//		logger.debug("rendering form");
-		// -- create render URL for the image display form.
-		PortletURL resetRenderUrl = response.createRenderURL();
-		request.setAttribute("resetRenderUrl", resetRenderUrl);
-		request.setAttribute("someParameterToTest", "Seems to work nicely with parameters from renderform");
-		
-		// -- TODO store the text and image url in the response object
-		/*
-		request.setAttribute("a", a);
-		*/
-
-		// -- dispatch control to JSP file
-		getPortletContext().getRequestDispatcher(
-				"/WEB-INF/jsp/GreenseasPortlet.jsp").include(request, response);
-//		logger.debug("finished rendering form");
-	}
 
 }

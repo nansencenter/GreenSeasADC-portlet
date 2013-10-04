@@ -12,7 +12,7 @@
 
 		<init-param>
 			<name>view-template</name>
-			<value>/view.jsp</value>
+			<value>/jsp/GreenseasPortlet.jsp</value>
 		</init-param>
 		<expiration-cache>0</expiration-cache>
 		<supports>
