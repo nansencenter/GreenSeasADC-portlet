@@ -89,7 +89,7 @@ myNamespace.mapViewer = (function(OL) {
 		// This one is currently used on production since the portlet is hosted
 		// with a cgi already there
 		// OpenLayers.ProxyHost = "/greenseas-portlet/cgi-bin/proxy.cgi?url=";
-//		OpenLayers.ProxyHost = "/GreenseasV.1-portlet/openLayersProxy?targetURL=";
+//		OpenLayers.ProxyHost = "/GreenseasV.2-portlet/openLayersProxy?targetURL=";
 		OpenLayers.ProxyHost = "/delegate/OpenLayersProxy?targetURL=";
 		OpenLayers.DOTS_PER_INCH = (25.4 / 0.28);
 		OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
