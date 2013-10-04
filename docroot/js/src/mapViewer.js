@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugmW = true;// debug flag
+var debugmW = false;// debug flag
 
 // local service URLs
 // myNamespace.WMSserver = "http://localhost:8080/geoserver/cite/wms";//MOD
@@ -53,14 +53,14 @@ myNamespace.mapViewer = (function(OL) {
 		// MOD (Was: EPSG:4269)
 		})
 	};
-	
+
 	function getRandomColor() {
-	    var letters = '0123456789ABCDEF'.split('');
-	    var color = '#';
-	    for (var i = 0; i < 6; i++ ) {
-	        color += letters[Math.round(Math.random() * 15)];
-	    }
-	    return color;
+		var letters = '0123456789ABCDEF'.split('');
+		var color = '#';
+		for ( var i = 0; i < 6; i++) {
+			color += letters[Math.round(Math.random() * 15)];
+		}
+		return color;
 	}
 
 	// some background layers, user may select one
@@ -89,7 +89,8 @@ myNamespace.mapViewer = (function(OL) {
 		// This one is currently used on production since the portlet is hosted
 		// with a cgi already there
 		// OpenLayers.ProxyHost = "/greenseas-portlet/cgi-bin/proxy.cgi?url=";
-		OpenLayers.ProxyHost = "/GreenseasV.1-portlet/openLayersProxy?targetURL=";
+//		OpenLayers.ProxyHost = "/GreenseasV.1-portlet/openLayersProxy?targetURL=";
+		OpenLayers.ProxyHost = "/delegate/OpenLayersProxy?targetURL=";
 		OpenLayers.DOTS_PER_INCH = (25.4 / 0.28);
 		OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
 
@@ -170,15 +171,19 @@ myNamespace.mapViewer = (function(OL) {
 		info.activate();
 	}
 
-	function highlightFeatures(features) {
-		// remove old highlights, add the new ones
-		mapLayers.highlights.removeAllFeatures();
+	function removeAllParameterLayers() {
 		for (layer in parameterLayers)
 			map.removeLayer(parameterLayers[layer]);
 		parameterLayers = {};
+	}
+
+	function highlightFeatures(features) {
+		// remove old highlights, add the new ones
+		mapLayers.highlights.removeAllFeatures();
+		removeAllParameterLayers();
 		mapLayers.highlights.addFeatures(features);
 		if (debugmW)
-			console.log("Layer index for highlights: "+map.getLayerIndex(mapLayers.highlights));
+			console.log("Layer index for highlights: " + map.getLayerIndex(mapLayers.highlights));
 	}
 
 	var parameterLayers = {};
@@ -208,15 +213,15 @@ myNamespace.mapViewer = (function(OL) {
 		layer.addFeatures(features);
 		if (debugmW)
 			console.log(parameterLayers);
-		if (name in parameterLayers){
+		if (name in parameterLayers) {
 			if (debugmW)
-				console.log("name in parameterLayers: "+ parameterLayers[name] );
+				console.log("name in parameterLayers: " + parameterLayers[name]);
 			map.removeLayer(parameterLayers[name]);
-			}
+		}
 		if (debugmW)
 			console.log("Came here also");
 		map.addLayer(layer);
-		map.setLayerIndex(layer,9999);
+		map.setLayerIndex(layer, 9999);
 		parameterLayers[name] = layer;
 		if (debugmW)
 			console.log("Added the layer: " + name);
@@ -250,6 +255,7 @@ myNamespace.mapViewer = (function(OL) {
 
 	// public interface
 	return {
+		removeAllParameterLayers : removeAllParameterLayers,
 		addLayer : addLayer,
 		initMap : initMap,
 		highlightFeatures : highlightFeatures,

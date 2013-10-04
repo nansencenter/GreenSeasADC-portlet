@@ -14,8 +14,10 @@ myNamespace.control = (function($, OL, ns) {
 			v4_flagellate : false
 		};
 
-		if (debugc)
+		if (debugc) {
 			console.log("control.js: starting init() method...");// TEST
+//			console.log(.getParameter("someParameterToTest"));
+		}
 		// hide export option until we have something to export
 		$("#exportDiv").hide();
 		$("#exportTemperatureDiv").hide();
@@ -287,6 +289,8 @@ myNamespace.control = (function($, OL, ns) {
 	// view all parameters of a feature
 	function viewParams() {
 
+		// removing the parameterlayers from previous searches
+		ns.mapViewer.removeAllParameterLayers();
 		// extract each value and insert into view param string
 		var paramString = "";
 		if (document.getElementById('bboxEnabledCheck').checked) {
@@ -440,7 +444,7 @@ myNamespace.control = (function($, OL, ns) {
 		});
 		if (debugc)
 			console.log("Replaced ID's");
-		return (featureArray == null)? null:featureArray[0];
+		return (featureArray == null) ? null : featureArray[0];
 	}
 
 	function convertArrayToHashMap(inputArray) {
@@ -487,7 +491,7 @@ myNamespace.control = (function($, OL, ns) {
 		// }
 		var newData = {};
 
-		if (layer == null){
+		if (layer == null) {
 			data = {};
 			return;
 		}

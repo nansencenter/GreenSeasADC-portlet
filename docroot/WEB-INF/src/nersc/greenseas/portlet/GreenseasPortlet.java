@@ -76,6 +76,7 @@ public class GreenseasPortlet extends GenericPortlet {
 		// -- create render URL for the image display form.
 		PortletURL resetRenderUrl = response.createRenderURL();
 		request.setAttribute("resetRenderUrl", resetRenderUrl);
+		request.setAttribute("someParameterToTest", "Seems to work nicely with parameters from renderform");
 		
 		// -- TODO store the text and image url in the response object
 		/*
