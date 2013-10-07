@@ -122,8 +122,9 @@ myNamespace.tableConstructor = (function($, hP) {
 				str += "<li id=\"" + table + "\"><a href=\"#\">" + hP.getTableHeader(table) + "</a>";
 				str += "<ul>";
 				$.each(hP.availableParameters[table], function(i, val) {
-					if (val != "id" && hP.mainParameters.parameters.indexOf(val) == -1) {
-						str += list(val, table);
+					if (hP.mainParameters.parameters.indexOf(val) == -1) {
+						if (val.substring(val.length - 2) != 'qf')
+							str += list(val, table);
 					}
 				});
 				str += "</ul></li>";
