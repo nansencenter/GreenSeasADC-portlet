@@ -5,8 +5,12 @@
 
 <%@page%>
 <%@ taglib uri="http://java.sun.com/portlet_2_0" prefix="portlet"%>
+<%@ taglib uri="http://alloy.liferay.com/tld/aui" prefix="aui"%>
 
 <portlet:defineObjects />
+ 
+ <!--  Create a serveResource URL -->
+<portlet:resourceURL var="ajaxCallResourceURL" />
 
 <div id="portlet">
 
@@ -76,8 +80,8 @@
 					</div>
 				</div>
 
-				<input type='button' id='filter' value="Run query" /> 
-				
+				<input type='button' id='filter' value="Run query" />
+
 				<!-- <input type='button' id='showRawQueryButton'
 					value="Show raw query" /> -->
 
@@ -107,7 +111,7 @@
 		</div>
 
 		<div id="temperatureTab">
-			<p>Run a query and select a feature (click a row) to view the parameter values here.</p>
+			<p>Run a query and select a feature (click a row) to view the parameter values here. WARNING: Max parameters to search for in each category is ~7</p>
 			<div id="singlePlots">
 				<div id="parameters" class="container">
 					<div id="temperature" class="floatLeft"></div>
@@ -122,8 +126,10 @@
 	</div>
 </div>
 
-<script type="text/javascript">
+<aui:script>
+	window.portletNameSpace = '<portlet:namespace />';
+	window.ajaxCallResourceURL = '<%= ajaxCallResourceURL.toString() %>';
 	$(document).ready(function() {
 		myNamespace.control.init();
 	});
-</script>
+</aui:script>
