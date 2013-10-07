@@ -27,20 +27,9 @@ myNamespace.fileCreation = (function($) {
 				csvContent += "; " + properties[prop];
 			}
 			
-//			$.each(myNamespace.handleParameters.chosenParameters.tablesSelected, function(i, table) {
-//				$.each(myNamespace.handleParameters.chosenParameters.parametersByTable[table], function(j, parameter) {
-//					csvContent += "; "+ properties[table + ":" + parameter];
-//				});
-//			});
 			
 			csvContent += "\n";
 		});
-		/* data.forEach(function(infoArray, index){
-
-		   dataString = infoArray.join(",");
-		   csvContent += index < infoArray.length ? dataString+ "\n" : dataString;
-
-		}); */
 		return csvContent;
 	}
 	return {

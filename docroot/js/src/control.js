@@ -20,7 +20,6 @@ myNamespace.control = (function($, OL, ns) {
 			
 		}
 		// hide export option until we have something to export
-		$("#exportDiv").hide();
 		$("#exportTemperatureDiv").hide();
 		$("#filterParameters").hide();
 
@@ -150,11 +149,6 @@ myNamespace.control = (function($, OL, ns) {
 
 		$("#featuresAndParams").show();
 
-		// link the button for exporting with new params
-		if (debugc)
-			console.log("control.js: calling linkExportButton()"); // TEST
-		linkExportButton();
-
 		// construct query string for display
 		queryString = ns.WFSserver + "?" + OL.Util.getParameterString(previousFilterParams);
 		if (debugc)
@@ -163,13 +157,6 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	var selectedFormat = "csv";
-
-	function formatChange() {
-		var s = document.getElementById('exportFormats');
-		selectedFormat = s.options[s.selectedIndex].value;
-
-		linkExportButton();
-	}
 
 	var selectedTemperatureFormat = "csv";
 
@@ -181,22 +168,6 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	var previousFilterParams = "";
-	var exportButtonURL = "";
-
-	function linkExportButton() {
-		// get a copy of params so we don't change the original
-		var params = $.extend({}, previousFilterParams);
-
-		// update params to selected format instead of json
-		params.OUTPUTFORMAT = selectedFormat;
-
-		// construct URL
-		exportButtonURL = ns.WFSserver + "?" + OL.Util.getParameterString(params);
-		// console.log("TEST: linkExportBUtton:
-		// exportButtonURL="+exportButtonURL);//TEST
-
-		ns.buttonEventHandlers.linkExportButton(exportButtonURL);
-	}
 
 	var previousTemperatureFilterParams = "";
 	var exportTemperatureButtonURL = "";
@@ -217,9 +188,6 @@ myNamespace.control = (function($, OL, ns) {
 		ns.buttonEventHandlers.linkTemperatureExportButton(ns.fileCreation.createCSV(data),
 				"data:text/csv;charset=utf-8", "Greenseas_Downloaded_Parameters.csv");
 
-		// console.log("TEST:
-		// exportTemperatureDiv="+$("#exportTemperatureDiv").html());//TEST
-		// console.log("TEST: exportDiv="+$("#exportDiv").html());//TEST
 	}
 
 	function convertInputToFeatures(input){
@@ -273,8 +241,6 @@ myNamespace.control = (function($, OL, ns) {
 
 		if (length < 1) {
 			document.getElementById('list').innerHTML = "No results found.";
-			document.getElementById('export').disabled = true;
-			$("#exportDiv").hide();
 		} else {
 			// if (debugc) console.log("TEST-displayFeatures:
 			// jsonObject.features="+JSON.stringify(jsonObject)); //TEST
@@ -283,8 +249,6 @@ myNamespace.control = (function($, OL, ns) {
 
 			document.getElementById('list').innerHTML = "Click a row to view parameters<br> " + "<div>"
 					+ constructedTable + "</div><br>";
-			document.getElementById('export').disabled = false;
-			// $("#exportDiv").show();
 			$('#filterTable').dataTable({
 				'aaSorting' : []
 			});
@@ -580,7 +544,6 @@ myNamespace.control = (function($, OL, ns) {
 		setBboxInputToCurrentMapExtent : setBboxInputToCurrentMapExtent,
 		lonLatAnywhere : lonLatAnywhere,
 		setRawRequestDialog : setRawRequestDialog,
-		linkExportButton : linkExportButton,
 		linkTemperatureExportButton : linkTemperatureExportButton,
 		setSelectedFormat : function(format) {
 			selectedFormat = format;

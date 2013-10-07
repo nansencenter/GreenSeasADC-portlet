@@ -8,8 +8,8 @@
 <%@ taglib uri="http://alloy.liferay.com/tld/aui" prefix="aui"%>
 
 <portlet:defineObjects />
- 
- <!--  Create a serveResource URL -->
+
+<!--  Create a serveResource URL -->
 <portlet:resourceURL var="ajaxCallResourceURL" />
 
 <div id="portlet">
@@ -80,8 +80,8 @@
 					</div>
 				</div>
 
-				<input type='button' id='filter' value="Run main query" />
-				<input type='button' id='filterParameters' value="Filter selected parameters" />
+				<input type='button' id='filter' value="Run main query" /> <input type='button' id='filterParameters'
+					value="Filter selected parameters" />
 
 				<!-- <input type='button' id='showRawQueryButton'
 					value="Show raw query" /> -->
@@ -93,14 +93,6 @@
 
 				<div id="list"></div>
 
-				<div id="exportDiv">
-					<input type='button' id='export' value="Export results" disabled /> <select id="exportFormats">
-						<option value="csv">CSV</option>
-						<option value="gml2">GML2</option>
-						<option value="shape-zip">Shapefile</option>
-						<option value="json">GeoJSON</option>
-					</select>
-				</div>
 			</div>
 
 			<!-- these divs are popus, don't actually appear -->
@@ -112,7 +104,8 @@
 		</div>
 
 		<div id="temperatureTab">
-			<p>Run a query and select a feature (click a row) to view the parameter values here. WARNING: Max parameters to search for in each category is ~7</p>
+			<p>Run a query and select a feature (click a row) to view the parameter values here. WARNING: Max parameters to
+				search for in each category is ~7</p>
 			<div id="singlePlots">
 				<div id="parameters" class="container">
 					<div id="temperature" class="floatLeft"></div>
@@ -129,7 +122,7 @@
 
 <aui:script>
 	window.portletNameSpace = '<portlet:namespace />';
-	window.ajaxCallResourceURL = '<%= ajaxCallResourceURL.toString() %>';
+	window.ajaxCallResourceURL = '<%=ajaxCallResourceURL.toString()%>';
 	$(document).ready(function() {
 		myNamespace.control.init();
 	});

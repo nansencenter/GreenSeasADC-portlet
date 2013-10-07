@@ -60,11 +60,6 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		callFromControl("#showRawQueryButton", c.setRawRequestDialog);
 
 		// on change events
-		jQ("#exportFormats").change(function() {
-			var s = document.getElementById('exportFormats');
-			c.setSelectedFormat(s.options[s.selectedIndex].value);
-			c.linkExportButton();
-		});
 		jQ("#exportTemperatureFormats").change(function() {
 			var s = document.getElementById('exportTemperatureFormats');
 			c.setSelectedTemperatureFormat(s.options[s.selectedIndex].value);
@@ -72,22 +67,8 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		});
 	}
 
-	function linkExportButton(csvContent) {
-		// alert("buttonEventHandlers.js: linkExportButton: URL="+URL);//TEST
-		// remove previous
-		jQ("#export").unbind("click");
-
-		add("#export", function() {
-			saveAs(new Blob([ csvContent ]), "DownloadedData.csv");
-		});
-	}
-
 	function linkTemperatureExportButton(csvContent,type,name) {
-		// alert("buttonEventHandlers.js: linkTemperatureExportButton:
-		// URL="+URL);//TEST
-		// remove previous
 		jQ("#exportTemperature").unbind("click");
-
 		add("#exportTemperature", function() {
 			saveAs(new Blob([ csvContent ], {
 				type : type
@@ -98,7 +79,6 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 	// public interface
 	return {
 		initHandlers : initHandlers,
-		linkExportButton : linkExportButton,
 		linkTemperatureExportButton : linkTemperatureExportButton,
 	};
 
