@@ -5,7 +5,7 @@ var debugfC = false;// debug flag
 myNamespace.fileCreation = (function($) {
 
 	function createCSV(dataIn){
-		var csvContent = "ID; Lat(dec.deg); Long(dec.deg)";
+		var csvContent = "ID; Lat(dec.deg); Long(dec.deg); Area; Depth of Sea (m); Depth of Sample (m); Date; Time";
 		$.each(myNamespace.handleParameters.chosenParameters.tablesSelected, function(k, table) {
 			$.each(myNamespace.handleParameters.chosenParameters.parametersByTable[table], function(j, parameter) {
 				if (debugfC)
@@ -22,13 +22,16 @@ myNamespace.fileCreation = (function($) {
 			var pos = val.geometry.coordinates;
 			csvContent += pos[0] + "; ";
 			csvContent += pos[1] + "";
-			$.each(myNamespace.handleParameters.chosenParameters.tablesSelected, function(i, table) {
-				$.each(myNamespace.handleParameters.chosenParameters.parametersByTable[table], function(j, parameter) {
-					if (debugfC)
-						console.log(parameter);
-					csvContent += "; "+ properties[table + ":" + parameter];
-				});
-			});
+			
+			for (prop in properties) {
+				csvContent += "; " + properties[prop];
+			}
+			
+//			$.each(myNamespace.handleParameters.chosenParameters.tablesSelected, function(i, table) {
+//				$.each(myNamespace.handleParameters.chosenParameters.parametersByTable[table], function(j, parameter) {
+//					csvContent += "; "+ properties[table + ":" + parameter];
+//				});
+//			});
 			
 			csvContent += "\n";
 		});

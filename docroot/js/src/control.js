@@ -22,6 +22,7 @@ myNamespace.control = (function($, OL, ns) {
 		// hide export option until we have something to export
 		$("#exportDiv").hide();
 		$("#exportTemperatureDiv").hide();
+		$("#filterParameters").hide();
 
 		// initialize map viewer
 		ns.mapViewer.initMap();
@@ -158,7 +159,7 @@ myNamespace.control = (function($, OL, ns) {
 		queryString = ns.WFSserver + "?" + OL.Util.getParameterString(previousFilterParams);
 		if (debugc)
 			console.log("queryString:" + queryString); // TEST
-
+		$("#filterParameters").show();
 	}
 
 	var selectedFormat = "csv";

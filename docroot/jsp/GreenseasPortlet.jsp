@@ -80,7 +80,8 @@
 					</div>
 				</div>
 
-				<input type='button' id='filter' value="Run query" />
+				<input type='button' id='filter' value="Run main query" />
+				<input type='button' id='filterParameters' value="Filter selected parameters" />
 
 				<!-- <input type='button' id='showRawQueryButton'
 					value="Show raw query" /> -->

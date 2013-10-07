@@ -12,7 +12,8 @@ myNamespace.tableConstructor = (function($, hP) {
 			console.log("tableConstructor.js: parameterTableTemperatures: features=" + JSON.stringify(features));// TEST
 
 		var header = "<table id='" + tableId + "Table" + "'class='table'>", tableHeader, footer = "</tbody></table>", rows = "", row = "";
-		tableHeader = headerFrom(hP.mainParameters.basicHeader.concat(hP.getChosenHeader())), +"\n<tbody>";
+		tableHeader = headerFrom(hP.mainParameters.basicHeader.concat(hP.mainParameters.customHeader).concat(
+				hP.getChosenHeader())), +"\n<tbody>";
 
 		// iterate through all features, generate table row for each
 		$.each(features, function(i, val) {
@@ -39,13 +40,17 @@ myNamespace.tableConstructor = (function($, hP) {
 			row += data(pos[0]);
 			row += data(pos[1]);
 
-			$.each(hP.chosenParameters.tablesSelected, function(i, table) {
-				$.each(hP.chosenParameters.parametersByTable[table], function(j, parameter) {
-					if (debugtC)
-						console.log(parameter);
-					row += data(properties[table + ":" + parameter]);
-				});
-			});
+			// adding metadata
+			for (prop in properties) {
+				row += data(properties[prop]);
+			}
+
+			// $.each(hP.chosenParameters.tablesSelected, function(i, table) {
+			// $.each(hP.chosenParameters.parametersByTable[table], function(j,
+			// parameter) {
+			// row += data(properties[table + ":" + parameter]);
+			// });
+			// });
 			rows += row + "</tr>\n";
 		});
 		// if (debugtC)
@@ -66,7 +71,7 @@ myNamespace.tableConstructor = (function($, hP) {
 		$.each(features, function(i, val) {
 			var id = val.id, idStr = id.substring(id.indexOf(".") + 1), prop = null;
 
-			row = "<tr onclick='myNamespace.control.viewParams()'>" + data(idStr);
+			row = data(idStr);
 
 			// extract position of data point (lat,long)
 			var pos = val.geometry.coordinates[0];
