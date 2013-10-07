@@ -16,7 +16,7 @@ myNamespace.handleParameters = (function($) {
 				"tempwbqf", "SST water body (deg.C)", "tempsstqf", "Temp. 5m (deg.C)", "temp5mqf", "Temp. 10m (deg.C)",
 				"temp10mqf", "Temp CU01 (deg.C)", "tempcu01qf", "Temp CU02 (deg.C)", "tempcu02qf", "Temp ST01 (deg.C)",
 				"tempst01qf", "Temp ST02 (deg.C)", "tempst02qf", "Temp MLD (deg.C)", "tempmldqf", "Depth Temp MLD (m)",
-				"mixedldqf" ],
+				"mixedldqf" ]
 	};
 	mainParameters = {
 		parameters : [ "location", "point", "depth_of_sea", "depth_of_sample", "date", "time" ],
@@ -28,7 +28,7 @@ myNamespace.handleParameters = (function($) {
 	};
 	var tableHeader = {
 		v4_temperature : "Physical",
-		v4_plankton : "Plankton",
+		v5_plankton : "Plankton",
 		v4_flagellate : "Flagellate",
 		v4_chlorophyll : "Light/Chlorophyll"
 	};

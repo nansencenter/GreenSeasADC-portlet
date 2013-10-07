@@ -1,22 +1,23 @@
 var myNamespace = myNamespace || {};
 
-var debugc = true;// debug flag
+var debugc = false;// debug flag
 var tablesDone;
 
 myNamespace.control = (function($, OL, ns) {
 	"use strict";
 
 	function init() {
+		//ns.ajax.doAjax();
 		tablesDone = {
 			v4_chlorophyll : false,
 			v4_temperature : false,
-			v4_plankton : false,
+			v5_plankton : false,
 			v4_flagellate : false
 		};
 
 		if (debugc) {
 			console.log("control.js: starting init() method...");// TEST
-//			console.log(.getParameter("someParameterToTest"));
+			
 		}
 		// hide export option until we have something to export
 		$("#exportDiv").hide();
@@ -220,10 +221,13 @@ myNamespace.control = (function($, OL, ns) {
 		// console.log("TEST: exportDiv="+$("#exportDiv").html());//TEST
 	}
 
-	function highLightFeatures(input, mainSearch, layer) {
-		// highlight on map
+	function convertInputToFeatures(input){
 		var gformat = new OL.Format.GeoJSON();
 		var features = gformat.read(input.responseText);
+		return features;
+	}
+	function highLightFeatures(features, mainSearch, layer) {
+		// highlight on map
 
 		// !!! CODE BELOW IS A HACK !!!
 		// swap x/y because of GeoJSON parsing issues (lat read as lon, and vice
@@ -237,7 +241,7 @@ myNamespace.control = (function($, OL, ns) {
 		if (mainSearch) {
 			ns.mapViewer.highlightFeatures(features);
 		} else {
-			ns.mapViewer.addLayer(features, ns.handleParameters.getTableHeader(layer));
+			ns.mapViewer.addLayer(features, ns.handleParameters.getTableHeader(layer) || layer);
 		}
 	}
 
@@ -252,7 +256,7 @@ myNamespace.control = (function($, OL, ns) {
 		}
 		// if response status is OK, parse result
 
-		highLightFeatures(input, true);
+		highLightFeatures(convertInputToFeatures(input), true);
 
 		// remove "loading..." text
 		$("#loadingText").html("");
@@ -359,7 +363,7 @@ myNamespace.control = (function($, OL, ns) {
 
 	// display a parameter as a table
 	function displayParameter(response, layer) {
-		highLightFeatures(response, false, layer);
+		highLightFeatures(convertInputToFeatures(response), false, layer);
 		var responseAsJSON;
 		if (debugc)
 			console.log("qmeter: parameter=" + layer);// TEST
@@ -384,7 +388,7 @@ myNamespace.control = (function($, OL, ns) {
 			// console.log("control.js: displayParameter: constructedTable=" +
 			// constructedTable);// TEST
 
-			$("#temperature").html(layer + "<br>" + "<div class='scrollArea'>" + constructedTable + "</div>");
+			$("#temperature").html("Entries where the selected parameters were available<br>" + "<div class='scrollArea'>" + constructedTable + "</div>");
 			// if (debugc)
 			// console.log("control.js: parameter table html=" +
 			// $("#temperature").html());// TEST
@@ -394,6 +398,7 @@ myNamespace.control = (function($, OL, ns) {
 				'bFilter' : false
 			});
 			linkTemperatureExportButton();
+			ns.mapViewer.addFeaturesFromData(data,"All parameters");
 		} else {
 			var layer = tablesToQuery.pop();
 			var paramString = "";

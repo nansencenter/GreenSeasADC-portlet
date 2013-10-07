@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugmW = false;// debug flag
+var debugmW = true;// debug flag
 
 // local service URLs
 // myNamespace.WMSserver = "http://localhost:8080/geoserver/cite/wms";//MOD
@@ -89,7 +89,8 @@ myNamespace.mapViewer = (function(OL) {
 		// This one is currently used on production since the portlet is hosted
 		// with a cgi already there
 		// OpenLayers.ProxyHost = "/greenseas-portlet/cgi-bin/proxy.cgi?url=";
-//		OpenLayers.ProxyHost = "/GreenseasV.2-portlet/openLayersProxy?targetURL=";
+		// OpenLayers.ProxyHost =
+		// "/GreenseasV.2-portlet/openLayersProxy?targetURL=";
 		OpenLayers.ProxyHost = "/delegate/OpenLayersProxy?targetURL=";
 		OpenLayers.DOTS_PER_INCH = (25.4 / 0.28);
 		OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
@@ -186,15 +187,36 @@ myNamespace.mapViewer = (function(OL) {
 			console.log("Layer index for highlights: " + map.getLayerIndex(mapLayers.highlights));
 	}
 
+	function addFeaturesFromData(data, name) {
+		if (debugmW)
+			console.log("addFeaturesFromData started");
+		var pointLayer = new OL.Layer.Vector(name, {
+			projection : "EPSG:4326"
+		});
+		var pointFeatures = [];
+		for (id in data) {
+			var lonLat = new OL.LonLat(data[id].geometry.coordinates[0], data[id].geometry.coordinates[1]);
+			var pointGeometry = new OL.Geometry.Point(lonLat.lat,lonLat.lon);
+			var pointFeature = new OL.Feature.Vector(pointGeometry);
+			pointFeatures.push(pointFeature);
+		}
+		pointLayer.addFeatures(pointFeatures);
+		map.addLayer(pointLayer);
+		parameterLayers[name] = pointLayer;
+
+		if (debugmW)
+			console.log("addFeaturesFromData ended");
+	}
+
 	var parameterLayers = {};
 	function addLayer(features, name) {
 		if (debugmW)
 			console.log("Adding a layer: " + name);
 		var color = getRandomColor();
-		var layer = new OpenLayers.Layer.Vector(name, {
+		var layer = new OL.Layer.Vector(name, {
 			// highlight style: golden circles
-			styleMap : new OpenLayers.StyleMap({
-				"default" : new OpenLayers.Style({
+			styleMap : new OL.StyleMap({
+				"default" : new OL.Style({
 					pointRadius : 2,
 					fillColor : color,
 					strokeColor : color,
@@ -207,7 +229,7 @@ myNamespace.mapViewer = (function(OL) {
 				// representation
 				zIndexing : true
 			},
-			projection : new OpenLayers.Projection("EPSG:4326")
+			projection : new OL.Projection("EPSG:4326")
 		// MOD (Was: EPSG:4269)
 		});
 		layer.addFeatures(features);
@@ -255,6 +277,7 @@ myNamespace.mapViewer = (function(OL) {
 
 	// public interface
 	return {
+		addFeaturesFromData : addFeaturesFromData,
 		removeAllParameterLayers : removeAllParameterLayers,
 		addLayer : addLayer,
 		initMap : initMap,

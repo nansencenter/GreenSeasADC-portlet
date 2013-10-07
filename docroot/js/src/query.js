@@ -121,7 +121,7 @@ myNamespace.query = (function(OL) {
 		for ( var i = 0, len = parameters.length; i < len; i++) {
 			requiredParamtersArray.push(createRequiredParameterFilter(parameters[i]));
 		}
-		return combineFilters(requiredParamtersArray);
+		return combineFiltersOr(requiredParamtersArray);
 	}
 
 	function createRequiredParameterFilter(parameter) {
