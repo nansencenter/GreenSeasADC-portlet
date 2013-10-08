@@ -49,6 +49,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 
 		add("#bboxEnabledCheck", checkParameter("bboxEnabledCheck", "Bounding box", "#bboxHeaderText"));
 		add("#dateEnabledCheck", checkParameter("dateEnabledCheck", "Date/Time", "#dateHeaderText"));
+		add("#depthEnabledCheck", checkParameter("depthEnabledCheck", "Depth", "#depthHeaderText"));
 		add("#parametersEnabledCheck", checkParameter("parametersEnabledCheck", "Parameters", "#parametersHeaderText"));
 
 		// buttons that call methods of control - should have control as "this"
@@ -61,8 +62,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		// on change events
 		jQ("#exportParametersFormats").change(function() {
 			var s = document.getElementById('exportParametersFormats');
-			c.setSelectedParametersFormat(s.options[s.selectedIndex].value);
-			c.linkParametersExportButton();
+			//should so something here when we get more formats
 		});
 	}
 

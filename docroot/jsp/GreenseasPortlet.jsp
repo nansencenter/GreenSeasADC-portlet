@@ -54,7 +54,7 @@
 					</div>
 
 					<h3>
-						<span id='dateHeaderText'>Date<!--/Time--> <em>(disabled)</em></span>
+						<span id='dateHeaderText'>Date/Time <em>(disabled)</em></span>
 					</h3>
 					<div id='datetime'>
 
@@ -68,6 +68,26 @@
 					</div>
 
 					<h3>
+						<span id='depthHeaderText'>Depth<em>(disabled)</em></span>
+					</h3>
+					<div id='depth'>
+
+						<input type="checkbox" id="depthEnabledCheck"> Enable in query <br> <br>
+
+						<div>
+							<form name="depthform">
+								<div class='left'>
+									<input type='text' id='depthMin' size="3" value="0" /> Minimum depth
+								</div>
+								<div class='left'>
+									<input type='text' id='depthMax' size="3" value="10" /> Maximum depth
+								</div>
+
+							</form>
+						</div>
+					</div>
+
+					<h3>
 						<span id='parametersHeaderText'>Parameters <em>(disabled)</em></span>
 					</h3>
 					<div id='parametersNeeded'>
@@ -75,13 +95,13 @@
 						<div>
 							<input type="checkbox" id="parametersEnabledCheck"> Enable in query
 						</div>
-						
+
 						<em> Tip: Selecting multiple parameters within a group resolves to "one of these". Selecting variables from
 							different groups resolves to "all of these". <br> Example: Selecting variables Physical.x1, Phyiscal.x2,
 							Plankton.y1, Plankton.y2 and Plankton.y3 would resolve in the query: ((Physical.x1 OR Phyiscal.x2)AND(Plankton.y1
 							OR Plankton.y2 OR Plankton.y3)).
 						</em> <br>
-						
+
 						<div id="parametersTree"></div>
 					</div>
 				</div>

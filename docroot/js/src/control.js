@@ -5,9 +5,7 @@ var debugc = false;// debug flag
 myNamespace.control = (function($, OL, ns) {
 	"use strict";
 
-	var selectedParametersFormat = "csv";
-
-	//List of tables that is selected for querying in a parameter-filter
+	// List of tables that is selected for querying in a parameter-filter
 	var tablesToQuery = [];
 	// All the filtered search data is stored here.
 	var data = null;
@@ -75,6 +73,7 @@ myNamespace.control = (function($, OL, ns) {
 
 	}
 
+	// non-public
 	function createfilterBoxHashMap() {
 		var filterBbox = null;
 		if (document.getElementById('bboxEnabledCheck').checked) {
@@ -93,6 +92,7 @@ myNamespace.control = (function($, OL, ns) {
 		return filterBbox;
 	}
 
+	// non-public
 	function createDateHashMap() {
 		var date = null;
 		if (document.getElementById('dateEnabledCheck').checked) {
@@ -109,6 +109,7 @@ myNamespace.control = (function($, OL, ns) {
 		return date;
 	}
 
+	// non-public
 	function createParameterArray() {
 		var par = null;
 		if (document.getElementById('parametersEnabledCheck').checked) {
@@ -121,6 +122,17 @@ myNamespace.control = (function($, OL, ns) {
 		}
 		return par;
 	}
+
+	function createDepthHashMap() {
+		var depth = null;
+		if (document.getElementById('depthEnabledCheck').checked) {
+			depth = {};
+			depth.min = $('#depthMin').val();
+			depth.max = $('#depthMax').val();
+		}
+		return depth;
+	}
+
 	function filterButton() {
 		$("#exportParametersDiv").hide();
 		if (debugc)
@@ -131,7 +143,7 @@ myNamespace.control = (function($, OL, ns) {
 
 		$("#parametersTable").html("");
 
-		// should be currently selected layer
+		// should be the meta-data-layer
 		var layer = ns.handleParameters.mainTable.name;
 
 		// add bbox?
@@ -143,11 +155,15 @@ myNamespace.control = (function($, OL, ns) {
 		// add parameters
 		var par = createParameterArray();
 
-		var attr = null; // no attributes are currently supported
+		var depth = createDepthHashMap();
+
+		// no attributes are currently supported
+		var attr = null;
 
 		if (debugc)
 			console.log("control.js: calling ns.query.constructFilterString()"); // TEST
-		var filter = ns.query.constructFilterString(filterBbox, date, attr);
+
+		var filter = ns.query.constructFilterString(filterBbox, date, attr, depth);
 
 		// GetFeature request with filter, callback handles result
 		if (debugc)
@@ -168,11 +184,14 @@ myNamespace.control = (function($, OL, ns) {
 				"data:text/csv;charset=utf-8", "Greenseas_Downloaded_Parameters.csv");
 	}
 
+	// non-public
 	function convertInputToFeatures(input) {
 		var gformat = new OL.Format.GeoJSON();
 		var features = gformat.read(input.responseText);
 		return features;
 	}
+
+	// non-public
 	function highLightFeatures(features, mainSearch, layer) {
 		// highlight on map
 
@@ -192,6 +211,7 @@ myNamespace.control = (function($, OL, ns) {
 		}
 	}
 
+	// non-public
 	function displayFeatures(input) {
 		if (debugc)
 			console.log("DisplayFeatures");
@@ -261,48 +281,47 @@ myNamespace.control = (function($, OL, ns) {
 		if (document.getElementById('parametersEnabledCheck').checked) {
 			ns.handleParameters.selectParameters($("#parametersTree").jstree("get_checked", null, true));
 		}
-		// go through all the first requested tables/parameters, request and
-		// display
-		// result
-		// through callback
+
+		// Resetting tablesToQuery between filters
 		tablesToQuery = [];
-		if (debugc)
-			console.log("Cloning basic data"); // TEST
+
+		// Cloning in the data from the basic search
 		data = convertArrayToHashMap($.extend(true, {}, basicData));
 		if (debugc)
-			console.log("Basic data cloned"); // TEST
-		if (debugc)
 			console.log("Going through all selected tables");
+
+		// Adding all selected layers to tablesToQuery
 		$.each(ns.handleParameters.chosenParameters.tablesSelected, function(i, table) {
 			tablesToQuery.push(table);
 		});
+
+		// pop the first layer
 		var layer = tablesToQuery.pop();
+		// Array with all parameters for the current layer
 		var propertyName = [];
-		if (debugc)
-			console.log("Going through all parameters in:" + layer);
+
+		// Adding the parameters to the array
 		$.each(ns.handleParameters.chosenParameters.parametersByTable[layer], function(j, parameter) {
 			propertyName.push(parameter);
 		});
-		if (debugc)
-			console.log("Went through all parameters in:" + layer);
+
+		// Requesting features from the first layer through an asynchronous
+		// request and sending response to displayParameter
 		ns.WebFeatureService.getFeature({
 			TYPENAME : layer,
 			PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
-			FILTER : ns.query.constructParameterFilterString(propertyName),
+			FILTER : ns.query.constructParameterFilterString(propertyName,createDepthHashMap()),
 			VIEWPARAMS : '' + paramFilter
 		}, function(response) {
 			displayParameter(response, layer);
 		});
-		if (debugc)
-			console.log("Sendt request:" + layer);
 
 		// jump to the parameters tab
 		$('#tabs').tabs("option", "active", 1);
-
-		document.getElementById('exportParameter').disabled = false;
 	}
 
 	// display a parameter as a table
+	// non-public
 	function displayParameter(response, layer) {
 		highLightFeatures(convertInputToFeatures(response), false, layer);
 		var responseAsJSON;
@@ -318,18 +337,19 @@ myNamespace.control = (function($, OL, ns) {
 		if (tablesToQuery.length == 0) {
 			if (debugc)
 				console.log("tablesToQuery.length == 0");
-			var constructedTable = ns.tableConstructor.parameterTable(layer, data);
+			var constructedTable = ns.tableConstructor.parameterTable(data);
 
 			$("#parametersTable").html(
 					"Entries where the selected parameters were available<br>" + "<div class='scrollArea'>"
 							+ constructedTable + "</div>");
 
-			$("#" + layer + "Table").dataTable({
+			$("#parametersResultTable").dataTable({
 				// search functionality not needed for parameter tables
 				'bFilter' : false
 			});
 			linkParametersExportButton();
 			ns.mapViewer.addFeaturesFromData(data, "All parameters");
+			document.getElementById('exportParameter').disabled = false;
 			$("#exportParametersDiv").show();
 		} else {
 			var layer = tablesToQuery.pop();
@@ -363,7 +383,7 @@ myNamespace.control = (function($, OL, ns) {
 			ns.WebFeatureService.getFeature({
 				TYPENAME : layer,
 				PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
-				FILTER : ns.query.constructParameterFilterString(propertyName),
+				FILTER : ns.query.constructParameterFilterString(propertyName,createDepthHashMap()),
 				VIEWPARAMS : '' + paramFilter
 			}, function(response) {
 				displayParameter(response, layer);
@@ -371,6 +391,7 @@ myNamespace.control = (function($, OL, ns) {
 		}
 	}
 
+	// non-public
 	function replaceId(features) {
 		if (debugc)
 			console.log("Replacing ID's");
@@ -384,6 +405,7 @@ myNamespace.control = (function($, OL, ns) {
 		return (featureArray == null) ? null : featureArray[0];
 	}
 
+	// non-public
 	function convertArrayToHashMap(inputArray) {
 		if (debugc)
 			console.log("convertArrayToHashMap");
@@ -395,6 +417,8 @@ myNamespace.control = (function($, OL, ns) {
 			console.log("Converted Array");
 		return output;
 	}
+
+	// non-public
 	function addData(response) {
 		if (debugc) {
 			console.log("Startet adding Data:");

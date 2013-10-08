@@ -5,15 +5,13 @@ var debugtC = false;// debug flag
 myNamespace.tableConstructor = (function($, hP) {
 	"use strict";
 
-	function parameterTable(tableId, features) {
-		if (debugtC)
-			console.log("tableConstructor.js: parameterTable: tableId=" + tableId);// TEST
+	function parameterTable(features) {
 		if (debugtC)
 			console.log("tableConstructor.js: parameterTable: features=" + JSON.stringify(features));// TEST
 
-		var header = "<table id='" + tableId + "Table" + "'class='table'>", tableHeader, footer = "</tbody></table>", rows = "", row = "";
-		tableHeader = headerFrom(hP.mainParameters.basicHeader.concat(hP.mainParameters.customHeader).concat(
-				hP.getChosenHeader())), +"\n<tbody>";
+		var header = "<table id='parametersResultTable' class='table'>", footer = "</tbody></table>", rows = "";
+		var tableHeader = headerFrom(hP.mainParameters.basicHeader.concat(hP.mainParameters.customHeader).concat(
+				hP.getChosenHeader())) +"\n<tbody>";
 
 		// iterate through all features, generate table row for each
 		$.each(features, function(i, val) {
@@ -32,7 +30,7 @@ myNamespace.tableConstructor = (function($, hP) {
 			if (debugtC)
 				console.log("tableConstructor.js: parameterTable: val=" + JSON.stringify(val));// TEST
 
-			row = "<tr>";
+			var row = "<tr>";
 			row += data(val.id);
 			var pos = val.geometry.coordinates;
 			if (debugtC)
@@ -50,13 +48,6 @@ myNamespace.tableConstructor = (function($, hP) {
 
 			rows += row + "</tr>\n";
 		});
-		// if (debugtC)
-		// console.log("tableConstrucktor: parameterTable:
-		// tableHeader=" + tableHeader);// TEST
-		// if (debugtC)
-		// console.log("tableConstrucktor: parameterTable: rows=" +
-		// rows);// TEST
-
 		return concatTable(header, tableHeader, rows, footer);
 	}
 
@@ -108,8 +99,6 @@ myNamespace.tableConstructor = (function($, hP) {
 	}
 
 	function list(value, table) {
-		// if (debugtC)
-		// console.log("Retrieving list for " + table + ":" + value);
 		return "<li id=\"" + table + ":" + value + "\"><a href=\"#\">" + hP.getHeader(value, table) + "</a></li>";
 	}
 

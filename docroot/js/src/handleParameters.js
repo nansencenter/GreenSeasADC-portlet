@@ -5,7 +5,9 @@ var debughP = false;// debug flag
 myNamespace.handleParameters = (function($) {
 	// TODO: make this a hashtable of hashtable, it must store the type of the
 	// variable: i.e. string, date, point, boolean, for comparison purposes
-	availableParameters = {
+	var depthParameterName = "depth_of_sample";
+
+	var availableParameters = {
 		v4_temperature : [ "id", "location", "point", "date", "time", "depth_of_sample", "tempwbod", "tempwbqf",
 				"tempsst", "tempsstqf", "temp5m", "temp5mqf", "temp10m", "temp10mqf", "tempcu01", "tempcu01qf",
 				"tempcu02", "tempcu02qf", "tempst01", "tempst01qf", "tempst02", "tempst02qf", "tempmld", "tempmldqf",
@@ -112,6 +114,7 @@ myNamespace.handleParameters = (function($) {
 	}
 	// public interface
 	return {
+		depthParameterName : depthParameterName,
 		mainTable : mainTable,
 		mainParameters : mainParameters,
 		getTableHeader : getTableHeader,
