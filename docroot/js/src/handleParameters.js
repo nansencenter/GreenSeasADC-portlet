@@ -79,7 +79,7 @@ myNamespace.handleParameters = (function($) {
 
 	function getChosenHeader() {
 		chosenHeader = [];
-		for ( var i = 0; i < chosenParameters.allSelected.length; i++) {
+		for ( var i = chosenParameters.allSelected.length - 1; i >= 0; i--) {
 			var parArr = chosenParameters.allSelected[i].split(":");
 			chosenHeader.push(getHeader(parArr[1], parArr[0]));
 		}
