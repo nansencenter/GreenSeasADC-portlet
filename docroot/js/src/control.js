@@ -20,7 +20,7 @@ myNamespace.control = (function($, OL, ns) {
 			
 		}
 		// hide export option until we have something to export
-		$("#exportTemperatureDiv").hide();
+		$("#exportParametersDiv").hide();
 		$("#filterParameters").hide();
 
 		// initialize map viewer
@@ -109,13 +109,14 @@ myNamespace.control = (function($, OL, ns) {
 		return par;
 	}
 	function filterButton() {
+		$("#exportParametersDiv").hide();
 		if (debugc)
 			console.log("control.js: start of filterButton()");// TEST
 		// set loading text and empty parameter HTML
 		$("#featuresAndParams").hide();
 		$("#loadingText").html("Loading data, please wait...");
 
-		$("#temperature").html("");
+		$("#parametersTable").html("");
 
 		// should be currently selected layer
 		var layer = ns.handleParameters.mainTable.name;
@@ -229,12 +230,10 @@ myNamespace.control = (function($, OL, ns) {
 		if (length < 1) {
 			document.getElementById('list').innerHTML = "No results found.";
 		} else {
-			// if (debugc) console.log("TEST-displayFeatures:
-			// jsonObject.features="+JSON.stringify(jsonObject)); //TEST
 
 			var constructedTable = ns.tableConstructor.featureTable("filterTable", jsonObject.features);
 
-			document.getElementById('list').innerHTML = "Click a row to view parameters<br> " + "<div>"
+			document.getElementById('list').innerHTML = "<div>"
 					+ constructedTable + "</div><br>";
 			$('#filterTable').dataTable({
 				'aaSorting' : []
@@ -310,7 +309,6 @@ myNamespace.control = (function($, OL, ns) {
 		$('#tabs').tabs("option", "active", 1);
 
 		document.getElementById('exportTemperature').disabled = false;
-		$("#exportTemperatureDiv").show();
 	}
 
 	var tablesToQuery = [];
@@ -330,24 +328,12 @@ myNamespace.control = (function($, OL, ns) {
 			return;
 		}
 		addData(responseAsJSON);
-		// if (debugc) {
-		// console.log("DATA VALUES:");
-		// $.each(data, function(i, dataValue) {
-		// console.log(dataValue);
-		// });
-		// }
 		if (tablesToQuery.length == 0) {
 			if (debugc)
 				console.log("tablesToQuery.length == 0");
 			var constructedTable = ns.tableConstructor.parameterTableTemperatures(layer, data);
-			// if (debugc)
-			// console.log("control.js: displayParameter: constructedTable=" +
-			// constructedTable);// TEST
 
-			$("#temperature").html("Entries where the selected parameters were available<br>" + "<div class='scrollArea'>" + constructedTable + "</div>");
-			// if (debugc)
-			// console.log("control.js: parameter table html=" +
-			// $("#temperature").html());// TEST
+			$("#parametersTable").html("Entries where the selected parameters were available<br>" + "<div class='scrollArea'>" + constructedTable + "</div>");
 
 			$("#" + layer + "Table").dataTable({
 				// search functionality not needed for parameter tables
@@ -355,6 +341,7 @@ myNamespace.control = (function($, OL, ns) {
 			});
 			linkParametersExportButton();
 			ns.mapViewer.addFeaturesFromData(data,"All parameters");
+			$("#exportParametersDiv").show();
 		} else {
 			var layer = tablesToQuery.pop();
 			var paramString = "";

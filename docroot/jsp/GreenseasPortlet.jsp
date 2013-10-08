@@ -105,11 +105,11 @@
 		<div id="parametersTab">
 			<p>Run a query and filter selected parameters to view the parameter values here.</p>
 			<div id="singlePlots">
-				<div id="parameters" class="container">
-					<div id="temperature" class="floatLeft"></div>
+				<div id="parametersContainer" class="container">
+					<div id="parametersTable" class="floatLeft"></div>
 				</div>
 			</div>
-			<div id="exportTemperatureDiv">
+			<div id="exportParametersDiv">
 				<input type='button' id='exportTemperature' value="Export data" disabled /> <select id="exportTemperatureFormats">
 					<option value="csv">CSV</option>
 				</select>
