@@ -19,7 +19,7 @@
 	<div id="tabs">
 		<ul>
 			<li><a href="#queryTab">Query and features</a></li>
-			<li><a href="#temperatureTab">Parameters</a></li>
+			<li><a href="#parametersTab">Parameters</a></li>
 
 		</ul>
 		<div id="queryTab">
@@ -75,7 +75,7 @@
 							<input type="checkbox" id="parametersEnabledCheck"> Enable in query
 						</div>
 
-						<div id="parameters"></div>
+						<div id="parametersTree"></div>
 					</div>
 				</div>
 
@@ -102,8 +102,8 @@
 			<div id="errorMessageDialog" title="An error occured"></div>
 		</div>
 
-		<div id="temperatureTab">
-			<p>Run a query and select a feature (click a row) to view the parameter values here.</p>
+		<div id="parametersTab">
+			<p>Run a query and filter selected parameters to view the parameter values here.</p>
 			<div id="singlePlots">
 				<div id="parameters" class="container">
 					<div id="temperature" class="floatLeft"></div>

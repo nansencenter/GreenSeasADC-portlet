@@ -164,7 +164,7 @@ myNamespace.control = (function($, OL, ns) {
 		var s = document.getElementById('exportTemperatureFormats');
 		selectedTemperatureFormat = s.options[s.selectedIndex].value;
 
-		linkTemperatureExportButton();
+		linkParametersExportButton();
 	}
 
 	var previousFilterParams = "";
@@ -172,22 +172,9 @@ myNamespace.control = (function($, OL, ns) {
 	var previousTemperatureFilterParams = "";
 	var exportTemperatureButtonURL = "";
 
-	function linkTemperatureExportButton() {
-		// get a copy of params so we don't change the original
-		// var params = $.extend({}, previousTemperatureFilterParams);
-
-		// update params to selected format instead of json
-		// params.OUTPUTFORMAT = selectedTemperatureFormat;
-
-		// construct URL
-		// exportTemperatureButtonURL = ns.WFSserver + "?" +
-		// OL.Util.getParameterString(params);
-		// console.log("TEST: linkTemperatureExportBUtton:
-		// exportTemperatureButtonURL="+exportTemperatureButtonURL);//TEST
-
-		ns.buttonEventHandlers.linkTemperatureExportButton(ns.fileCreation.createCSV(data),
+	function linkParametersExportButton() {
+		ns.buttonEventHandlers.linkParametersExportButton(ns.fileCreation.createCSV(data),
 				"data:text/csv;charset=utf-8", "Greenseas_Downloaded_Parameters.csv");
-
 	}
 
 	function convertInputToFeatures(input){
@@ -282,14 +269,18 @@ myNamespace.control = (function($, OL, ns) {
 		var paramFilter = paramString;
 
 		if (document.getElementById('parametersEnabledCheck').checked) {
-			ns.handleParameters.selectParameters($("#parameters").jstree("get_checked", null, true));
+			ns.handleParameters.selectParameters($("#parametersTree").jstree("get_checked", null, true));
 		}
 		// go through all the first requested tables/parameters, request and
 		// display
 		// result
 		// through callback
 		tablesToQuery = [];
+		if (debugc)
+			console.log("Cloning basic data"); // TEST
 		data = convertArrayToHashMap($.extend(true, {}, basicData));
+		if (debugc)
+			console.log("Basic data cloned"); // TEST
 		if (debugc)
 			console.log("Going through all selected tables");
 		$.each(ns.handleParameters.chosenParameters.tablesSelected, function(i, table) {
@@ -362,7 +353,7 @@ myNamespace.control = (function($, OL, ns) {
 				// search functionality not needed for parameter tables
 				'bFilter' : false
 			});
-			linkTemperatureExportButton();
+			linkParametersExportButton();
 			ns.mapViewer.addFeaturesFromData(data,"All parameters");
 		} else {
 			var layer = tablesToQuery.pop();
@@ -432,33 +423,8 @@ myNamespace.control = (function($, OL, ns) {
 		if (debugc) {
 			console.log("Startet adding Data:");
 		}
-		// if (debugc) {
-		// console.log("addData:");
-		// console.log("DATA VALUES:");
-		// $.each(data, function(i, dataValue) {
-		// console.log(dataValue);
-		// });
-		// }
-		// if (debugc) {
-		// console.log("response VALUES:");
-		// $.each(response, function(i, dataValue) {
-		// console.log(dataValue);
-		// });
-		// }
 		var features = response.features;
-		// if (debugc) {
-		// console.log("features VALUES:");
-		// $.each(features, function(i, dataValue) {
-		// console.log(dataValue);
-		// });
-		// }
 		var layer = replaceId(features);
-		// if (debugc) {
-		// console.log("features VALUES:");
-		// $.each(features, function(i, dataValue) {
-		// console.log(dataValue);
-		// });
-		// }
 		var newData = {};
 
 		if (layer == null) {
@@ -470,8 +436,6 @@ myNamespace.control = (function($, OL, ns) {
 		}
 		$.each(features, function(i, feature) {
 			$.each(feature.properties, function(j, parameter) {
-				// if (debugc)
-				// console.log("feature.id:" + feature.id);
 				if (feature.id in data) {
 					newData[feature.id] = data[feature.id];
 					newData[feature.id].properties[layer + ":" + j] = parameter;
@@ -517,9 +481,9 @@ myNamespace.control = (function($, OL, ns) {
 		if (table != ns.handleParameters.mainTable.name) {
 			tablesDone[table] = true;
 		}
-		$("#parameters").html(ns.tableConstructor.parametersList(tablesDone));
+		$("#parametersTree").html(ns.tableConstructor.parametersList(tablesDone));
 		// init the parameters tree
-		$("#parameters")
+		$("#parametersTree")
 		// call `.jstree` with the options object
 		.jstree({
 			// the `plugins` array allows you to configure the active
@@ -544,7 +508,7 @@ myNamespace.control = (function($, OL, ns) {
 		setBboxInputToCurrentMapExtent : setBboxInputToCurrentMapExtent,
 		lonLatAnywhere : lonLatAnywhere,
 		setRawRequestDialog : setRawRequestDialog,
-		linkTemperatureExportButton : linkTemperatureExportButton,
+		linkParametersExportButton : linkParametersExportButton,
 		setSelectedFormat : function(format) {
 			selectedFormat = format;
 		}

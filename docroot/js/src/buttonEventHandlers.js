@@ -63,11 +63,11 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		jQ("#exportTemperatureFormats").change(function() {
 			var s = document.getElementById('exportTemperatureFormats');
 			c.setSelectedTemperatureFormat(s.options[s.selectedIndex].value);
-			c.linkTemperatureExportButton();
+			c.linkParametersExportButton();
 		});
 	}
 
-	function linkTemperatureExportButton(csvContent,type,name) {
+	function linkParametersExportButton(csvContent,type,name) {
 		jQ("#exportTemperature").unbind("click");
 		add("#exportTemperature", function() {
 			saveAs(new Blob([ csvContent ], {
@@ -79,7 +79,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 	// public interface
 	return {
 		initHandlers : initHandlers,
-		linkTemperatureExportButton : linkTemperatureExportButton,
+		linkParametersExportButton : linkParametersExportButton,
 	};
 
 }(jQuery));
