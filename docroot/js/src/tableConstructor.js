@@ -40,17 +40,15 @@ myNamespace.tableConstructor = (function($, hP) {
 			row += data(pos[0]);
 			row += data(pos[1]);
 
-			// adding metadata
+			// adding the data
 			for (prop in properties) {
-				row += data(properties[prop]);
+				var value = properties[prop];
+				console.log("THE VALUE: \"" + value +"\"");
+				if (value == null)
+					value = "";
+				row += data(value);
 			}
 
-			// $.each(hP.chosenParameters.tablesSelected, function(i, table) {
-			// $.each(hP.chosenParameters.parametersByTable[table], function(j,
-			// parameter) {
-			// row += data(properties[table + ":" + parameter]);
-			// });
-			// });
 			rows += row + "</tr>\n";
 		});
 		// if (debugtC)

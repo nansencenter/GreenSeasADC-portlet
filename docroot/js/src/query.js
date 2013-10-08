@@ -128,20 +128,20 @@ myNamespace.query = (function(OL) {
 		if (debugq)
 			console.log("createRequiredParameterFilter starting");// TEST
 		var requiredArray = [];
-		requiredArray.push(combineFilters([ new OL.Filter.Comparison({
+		requiredArray.push(new OL.Filter.Comparison({
 			type : OpenLayers.Filter.Comparison.NOT_EQUAL_TO,
 			property : parameter,
 			value : ""
-		}), new OL.Filter.Comparison({
+		}));
+		/*requiredArray.push( new OL.Filter.Comparison({
 			type : OpenLayers.Filter.Comparison.NOT_EQUAL_TO,
 			property : parameter,
 			value : "null"
-		}) ]));
-		/*requiredArray.push(negateFilter([new OL.Filter.Comparison({
+		}));*/
+		requiredArray.push(negateFilter([new OL.Filter.Comparison({
 			type : OpenLayers.Filter.Comparison.IS_NULL,
 			property : parameter,
-		})]));*/
-
+		})]));
 		if (debugq)
 			console.log("createRequiredParameterFilter ending");// TEST
 		return combineFilters(requiredArray);
