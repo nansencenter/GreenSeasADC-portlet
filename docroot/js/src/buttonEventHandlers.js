@@ -57,7 +57,6 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		callFromControl("#filter", c.filterButton);
 		callFromControl("#toCurrentExtent", c.setBboxInputToCurrentMapExtent);
 		callFromControl("#anywhereButton", c.lonLatAnywhere);
-		callFromControl("#showRawQueryButton", c.setRawRequestDialog);
 
 		// on change events
 		jQ("#exportTemperatureFormats").change(function() {

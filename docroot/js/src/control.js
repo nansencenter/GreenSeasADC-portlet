@@ -6,8 +6,22 @@ var tablesDone;
 myNamespace.control = (function($, OL, ns) {
 	"use strict";
 
+	var selectedFormat = "csv";
+
+	var selectedTemperatureFormat = "csv";
+	var previousFilterParams = "";
+
+	var previousTemperatureFilterParams = "";
+	var exportTemperatureButtonURL = "";
+	var tablesToQuery = [];
+	var data = null;
+	var basicData = null;
+
 	function init() {
-		//ns.ajax.doAjax();
+		tablesToQuery = [];
+		data = null;
+		basicData = null;
+		// ns.ajax.doAjax();
 		tablesDone = {
 			v4_chlorophyll : false,
 			v4_temperature : false,
@@ -17,7 +31,7 @@ myNamespace.control = (function($, OL, ns) {
 
 		if (debugc) {
 			console.log("control.js: starting init() method...");// TEST
-			
+
 		}
 		// hide export option until we have something to export
 		$("#exportParametersDiv").hide();
@@ -59,8 +73,6 @@ myNamespace.control = (function($, OL, ns) {
 		});
 
 	}
-
-	var queryString = "No query run yet!";
 
 	function createfilterBoxHashMap() {
 		var filterBbox = null;
@@ -149,17 +161,8 @@ myNamespace.control = (function($, OL, ns) {
 		previousFilterParams = ns.WebFeatureService.getPreviousRequestParameters();
 
 		$("#featuresAndParams").show();
-
-		// construct query string for display
-		queryString = ns.WFSserver + "?" + OL.Util.getParameterString(previousFilterParams);
-		if (debugc)
-			console.log("queryString:" + queryString); // TEST
 		$("#filterParameters").show();
 	}
-
-	var selectedFormat = "csv";
-
-	var selectedTemperatureFormat = "csv";
 
 	function formatTemperatureChange() {
 		var s = document.getElementById('exportTemperatureFormats');
@@ -168,17 +171,12 @@ myNamespace.control = (function($, OL, ns) {
 		linkParametersExportButton();
 	}
 
-	var previousFilterParams = "";
-
-	var previousTemperatureFilterParams = "";
-	var exportTemperatureButtonURL = "";
-
 	function linkParametersExportButton() {
 		ns.buttonEventHandlers.linkParametersExportButton(ns.fileCreation.createCSV(data),
 				"data:text/csv;charset=utf-8", "Greenseas_Downloaded_Parameters.csv");
 	}
 
-	function convertInputToFeatures(input){
+	function convertInputToFeatures(input) {
 		var gformat = new OL.Format.GeoJSON();
 		var features = gformat.read(input.responseText);
 		return features;
@@ -233,8 +231,7 @@ myNamespace.control = (function($, OL, ns) {
 
 			var constructedTable = ns.tableConstructor.featureTable("filterTable", jsonObject.features);
 
-			document.getElementById('list').innerHTML = "<div>"
-					+ constructedTable + "</div><br>";
+			document.getElementById('list').innerHTML = "<div>" + constructedTable + "</div><br>";
 			$('#filterTable').dataTable({
 				'aaSorting' : []
 			});
@@ -312,10 +309,6 @@ myNamespace.control = (function($, OL, ns) {
 		document.getElementById('exportTemperature').disabled = false;
 	}
 
-	var tablesToQuery = [];
-	var data = null;
-	var basicData = null;
-
 	// display a parameter as a table
 	function displayParameter(response, layer) {
 		highLightFeatures(convertInputToFeatures(response), false, layer);
@@ -334,14 +327,16 @@ myNamespace.control = (function($, OL, ns) {
 				console.log("tablesToQuery.length == 0");
 			var constructedTable = ns.tableConstructor.parameterTableTemperatures(layer, data);
 
-			$("#parametersTable").html("Entries where the selected parameters were available<br>" + "<div class='scrollArea'>" + constructedTable + "</div>");
+			$("#parametersTable").html(
+					"Entries where the selected parameters were available<br>" + "<div class='scrollArea'>"
+							+ constructedTable + "</div>");
 
 			$("#" + layer + "Table").dataTable({
 				// search functionality not needed for parameter tables
 				'bFilter' : false
 			});
 			linkParametersExportButton();
-			ns.mapViewer.addFeaturesFromData(data,"All parameters");
+			ns.mapViewer.addFeaturesFromData(data, "All parameters");
 			$("#exportParametersDiv").show();
 		} else {
 			var layer = tablesToQuery.pop();
@@ -453,11 +448,6 @@ myNamespace.control = (function($, OL, ns) {
 		$("#right").val(right);
 	}
 
-	function setRawRequestDialog() {
-		$("#rawRequestText").html(queryString);
-		$("#rawRequestDialog").dialog('open');
-	}
-
 	function initiateParameters(input) {
 		if (debugc) {
 			console.log("Input values of initiateparameters");
@@ -495,7 +485,6 @@ myNamespace.control = (function($, OL, ns) {
 		viewParams : viewParams,
 		setBboxInputToCurrentMapExtent : setBboxInputToCurrentMapExtent,
 		lonLatAnywhere : lonLatAnywhere,
-		setRawRequestDialog : setRawRequestDialog,
 		linkParametersExportButton : linkParametersExportButton,
 		setSelectedFormat : function(format) {
 			selectedFormat = format;
