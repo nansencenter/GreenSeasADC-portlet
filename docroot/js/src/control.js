@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugc = false;// debug flag
+var debugc = true;// debug flag
 var tablesDone;
 
 myNamespace.control = (function($, OL, ns) {
@@ -289,7 +289,7 @@ myNamespace.control = (function($, OL, ns) {
 		// result
 		// through callback
 		tablesToQuery = [];
-		data = convertArrayToHashMap(basicData);
+		data = convertArrayToHashMap($.extend(true, {}, basicData));
 		if (debugc)
 			console.log("Going through all selected tables");
 		$.each(ns.handleParameters.chosenParameters.tablesSelected, function(i, table) {
