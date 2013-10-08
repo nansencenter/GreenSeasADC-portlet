@@ -43,7 +43,6 @@ myNamespace.tableConstructor = (function($, hP) {
 			// adding the data
 			for (prop in properties) {
 				var value = properties[prop];
-				console.log("THE VALUE: \"" + value +"\"");
 				if (value == null)
 					value = "";
 				row += data(value);

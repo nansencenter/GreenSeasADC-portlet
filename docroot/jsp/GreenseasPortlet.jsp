@@ -54,15 +54,15 @@
 					</div>
 
 					<h3>
-						<span id='dateHeaderText'>Date/Time <em>(disabled)</em></span>
+						<span id='dateHeaderText'>Date<!--/Time--> <em>(disabled)</em></span>
 					</h3>
 					<div id='datetime'>
 
 						<input type="checkbox" id="dateEnabledCheck"> Enable in query <br> <br> <em>Date (Use
 							yyyy-mm-dd format if no date picker appears)</em> <br> Between <input type="date" id="fromDate"
-							value="2006-01-01"> and <input type="date" id="toDate" value="2007-01-01"><br> <br> <em>Time</em>
+							value="2006-01-01"> and <input type="date" id="toDate" value="2007-01-01"><!--<br>  <br> <em>Time</em>
 						<br> Between <input type="time" id="fromTime" value="00:00"> and <input type="time" id="toTime"
-							value="23:59"> <br>
+							value="23:59"> <br>  -->
 
 					</div>
 
@@ -70,6 +70,12 @@
 						<span id='parametersHeaderText'>Parameters <em>(disabled)</em></span>
 					</h3>
 					<div id='parametersNeeded'>
+
+						Selecting multiple parameters within a group resolves to "one of these". Selecting variables from different groups
+						resolves to "all of these". <br> Example: Selecting variables Physical.x1, Phyiscal.x2, Plankton.y1,
+						Plankton.y2 and Plankton.y3 would resolve in the query: ((Physical.x1 OR Phyiscal.x2)AND(Plankton.y1 OR
+						Plankton.y2 OR Plankton.y3)). <br>
+						<br>
 
 						<div>
 							<input type="checkbox" id="parametersEnabledCheck"> Enable in query

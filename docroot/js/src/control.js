@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugc = true;// debug flag
+var debugc = false;// debug flag
 var tablesDone;
 
 myNamespace.control = (function($, OL, ns) {
@@ -243,6 +243,7 @@ myNamespace.control = (function($, OL, ns) {
 
 	// view all parameters of a feature
 	function viewParams() {
+		$("#parametersTable").html("Loading parameters..");
 
 		// removing the parameterlayers from previous searches
 		ns.mapViewer.removeAllParameterLayers();
