@@ -137,10 +137,10 @@ myNamespace.query = (function(OL) {
 			property : parameter,
 			value : "null"
 		}) ]));
-		requiredArray.push(negateFilter([new OL.Filter.Comparison({
+		/*requiredArray.push(negateFilter([new OL.Filter.Comparison({
 			type : OpenLayers.Filter.Comparison.IS_NULL,
 			property : parameter,
-		})]));
+		})]));*/
 
 		if (debugq)
 			console.log("createRequiredParameterFilter ending");// TEST
@@ -194,7 +194,7 @@ myNamespace.query = (function(OL) {
 		return writtenXML;
 	}
 
-	// combine array of filters to single filter
+	// combine array of filters to single filter with AND
 	function combineFilters(filtersToCombine) {
 		return new OL.Filter.Logical({
 			type : OL.Filter.Logical.AND,
@@ -202,6 +202,7 @@ myNamespace.query = (function(OL) {
 		});
 	}
 
+	// combine array of filters to single filter with OR
 	function combineFiltersOr(filtersToCombine) {
 		return new OL.Filter.Logical({
 			type : OL.Filter.Logical.OR,
@@ -210,10 +211,10 @@ myNamespace.query = (function(OL) {
 	}
 
 	// negate a filter
-	function negateFilter(filter) {
+	function negateFilter(filterArray) {
 		return new OL.Filter.Logical({
 			type : OL.Filter.Logical.NOT,
-			filters : filter
+			filters : filterArray
 		});
 	}
 

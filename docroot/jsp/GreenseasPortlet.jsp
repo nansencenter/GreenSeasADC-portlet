@@ -24,8 +24,7 @@
 		</ul>
 		<div id="queryTab">
 			<div id='search'>
-				<p>Search layers with various parameters. Disabling a parameter category means it will not be included in the
-					query (equivalent to, but faster than setting parameters to "anywhere" etc.).</p>
+				<p>Search layers with various parameters.</p>
 				<div id='queryOptions'>
 					<h3>
 						<span id='bboxHeaderText'>Bounding box <em>(disabled)</em></span>
@@ -104,8 +103,7 @@
 		</div>
 
 		<div id="temperatureTab">
-			<p>Run a query and select a feature (click a row) to view the parameter values here. WARNING: Max parameters to
-				search for in each category is ~7</p>
+			<p>Run a query and select a feature (click a row) to view the parameter values here.</p>
 			<div id="singlePlots">
 				<div id="parameters" class="container">
 					<div id="temperature" class="floatLeft"></div>
