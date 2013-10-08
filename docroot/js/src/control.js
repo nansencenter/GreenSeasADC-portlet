@@ -1,21 +1,22 @@
 var myNamespace = myNamespace || {};
 
 var debugc = false;// debug flag
-var tablesDone;
 
 myNamespace.control = (function($, OL, ns) {
 	"use strict";
 
-	var selectedFormat = "csv";
+	var selectedParametersFormat = "csv";
 
-	var selectedTemperatureFormat = "csv";
-	var previousFilterParams = "";
-
-	var previousTemperatureFilterParams = "";
-	var exportTemperatureButtonURL = "";
+	//List of tables that is selected for querying in a parameter-filter
 	var tablesToQuery = [];
+	// All the filtered search data is stored here.
 	var data = null;
+	// The data from the basic search result is stored for being able to
+	// re-apply parameter-filter without having to do the basic query
 	var basicData = null;
+	// Table of all tables available in the database and a boolean that
+	// represents if they have been initiated/analyzed
+	var tablesDone;
 
 	function init() {
 		tablesToQuery = [];
@@ -158,17 +159,8 @@ myNamespace.control = (function($, OL, ns) {
 
 		if (debugc)
 			console.log("control.js: calling ns.WebFeatureService.getPreviousRequestParameters()"); // TEST
-		previousFilterParams = ns.WebFeatureService.getPreviousRequestParameters();
 
 		$("#featuresAndParams").show();
-		$("#filterParameters").show();
-	}
-
-	function formatTemperatureChange() {
-		var s = document.getElementById('exportTemperatureFormats');
-		selectedTemperatureFormat = s.options[s.selectedIndex].value;
-
-		linkParametersExportButton();
 	}
 
 	function linkParametersExportButton() {
@@ -235,6 +227,7 @@ myNamespace.control = (function($, OL, ns) {
 			$('#filterTable').dataTable({
 				'aaSorting' : []
 			});
+			$("#filterParameters").show();
 		}
 	}
 
@@ -306,7 +299,7 @@ myNamespace.control = (function($, OL, ns) {
 		// jump to the parameters tab
 		$('#tabs').tabs("option", "active", 1);
 
-		document.getElementById('exportTemperature').disabled = false;
+		document.getElementById('exportParameter').disabled = false;
 	}
 
 	// display a parameter as a table
@@ -325,7 +318,7 @@ myNamespace.control = (function($, OL, ns) {
 		if (tablesToQuery.length == 0) {
 			if (debugc)
 				console.log("tablesToQuery.length == 0");
-			var constructedTable = ns.tableConstructor.parameterTableTemperatures(layer, data);
+			var constructedTable = ns.tableConstructor.parameterTable(layer, data);
 
 			$("#parametersTable").html(
 					"Entries where the selected parameters were available<br>" + "<div class='scrollArea'>"
@@ -486,9 +479,6 @@ myNamespace.control = (function($, OL, ns) {
 		setBboxInputToCurrentMapExtent : setBboxInputToCurrentMapExtent,
 		lonLatAnywhere : lonLatAnywhere,
 		linkParametersExportButton : linkParametersExportButton,
-		setSelectedFormat : function(format) {
-			selectedFormat = format;
-		}
 	};
 
 }(jQuery, OpenLayers, myNamespace));

@@ -5,11 +5,11 @@ var debugtC = false;// debug flag
 myNamespace.tableConstructor = (function($, hP) {
 	"use strict";
 
-	function parameterTableTemperatures(tableId, features) {
+	function parameterTable(tableId, features) {
 		if (debugtC)
-			console.log("tableConstructor.js: parameterTableTemperatures: tableId=" + tableId);// TEST
+			console.log("tableConstructor.js: parameterTable: tableId=" + tableId);// TEST
 		if (debugtC)
-			console.log("tableConstructor.js: parameterTableTemperatures: features=" + JSON.stringify(features));// TEST
+			console.log("tableConstructor.js: parameterTable: features=" + JSON.stringify(features));// TEST
 
 		var header = "<table id='" + tableId + "Table" + "'class='table'>", tableHeader, footer = "</tbody></table>", rows = "", row = "";
 		tableHeader = headerFrom(hP.mainParameters.basicHeader.concat(hP.mainParameters.customHeader).concat(
@@ -36,7 +36,7 @@ myNamespace.tableConstructor = (function($, hP) {
 			row += data(val.id);
 			var pos = val.geometry.coordinates;
 			if (debugtC)
-				console.log("tableConstructor.js: parameterTableTemperatures: pos=" + pos);// TEST
+				console.log("tableConstructor.js: parameterTable: pos=" + pos);// TEST
 			row += data(pos[0]);
 			row += data(pos[1]);
 
@@ -51,10 +51,10 @@ myNamespace.tableConstructor = (function($, hP) {
 			rows += row + "</tr>\n";
 		});
 		// if (debugtC)
-		// console.log("tableConstrucktor: parameterTableTemperatures:
+		// console.log("tableConstrucktor: parameterTable:
 		// tableHeader=" + tableHeader);// TEST
 		// if (debugtC)
-		// console.log("tableConstrucktor: parameterTableTemperatures: rows=" +
+		// console.log("tableConstrucktor: parameterTable: rows=" +
 		// rows);// TEST
 
 		return concatTable(header, tableHeader, rows, footer);
@@ -139,7 +139,7 @@ myNamespace.tableConstructor = (function($, hP) {
 	}
 
 	return {
-		parameterTableTemperatures : parameterTableTemperatures,
+		parameterTable : parameterTable,
 		featureTable : featureTable,
 		parametersList : parametersList
 	};

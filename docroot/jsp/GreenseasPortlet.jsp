@@ -114,7 +114,7 @@
 				</div>
 			</div>
 			<div id="exportParametersDiv">
-				<input type='button' id='exportTemperature' value="Export data" disabled /> <select id="exportTemperatureFormats">
+				<input type='button' id='exportParameter' value="Export data" disabled /> <select id="exportParametersFormats">
 					<option value="csv">CSV</option>
 				</select>
 			</div>

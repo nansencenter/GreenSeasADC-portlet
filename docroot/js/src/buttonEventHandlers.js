@@ -59,16 +59,16 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		callFromControl("#anywhereButton", c.lonLatAnywhere);
 
 		// on change events
-		jQ("#exportTemperatureFormats").change(function() {
-			var s = document.getElementById('exportTemperatureFormats');
-			c.setSelectedTemperatureFormat(s.options[s.selectedIndex].value);
+		jQ("#exportParametersFormats").change(function() {
+			var s = document.getElementById('exportParametersFormats');
+			c.setSelectedParametersFormat(s.options[s.selectedIndex].value);
 			c.linkParametersExportButton();
 		});
 	}
 
 	function linkParametersExportButton(csvContent,type,name) {
-		jQ("#exportTemperature").unbind("click");
-		add("#exportTemperature", function() {
+		jQ("#exportParameter").unbind("click");
+		add("#exportParameter", function() {
 			saveAs(new Blob([ csvContent ], {
 				type : type
 			}), name);

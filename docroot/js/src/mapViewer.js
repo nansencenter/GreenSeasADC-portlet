@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugmW = true;// debug flag
+var debugmW = false;// debug flag
 
 // local service URLs
 // myNamespace.WMSserver = "http://localhost:8080/geoserver/cite/wms";//MOD
