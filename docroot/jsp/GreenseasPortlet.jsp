@@ -143,6 +143,7 @@
 </div>
 
 <aui:script>
+	window.allParametersHeader = <%= renderRequest.getAttribute("allParametersHeader") %>;
 	window.portletNameSpace = '<portlet:namespace />';
 	window.ajaxCallResourceURL = '<%=ajaxCallResourceURL.toString()%>';
 	$(document).ready(function() {

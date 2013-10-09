@@ -29,6 +29,8 @@ import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 
+import nersc.greenseas.configuration.DatabaseProperties;
+
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -45,6 +47,7 @@ public class GreenseasPortlet extends MVCPortlet {
 
 	@Override
 	public void doView(RenderRequest renderRequest, RenderResponse renderResponse) throws IOException, PortletException {
+		renderRequest.setAttribute("allParametersHeader", DatabaseProperties.getAllParametersHeader());
 		super.doView(renderRequest, renderResponse);
 	}
 

@@ -13,13 +13,6 @@ myNamespace.handleParameters = (function($) {
 				"tempcu02", "tempcu02qf", "tempst01", "tempst01qf", "tempst02", "tempst02qf", "tempmld", "tempmldqf",
 				"mixedld", "mixedldqf" ]
 	};
-	var allParametersHeader = {
-		v4_temperature : [ "Location", "Point", "Date", "time", "Depth of sample (m)", "Temp. water body (deg.C)",
-				"tempwbqf", "SST water body (deg.C)", "tempsstqf", "Temp. 5m (deg.C)", "temp5mqf", "Temp. 10m (deg.C)",
-				"temp10mqf", "Temp CU01 (deg.C)", "tempcu01qf", "Temp CU02 (deg.C)", "tempcu02qf", "Temp ST01 (deg.C)",
-				"tempst01qf", "Temp ST02 (deg.C)", "tempst02qf", "Temp MLD (deg.C)", "tempmldqf", "Depth Temp MLD (m)",
-				"mixedldqf" ]
-	};
 	mainParameters = {
 		parameters : [ "location", "point", "depth_of_sea", "depth_of_sample", "date", "time" ],
 		basicHeader : [ "ID", "Lat (dec.deg)", "Long (dec.deg)" ],
@@ -34,6 +27,7 @@ myNamespace.handleParameters = (function($) {
 		v4_flagellate : "Flagellate",
 		v4_chlorophyll : "Light/Chlorophyll"
 	};
+
 	var chosenParameters = {
 		parametersByTable : {},
 		allSelected : [],
@@ -68,11 +62,13 @@ myNamespace.handleParameters = (function($) {
 	}
 
 	function getHeader(parameter, table) {
-		var index = availableParameters[table].indexOf(parameter);
-		if (index == -1) {
-			return null;
-		} else
-			return allParametersHeader[table][index];
+		var header;
+		try {
+			header = allParametersHeader[table][parameter];
+		} catch (e) {
+			return parameter;
+		}
+		return header;
 	}
 
 	function getTableHeader(table) {
@@ -98,9 +94,6 @@ myNamespace.handleParameters = (function($) {
 		if (table == mainTable.name) {
 			mainParameters.parameters = parameters;
 		} else {
-			// Check if headers match (at least on the length)
-			if (allParametersHeader[table] == null || allParametersHeader[table].length != parameters.length)
-				allParametersHeader[table] = parameters;
 			availableParameters[table] = parameters;
 		}
 		if (debughP)
