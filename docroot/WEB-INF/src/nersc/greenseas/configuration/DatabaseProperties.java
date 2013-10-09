@@ -16,6 +16,13 @@ public class DatabaseProperties {
 		}
 	};
 
+	/**
+	 * Reading in the parameterHeaders.properties file and adding the properties
+	 * on the form layerName.propertyName="Header" to a javascript object on the
+	 * form {layerName:{propertyName:header}}
+	 * 
+	 * @return A String on the format of a javascript object with parameterHeaders
+	 */
 	public static String getAllParametersHeader() {
 		StringBuffer allParametersHeader = new StringBuffer("{");
 		try {

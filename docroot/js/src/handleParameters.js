@@ -68,7 +68,7 @@ myNamespace.handleParameters = (function($) {
 		} catch (e) {
 			return parameter;
 		}
-		return header;
+		return header ? header : parameter;
 	}
 
 	function getTableHeader(table) {
