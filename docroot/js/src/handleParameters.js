@@ -90,10 +90,6 @@ myNamespace.handleParameters = (function($) {
 		return chosenHeader;
 	}
 
-	function extractParameters(par) {
-		var parameters = [];
-	}
-
 	function initiateParameters(input) {
 		if (debughP)
 			console.log("Initiating Parameters");

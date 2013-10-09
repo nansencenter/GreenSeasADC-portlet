@@ -14,21 +14,35 @@ myNamespace.XMLParser = (function($) {
 		return M[0];// M.join(' ');
 	}
 
-	function extractParameters(xmlSchema) {
-		if (debugXML)
-			console.log("extractParameters");
-		var browser = findBrowser();
-		if (debugXML)
-			console.log("browser: " + browser);
-		if (debugXML)
-			console.log(xmlSchema);
-		var parameters = [];
+	function getNumberOfFeatures(response) {
+		var xmlDoc = getXmlDoc(response);
+		if (debugXML){
+			console.log("xmlDoc");
+			console.log(xmlDoc);
+			console.log("xmlDoc.documentElement:");
+			console.log(xmlDoc.documentElement);
+		}
+		return xmlDoc.documentElement.getAttribute("numberOfFeatures");
+	}
+
+	function getXmlDoc(xmlSchema) {
 		var xmlDoc;
+		var browser = findBrowser();
 		if (browser == "Chrome" || browser == "Firefox") {
 			xmlDoc = xmlSchema.responseXML;
 		} else {
 			xmlDoc = xmlSchema._object.responseXML;
 		}
+		return xmlDoc;
+	}
+
+	function extractParameters(xmlSchema) {
+		if (debugXML)
+			console.log("extractParameters");
+		if (debugXML)
+			console.log(xmlSchema);
+		var parameters = [];
+		var xmlDoc = getXmlDoc(xmlSchema);
 		if (debugXML)
 			console.log(xmlDoc);
 
@@ -53,6 +67,7 @@ myNamespace.XMLParser = (function($) {
 	}
 	// public interface
 	return {
+		getNumberOfFeatures : getNumberOfFeatures,
 		extractParameters : extractParameters
 	};
 

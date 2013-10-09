@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugc = false;// debug flag
+var debugc = true;// debug flag
 
 myNamespace.control = (function($, OL, ns) {
 	"use strict";
@@ -17,19 +17,19 @@ myNamespace.control = (function($, OL, ns) {
 	var tablesDone;
 
 	function init() {
-		tablesToQuery = [];
-		data = null;
-		basicData = null;
-		// ns.ajax.doAjax();
-		tablesDone = {
-			v4_chlorophyll : false,
-			v4_temperature : false,
-			v5_plankton : false,
-			v4_flagellate : false
-		};
-
 		if (debugc) {
 			console.log("control.js: starting init() method...");// TEST
+
+			tablesToQuery = [];
+			data = null;
+			basicData = null;
+			// ns.ajax.doAjax();
+			tablesDone = {
+				v4_chlorophyll : false,
+				v4_temperature : false,
+				v5_plankton : false,
+				v4_flagellate : false
+			};
 
 		}
 		// hide export option until we have something to export
@@ -240,7 +240,7 @@ myNamespace.control = (function($, OL, ns) {
 		if (length < 1) {
 			document.getElementById('list').innerHTML = "No results found.";
 		} else {
-
+			updateTreeInventoryNumbers();
 			var constructedTable = ns.tableConstructor.featureTable("filterTable", jsonObject.features);
 
 			document.getElementById('list').innerHTML = "<div>" + constructedTable + "</div><br>";
@@ -253,71 +253,82 @@ myNamespace.control = (function($, OL, ns) {
 
 	// view all parameters of a feature
 	function viewParams() {
-		$("#parametersTable").html("Loading parameters..");
-
-		// removing the parameterlayers from previous searches
-		ns.mapViewer.removeAllParameterLayers();
-		// extract each value and insert into view param string
-		var paramString = "";
-		if (document.getElementById('bboxEnabledCheck').checked) {
-			paramString = "left:" + $('#left').val() + ";bottom:" + $('#bottom').val() + ";right:" + $('#right').val()
-					+ ";top:" + $('#top').val();
-		} else {
-			paramString = "left:-180.0;bottom:-90.0;right:180.0;top:90.0";// default
-			// bbox,
-			// global
-		}
-		if (document.getElementById('dateEnabledCheck').checked) {
-			paramString += ";sdate:" + $('#fromDate').val() + ";edate:" + $('#toDate').val();
-		} else {
-			// do nothing, we don't search for dates
-		}
-
-		if (debugc)
-			console.log("TEST: viewParams: new FILTER=" + paramString); // TEST
-
-		var paramFilter = paramString;
-
 		if (document.getElementById('parametersEnabledCheck').checked) {
-			ns.handleParameters.selectParameters($("#parametersTree").jstree("get_checked", null, true));
+			$("#parametersTable").html("Loading parameters..");
+
+			// removing the parameterlayers from previous searches
+			ns.mapViewer.removeAllParameterLayers();
+			// extract each value and insert into view param string
+			var paramString = "";
+			if (document.getElementById('bboxEnabledCheck').checked) {
+				paramString = "left:" + $('#left').val() + ";bottom:" + $('#bottom').val() + ";right:"
+						+ $('#right').val() + ";top:" + $('#top').val();
+			} else {
+				paramString = "left:-180.0;bottom:-90.0;right:180.0;top:90.0";// default
+				// bbox,
+				// global
+			}
+			if (document.getElementById('dateEnabledCheck').checked) {
+				paramString += ";sdate:" + $('#fromDate').val() + ";edate:" + $('#toDate').val();
+			} else {
+				// do nothing, we don't search for dates
+			}
+
+			if (debugc)
+				console.log("TEST: viewParams: new FILTER=" + paramString); // TEST
+
+			var paramFilter = paramString;
+
+			if (document.getElementById('parametersEnabledCheck').checked) {
+				ns.handleParameters.selectParameters($("#parametersTree").jstree("get_checked", null, true));
+			}
+
+			// Resetting tablesToQuery between filters
+			tablesToQuery = [];
+
+			// Cloning in the data from the basic search
+			data = convertArrayToHashMap($.extend(true, {}, basicData));
+			if (debugc)
+				console.log("Adding all selected tables to tablesSelected");
+
+			// Adding all selected layers to tablesToQuery
+			$.each(ns.handleParameters.chosenParameters.tablesSelected, function(i, table) {
+				tablesToQuery.push(table);
+			});
+
+			if (debugc)
+				console.log("Popping first layer");
+			// pop the first layer
+			var layer = tablesToQuery.pop();
+			// Array with all parameters for the current layer
+			var propertyName = [];
+
+			if (debugc)
+				console.log("Adding the parameters to the array");
+			// Adding the parameters to the array
+			$.each(ns.handleParameters.chosenParameters.parametersByTable[layer], function(j, parameter) {
+				propertyName.push(parameter);
+			});
+
+			if (debugc)
+				console.log("Requesting features from the first layer");
+			// Requesting features from the first layer through an asynchronous
+			// request and sending response to displayParameter
+			ns.WebFeatureService.getFeature({
+				TYPENAME : layer,
+				PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
+				FILTER : ns.query.constructParameterFilterString(propertyName, createDepthHashMap()),
+				VIEWPARAMS : '' + paramFilter
+			}, function(response) {
+				displayParameter(response, layer);
+			});
+
+			// jump to the parameters tab
+			$('#tabs').tabs("option", "active", 1);
+		} else {
+			ns.errorMessage
+					.showErrorMessage("You need to enable parameters in the query and select parameters before filtering");
 		}
-
-		// Resetting tablesToQuery between filters
-		tablesToQuery = [];
-
-		// Cloning in the data from the basic search
-		data = convertArrayToHashMap($.extend(true, {}, basicData));
-		if (debugc)
-			console.log("Going through all selected tables");
-
-		// Adding all selected layers to tablesToQuery
-		$.each(ns.handleParameters.chosenParameters.tablesSelected, function(i, table) {
-			tablesToQuery.push(table);
-		});
-
-		// pop the first layer
-		var layer = tablesToQuery.pop();
-		// Array with all parameters for the current layer
-		var propertyName = [];
-
-		// Adding the parameters to the array
-		$.each(ns.handleParameters.chosenParameters.parametersByTable[layer], function(j, parameter) {
-			propertyName.push(parameter);
-		});
-
-		// Requesting features from the first layer through an asynchronous
-		// request and sending response to displayParameter
-		ns.WebFeatureService.getFeature({
-			TYPENAME : layer,
-			PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
-			FILTER : ns.query.constructParameterFilterString(propertyName,createDepthHashMap()),
-			VIEWPARAMS : '' + paramFilter
-		}, function(response) {
-			displayParameter(response, layer);
-		});
-
-		// jump to the parameters tab
-		$('#tabs').tabs("option", "active", 1);
 	}
 
 	// display a parameter as a table
@@ -353,42 +364,39 @@ myNamespace.control = (function($, OL, ns) {
 			$("#exportParametersDiv").show();
 		} else {
 			var layer = tablesToQuery.pop();
-			var paramString = "";
-			if (document.getElementById('bboxEnabledCheck').checked) {
-				paramString = "left:" + $('#left').val() + ";bottom:" + $('#bottom').val() + ";right:"
-						+ $('#right').val() + ";top:" + $('#top').val();
-			} else {
-				paramString = "left:-180.0;bottom:-90.0;right:180.0;top:90.0";// default
-				// bbox,
-				// global
-			}
-			if (document.getElementById('dateEnabledCheck').checked) {
-				paramString += ";sdate:" + $('#fromDate').val() + ";edate:" + $('#toDate').val();
-			} else {
-				// do nothing, we don't search for dates
-			}
-
-			if (debugc)
-				console.log("TEST: viewParams: new FILTER=" + paramString); // TEST
-
-			var paramFilter = paramString;
-			if (debugc)
-				console.log("tablesToQuery.length != 0 AND layer=" + layer);
+			var paramFilter = generateParamStringFrombboxAndDate();
 			var propertyName = [];
-			if (debugc)
-				console.log("Going through all parameters in:" + layer);
 			$.each(ns.handleParameters.chosenParameters.parametersByTable[layer], function(j, parameter) {
 				propertyName.push(parameter);
 			});
 			ns.WebFeatureService.getFeature({
 				TYPENAME : layer,
 				PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
-				FILTER : ns.query.constructParameterFilterString(propertyName,createDepthHashMap()),
+				FILTER : ns.query.constructParameterFilterString(propertyName, createDepthHashMap()),
 				VIEWPARAMS : '' + paramFilter
 			}, function(response) {
 				displayParameter(response, layer);
 			});
 		}
+	}
+
+	function generateParamStringFrombboxAndDate() {
+		var paramString = "";
+		if (document.getElementById('bboxEnabledCheck').checked) {
+			paramString = "left:" + $('#left').val() + ";bottom:" + $('#bottom').val() + ";right:" + $('#right').val()
+					+ ";top:" + $('#top').val();
+		} else {
+			paramString = "left:-180.0;bottom:-90.0;right:180.0;top:90.0";// default
+			// bbox,
+			// global
+		}
+		if (document.getElementById('dateEnabledCheck').checked) {
+			paramString += ";sdate:" + $('#fromDate').val() + ";edate:" + $('#toDate').val();
+		} else {
+			// do nothing, we don't search for dates
+		}
+
+		return paramString;
 	}
 
 	// non-public
@@ -421,7 +429,7 @@ myNamespace.control = (function($, OL, ns) {
 	// non-public
 	function addData(response) {
 		if (debugc) {
-			console.log("Startet adding Data:");
+			console.log("Started adding Data:");
 		}
 		var features = response.features;
 		var layer = replaceId(features);
@@ -463,6 +471,36 @@ myNamespace.control = (function($, OL, ns) {
 		$("#bottom").val(bottom);
 		$("#top").val(top);
 		$("#right").val(right);
+	}
+
+	function updateTreeWithInventoryNumbers(response, par, layer) {
+		if (debugc) {
+			console.log("Started updateTreeWithInventoryNumbers:" + par);
+		}
+		var numberOfFeatures = ns.XMLParser.getNumberOfFeatures(response);
+		var newText = ns.handleParameters.getHeader(par, layer) + " [" + numberOfFeatures + "]";
+		$("#parametersTree").jstree("set_text", $(document.getElementById(layer + ":" + par)), newText);
+	}
+
+	function updateTreeInventoryNumbers() {
+		var myTreeContainer = $.jstree._reference("#parametersTree").get_container();
+		var allChildren = myTreeContainer.find("li");
+		$.each(allChildren, function(i, val) {
+			var splitString = val.id.split(":");
+			if (splitString.length == 2) {
+				var layer = splitString[0];
+				var paramFilter = generateParamStringFrombboxAndDate();
+				ns.WebFeatureService.getFeature({
+					TYPENAME : layer,
+					PROPERTYNAME : splitString[1],
+					FILTER : ns.query.constructParameterFilterString([ splitString[1] ], createDepthHashMap()),
+					VIEWPARAMS : '' + paramFilter,
+					RESULTTYPE : "hits"
+				}, function(response) {
+					updateTreeWithInventoryNumbers(response, splitString[1], splitString[0]);
+				});
+			}
+		});
 	}
 
 	function initiateParameters(input) {

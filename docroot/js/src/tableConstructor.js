@@ -98,8 +98,8 @@ myNamespace.tableConstructor = (function($, hP) {
 		return headerString + "</thead>";
 	}
 
-	function list(value, table) {
-		return "<li id=\"" + table + ":" + value + "\"><a href=\"#\">" + hP.getHeader(value, table) + "</a></li>";
+	function listItem(value, table) {
+		return "<li id=\"" + table + ":" + value + "\"><a>" + hP.getHeader(value, table) + "</a></li>";
 	}
 
 	function parametersList(tablesDone) {
@@ -110,12 +110,12 @@ myNamespace.tableConstructor = (function($, hP) {
 			if (debugtC)
 				console.log("tablesDone[table] where table= " + table);
 			if (tablesDone[table]) {
-				str += "<li id=\"" + table + "\"><a href=\"#\">" + hP.getTableHeader(table) + "</a>";
+				str += "<li id=\"" + table + "\"><a>" + hP.getTableHeader(table) + "</a>";
 				str += "<ul>";
 				$.each(hP.availableParameters[table], function(i, val) {
 					if (hP.mainParameters.parameters.indexOf(val) == -1) {
 						if (val.substring(val.length - 2) != 'qf')
-							str += list(val, table);
+							str += listItem(val, table);
 					}
 				});
 				str += "</ul></li>";
