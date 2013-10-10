@@ -89,7 +89,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 							}), name);
 						} else {
 							myNamespace.errorMessage
-									.showErrorMessage("Can not download because blob consutrctor is not supported in this browser!");
+									.showErrorMessage("Can not download because blob consutrctor is not supported in this browser!\nKnown supported browsers: \nChrome 29 on Windows\nFirefox 24 on Windows\nInternet Explorer 10 on Windows\n\nKnown not supported browsers:\nSafari 5 on Windows");
 						}
 					}
 
