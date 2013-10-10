@@ -237,7 +237,7 @@ myNamespace.control = (function($, OL, ns) {
 
 			// removing the parameterlayers from previous searches
 			ns.mapViewer.removeAllParameterLayers();
-			ns.handleParameters.selectParameters($("#parametersTree").jstree("get_checked", null, true));
+			ns.handleParameters.selectParameters($("#parametersTree").jstree("get_checked", null, true), document.getElementById('qualityFlagsEnabledCheck').checked);
 
 			// Resetting tablesToQuery between filters
 			tablesToQuery = [];
@@ -256,10 +256,18 @@ myNamespace.control = (function($, OL, ns) {
 			var layer = tablesToQuery.pop();
 			// Array with all parameters for the current layer
 			var propertyName = [];
+			var propertyNameNeed = [];
+
+			// Add qualityFlags?
+			var qf = document.getElementById('qualityFlagsEnabledCheck').checked;
 
 			// Adding the parameters to the array
 			$.each(ns.handleParameters.chosenParameters.parametersByTable[layer], function(j, parameter) {
 				propertyName.push(parameter);
+				propertyNameNeed.push(parameter);
+				if (qf) {
+					propertyName.push(parameter + "qf");
+				}
 			});
 
 			var filterBbox = createfilterBoxHashMap();
@@ -270,7 +278,7 @@ myNamespace.control = (function($, OL, ns) {
 			ns.WebFeatureService.getFeature({
 				TYPENAME : layer,
 				PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
-				FILTER : ns.query.constructParameterFilterString(propertyName, createDepthHashMap(), filterBbox, date),
+				FILTER : ns.query.constructParameterFilterString(propertyNameNeed, createDepthHashMap(), filterBbox, date),
 			}, function(response) {
 				displayParameter(response, layer);
 			});
@@ -319,13 +327,20 @@ myNamespace.control = (function($, OL, ns) {
 			var date = createDateHashMap();
 			var layer = tablesToQuery.pop();
 			var propertyName = [];
+			var propertyNameNeed = [];
+			// Add qualityFlags?
+			var qf = document.getElementById('qualityFlagsEnabledCheck').checked;
 			$.each(ns.handleParameters.chosenParameters.parametersByTable[layer], function(j, parameter) {
 				propertyName.push(parameter);
+				propertyNameNeed.push(parameter);
+				if (qf) {
+					propertyName.push(parameter + "qf");
+				}
 			});
 			ns.WebFeatureService.getFeature({
 				TYPENAME : layer,
 				PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
-				FILTER : ns.query.constructParameterFilterString(propertyName, createDepthHashMap(), filterBbox, date),
+				FILTER : ns.query.constructParameterFilterString(propertyNameNeed, createDepthHashMap(), filterBbox, date),
 			}, function(response) {
 				displayParameter(response, layer);
 			});

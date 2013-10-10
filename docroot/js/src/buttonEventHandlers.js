@@ -62,17 +62,38 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		// on change events
 		jQ("#exportParametersFormats").change(function() {
 			var s = document.getElementById('exportParametersFormats');
-			//should so something here when we get more formats
+			// should so something here when we get more formats
 		});
 	}
 
-	function linkParametersExportButton(csvContent,type,name) {
+	function linkParametersExportButton(csvContent, type, name) {
 		jQ("#exportParameter").unbind("click");
-		add("#exportParameter", function() {
-			saveAs(new Blob([ csvContent ], {
-				type : type
-			}), name);
-		});
+		add(
+				"#exportParameter",
+				function() {
+					try {
+						saveAs(new Blob([ csvContent ], {
+							type : type
+						}), name);
+					} catch (e) {
+						window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder
+								|| window.MSBlobBuilder || window.webkitURL;
+						if (e.name == 'TypeError' && window.BlobBuilder) {
+							var bb = new BlobBuilder();
+							bb.append([ csvContent ]);
+							saveAs(bb.getBlob(type), name);
+						} else if (e.name == "InvalidStateError") {
+							// InvalidStateError (tested on FF13 WinXP)
+							saveAs(new Blob([ csvContent ], {
+								type : type
+							}), name);
+						} else {
+							myNamespace.errorMessage
+									.showErrorMessage("Can not download because blob consutrctor is not supported in this browser!");
+						}
+					}
+
+				});
 	}
 
 	// public interface

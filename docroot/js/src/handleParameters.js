@@ -6,6 +6,7 @@ myNamespace.handleParameters = (function($) {
 	// TODO: make this a hashtable of hashtable, it must store the type of the
 	// variable: i.e. string, date, point, boolean, for comparison purposes
 	var depthParameterName = "depth_of_sample";
+	var qf = false;
 
 	var availableParameters = {};
 	mainParameters = {
@@ -29,7 +30,8 @@ myNamespace.handleParameters = (function($) {
 		tablesSelected : []
 	};
 
-	function selectParameters(par) {
+	function selectParameters(par, flags) {
+		qf = flags;
 		chosenParameters.allSelected = [];
 		chosenParameters.tablesSelected = [];
 		chosenParameters.parametersByTable = {};
@@ -75,6 +77,9 @@ myNamespace.handleParameters = (function($) {
 		for ( var i = chosenParameters.allSelected.length - 1; i >= 0; i--) {
 			var parArr = chosenParameters.allSelected[i].split(":");
 			chosenHeader.push(getHeader(parArr[1], parArr[0]));
+			if (qf) {
+				chosenHeader.push("QF");
+			}
 		}
 		if (debughP)
 			console.log(chosenHeader);

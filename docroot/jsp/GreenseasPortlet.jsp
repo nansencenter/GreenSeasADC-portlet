@@ -60,7 +60,7 @@
 
 						<input type="checkbox" id="dateEnabledCheck"> Enable in query <br> <br> <em>Date (Use
 							yyyy-mm-dd format if no date picker appears)</em> <br> Between <input type="date" id="fromDate"
-							value="2006-01-01"> and <input type="date" id="toDate" value="2007-01-01"> <br>
+							value="1915-01-01"> and <input type="date" id="toDate" value="2007-01-01"> <br>
 						<input type="checkbox" id="timeEnabledCheck"> Search for time <br> <br> Between <input
 							type="time" id="fromTime" value="00:00"> and <input type="time" id="toTime" value="23:59"> <br>
 
@@ -99,9 +99,12 @@
 							different groups resolves to "all of these". <br> Example: Selecting variables Physical.x1, Phyiscal.x2,
 							Plankton.y1, Plankton.y2 and Plankton.y3 would resolve in the query: ((Physical.x1 OR Phyiscal.x2)AND(Plankton.y1
 							OR Plankton.y2 OR Plankton.y3)).
-						</em> <br>
-
+						</em>
 						<div id="parametersTree"></div>
+						<br>
+						<div>
+							<input type="checkbox" id="qualityFlagsEnabledCheck"> Include qualityflags
+						</div>
 					</div>
 				</div>
 
