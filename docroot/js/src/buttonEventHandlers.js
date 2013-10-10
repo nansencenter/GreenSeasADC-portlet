@@ -54,8 +54,8 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 
 		// buttons that call methods of control - should have control as "this"
 		var c = myNamespace.control;
-		callFromControl("#filterParameters", c.viewParams);
-		callFromControl("#filter", c.filterButton);
+		callFromControl("#filterParameters", c.filterParametersButton);
+		callFromControl("#filter", c.mainQueryButton);
 		callFromControl("#toCurrentExtent", c.setBboxInputToCurrentMapExtent);
 		callFromControl("#anywhereButton", c.lonLatAnywhere);
 

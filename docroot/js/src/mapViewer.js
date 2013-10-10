@@ -4,16 +4,12 @@ var debugmW = false;// debug flag
 
 // local service URLs
 // myNamespace.WMSserver = "http://localhost:8080/geoserver/cite/wms";//MOD
-// myNamespace.WFSserver = "http://localhost:8080/geoserver/cite/wfs";//MOD
 myNamespace.WFSformat = "image/png";
 
 // NERSC services
 myNamespace.WMSserver = "http://tomcat.nersc.no:8080/geoserver/greensad/wms";
-myNamespace.WFSserver = "http://tomcat.nersc.no:8080/geoserver/greensad/wfs";
 
 myNamespace.mapViewer = (function(OL) {
-	// if (debugm) alert("mapViewer.js:
-	// WFSserver="+myNamespace.WFSserver);//TEST
 	"use strict";
 	// TODO fix bound
 	var currentBounds = new OpenLayers.Bounds(-60, -72, 82, 88), maxExtent = new OpenLayers.Bounds(-120, -88, 120, 88);
@@ -23,11 +19,27 @@ myNamespace.mapViewer = (function(OL) {
 	// map on which layers are drawn
 	var map;
 
+	// Object that stores the layers for the parameters
+	var parameterLayers = {};
+
+	function getSLD(title, layer, color, size) {
+		sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+				+ "<StyledLayerDescriptor version=\"1.0.0\" xsi:schemaLocation=\"http://www.opengis.net/sld StyledLayerDescriptor.xsd\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
+				+ "<NamedLayer><Name>"
+				+ layer
+				+ "</Name><UserStyle><Title>"
+				+ title
+				+ "</Title><FeatureTypeStyle><Rule><PointSymbolizer><Graphic><Mark><WellKnownName>circle</WellKnownName><Fill><CssParameter name=\"fill\">"
+				+ color
+				+ "</CssParameter></Fill></Mark><Size>"
+				+ size
+				+ "</Size></Graphic></PointSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>";
+		return sld;
+	}
 	// front layers drawn on the map widget, can be toggled on/off
 	var mapLayers = {
-		contour : undefined,
 		datapoints : new OpenLayers.Layer.WMS("Data points", myNamespace.WMSserver, {
-			layers : 'greensad:gsadb3',
+			layers : 'gsadb3',
 			format : myNamespace.WMSformat,
 			transparent : true
 		}, {
@@ -50,8 +62,20 @@ myNamespace.mapViewer = (function(OL) {
 				zIndexing : true
 			},
 			projection : new OpenLayers.Projection("EPSG:4326")
-		// MOD (Was: EPSG:4269)
-		})
+		}),
+		WMShighlights : new OpenLayers.Layer.WMS.Post("WMS Basic search results", myNamespace.WMSserver, {
+			layers : 'gsadb3',
+			format : myNamespace.WMSformat,
+			transparent : true,
+			sld_body : getSLD("Basic search results", "greensad:gsadb3", "#FFBF00", 2),
+			rendererOptions : {
+				// for guaranteeing highlights are drawn on top of WMS
+				// representation
+				zIndexing : true
+			},
+		}, {
+			isBaseLayer : false
+		}),
 	};
 
 	function getRandomColor() {
@@ -71,10 +95,11 @@ myNamespace.mapViewer = (function(OL) {
 			format : myNamespace.WMSformat
 		}),
 
-		marble : new OpenLayers.Layer.WMS('Blue Marble', 'http://disc1.gsfc.nasa.gov/daac-bin/wms_ogc', {
-			layers : 'bluemarble',
-			format : myNamespace.WMSformat
-		}),
+		/*
+		 * marble : new OpenLayers.Layer.WMS('Blue Marble',
+		 * 'http://disc1.gsfc.nasa.gov/daac-bin/wms_ogc', { layers :
+		 * 'bluemarble', format : myNamespace.WMSformat }),
+		 */
 
 		ocean : new OpenLayers.Layer.WMS('GEBCO Bathymetry',
 				'http://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?', {
@@ -84,13 +109,9 @@ myNamespace.mapViewer = (function(OL) {
 	};
 
 	function initMap() {
-		// if (debugm) alert("mapViewer.js: starting initMap()...");
 		// set some OpenLayers settings
-		// This one is currently used on production since the portlet is hosted
-		// with a cgi already there
-		// OpenLayers.ProxyHost = "/greenseas-portlet/cgi-bin/proxy.cgi?url=";
-		// OpenLayers.ProxyHost =
-		// "/GreenseasV.2-portlet/openLayersProxy?targetURL=";
+		// The proxy comes from
+		// nersc.greenseas.openlayersProxy.GwtOpenLayersProxyServlet
 		OpenLayers.ProxyHost = "/delegate/OpenLayersProxy?targetURL=";
 		OpenLayers.DOTS_PER_INCH = (25.4 / 0.28);
 		OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
@@ -121,7 +142,7 @@ myNamespace.mapViewer = (function(OL) {
 		// fg.highlights]);
 
 		// TODO: rewrite to avoid hardcoding!!!
-		map.addLayers([ bg.generic, bg.ocean, bg.marble, fg.datapoints, fg.highlights ]);
+		map.addLayers([ bg.generic, bg.ocean, /* bg.marble, */fg.datapoints, fg.highlights/*, fg.WMShighlights */]);
 
 		map.zoomToExtent(currentBounds, true);
 
@@ -196,7 +217,7 @@ myNamespace.mapViewer = (function(OL) {
 		var pointFeatures = [];
 		for (id in data) {
 			var lonLat = new OL.LonLat(data[id].geometry.coordinates[0], data[id].geometry.coordinates[1]);
-			var pointGeometry = new OL.Geometry.Point(lonLat.lat,lonLat.lon);
+			var pointGeometry = new OL.Geometry.Point(lonLat.lat, lonLat.lon);
 			var pointFeature = new OL.Feature.Vector(pointGeometry);
 			pointFeatures.push(pointFeature);
 		}
@@ -208,7 +229,6 @@ myNamespace.mapViewer = (function(OL) {
 			console.log("addFeaturesFromData ended");
 	}
 
-	var parameterLayers = {};
 	function addLayer(features, name) {
 		if (debugmW)
 			console.log("Adding a layer: " + name);
@@ -247,24 +267,6 @@ myNamespace.mapViewer = (function(OL) {
 		parameterLayers[name] = layer;
 		if (debugmW)
 			console.log("Added the layer: " + name);
-	}
-
-	function downloadCurrentContourImage() {
-
-		// width should be given by user, then height is set automatically from
-		// the ratio of width/height in the bounding box. This way we avoid
-		// stretching the image
-		var additionalParams = {
-			WIDTH : 1020,
-			HEIGHT : 750
-		};
-
-		var request = mapLayers.contour.getFullRequestString(additionalParams);
-
-		// add bbox manually
-		request += "&BBOX=" + myNamespace.control.currentBbox;
-
-		window.open(request);
 	}
 
 	function getExtent() {

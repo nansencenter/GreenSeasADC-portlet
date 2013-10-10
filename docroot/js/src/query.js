@@ -8,10 +8,10 @@ myNamespace.query = (function(OL) {
 	var previousFilter;
 
 	// construct an OGC XML filter object from attributes
-	function constructFilter(bbox, date, attributes, depth) {
+	function constructFilter(bbox, date, depth, param) {
 
 		// should we filter at all?
-		if (bbox || date || attributes || depth) {
+		if (bbox || date || depth || param) {
 			var filterArray = [];
 
 			// bbox filter
@@ -24,19 +24,17 @@ myNamespace.query = (function(OL) {
 				filterArray.push(dateFilter(date));
 			}
 
-			if (attributes) {
-				var attrFilter = attributeFilter(attributes);
-
-				// only add the filter if it produced a result
-				if (attrFilter !== null) {
-					filterArray.push(attrFilter);
-				}
-			}
-
+			// depth filter
 			if (depth) {
 				var depthFilter = createDepthFilter(depth);
 				if (depthFilter != null)
 					filterArray.push(depthFilter);
+			}
+
+			// parametersfilter
+			if (param) {
+				var parametersFilter = requiredParameters(param);
+				filterArray.push(parametersFilter);
 			}
 
 			// combine all filters together by logical AND
@@ -60,26 +58,19 @@ myNamespace.query = (function(OL) {
 
 	function constructFilterString(bbox, date, attributes, depth) {
 		if (debugq)
-			console.log("constructFilterString");// TEST
+			console.log("constructFilterString");
 		// generate filter object
-		var filterObject = constructFilter(bbox, date, attributes, depth);
+		var filterObject = constructFilter(bbox, date, depth);
 
 		return constructString(filterObject);
 
 	}
 
-	function constructParameterFilterString(parameters, depth) {
+	function constructParameterFilterString(parameters, depth, bbox, date) {
 		if (debugq)
-			console.log("constructFilterString starting");// TEST
+			console.log("constructParameterFilterString starting");
 		// generate filter object
-		var filterArrays = [];
-		var parametersFilter = requiredParameters(parameters);
-		filterArrays.push(parametersFilter);
-		if (depth) {
-			var depthFilter = createDepthFilter(depth);
-			filterArrays.push(depthFilter);
-		}
-		var filterObject = combineFilters(filterArrays);
+		var filterObject = constructFilter(bbox, date, depth, parameters);
 
 		if (debugq)
 			console.log("constructFilterString ending");// TEST
@@ -117,7 +108,6 @@ myNamespace.query = (function(OL) {
 	// issues - time option is currently disabled because not all data had a
 	// time included
 	function dateFilter(date) {
-		// var dateTimeFilterArray = [];
 
 		var dateFilter = new OL.Filter.Comparison({
 			type : OL.Filter.Comparison.BETWEEN,
@@ -125,20 +115,22 @@ myNamespace.query = (function(OL) {
 			lowerBoundary : date.fromDate,
 			upperBoundary : date.toDate
 		});
+		if (date.time) {
+			var dateTimeFilterArray = [];
+			dateTimeFilterArray.push(dateFilter);
 
-		// dateTimeFilterArray.push(dateFilter);
+			var timeFilter = new OL.Filter.Comparison({
+				type : OL.Filter.Comparison.BETWEEN,
+				property : "time", // Was: sttime
+				lowerBoundary : date.fromTime,
+				upperBoundary : date.toTime
+			});
 
-		// var timeFilter = new OL.Filter.Comparison({
-		// type : OL.Filter.Comparison.BETWEEN,
-		// property : "time", // Was: sttime
-		// lowerBoundary : date.fromTime,
-		// upperBoundary : date.toTime
-		// });
-
-		// dateTimeFilterArray.push(timeFilter);
-
-		return dateFilter;
-		// return combineFilters(dateTimeFilterArray);
+			dateTimeFilterArray.push(timeFilter);
+			return combineFilters(dateTimeFilterArray);
+		} else {
+			return dateFilter;
+		}
 	}
 
 	function requiredParameters(parameters) {
@@ -207,14 +199,8 @@ myNamespace.query = (function(OL) {
 		if (debugq)
 			console.log("filterToXmlString starting with filter:" + JSON.stringify(filter));// TEST
 		var formatter = new OL.Format.Filter();
-		if (debugq)
-			console.log("came thus far formatter:" + formatter);// TE
 		var xmlFormat = new OL.Format.XML();
-		if (debugq)
-			console.log("came thus far xmlFormat:" + xmlFormat);// TE
 		var written = formatter.write(filter);
-		if (debugq)
-			console.log("written:" + written);// TEST
 		var writtenXML = xmlFormat.write(written);
 		return writtenXML;
 	}

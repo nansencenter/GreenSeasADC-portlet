@@ -7,12 +7,7 @@ myNamespace.handleParameters = (function($) {
 	// variable: i.e. string, date, point, boolean, for comparison purposes
 	var depthParameterName = "depth_of_sample";
 
-	var availableParameters = {
-		v4_temperature : [ "id", "location", "point", "date", "time", "depth_of_sample", "tempwbod", "tempwbqf",
-				"tempsst", "tempsstqf", "temp5m", "temp5mqf", "temp10m", "temp10mqf", "tempcu01", "tempcu01qf",
-				"tempcu02", "tempcu02qf", "tempst01", "tempst01qf", "tempst02", "tempst02qf", "tempmld", "tempmldqf",
-				"mixedld", "mixedldqf" ]
-	};
+	var availableParameters = {};
 	mainParameters = {
 		parameters : [ "location", "point", "depth_of_sea", "depth_of_sample", "date", "time" ],
 		basicHeader : [ "ID", "Lat (dec.deg)", "Long (dec.deg)" ],
@@ -43,7 +38,7 @@ myNamespace.handleParameters = (function($) {
 			if (debughP)
 				console.log("Checking val: " + parArr[0] + ":" + parArr[1]);
 			// if the parameter is an actual available parameter in that table
-			// (minor check for error)
+			// (minor check for error) TODO: remove?
 			if (availableParameters[parArr[0]].indexOf(parArr[1]) != -1) {
 				chosenParameters.allSelected.push(val.getAttribute("id"));
 				// if its the first registered parameter from that table

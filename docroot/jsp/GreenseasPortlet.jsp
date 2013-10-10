@@ -60,10 +60,9 @@
 
 						<input type="checkbox" id="dateEnabledCheck"> Enable in query <br> <br> <em>Date (Use
 							yyyy-mm-dd format if no date picker appears)</em> <br> Between <input type="date" id="fromDate"
-							value="2006-01-01"> and <input type="date" id="toDate" value="2007-01-01">
-						<!--<br>  <br> <em>Time</em>
-						<br> Between <input type="time" id="fromTime" value="00:00"> and <input type="time" id="toTime"
-							value="23:59"> <br>  -->
+							value="2006-01-01"> and <input type="date" id="toDate" value="2007-01-01"> <br>
+						<input type="checkbox" id="timeEnabledCheck"> Search for time <br> <br> Between <input
+							type="time" id="fromTime" value="00:00"> and <input type="time" id="toTime" value="23:59"> <br>
 
 					</div>
 
@@ -143,7 +142,7 @@
 </div>
 
 <aui:script>
-	window.allParametersHeader = <%= renderRequest.getAttribute("allParametersHeader") %>;
+	window.allParametersHeader = <%=renderRequest.getAttribute("allParametersHeader")%>;
 	window.portletNameSpace = '<portlet:namespace />';
 	window.ajaxCallResourceURL = '<%=ajaxCallResourceURL.toString()%>';
 	$(document).ready(function() {

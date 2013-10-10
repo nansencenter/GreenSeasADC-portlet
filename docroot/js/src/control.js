@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugc = true;// debug flag
+var debugc = false;// debug flag
 
 myNamespace.control = (function($, OL, ns) {
 	"use strict";
@@ -19,19 +19,18 @@ myNamespace.control = (function($, OL, ns) {
 	function init() {
 		if (debugc) {
 			console.log("control.js: starting init() method...");// TEST
-
-			tablesToQuery = [];
-			data = null;
-			basicData = null;
-			// ns.ajax.doAjax();
-			tablesDone = {
-				v4_chlorophyll : false,
-				v4_temperature : false,
-				v5_plankton : false,
-				v4_flagellate : false
-			};
-
 		}
+		tablesToQuery = [];
+		data = null;
+		basicData = null;
+		// ns.ajax.doAjax();
+		tablesDone = {
+			v4_chlorophyll : false,
+			v4_temperature : false,
+			v5_plankton : false,
+			v4_flagellate : false
+		};
+
 		// hide export option until we have something to export
 		$("#exportParametersDiv").hide();
 		$("#filterParameters").hide();
@@ -103,24 +102,11 @@ myNamespace.control = (function($, OL, ns) {
 			date.fromDate = $('#fromDate').val();
 			date.toDate = $('#toDate').val();
 
-			// date.fromTime = $('#fromTime').val();
-			// date.toTime = $('#toTime').val();
+			date.time = document.getElementById('timeEnabledCheck').checked;
+			date.fromTime = $('#fromTime').val();
+			date.toTime = $('#toTime').val();
 		}
 		return date;
-	}
-
-	// non-public
-	function createParameterArray() {
-		var par = null;
-		if (document.getElementById('parametersEnabledCheck').checked) {
-			par = new Array();
-			for (parameter in document.getElementById('parameters')) {
-				par.push(parameter);
-			}
-			if (debugc)
-				console.log(par.toString());
-		}
-		return par;
 	}
 
 	function createDepthHashMap() {
@@ -133,10 +119,10 @@ myNamespace.control = (function($, OL, ns) {
 		return depth;
 	}
 
-	function filterButton() {
+	function mainQueryButton() {
 		$("#exportParametersDiv").hide();
 		if (debugc)
-			console.log("control.js: start of filterButton()");// TEST
+			console.log("control.js: start of mainQueryButton()");// TEST
 		// set loading text and empty parameter HTML
 		$("#featuresAndParams").hide();
 		$("#loadingText").html("Loading data, please wait...");
@@ -146,15 +132,8 @@ myNamespace.control = (function($, OL, ns) {
 		// should be the meta-data-layer
 		var layer = ns.handleParameters.mainTable.name;
 
-		// add bbox?
 		var filterBbox = createfilterBoxHashMap();
-
-		// add date?
 		var date = createDateHashMap();
-
-		// add parameters
-		var par = createParameterArray();
-
 		var depth = createDepthHashMap();
 
 		// no attributes are currently supported
@@ -252,36 +231,13 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	// view all parameters of a feature
-	function viewParams() {
+	function filterParametersButton() {
 		if (document.getElementById('parametersEnabledCheck').checked) {
 			$("#parametersTable").html("Loading parameters..");
 
 			// removing the parameterlayers from previous searches
 			ns.mapViewer.removeAllParameterLayers();
-			// extract each value and insert into view param string
-			var paramString = "";
-			if (document.getElementById('bboxEnabledCheck').checked) {
-				paramString = "left:" + $('#left').val() + ";bottom:" + $('#bottom').val() + ";right:"
-						+ $('#right').val() + ";top:" + $('#top').val();
-			} else {
-				paramString = "left:-180.0;bottom:-90.0;right:180.0;top:90.0";// default
-				// bbox,
-				// global
-			}
-			if (document.getElementById('dateEnabledCheck').checked) {
-				paramString += ";sdate:" + $('#fromDate').val() + ";edate:" + $('#toDate').val();
-			} else {
-				// do nothing, we don't search for dates
-			}
-
-			if (debugc)
-				console.log("TEST: viewParams: new FILTER=" + paramString); // TEST
-
-			var paramFilter = paramString;
-
-			if (document.getElementById('parametersEnabledCheck').checked) {
-				ns.handleParameters.selectParameters($("#parametersTree").jstree("get_checked", null, true));
-			}
+			ns.handleParameters.selectParameters($("#parametersTree").jstree("get_checked", null, true));
 
 			// Resetting tablesToQuery between filters
 			tablesToQuery = [];
@@ -296,29 +252,25 @@ myNamespace.control = (function($, OL, ns) {
 				tablesToQuery.push(table);
 			});
 
-			if (debugc)
-				console.log("Popping first layer");
 			// pop the first layer
 			var layer = tablesToQuery.pop();
 			// Array with all parameters for the current layer
 			var propertyName = [];
 
-			if (debugc)
-				console.log("Adding the parameters to the array");
 			// Adding the parameters to the array
 			$.each(ns.handleParameters.chosenParameters.parametersByTable[layer], function(j, parameter) {
 				propertyName.push(parameter);
 			});
 
-			if (debugc)
-				console.log("Requesting features from the first layer");
+			var filterBbox = createfilterBoxHashMap();
+			var date = createDateHashMap();
+
 			// Requesting features from the first layer through an asynchronous
 			// request and sending response to displayParameter
 			ns.WebFeatureService.getFeature({
 				TYPENAME : layer,
 				PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
-				FILTER : ns.query.constructParameterFilterString(propertyName, createDepthHashMap()),
-				VIEWPARAMS : '' + paramFilter
+				FILTER : ns.query.constructParameterFilterString(propertyName, createDepthHashMap(), filterBbox, date),
 			}, function(response) {
 				displayParameter(response, layer);
 			});
@@ -363,8 +315,9 @@ myNamespace.control = (function($, OL, ns) {
 			document.getElementById('exportParameter').disabled = false;
 			$("#exportParametersDiv").show();
 		} else {
+			var filterBbox = createfilterBoxHashMap();
+			var date = createDateHashMap();
 			var layer = tablesToQuery.pop();
-			var paramFilter = generateParamStringFrombboxAndDate();
 			var propertyName = [];
 			$.each(ns.handleParameters.chosenParameters.parametersByTable[layer], function(j, parameter) {
 				propertyName.push(parameter);
@@ -372,31 +325,11 @@ myNamespace.control = (function($, OL, ns) {
 			ns.WebFeatureService.getFeature({
 				TYPENAME : layer,
 				PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
-				FILTER : ns.query.constructParameterFilterString(propertyName, createDepthHashMap()),
-				VIEWPARAMS : '' + paramFilter
+				FILTER : ns.query.constructParameterFilterString(propertyName, createDepthHashMap(), filterBbox, date),
 			}, function(response) {
 				displayParameter(response, layer);
 			});
 		}
-	}
-
-	function generateParamStringFrombboxAndDate() {
-		var paramString = "";
-		if (document.getElementById('bboxEnabledCheck').checked) {
-			paramString = "left:" + $('#left').val() + ";bottom:" + $('#bottom').val() + ";right:" + $('#right').val()
-					+ ";top:" + $('#top').val();
-		} else {
-			paramString = "left:-180.0;bottom:-90.0;right:180.0;top:90.0";// default
-			// bbox,
-			// global
-		}
-		if (document.getElementById('dateEnabledCheck').checked) {
-			paramString += ";sdate:" + $('#fromDate').val() + ";edate:" + $('#toDate').val();
-		} else {
-			// do nothing, we don't search for dates
-		}
-
-		return paramString;
 	}
 
 	// non-public
@@ -483,18 +416,19 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function updateTreeInventoryNumbers() {
+		var filterBbox = createfilterBoxHashMap();
+		var date = createDateHashMap();
 		var myTreeContainer = $.jstree._reference("#parametersTree").get_container();
 		var allChildren = myTreeContainer.find("li");
 		$.each(allChildren, function(i, val) {
 			var splitString = val.id.split(":");
 			if (splitString.length == 2) {
 				var layer = splitString[0];
-				var paramFilter = generateParamStringFrombboxAndDate();
 				ns.WebFeatureService.getFeature({
 					TYPENAME : layer,
 					PROPERTYNAME : splitString[1],
-					FILTER : ns.query.constructParameterFilterString([ splitString[1] ], createDepthHashMap()),
-					VIEWPARAMS : '' + paramFilter,
+					FILTER : ns.query.constructParameterFilterString([ splitString[1] ], createDepthHashMap(),
+							filterBbox, date),
 					RESULTTYPE : "hits"
 				}, function(response) {
 					updateTreeWithInventoryNumbers(response, splitString[1], splitString[0]);
@@ -536,8 +470,8 @@ myNamespace.control = (function($, OL, ns) {
 		init : init,
 		initiateParameters : initiateParameters,
 		setLonLatInput : setLonLatInput,
-		filterButton : filterButton,
-		viewParams : viewParams,
+		mainQueryButton : mainQueryButton,
+		filterParametersButton : filterParametersButton,
 		setBboxInputToCurrentMapExtent : setBboxInputToCurrentMapExtent,
 		lonLatAnywhere : lonLatAnywhere,
 		linkParametersExportButton : linkParametersExportButton,
