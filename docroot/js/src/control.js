@@ -126,7 +126,7 @@ myNamespace.control = (function($, OL, ns) {
 		// set loading text and empty parameter HTML
 		$("#featuresAndParams").hide();
 		$("#loadingText").html("Loading data, please wait...");
-
+		$("#list").html("");
 		$("#parametersTable").html("");
 
 		// should be the meta-data-layer
@@ -159,7 +159,7 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function linkParametersExportButton() {
-		ns.buttonEventHandlers.linkParametersExportButton(ns.fileCreation.createCSV,data,
+		ns.buttonEventHandlers.linkParametersExportButton(ns.fileCreation.createCSV, data,
 				"data:text/csv;charset=utf-8", "Greenseas_Downloaded_Parameters.csv");
 	}
 
@@ -204,9 +204,6 @@ myNamespace.control = (function($, OL, ns) {
 
 		highLightFeatures(convertInputToFeatures(input), true);
 
-		// remove "loading..." text
-		$("#loadingText").html("");
-
 		// **** output to table ****
 		var jsonObject = JSON.parse(input.responseText);
 
@@ -222,6 +219,9 @@ myNamespace.control = (function($, OL, ns) {
 			updateTreeInventoryNumbers();
 			var constructedTable = ns.tableConstructor.featureTable("filterTable", jsonObject.features);
 
+			// remove "loading..." text
+			$("#loadingText").html("");
+			
 			document.getElementById('list').innerHTML = "<div>" + constructedTable + "</div><br>";
 			$('#filterTable').dataTable({
 				'aaSorting' : []
@@ -237,7 +237,8 @@ myNamespace.control = (function($, OL, ns) {
 
 			// removing the parameterlayers from previous searches
 			ns.mapViewer.removeAllParameterLayers();
-			ns.handleParameters.selectParameters($("#parametersTree").jstree("get_checked", null, true), document.getElementById('qualityFlagsEnabledCheck').checked);
+			ns.handleParameters.selectParameters($("#parametersTree").jstree("get_checked", null, true), document
+					.getElementById('qualityFlagsEnabledCheck').checked);
 
 			// Resetting tablesToQuery between filters
 			tablesToQuery = [];
@@ -278,7 +279,8 @@ myNamespace.control = (function($, OL, ns) {
 			ns.WebFeatureService.getFeature({
 				TYPENAME : layer,
 				PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
-				FILTER : ns.query.constructParameterFilterString(propertyNameNeed, createDepthHashMap(), filterBbox, date),
+				FILTER : ns.query.constructParameterFilterString(propertyNameNeed, createDepthHashMap(), filterBbox,
+						date),
 			}, function(response) {
 				displayParameter(response, layer);
 			});
@@ -340,7 +342,8 @@ myNamespace.control = (function($, OL, ns) {
 			ns.WebFeatureService.getFeature({
 				TYPENAME : layer,
 				PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
-				FILTER : ns.query.constructParameterFilterString(propertyNameNeed, createDepthHashMap(), filterBbox, date),
+				FILTER : ns.query.constructParameterFilterString(propertyNameNeed, createDepthHashMap(), filterBbox,
+						date),
 			}, function(response) {
 				displayParameter(response, layer);
 			});
