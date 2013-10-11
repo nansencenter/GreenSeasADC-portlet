@@ -9,7 +9,7 @@ myNamespace.fileCreation = (function($) {
 		var delimiter = "";
 		$.each(headers, function(i, val) {
 			headerString += delimiter;
-			delimiter = ";";
+			delimiter = csvDelimiter;
 			headerString += val;
 		});
 
@@ -25,9 +25,9 @@ myNamespace.fileCreation = (function($) {
 			console.log("Added headers: " + csvContent);
 		$.each(dataIn, function(i, val) {
 			var properties = val.properties;
-			csvContent += val.id + ";";
+			csvContent += val.id + csvDelimiter;
 			var pos = val.geometry.coordinates;
-			csvContent += pos[0] + ";";
+			csvContent += pos[0] + csvDelimiter;
 			csvContent += pos[1] + "";
 
 			for (prop in properties) {
@@ -35,7 +35,7 @@ myNamespace.fileCreation = (function($) {
 				var value = properties[prop];
 				if (value == null)
 					value = "";
-				csvContent += ";" + value;
+				csvContent += csvDelimiter + value;
 			}
 
 			csvContent += "\n";
