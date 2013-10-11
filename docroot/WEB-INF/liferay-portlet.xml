@@ -39,8 +39,6 @@
 		<header-portlet-javascript>/js/src/query.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/src/webFeatureService.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/src/tableConstructor.js</header-portlet-javascript>
-		<!-- test script files-->
-		<header-portlet-javascript>/js/test/test.js</header-portlet-javascript>
 		<css-class-wrapper>test-portlet</css-class-wrapper>
 	</portlet>
 	<role-mapper>
