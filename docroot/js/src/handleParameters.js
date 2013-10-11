@@ -5,7 +5,6 @@ var debughP = false;// debug flag
 myNamespace.handleParameters = (function($) {
 	// TODO: make this a hashtable of hashtable, it must store the type of the
 	// variable: i.e. string, date, point, boolean, for comparison purposes
-	var depthParameterName = "depth_of_sample";
 	var qf = false;
 
 	var availableParameters = {};
@@ -14,16 +13,6 @@ myNamespace.handleParameters = (function($) {
 		basicHeader : [ "ID", "Lat (dec.deg)", "Long (dec.deg)" ],
 		customHeader : [ "Area", "Depth of Sea (m)", "Depth of Sample (m)", "Date", "Time" ]
 	};
-	mainTable = {
-		name : "gsadb3"
-	};
-	var tableHeader = {
-		v4_temperature : "Physical",
-		v5_plankton : "Plankton",
-		v4_flagellate : "Flagellate",
-		v4_chlorophyll : "Light/Chlorophyll"
-	};
-
 	var chosenParameters = {
 		parametersByTable : {},
 		allSelected : [],
@@ -31,6 +20,8 @@ myNamespace.handleParameters = (function($) {
 	};
 
 	function selectParameters(par, flags) {
+		if (debughP)
+			console.log("Setting qf to:"+flags);
 		qf = flags;
 		chosenParameters.allSelected = [];
 		chosenParameters.tablesSelected = [];
@@ -69,7 +60,7 @@ myNamespace.handleParameters = (function($) {
 	}
 
 	function getTableHeader(table) {
-		return tableHeader[table];
+		return allLayersHeader[table] ? allLayersHeader[table] : table;
 	}
 
 	function getChosenHeader() {
@@ -78,7 +69,7 @@ myNamespace.handleParameters = (function($) {
 			var parArr = chosenParameters.allSelected[i].split(":");
 			chosenHeader.push(getHeader(parArr[1], parArr[0]));
 			if (qf) {
-				chosenHeader.push("QF");
+				chosenHeader.push(qfHeader);
 			}
 		}
 		if (debughP)
@@ -91,7 +82,7 @@ myNamespace.handleParameters = (function($) {
 			console.log("Initiating Parameters");
 		var parameters = myNamespace.XMLParser.extractParameters(input);
 		var table = parameters.pop();
-		if (table == mainTable.name) {
+		if (table == metaDataTable) {
 			mainParameters.parameters = parameters;
 		} else {
 			availableParameters[table] = parameters;
@@ -101,10 +92,13 @@ myNamespace.handleParameters = (function($) {
 		return table;
 
 	}
+	
+	function getQF(){
+		return qf.valueOf();
+	}
 	// public interface
 	return {
-		depthParameterName : depthParameterName,
-		mainTable : mainTable,
+		qf : getQF,
 		mainParameters : mainParameters,
 		getTableHeader : getTableHeader,
 		initiateParameters : initiateParameters,

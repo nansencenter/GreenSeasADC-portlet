@@ -48,7 +48,7 @@ myNamespace.query = (function(OL) {
 	function createDepthFilter(depth) {
 		var depthFilter = new OL.Filter.Comparison({
 			type : OL.Filter.Comparison.BETWEEN,
-			property : myNamespace.handleParameters.depthParameterName,
+			property : depthParameterName,
 			lowerBoundary : depth.min,
 			upperBoundary : depth.max
 		});

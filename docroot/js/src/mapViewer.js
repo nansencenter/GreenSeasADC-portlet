@@ -23,7 +23,7 @@ myNamespace.mapViewer = (function(OL) {
 	var parameterLayers = {};
 
 	function getSLD(title, layer, color, size) {
-		sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+		var sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 				+ "<StyledLayerDescriptor version=\"1.0.0\" xsi:schemaLocation=\"http://www.opengis.net/sld StyledLayerDescriptor.xsd\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
 				+ "<NamedLayer><Name>"
 				+ layer
@@ -37,46 +37,50 @@ myNamespace.mapViewer = (function(OL) {
 		return sld;
 	}
 	// front layers drawn on the map widget, can be toggled on/off
-	var mapLayers = {
-		datapoints : new OpenLayers.Layer.WMS("Data points", myNamespace.WMSserver, {
-			layers : 'gsadb3',
-			format : myNamespace.WMSformat,
-			transparent : true
-		}, {
-			isBaseLayer : false
-		}),
-		highlights : new OpenLayers.Layer.Vector("Basic search results", {
-			// highlight style: golden circles
-			styleMap : new OpenLayers.StyleMap({
-				"default" : new OpenLayers.Style({
-					pointRadius : 2,
-					fillColor : "#610B0B",
-					strokeColor : "#610B0B",
-					strokeWidth : 1,
-					graphicZIndex : 1
-				})
+	var mapLayers = {};
+	function initMapLayers() {
+		mapLayers = {
+			datapoints : new OpenLayers.Layer.WMS("Data points", myNamespace.WMSserver, {
+				layers : window.metaDataTable,
+				format : myNamespace.WMSformat,
+				transparent : true
+			}, {
+				isBaseLayer : false
 			}),
-			rendererOptions : {
-				// for guaranteeing highlights are drawn on top of WMS
-				// representation
-				zIndexing : true
-			},
-			projection : new OpenLayers.Projection("EPSG:4326")
-		}),
-		WMShighlights : new OpenLayers.Layer.WMS.Post("WMS Basic search results", myNamespace.WMSserver, {
-			layers : 'gsadb3',
-			format : myNamespace.WMSformat,
-			transparent : true,
-			sld_body : getSLD("Basic search results", "greensad:gsadb3", "#FFBF00", 2),
-			rendererOptions : {
-				// for guaranteeing highlights are drawn on top of WMS
-				// representation
-				zIndexing : true
-			},
-		}, {
-			isBaseLayer : false
-		}),
-	};
+			//TODO: move this out so its not actually there until a query is run
+			highlights : new OpenLayers.Layer.Vector("Basic search results", {
+				// highlight style: golden circles
+				styleMap : new OpenLayers.StyleMap({
+					"default" : new OpenLayers.Style({
+						pointRadius : 2,
+						fillColor : "#610B0B",
+						strokeColor : "#610B0B",
+						strokeWidth : 1,
+						graphicZIndex : 1
+					})
+				}),
+				rendererOptions : {
+					// for guaranteeing highlights are drawn on top of WMS
+					// representation
+					zIndexing : true
+				},
+				projection : new OpenLayers.Projection("EPSG:4326")
+			}),
+			/*WMShighlights : new OpenLayers.Layer.WMS.Post("WMS Basic search results", myNamespace.WMSserver, {
+				layers : window.metaDataTable,
+				format : myNamespace.WMSformat,
+				transparent : true,
+				sld_body : getSLD("Basic search results", "greensad:" + window.metaDataTable, "#FFBF00", 2),
+				rendererOptions : {
+					// for guaranteeing highlights are drawn on top of WMS
+					// representation
+					zIndexing : true
+				},
+			}, {
+				isBaseLayer : false
+			})*/
+		};
+	}
 
 	function getRandomColor() {
 		var letters = '0123456789ABCDEF'.split('');
@@ -109,6 +113,11 @@ myNamespace.mapViewer = (function(OL) {
 	};
 
 	function initMap() {
+		if (debugmW)
+			console.log("Starting initMap");
+		initMapLayers();
+		if (debugmW)
+			console.log("Initiated mapLayers");
 		// set some OpenLayers settings
 		// The proxy comes from
 		// nersc.greenseas.openlayersProxy.GwtOpenLayersProxyServlet
@@ -134,16 +143,25 @@ myNamespace.mapViewer = (function(OL) {
 		var graticule = new OpenLayers.Control.Graticule();
 		graticule.displayInLayerSwitcher = true;
 		map.addControl(graticule);
-
+		if (debugmW)
+			console.log("Added controls");
 		var bg = backgroundLayers, fg = mapLayers;
 
 		// testing at work
 		// map.addLayers([bg.generic, bg.marble, bg.ocean, fg.stations,
 		// fg.highlights]);
 
-		// TODO: rewrite to avoid hardcoding!!!
-		map.addLayers([ bg.generic, bg.ocean, /* bg.marble, */fg.datapoints, fg.highlights/*, fg.WMShighlights */]);
+		layers = [];
+		$.each(backgroundLayers, function(i,val){
+			layers.push(val);
+		});
+		$.each(mapLayers, function(i,val){
+			layers.push(val);
+		});
+		map.addLayers(layers);
 
+		if (debugmW)
+			console.log("Added mapLayers");
 		map.zoomToExtent(currentBounds, true);
 
 		// add drag-box mouse control to map
@@ -172,6 +190,8 @@ myNamespace.mapViewer = (function(OL) {
 
 		map.addControl(control);
 		registerClickBehaviour(fg.floats);
+		if (debugmW)
+			console.log("Finished initMap");
 	}
 
 	function registerClickBehaviour(layer) {

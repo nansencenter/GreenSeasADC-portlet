@@ -114,7 +114,7 @@ myNamespace.tableConstructor = (function($, hP) {
 				str += "<ul>";
 				$.each(hP.availableParameters[table], function(i, val) {
 					if (hP.mainParameters.parameters.indexOf(val) == -1) {
-						if (val.substring(val.length - 2) != 'qf')
+						if (val.substring(val.length - 2) != qfPostFix)
 							str += listItem(val, table);
 					}
 				});

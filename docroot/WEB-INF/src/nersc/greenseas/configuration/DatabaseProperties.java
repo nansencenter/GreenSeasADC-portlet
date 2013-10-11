@@ -21,7 +21,8 @@ public class DatabaseProperties {
 	 * on the form layerName.propertyName="Header" to a javascript object on the
 	 * form {layerName:{propertyName:header}}
 	 * 
-	 * @return A String on the format of a javascript object with parameterHeaders
+	 * @return A String on the format of a javascript object with
+	 *         parameterHeaders
 	 */
 	public static String getAllParametersHeader() {
 		StringBuffer allParametersHeader = new StringBuffer("{");
@@ -55,5 +56,49 @@ public class DatabaseProperties {
 		}
 		allParametersHeader.append("}}");
 		return allParametersHeader.toString();
+	}
+
+	/**
+	 * Reading in the parameterHeaders.properties file and adding the properties
+	 * on the form layerName.propertyName="Header" to a javascript object on the
+	 * form {layerName:{propertyName:header}}
+	 * 
+	 * @return A String on the format of a javascript object with
+	 *         parameterHeaders
+	 */
+	public static String getAllLayersHeader() {
+		StringBuffer allLayersHeader = new StringBuffer("{");
+		try {
+			Properties prop = new Properties();
+			prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream("layerHeaders.properties"));
+			Set<String> propNameSet = prop.stringPropertyNames();
+			String prefix = "";
+			for (String propName : propNameSet) {
+				allLayersHeader.append(prefix);
+				prefix = ",";
+				allLayersHeader.append(propName + ":" + prop.getProperty(propName));
+			}
+
+		} catch (Exception e) {
+			return "{}";
+		}
+		allLayersHeader.append("}");
+		return allLayersHeader.toString();
+	}
+	
+	public static String getAllProperties(){
+		StringBuffer properties = new StringBuffer();
+		try {
+			Properties prop = new Properties();
+			prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream("greenSeas.properties"));
+			Set<String> propNameSet = prop.stringPropertyNames();
+			for (String propName : propNameSet) {
+				properties.append("window."+propName +"="+prop.getProperty(propName)+";");
+			}
+
+		} catch (Exception e) {
+		}
+		System.out.println(properties.toString());
+		return properties.toString();
 	}
 }

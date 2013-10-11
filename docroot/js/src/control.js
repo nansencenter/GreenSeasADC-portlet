@@ -47,7 +47,7 @@ myNamespace.control = (function($, OL, ns) {
 			});
 		}
 		ns.WebFeatureService.describeFeatureType({
-			TYPENAME : ns.handleParameters.mainTable.name,
+			TYPENAME : metaDataTable,
 		}, function(response) {
 			initiateParameters(response);
 		});
@@ -130,7 +130,7 @@ myNamespace.control = (function($, OL, ns) {
 		$("#parametersTable").html("");
 
 		// should be the meta-data-layer
-		var layer = ns.handleParameters.mainTable.name;
+		var layer = metaDataTable;
 
 		var filterBbox = createfilterBoxHashMap();
 		var date = createDateHashMap();
@@ -159,7 +159,7 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function linkParametersExportButton() {
-		ns.buttonEventHandlers.linkParametersExportButton(ns.fileCreation.createCSV(data),
+		ns.buttonEventHandlers.linkParametersExportButton(ns.fileCreation.createCSV,data,
 				"data:text/csv;charset=utf-8", "Greenseas_Downloaded_Parameters.csv");
 	}
 
@@ -266,7 +266,7 @@ myNamespace.control = (function($, OL, ns) {
 				propertyName.push(parameter);
 				propertyNameNeed.push(parameter);
 				if (qf) {
-					propertyName.push(parameter + "qf");
+					propertyName.push(parameter + qfPostFix);
 				}
 			});
 
@@ -318,7 +318,7 @@ myNamespace.control = (function($, OL, ns) {
 				// search functionality not needed for parameter tables
 				'bFilter' : false
 			});
-			linkParametersExportButton();
+			linkParametersExportButton()
 			ns.mapViewer.addFeaturesFromData(data, "All parameters");
 			document.getElementById('exportParameter').disabled = false;
 			$("#exportParametersDiv").show();
@@ -334,7 +334,7 @@ myNamespace.control = (function($, OL, ns) {
 				propertyName.push(parameter);
 				propertyNameNeed.push(parameter);
 				if (qf) {
-					propertyName.push(parameter + "qf");
+					propertyName.push(parameter + qfPostFix);
 				}
 			});
 			ns.WebFeatureService.getFeature({
@@ -460,7 +460,7 @@ myNamespace.control = (function($, OL, ns) {
 			});
 		}
 		var table = ns.handleParameters.initiateParameters(input);
-		if (table != ns.handleParameters.mainTable.name) {
+		if (table != metaDataTable) {
 			tablesDone[table] = true;
 		}
 		$("#parametersTree").html(ns.tableConstructor.parametersList(tablesDone));

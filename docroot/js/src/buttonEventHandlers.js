@@ -66,11 +66,12 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		});
 	}
 
-	function linkParametersExportButton(csvContent, type, name) {
+	function linkParametersExportButton(callback, data, type, name) {
 		jQ("#exportParameter").unbind("click");
 		add(
 				"#exportParameter",
 				function() {
+					csvContent = callback(data);
 					try {
 						saveAs(new Blob([ csvContent ], {
 							type : type
@@ -88,6 +89,8 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 								type : type
 							}), name);
 						} else {
+							// saveAs("data:"+type+";base64,"+
+							// btoa(csvContent),name);
 							myNamespace.errorMessage
 									.showErrorMessage("Can not download because blob consutrctor is not supported in this browser!\nKnown supported browsers: \nChrome 29 on Windows\nFirefox 24 on Windows\nInternet Explorer 10 on Windows\n\nKnown not supported browsers:\nSafari 5 on Windows");
 						}
