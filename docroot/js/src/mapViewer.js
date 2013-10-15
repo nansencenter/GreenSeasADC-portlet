@@ -5,6 +5,7 @@ var debugmW = false;// debug flag
 // local service URLs
 // myNamespace.WMSserver = "http://localhost:8080/geoserver/cite/wms";//MOD
 myNamespace.WFSformat = "image/png";
+myNamespace.WMSformat = "image/png";
 
 // NERSC services
 myNamespace.WMSserver = "http://tomcat.nersc.no:8080/geoserver/greensad/wms";
@@ -22,6 +23,9 @@ myNamespace.mapViewer = (function(OL) {
 	// Object that stores the layers for the parameters
 	var parameterLayers = {};
 
+	// This SLD is partly taken from
+	// http://docs.geoserver.org/stable/en/user/styling/sld-cookbook/points.html#simple-point
+	// TODO: replace with styles for better performance?
 	function getSLD(title, layer, color, size) {
 		var sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 				+ "<StyledLayerDescriptor version=\"1.0.0\" xsi:schemaLocation=\"http://www.opengis.net/sld StyledLayerDescriptor.xsd\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
@@ -43,42 +47,12 @@ myNamespace.mapViewer = (function(OL) {
 			datapoints : new OpenLayers.Layer.WMS("Data points", myNamespace.WMSserver, {
 				layers : window.metaDataTable,
 				format : myNamespace.WMSformat,
+				/*styles : "TestingStyle",
+				env : "color:0BFF0B;size:5",*/
 				transparent : true
 			}, {
 				isBaseLayer : false
 			}),
-			//TODO: move this out so its not actually there until a query is run
-			highlights : new OpenLayers.Layer.Vector("Basic search results", {
-				// highlight style: golden circles
-				styleMap : new OpenLayers.StyleMap({
-					"default" : new OpenLayers.Style({
-						pointRadius : 2,
-						fillColor : "#610B0B",
-						strokeColor : "#610B0B",
-						strokeWidth : 1,
-						graphicZIndex : 1
-					})
-				}),
-				rendererOptions : {
-					// for guaranteeing highlights are drawn on top of WMS
-					// representation
-					zIndexing : true
-				},
-				projection : new OpenLayers.Projection("EPSG:4326")
-			}),
-			/*WMShighlights : new OpenLayers.Layer.WMS.Post("WMS Basic search results", myNamespace.WMSserver, {
-				layers : window.metaDataTable,
-				format : myNamespace.WMSformat,
-				transparent : true,
-				sld_body : getSLD("Basic search results", "greensad:" + window.metaDataTable, "#FFBF00", 2),
-				rendererOptions : {
-					// for guaranteeing highlights are drawn on top of WMS
-					// representation
-					zIndexing : true
-				},
-			}, {
-				isBaseLayer : false
-			})*/
 		};
 	}
 
@@ -98,12 +72,6 @@ myNamespace.mapViewer = (function(OL) {
 			layers : 'basic',
 			format : myNamespace.WMSformat
 		}),
-
-		/*
-		 * marble : new OpenLayers.Layer.WMS('Blue Marble',
-		 * 'http://disc1.gsfc.nasa.gov/daac-bin/wms_ogc', { layers :
-		 * 'bluemarble', format : myNamespace.WMSformat }),
-		 */
 
 		ocean : new OpenLayers.Layer.WMS('GEBCO Bathymetry',
 				'http://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?', {
@@ -135,27 +103,22 @@ myNamespace.mapViewer = (function(OL) {
 					new OpenLayers.Control.Attribution() ]
 		});
 
+		// Adding the controls to the map
 		map.addControl(new OpenLayers.Control.LayerSwitcher());
 		map.addControl(new OpenLayers.Control.MousePosition());
 		map.addControl(new OpenLayers.Control.OverviewMap());
 		map.addControl(new OpenLayers.Control.PanZoomBar());
-
 		var graticule = new OpenLayers.Control.Graticule();
 		graticule.displayInLayerSwitcher = true;
 		map.addControl(graticule);
-		if (debugmW)
-			console.log("Added controls");
+
+		// Adding the layers to the map
 		var bg = backgroundLayers, fg = mapLayers;
-
-		// testing at work
-		// map.addLayers([bg.generic, bg.marble, bg.ocean, fg.stations,
-		// fg.highlights]);
-
 		layers = [];
-		$.each(backgroundLayers, function(i,val){
+		$.each(backgroundLayers, function(i, val) {
 			layers.push(val);
 		});
-		$.each(mapLayers, function(i,val){
+		$.each(mapLayers, function(i, val) {
 			layers.push(val);
 		});
 		map.addLayers(layers);
@@ -219,15 +182,6 @@ myNamespace.mapViewer = (function(OL) {
 		parameterLayers = {};
 	}
 
-	function highlightFeatures(features) {
-		// remove old highlights, add the new ones
-		mapLayers.highlights.removeAllFeatures();
-		removeAllParameterLayers();
-		mapLayers.highlights.addFeatures(features);
-		if (debugmW)
-			console.log("Layer index for highlights: " + map.getLayerIndex(mapLayers.highlights));
-	}
-
 	function addFeaturesFromData(data, name) {
 		if (debugmW)
 			console.log("addFeaturesFromData started");
@@ -249,42 +203,78 @@ myNamespace.mapViewer = (function(OL) {
 			console.log("addFeaturesFromData ended");
 	}
 
-	function addLayer(features, name) {
+	// From
+	// http://docs.geoserver.org/stable/en/user/services/wms/basics.html#axis-ordering
+	// - The WMS 1.3 specification mandates that the axis ordering for
+	// geographic coordinate systems defined in the EPSG database be
+	// latitude/longitude, or y/x. This is contrary to the fact that most
+	// spatial data is usually in longitude/latitude, or x/y.
+	function swapLonLatInFilteR(filter) {
 		if (debugmW)
-			console.log("Adding a layer: " + name);
-		var color = getRandomColor();
-		var layer = new OL.Layer.Vector(name, {
-			// highlight style: golden circles
-			styleMap : new OL.StyleMap({
-				"default" : new OL.Style({
-					pointRadius : 2,
-					fillColor : color,
-					strokeColor : color,
-					strokeWidth : 1,
-					graphicZIndex : 1
-				})
-			}),
-			rendererOptions : {
-				// for guaranteeing highlights are drawn on top of WMS
-				// representation
-				zIndexing : true
-			},
-			projection : new OL.Projection("EPSG:4326")
-		// MOD (Was: EPSG:4269)
-		});
-		layer.addFeatures(features);
-		if (debugmW)
-			console.log(parameterLayers);
-		if (name in parameterLayers) {
+			console.log("swapLonLatInFilteR started with filter:" + filter);
+		if (filter) {
+			var newFilter = "";
+			var startSub = filter.indexOf("<gml:coordinates decimal=\".\" cs=\",\" ts=\" \">") + 43;
+			// Check if there actually is a bbox
+			if (startSub == 42)
+				return filter;
+			var endSub = filter.indexOf("</gml:coordinates>");
+			newFilter += filter.substring(0, startSub);
+
+			var oldCoordinates = filter.substring(startSub, endSub);
+			var lonLat = oldCoordinates.split(" ");
+			var lonLatsplitd = [ lonLat[0].split(","), lonLat[1].split(",") ];
+			var newCoordinates = lonLatsplitd[0][1] + "," + lonLatsplitd[0][0] + " " + lonLatsplitd[1][1] + ","
+					+ lonLatsplitd[1][0];
+			newFilter += newCoordinates;
+			newFilter += filter.substring(endSub);
 			if (debugmW)
-				console.log("name in parameterLayers: " + parameterLayers[name]);
-			map.removeLayer(parameterLayers[name]);
+				console.log("swapLonLatInFilteR ended with filter:" + newFilter);
+			return newFilter;
+		} else {
+			return "";// <ogc:Filter
+			// xmlns:ogc=\"http://www.opengis.net/ogc\"></ogc:Filter>
+			// ?
 		}
+	}
+
+	// Adding a layer with a filter and name to the map using a WMS. The
+	// handling of the metadatatable is customized. name should not be "Data
+	// points"
+	function addLayerWMS(filter, layer, name) {
 		if (debugmW)
-			console.log("Came here also");
-		map.addLayer(layer);
-		map.setLayerIndex(layer, 9999);
-		parameterLayers[name] = layer;
+			console.log("addLayerWMS started");
+		var layers = parameterLayers;
+		var index = 9999;
+		var color = window[layer+"Color"] || "#610B0B";
+		var newLayer;
+		if (layer == window.metaDataTable) {
+			index = 9998;
+			layers = mapLayers;
+		} else {
+			color = window[layer+"Color"] || getRandomColor();
+		}
+		if (name in layers) {
+			if (debugmW)
+				console.log("name in parameterLayers: " + layers[name]);
+			map.removeLayer(layers[name]);
+		}
+
+		newLayer = new OpenLayers.Layer.WMS(name, myNamespace.WMSserver, {
+			layers : layer,
+			transparent : true,
+			filter : swapLonLatInFilteR(filter),
+			/*tileOptions: {maxGetUrlLength: 10},*/
+			sld_body : getSLD(name, database + ":" + layer, color, 4),
+			format : myNamespace.WMSformat
+		}, {
+			isBaseLayer : false
+		});
+		if (debugmW)
+			console.log("created the new layer");
+		map.addLayer(newLayer);
+		map.setLayerIndex(newLayer, index);
+		layers[name] = newLayer;
 		if (debugmW)
 			console.log("Added the layer: " + name);
 	}
@@ -299,11 +289,10 @@ myNamespace.mapViewer = (function(OL) {
 
 	// public interface
 	return {
+		addLayerWMS : addLayerWMS,
 		addFeaturesFromData : addFeaturesFromData,
 		removeAllParameterLayers : removeAllParameterLayers,
-		addLayer : addLayer,
 		initMap : initMap,
-		highlightFeatures : highlightFeatures,
 		getExtent : getExtent,
 		zoomToExtent : zoomToExtent,
 	};

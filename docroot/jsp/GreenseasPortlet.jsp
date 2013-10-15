@@ -145,9 +145,12 @@
 </div>
 
 <aui:script>
+	<!-- Initiating all properties from the main properties file -->
 	<%=renderRequest.getAttribute("allProperties")%>
-	window.allParametersHeader = <%=renderRequest.getAttribute("allParametersHeader")%>;
-	window.allLayersHeader = <%=renderRequest.getAttribute("allLayersHeader")%>;
+	<!-- Initiating window.allParametersHeader -->
+	<%=renderRequest.getAttribute("allParametersHeader")%>
+	<!-- Initiating window.allLayersHeader and window.allLayers -->
+	<%=renderRequest.getAttribute("allLayers")%>
 	window.portletNameSpace = '<portlet:namespace />';
 	window.ajaxCallResourceURL = '<%=ajaxCallResourceURL.toString()%>';
 	$(document).ready(function() {

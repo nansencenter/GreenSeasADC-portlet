@@ -48,7 +48,7 @@ public class GreenseasPortlet extends MVCPortlet {
 	@Override
 	public void doView(RenderRequest renderRequest, RenderResponse renderResponse) throws IOException, PortletException {
 		renderRequest.setAttribute("allParametersHeader", DatabaseProperties.getAllParametersHeader());
-		renderRequest.setAttribute("allLayersHeader", DatabaseProperties.getAllLayersHeader());
+		renderRequest.setAttribute("allLayers", DatabaseProperties.getAllLayers());
 		renderRequest.setAttribute("allProperties", DatabaseProperties.getAllProperties());
 		super.doView(renderRequest, renderResponse);
 	}

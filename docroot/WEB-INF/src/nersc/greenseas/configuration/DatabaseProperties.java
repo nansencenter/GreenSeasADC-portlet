@@ -25,7 +25,7 @@ public class DatabaseProperties {
 	 *         parameterHeaders
 	 */
 	public static String getAllParametersHeader() {
-		StringBuffer allParametersHeader = new StringBuffer("{");
+		StringBuffer allParametersHeader = new StringBuffer("window.allParametersHeader = {");
 		try {
 			Properties prop = new Properties();
 			prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream("parameterHeaders.properties"));
@@ -52,9 +52,9 @@ public class DatabaseProperties {
 				allParametersHeader.append(propArray[1] + ":" + propArray[2]);
 			}
 		} catch (Exception e) {
-			return "{}";
+			return "window.allParametersHeader = {};";
 		}
-		allParametersHeader.append("}}");
+		allParametersHeader.append("}};");
 		return allParametersHeader.toString();
 	}
 
@@ -66,39 +66,43 @@ public class DatabaseProperties {
 	 * @return A String on the format of a javascript object with
 	 *         parameterHeaders
 	 */
-	public static String getAllLayersHeader() {
-		StringBuffer allLayersHeader = new StringBuffer("{");
+	public static String getAllLayers() {
+		StringBuffer allLayersHeader = new StringBuffer("window.allLayersHeader = {");
+		StringBuffer allLayers = new StringBuffer("window.allLayers = {");
 		try {
 			Properties prop = new Properties();
 			prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream("layerHeaders.properties"));
 			Set<String> propNameSet = prop.stringPropertyNames();
 			String prefix = "";
 			for (String propName : propNameSet) {
+				allLayers.append(prefix);
 				allLayersHeader.append(prefix);
 				prefix = ",";
+				allLayers.append(propName + ": false");
 				allLayersHeader.append(propName + ":" + prop.getProperty(propName));
 			}
 
 		} catch (Exception e) {
-			return "{}";
+			return "window.allLayersHeader = {};window.allLayers = {};";
 		}
-		allLayersHeader.append("}");
-		return allLayersHeader.toString();
+		allLayersHeader.append("};");
+		allLayers.append("};");
+		return allLayersHeader.toString()+allLayers.toString();
 	}
-	
-	public static String getAllProperties(){
+
+	public static String getAllProperties() {
 		StringBuffer properties = new StringBuffer();
 		try {
 			Properties prop = new Properties();
 			prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream("greenSeas.properties"));
 			Set<String> propNameSet = prop.stringPropertyNames();
 			for (String propName : propNameSet) {
-				properties.append("window."+propName +"="+prop.getProperty(propName)+";");
+				properties.append("window." + propName + "=" + prop.getProperty(propName) + ";");
 			}
 
 		} catch (Exception e) {
+			return "";
 		}
-		System.out.println(properties.toString());
 		return properties.toString();
 	}
 }

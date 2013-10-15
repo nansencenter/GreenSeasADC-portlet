@@ -15,6 +15,7 @@
 		<header-portlet-css>/css/qunit-1.11.0.css</header-portlet-css>
 		<!-- application css-->
 		<header-portlet-css>/css/main.css</header-portlet-css>
+		<header-portlet-css>/js/lib/theme/default/style.css</header-portlet-css>
 		<!-- application libs -->
 		<header-portlet-javascript>/js/lib/jquery.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/lib/FileSaver.js</header-portlet-javascript>
@@ -39,7 +40,6 @@
 		<header-portlet-javascript>/js/src/query.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/src/webFeatureService.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/src/tableConstructor.js</header-portlet-javascript>
-		<css-class-wrapper>test-portlet</css-class-wrapper>
 	</portlet>
 	<role-mapper>
 		<role-name>administrator</role-name>

@@ -102,14 +102,14 @@ myNamespace.tableConstructor = (function($, hP) {
 		return "<li id=\"" + table + ":" + value + "\"><a>" + hP.getHeader(value, table) + "</a></li>";
 	}
 
-	function parametersList(tablesDone) {
+	function parametersList() {
 		if (debugtC)
 			console.log("Making parameters");
 		str = "<ul>";
-		for ( var table in tablesDone) {
+		for ( var table in allLayers) {
 			if (debugtC)
 				console.log("tablesDone[table] where table= " + table);
-			if (tablesDone[table]) {
+			if (allLayers[table]) {
 				str += "<li id=\"" + table + "\"><a>" + hP.getTableHeader(table) + "</a>";
 				str += "<ul>";
 				$.each(hP.availableParameters[table], function(i, val) {
