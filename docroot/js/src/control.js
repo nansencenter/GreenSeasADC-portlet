@@ -458,6 +458,7 @@ myNamespace.control = (function($, OL, ns) {
 			"plugins" : [ "themes", "html_data", "ui", "checkbox" ],
 			"themes" : {
 				"theme" : "default",
+				/*This url is not necessary - The loading of it is disabled in jstree - Liferay loads the css itself - see liferay-portlet.xml to change the theme*/
 				"url" : "/css/style.css",
 				/*"dots" : false,*/
 				"icons" : false
