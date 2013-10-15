@@ -16,7 +16,7 @@ myNamespace.XMLParser = (function($) {
 
 	function getNumberOfFeatures(response) {
 		var xmlDoc = getXmlDoc(response);
-		if (debugXML){
+		if (debugXML) {
 			console.log("xmlDoc");
 			console.log(xmlDoc);
 			console.log("xmlDoc.documentElement:");
@@ -49,13 +49,16 @@ myNamespace.XMLParser = (function($) {
 		if (debugXML) {
 			console.log(xmlDoc.documentElement.childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes[1]
 					.getAttribute("name"));
+			console.log(xmlDoc.documentElement.childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes);
 		}
 
 		var sequence = xmlDoc.documentElement.childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes;
 		var numberOfParameters = sequence.length;
-		for ( var i = 1; i < numberOfParameters; i += 2) {
-			if (debugXML)
+		for ( var i = numberOfParameters - 2; i >= 1; i -= 2) {
+			if (debugXML) {
+				console.log(sequence.item(i));
 				console.log("extractParameters FOUND PARAMETER: " + sequence.item(i).getAttribute("name"));
+			}
 			parameters.push(sequence.item(i).getAttribute("name"));
 		}
 		if (debugXML)
