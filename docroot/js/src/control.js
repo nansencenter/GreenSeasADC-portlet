@@ -194,6 +194,8 @@ myNamespace.control = (function($, OL, ns) {
 		replaceId(basicData);
 		var length = jsonObject.features.length;
 
+		if (debugc)
+			console.log("length is ok");
 		if (length < 1) {
 			document.getElementById('list').innerHTML = "No results found.";
 		} else {
@@ -262,7 +264,7 @@ myNamespace.control = (function($, OL, ns) {
 			// request and sending response to displayParameter
 			ns.WebFeatureService.getFeature({
 				TYPENAME : layer,
-				PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
+				PROPERTYNAMES : [ "point" ].concat(propertyName),
 				FILTER : filter,
 			}, function(response) {
 				displayParameter(response, layer, filter);
@@ -329,7 +331,7 @@ myNamespace.control = (function($, OL, ns) {
 			// request and sending response to displayParameter
 			ns.WebFeatureService.getFeature({
 				TYPENAME : layer,
-				PROPERTYNAME : [ "point" ].concat(propertyName).toString(),
+				PROPERTYNAMES : [ "point" ].concat(propertyName),
 				FILTER : filter,
 			}, function(response) {
 				displayParameter(response, layer, filter);

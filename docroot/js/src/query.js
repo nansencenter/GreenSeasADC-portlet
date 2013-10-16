@@ -198,7 +198,7 @@ myNamespace.query = (function(OL) {
 	function filterToXmlString(filter) {
 		if (debugq)
 			console.log("filterToXmlString starting with filter:" + JSON.stringify(filter));// TEST
-		var formatter = new OL.Format.Filter();
+		var formatter = new OL.Format.Filter.v1_1_0();
 		var xmlFormat = new OL.Format.XML();
 		var written = formatter.write(filter);
 		var writtenXML = xmlFormat.write(written);

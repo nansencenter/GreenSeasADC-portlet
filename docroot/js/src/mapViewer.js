@@ -3,7 +3,7 @@ var myNamespace = myNamespace || {};
 var debugmW = false;// debug flag
 
 // local service URLs
-// myNamespace.WMSserver = "http://localhost:8080/geoserver/cite/wms";//MOD
+// myNamespace.WMSserver = "http://localhost:8090/geoserver/greensad/wms";//MOD
 myNamespace.WFSformat = "image/png";
 myNamespace.WMSformat = "image/png";
 
@@ -47,8 +47,9 @@ myNamespace.mapViewer = (function(OL) {
 			datapoints : new OpenLayers.Layer.WMS("Data points", myNamespace.WMSserver, {
 				layers : window.metaDataTable,
 				format : myNamespace.WMSformat,
-				/*styles : "TestingStyle",
-				env : "color:0BFF0B;size:5",*/
+				/*
+				 * styles : "TestingStyle", env : "color:0BFF0B;size:5",
+				 */
 				transparent : true
 			}, {
 				isBaseLayer : false
@@ -214,19 +215,31 @@ myNamespace.mapViewer = (function(OL) {
 			console.log("swapLonLatInFilteR started with filter:" + filter);
 		if (filter) {
 			var newFilter = "";
-			var startSub = filter.indexOf("<gml:coordinates decimal=\".\" cs=\",\" ts=\" \">") + 43;
+			var startSub = filter.indexOf("<gml:lowerCorner>") + 17;
 			// Check if there actually is a bbox
-			if (startSub == 42)
+			if (startSub == 16)
 				return filter;
-			var endSub = filter.indexOf("</gml:coordinates>");
+			var endSub = filter.indexOf("</gml:lowerCorner>");
 			newFilter += filter.substring(0, startSub);
 
 			var oldCoordinates = filter.substring(startSub, endSub);
 			var lonLat = oldCoordinates.split(" ");
-			var lonLatsplitd = [ lonLat[0].split(","), lonLat[1].split(",") ];
-			var newCoordinates = lonLatsplitd[0][1] + "," + lonLatsplitd[0][0] + " " + lonLatsplitd[1][1] + ","
-					+ lonLatsplitd[1][0];
-			newFilter += newCoordinates;
+			newFilter += lonLat[1] + " " + lonLat[0];
+			// var newCoordinates = lonLatsplitd[0][1] + "," +
+			// lonLatsplitd[0][0] + " " + lonLatsplitd[1][1] + ","
+			// + lonLatsplitd[1][0];
+			// newFilter += newCoordinates;
+			var startSub = filter.indexOf("<gml:upperCorner>") + 17;
+			// Check if there actually is a bbox
+			if (startSub == 16)
+				return filter;
+			newFilter += filter.substring(endSub, startSub);
+			endSub = filter.indexOf("</gml:upperCorner>");
+
+			oldCoordinates = filter.substring(startSub, endSub);
+			lonLat = oldCoordinates.split(" ");
+			newFilter += lonLat[1] + " " + lonLat[0];
+
 			newFilter += filter.substring(endSub);
 			if (debugmW)
 				console.log("swapLonLatInFilteR ended with filter:" + newFilter);
@@ -246,13 +259,13 @@ myNamespace.mapViewer = (function(OL) {
 			console.log("addLayerWMS started");
 		var layers = parameterLayers;
 		var index = 9999;
-		var color = window[layer+"Color"] || "#610B0B";
+		var color = window[layer + "Color"] || "#610B0B";
 		var newLayer;
 		if (layer == window.metaDataTable) {
 			index = 9998;
 			layers = mapLayers;
 		} else {
-			color = window[layer+"Color"] || getRandomColor();
+			color = window[layer + "Color"] || getRandomColor();
 		}
 		if (name in layers) {
 			if (debugmW)
@@ -264,11 +277,13 @@ myNamespace.mapViewer = (function(OL) {
 			layers : layer,
 			transparent : true,
 			filter : swapLonLatInFilteR(filter),
-			/*tileOptions: {maxGetUrlLength: 10},*/
 			sld_body : getSLD(name, database + ":" + layer, color, 4),
 			format : myNamespace.WMSformat
 		}, {
-			isBaseLayer : false
+			isBaseLayer : false,
+			tileOptions : {
+				maxGetUrlLength : 2048
+			},
 		});
 		if (debugmW)
 			console.log("created the new layer");
