@@ -5,27 +5,26 @@ var debugwfs = false;// debug flag
 myNamespace.WebFeatureService = (function(jQ, OL) {
 	"use strict";
 
-	var server = "http://tomcat.nersc.no:8080/geoserver/greensad/wfs";
-	// server = "http://localhost:8090/geoserver/greensad/wfs";
-	if (debugwfs)
-		console.log("webFeatureService.js: server=" + server);// TEST
+
 
 	// fires an asyn. HTTP GET request to server
-	function asyncGetRequest(parameters, callback) {
+	function asyncGetRequest(parameters, callback) {	if (debugwfs)
+		console.log("asyncGetRequest: server=" + window.WFSServer);// TEST
 		OL.Request.GET({
-			url : server,
+			url : window.WFSServer,
 			params : parameters,
 			callback : callback
 		});
 	}
 
-	// fires an asyn. HTTP POST request to server
+	// fires an asyn. HTTP POST request to window.WFSServer with "Content-Type"
+	// : "text/xml;charset=utf-8"
 	function asyncPostRequest(parametersXML, callback) {
 
 		if (debugwfs)
 			console.log("asyncRequest data: " + parametersXML);// TEST
 		OL.Request.POST({
-			url : server,
+			url : window.WFSServer,
 			data : parametersXML,
 			headers : {
 				"Content-Type" : "text/xml;charset=utf-8"
@@ -39,12 +38,12 @@ myNamespace.WebFeatureService = (function(jQ, OL) {
 	function convertParametersToGetFeatureXML(parameters) {
 		var propertyName = "";
 		if (parameters.PROPERTYNAME) {
-			propertyName = "propertyName=\"greensad:" + parameters.PROPERTYNAME + "\" ";
+			propertyName = "propertyName=\"" + window.database + ":" + parameters.PROPERTYNAME + "\" ";
 		}
 		var propertyNames = "";
 		if (parameters.PROPERTYNAMES) {
 			jQ.each(parameters.PROPERTYNAMES, function(i, val) {
-				propertyNames += "<PropertyName>greensad:" + val + "</PropertyName>";
+				propertyNames += "<PropertyName>" + window.database + ":" + val + "</PropertyName>";
 			});
 		}
 		var resultType = "";
@@ -58,12 +57,8 @@ myNamespace.WebFeatureService = (function(jQ, OL) {
 				+ resultType + "xmlns=\"http://www.opengis.net/wfs\" "
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
 				+ "xsi:schemaLocation=\"http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">"
-				+ "<Query typeName=\"" + "greensad:" + parameters.TYPENAME + "\" srsName=\"urn:ogc:def:crs:EPSG::4326\">" + propertyNames + filter
-				+ "</Query>"
-				/*
-				 * + "<OutputFormat>" + "json" + "</OutputFormat>"
-				 */
-				+ "</GetFeature>";
+				+ "<Query typeName=\"" + window.database + ":" + parameters.TYPENAME
+				+ "\" srsName=\"urn:ogc:def:crs:EPSG::4326\">" + propertyNames + filter + "</Query>" + "</GetFeature>";
 
 		return xml;
 	}
@@ -71,19 +66,7 @@ myNamespace.WebFeatureService = (function(jQ, OL) {
 	// fires a GetFeature WFS request to server
 	function getFeature(extraParameters, callback) {
 		if (debugwfs)
-			console.log("webFeatureService.js: start of getFeature()");// TEST
-		// some default parameters that will be set automatically if not
-		// overridden in extraParams
-		var parameters = {
-			REQUEST : "GetFeature",
-			SERVICE : "WFS",
-			VERSION : "1.1.0",
-			OUTPUTFORMAT : "json"
-		};
-
-		// extend provided parameters onto default parameters, make request
-		if (debugwfs)
-			console.log("webFeatureService.js: calling asyncGetRequest()");// TEST
+			console.log("getFeature: calling asyncGetRequest()");// TEST
 		// asyncGetRequest(jQ.extend(parameters, extraParameters), callback);
 		var parametersXML = convertParametersToGetFeatureXML(extraParameters);
 		asyncPostRequest(parametersXML, callback);

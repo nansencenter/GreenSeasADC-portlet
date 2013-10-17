@@ -145,15 +145,15 @@
 </div>
 
 <aui:script>
-	<!-- Initiating all properties from the main properties file -->
-	<%=renderRequest.getAttribute("allProperties")%>
-	<!-- Initiating window.allParametersHeader -->
-	<%=renderRequest.getAttribute("allParametersHeader")%>
-	<!-- Initiating window.allLayersHeader and window.allLayers -->
-	<%=renderRequest.getAttribute("allLayers")%>
-	window.portletNameSpace = '<portlet:namespace />';
-	window.ajaxCallResourceURL = '<%=ajaxCallResourceURL.toString()%>';
 	$(document).ready(function() {
+		<!-- Initiating all properties from the main properties file -->
+		<%=renderRequest.getAttribute("allProperties")%>
+		<!-- Initiating window.allParametersHeader -->
+		<%=renderRequest.getAttribute("allParametersHeader")%>
+		<!-- Initiating window.allLayersHeader and window.allLayers -->
+		<%=renderRequest.getAttribute("allLayers")%>
+		window.portletNameSpace = '<portlet:namespace />';
+		window.ajaxCallResourceURL = '<%=ajaxCallResourceURL.toString()%>';
 		myNamespace.control.init();
 	});
 </aui:script>

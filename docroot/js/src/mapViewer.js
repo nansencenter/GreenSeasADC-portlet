@@ -2,13 +2,7 @@ var myNamespace = myNamespace || {};
 
 var debugmW = false;// debug flag
 
-// local service URLs
-// myNamespace.WMSserver = "http://localhost:8090/geoserver/greensad/wms";//MOD
-myNamespace.WFSformat = "image/png";
-myNamespace.WMSformat = "image/png";
 
-// NERSC services
-myNamespace.WMSserver = "http://tomcat.nersc.no:8080/geoserver/greensad/wms";
 
 myNamespace.mapViewer = (function(OL) {
 	"use strict";
@@ -44,9 +38,9 @@ myNamespace.mapViewer = (function(OL) {
 	var mapLayers = {};
 	function initMapLayers() {
 		mapLayers = {
-			datapoints : new OpenLayers.Layer.WMS("Data points", myNamespace.WMSserver, {
+			datapoints : new OpenLayers.Layer.WMS("Data points", window.WMSServer, {
 				layers : window.metaDataTable,
-				format : myNamespace.WMSformat,
+				format : window.WMSformat,
 				/*
 				 * styles : "TestingStyle", env : "color:0BFF0B;size:5",
 				 */
@@ -71,13 +65,13 @@ myNamespace.mapViewer = (function(OL) {
 
 		generic : new OpenLayers.Layer.WMS("Generic background", "http://vmap0.tiles.osgeo.org/wms/vmap0", {
 			layers : 'basic',
-			format : myNamespace.WMSformat
+			format : window.WMSformat
 		}),
 
 		ocean : new OpenLayers.Layer.WMS('GEBCO Bathymetry',
 				'http://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?', {
 					layers : 'gebco_08_grid',
-					format : myNamespace.WMSformat
+					format : window.WMSformat
 				})
 	};
 
@@ -162,7 +156,7 @@ myNamespace.mapViewer = (function(OL) {
 
 		// clicking feature opens popup with basic info
 		var info = new OpenLayers.Control.WMSGetFeatureInfo({
-			url : myNamespace.WMSserver,
+			url : window.WMSServer,
 			title : 'Identify features by clicking',
 			queryVisible : true,
 			maxFeatures : 1,
@@ -273,12 +267,12 @@ myNamespace.mapViewer = (function(OL) {
 			map.removeLayer(layers[name]);
 		}
 
-		newLayer = new OpenLayers.Layer.WMS(name, myNamespace.WMSserver, {
+		newLayer = new OpenLayers.Layer.WMS(name, window.WMSServer, {
 			layers : layer,
 			transparent : true,
 			filter : swapLonLatInFilteR(filter),
 			sld_body : getSLD(name, database + ":" + layer, color, 4),
-			format : myNamespace.WMSformat
+			format : window.WMSformat
 		}, {
 			isBaseLayer : false,
 			tileOptions : {

@@ -87,7 +87,7 @@ public class DatabaseProperties {
 		}
 		allLayersHeader.append("};");
 		allLayers.append("};");
-		return allLayersHeader.toString()+allLayers.toString();
+		return allLayersHeader.toString() + allLayers.toString();
 	}
 
 	public static String getAllProperties() {
