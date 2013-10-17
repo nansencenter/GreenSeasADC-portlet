@@ -28,11 +28,11 @@ myNamespace.XMLParser = (function($) {
 	function getXmlDoc(xmlSchema) {
 		var xmlDoc;
 		var browser = findBrowser();
-		if (browser == "Chrome" || browser == "Firefox") {
+		/*if (browser == "Chrome" || browser == "Firefox") {
 			xmlDoc = xmlSchema.responseXML;
-		} else {
+		} else {*/
 			xmlDoc = xmlSchema._object.responseXML;
-		}
+		//}
 		return xmlDoc;
 	}
 

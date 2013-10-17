@@ -5,11 +5,8 @@ var debugwfs = false;// debug flag
 myNamespace.WebFeatureService = (function(jQ, OL) {
 	"use strict";
 
-
-
 	// fires an asyn. HTTP GET request to server
-	function asyncGetRequest(parameters, callback) {	if (debugwfs)
-		console.log("asyncGetRequest: server=" + window.WFSServer);// TEST
+	function asyncGetRequest(parameters, callback) {
 		OL.Request.GET({
 			url : window.WFSServer,
 			params : parameters,
@@ -20,7 +17,6 @@ myNamespace.WebFeatureService = (function(jQ, OL) {
 	// fires an asyn. HTTP POST request to window.WFSServer with "Content-Type"
 	// : "text/xml;charset=utf-8"
 	function asyncPostRequest(parametersXML, callback) {
-
 		if (debugwfs)
 			console.log("asyncRequest data: " + parametersXML);// TEST
 		OL.Request.POST({
@@ -29,7 +25,6 @@ myNamespace.WebFeatureService = (function(jQ, OL) {
 			headers : {
 				"Content-Type" : "text/xml;charset=utf-8"
 			},
-
 			callback : callback
 		});
 

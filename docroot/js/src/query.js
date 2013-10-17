@@ -100,7 +100,7 @@ myNamespace.query = (function(OL) {
 		return new OL.Filter.Spatial({
 			type : OL.Filter.Spatial.BBOX,
 			value : bbox,
-			property : "point" // Was: stpoint
+			property : window.geometryParameter
 		});
 	}
 

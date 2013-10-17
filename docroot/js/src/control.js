@@ -115,6 +115,7 @@ myNamespace.control = (function($, OL, ns) {
 	function mainQueryButton() {
 		// removing the parameterlayers from previous searches
 		ns.mapViewer.removeAllParameterLayers();
+		ns.mapViewer.removeBasicSearchLayer();
 		$("#exportParametersDiv").hide();
 		if (debugc)
 			console.log("control.js: start of mainQueryButton()");// TEST
@@ -199,7 +200,7 @@ myNamespace.control = (function($, OL, ns) {
 		if (length < 1) {
 			document.getElementById('list').innerHTML = "No results found.";
 		} else {
-			highLightFeaturesWMS(filter, metaDataTable, "Basic search results");
+			highLightFeaturesWMS(filter, metaDataTable, window.basicSearchName);
 			updateTreeInventoryNumbers();
 			var constructedTable = ns.tableConstructor.featureTable("filterTable", jsonObject.features);
 
@@ -264,7 +265,7 @@ myNamespace.control = (function($, OL, ns) {
 			// request and sending response to displayParameter
 			ns.WebFeatureService.getFeature({
 				TYPENAME : layer,
-				PROPERTYNAMES : [ "point" ].concat(propertyName),
+				PROPERTYNAMES : [ window.geometryParameter ].concat(propertyName),
 				FILTER : filter,
 			}, function(response) {
 				displayParameter(response, layer, filter);
@@ -331,7 +332,7 @@ myNamespace.control = (function($, OL, ns) {
 			// request and sending response to displayParameter
 			ns.WebFeatureService.getFeature({
 				TYPENAME : layer,
-				PROPERTYNAMES : [ "point" ].concat(propertyName),
+				PROPERTYNAMES : [ window.geometryParameter ].concat(propertyName),
 				FILTER : filter,
 			}, function(response) {
 				displayParameter(response, layer, filter);
@@ -451,18 +452,15 @@ myNamespace.control = (function($, OL, ns) {
 		}
 		$("#parametersTree").html(ns.tableConstructor.parametersList());
 		// init the parameters tree
-		$("#parametersTree")
-		// call `.jstree` with the options object
-		.jstree({
-			// the `plugins` array allows you to configure the active
-			// plugins on
-			// this instance
-			"plugins" : [ "themes", "html_data", "ui", "checkbox" ],
+		$("#parametersTree").jstree({
+			"plugins" : [ "themes", "html_data", "checkbox" ],
 			"themes" : {
 				"theme" : "default",
-				/*This url is not necessary - The loading of it is disabled in jstree - Liferay loads the css itself - see liferay-portlet.xml to change the theme*/
-				"url" : "/css/style.css",
-				/*"dots" : false,*/
+				/*
+				 * Specification of the style is not necessary - The loading of
+				 * it is disabled in jstree - Liferay loads the css itself - see
+				 * liferay-portlet.xml to change the theme
+				 */
 				"icons" : false
 			}
 		});

@@ -2,8 +2,6 @@ var myNamespace = myNamespace || {};
 
 var debugmW = false;// debug flag
 
-
-
 myNamespace.mapViewer = (function(OL) {
 	"use strict";
 	// TODO fix bound
@@ -176,6 +174,13 @@ myNamespace.mapViewer = (function(OL) {
 			map.removeLayer(parameterLayers[layer]);
 		parameterLayers = {};
 	}
+	
+	function removeBasicSearchLayer(){
+		if (window.basicSearchName in mapLayers){
+			map.removeLayer(mapLayers[window.basicSearchName]);
+			delete mapLayers[window.basicSearchName];
+		}
+	}
 
 	function addFeaturesFromData(data, name) {
 		if (debugmW)
@@ -219,12 +224,8 @@ myNamespace.mapViewer = (function(OL) {
 			var oldCoordinates = filter.substring(startSub, endSub);
 			var lonLat = oldCoordinates.split(" ");
 			newFilter += lonLat[1] + " " + lonLat[0];
-			// var newCoordinates = lonLatsplitd[0][1] + "," +
-			// lonLatsplitd[0][0] + " " + lonLatsplitd[1][1] + ","
-			// + lonLatsplitd[1][0];
-			// newFilter += newCoordinates;
 			var startSub = filter.indexOf("<gml:upperCorner>") + 17;
-			// Check if there actually is a bbox
+			// Check if there actually is a bbox again
 			if (startSub == 16)
 				return filter;
 			newFilter += filter.substring(endSub, startSub);
@@ -239,9 +240,7 @@ myNamespace.mapViewer = (function(OL) {
 				console.log("swapLonLatInFilteR ended with filter:" + newFilter);
 			return newFilter;
 		} else {
-			return "";// <ogc:Filter
-			// xmlns:ogc=\"http://www.opengis.net/ogc\"></ogc:Filter>
-			// ?
+			return "";
 		}
 	}
 
@@ -301,6 +300,7 @@ myNamespace.mapViewer = (function(OL) {
 		addLayerWMS : addLayerWMS,
 		addFeaturesFromData : addFeaturesFromData,
 		removeAllParameterLayers : removeAllParameterLayers,
+		removeBasicSearchLayer : removeBasicSearchLayer,
 		initMap : initMap,
 		getExtent : getExtent,
 		zoomToExtent : zoomToExtent,
