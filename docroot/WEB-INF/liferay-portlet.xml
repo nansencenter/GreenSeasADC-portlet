@@ -18,6 +18,7 @@
 		<header-portlet-css>/js/lib/theme/default/style.css</header-portlet-css>
 		<!-- application libs -->
 		<header-portlet-javascript>/js/lib/jquery.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/lib/jquery.form.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/lib/FileSaver.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/lib/jquery.jstree.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/lib/highcharts.js</header-portlet-javascript>

@@ -5,19 +5,20 @@ var debuga = true;// debug flag
 myNamespace.ajax = (function($) {
 	"use strict";
 
-	function doAjax() {
+	function getLayersFromNetCDFFile(useOpendap, opendapDataURL) {
 		AUI().use('aui-io-request', function(A) {
 			if (debuga) {
-				console.log("Started doAjax");
+				console.log("Started getLayersFromNetCDFFile");
 			}
 			var url = ajaxCallResourceURL;
-			// var data = {};
-			// data[portletNameSpace + 'param1'] = 'hello1';
-			// data[portletNameSpace + 'param2'] = 'hello2';
+			var data = {};
+			data[portletNameSpace + 'requestType'] = "getLayersFromNetCDFFile";
+			if (useOpendap)
+				data[portletNameSpace + 'opendapDataURL'] = opendapDataURL;
 
 			A.io.request(url, {
 				// data to be sent to server
-				// data : data,
+				data : data,
 				dataType : 'json',
 
 				on : {
@@ -28,18 +29,43 @@ myNamespace.ajax = (function($) {
 						var instance = this;
 
 						// JSON Data coming back from Server
-						var message = instance.get('responseData');
+						var responseData = instance.get('responseData');
+						myNamespace.control.viewParameterNames(responseData);
+					}
+				}
+			});
+		});
+	}
 
-//						if (debuga) {
-//							if (message) {
-//								console.log(message.retVal1);
-//								console.log(event);
-//								console.log(id);
-//								console.log(obj);
-//							} else {
-//								alert('no data back from server');
-//							}
-//						}
+	function getDatavaluesFromRaster(dataRequest) {
+		AUI().use('aui-io-request', function(A) {
+			if (debuga) {
+				console.log("Started getDatavaluesFromRaster");
+				console.log(JSON.stringify(dataRequest));
+			}
+			var url = ajaxCallResourceURL;
+			// var data = {};
+			// data[portletNameSpace + 'param1'] = 'hello1';
+			// dataRequest[portletNameSpace + 'requestType'] =
+			// 'getDatavaluesFromRaster';
+
+			A.io.request(url, {
+				// data to be sent to server
+				data : dataRequest,
+				dataType : 'json',
+
+				on : {
+					failure : function() {
+						alert("SOMETHING WENT WRONG!");
+					},
+
+					success : function(event, id, obj) {
+						var instance = this;
+
+						// JSON Data coming back from Server
+						var responseData = instance.get('responseData');
+						myNamespace.control.compareData(responseData);
+
 					}
 
 				}
@@ -48,7 +74,8 @@ myNamespace.ajax = (function($) {
 	}
 	// public interface
 	return {
-		doAjax : doAjax
+		getLayersFromNetCDFFile : getLayersFromNetCDFFile,
+		getDatavaluesFromRaster : getDatavaluesFromRaster
 	};
 
 }(jQuery));

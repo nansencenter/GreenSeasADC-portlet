@@ -34,9 +34,9 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 	function checkParameter(checkBoxId, divName, divId) {
 		return function() {
 			if (document.getElementById(checkBoxId).checked) {
-				jQ(divId).html(divName + " <em>(enabled)</em>");
+				jQ(divId).html(divName + " <em>(on)</em>");
 			} else {
-				jQ(divId).html(divName + " <em>(disabled)</em>");
+				jQ(divId).html(divName + " <em>(off)</em>");
 			}
 		};
 	}
@@ -51,13 +51,18 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		add("#dateEnabledCheck", checkParameter("dateEnabledCheck", "Date/Time", "#dateHeaderText"));
 		add("#depthEnabledCheck", checkParameter("depthEnabledCheck", "Depth", "#depthHeaderText"));
 		add("#parametersEnabledCheck", checkParameter("parametersEnabledCheck", "Parameters", "#parametersHeaderText"));
+		add("#metadataEnabledCheck", checkParameter("metadataEnabledCheck", "Metadata", "#metadataHeaderText"));
 
 		// buttons that call methods of control - should have control as "this"
 		var c = myNamespace.control;
 		callFromControl("#filterParameters", c.filterParametersButton);
+		callFromControl("#compareRasterButton", c.compareRasterButton);
+		callFromControl("#timeSeriesButton", c.timeSeriesButton);
 		callFromControl("#filter", c.mainQueryButton);
 		callFromControl("#toCurrentExtent", c.setBboxInputToCurrentMapExtent);
 		callFromControl("#anywhereButton", c.lonLatAnywhere);
+		callFromControl("#extractParameterNamesButton", c.extractParameterNamesButton);
+		callFromControl("#calculateStatisticsButton", c.calculateStatisticsButton);
 
 		// on change events
 		jQ("#exportParametersFormats").change(function() {

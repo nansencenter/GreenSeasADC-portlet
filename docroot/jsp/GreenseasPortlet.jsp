@@ -11,6 +11,8 @@
 
 <!--  Create a serveResource URL -->
 <portlet:resourceURL var="ajaxCallResourceURL" />
+<portlet:actionURL var="submitFileAction" name="submitFile">
+</portlet:actionURL>
 
 <div id="portlet">
 
@@ -20,6 +22,10 @@
 		<ul>
 			<li><a href="#queryTab">Query and features</a></li>
 			<li><a href="#parametersTab">Parameters</a></li>
+			<li><a href="#statsTab">Statistics, plots and charts</a></li>
+			<li><a href="#uploadRasterTab">Upload raster data</a></li>
+			<li><a href="#matchUpTab">Model/data matchup</a></li>
+			<li><a href="#layersTab">Configure Map layers</a></li>
 
 		</ul>
 		<div id="queryTab">
@@ -27,13 +33,16 @@
 				<p>Search layers with various parameters.</p>
 				<div id='queryOptions'>
 					<h3>
-						<span id='bboxHeaderText'>Bounding box <em>(disabled)</em></span>
+						<span id='bboxHeaderText'>Bounding box <em>(off)</em></span>
 					</h3>
 					<div id='bbox'>
-						<input type="checkbox" id="bboxEnabledCheck"> Enable in query <br> <em>Tip: You can hold shift
-							and draw with mouse on map to set bounding box</em> <br> <input type='button' id='toCurrentExtent'
-							value="From map extent" title='Sets bounding box to the current extent of the map' /> <input type='button'
-							id='anywhereButton' value="Anywhere" />
+						<input type="checkbox" id="bboxEnabledCheck"> Enable in query
+						<br>
+						<em>Tip: You can hold shift and draw with mouse on map to set bounding box</em>
+						<br>
+						<input type='button' id='toCurrentExtent' value="From map extent"
+							title='Sets bounding box to the current extent of the map' /> <input type='button' id='anywhereButton'
+							value="Anywhere" />
 						<div>
 							<form name="lonlatform">
 								<div class='centered'>
@@ -54,24 +63,34 @@
 					</div>
 
 					<h3>
-						<span id='dateHeaderText'>Date/Time <em>(disabled)</em></span>
+						<span id='dateHeaderText'>Date/Time <em>(off)</em></span>
 					</h3>
 					<div id='datetime'>
 
-						<input type="checkbox" id="dateEnabledCheck"> Enable in query <br> <br> <em>Date (Use
-							yyyy-mm-dd format if no date picker appears)</em> <br> Between <input type="date" id="fromDate"
-							value="1915-01-01"> and <input type="date" id="toDate" value="2007-01-01"> <br> <input
-							type="checkbox" id="timeEnabledCheck"> Search for time <br> <br> Between <input type="time"
-							id="fromTime" value="00:00"> and <input type="time" id="toTime" value="23:59"> <br>
+						<input type="checkbox" id="dateEnabledCheck"> Enable in query
+						<br>
+						<br>
+						<em>Date (Use yyyy-mm-dd format if no date picker appears)</em>
+						<br>
+						Between <input type="date" id="fromDate" value="1915-01-01"> and <input type="date" id="toDate"
+							value="2007-01-01">
+						<br>
+						<input type="checkbox" id="timeEnabledCheck"> Search for time
+						<br>
+						<br>
+						Between <input type="time" id="fromTime" value="00:00"> and <input type="time" id="toTime" value="23:59">
+						<br>
 
 					</div>
 
 					<h3>
-						<span id='depthHeaderText'>Depth<em>(disabled)</em></span>
+						<span id='depthHeaderText'>Depth<em>(off)</em></span>
 					</h3>
 					<div id='depth'>
 
-						<input type="checkbox" id="depthEnabledCheck"> Enable in query <br> <br>
+						<input type="checkbox" id="depthEnabledCheck"> Enable in query
+						<br>
+						<br>
 
 						<div>
 							<form name="depthform">
@@ -87,7 +106,20 @@
 					</div>
 
 					<h3>
-						<span id='parametersHeaderText'>Parameters <em>(disabled)</em></span>
+						<span id='metadataHeaderText'>Metadata <em>(off)</em></span>
+					</h3>
+					<div id='metadataSelected'>
+
+						<div>
+							<input type="checkbox" id="metadataEnabledCheck"> Enable in query
+						</div>
+						<em>Select the metadata you want to accompany the data. If this is not enabled, then, by default, all
+							metadata will be selected.</em>
+						<div id="metadataTree"></div>
+					</div>
+
+					<h3>
+						<span id='parametersHeaderText'>Parameters <em>(off)</em></span>
 					</h3>
 					<div id='parametersNeeded'>
 
@@ -121,37 +153,90 @@
 			</div>
 
 			<!-- these divs are popus, don't actually appear -->
-			<div id="rawRequestDialog" title="Raw request">
-				<textarea id="rawRequestText"></textarea>
-			</div>
-
 			<div id="errorMessageDialog" title="An error occured"></div>
 		</div>
 
 		<div id="parametersTab">
-			<p>Run a query and filter selected parameters to view the parameter values here.</p>
+			<div id="parametersTabText">
+				<p>Run a query and filter selected parameters to view the parameter values here.</p>
+			</div>
 			<div id="singlePlots">
 				<div id="parametersContainer" class="container">
 					<div id="parametersTable" class="floatLeft"></div>
 				</div>
 			</div>
-			<div id="exportParametersDiv">
+			<div id="exportParametersDiv" class="floatLeft">
 				<input type='button' id='exportParameter' value="Export data" disabled /> <select id="exportParametersFormats">
 					<option value="csv">CSV</option>
 				</select>
 			</div>
 		</div>
+
+
+		<div id="statsTab">
+			<div id="parametersTabText">
+				<p>Run a query and filter selected parameters to view the parameter values here.</p>
+			</div>
+			<input type="button" id="calculateStatisticsButton" value="Calculate statistics" />
+			<div id="statisticsContainer"></div>
+			<br>
+			<div id='timeSeriesDiv'>
+				<div id="timeSeriesVariableDiv"></div>
+				<br>
+				<input type='button' id='timeSeriesButton' value="generateTimeseries" />
+				<div id="timeSeriesContainer" style="width: 100%; height: 400px;"></div>
+			</div>
+		</div>
+
+		<div id="uploadRasterTab">
+			<div id='uploadRaster'>
+				<p>Upload the raster data you want to compare to.</p>
+				<form id="uploadRasterForm" action="<%=submitFileAction%>" method="post" enctype="multipart/form-data">
+					<input type="file" id="file" name='<portlet:namespace />file' size="50" /> <input type="submit" value="Upload" />
+				</form>
+				<div id="progress">
+					<div id="bar"></div>
+					<div id="percent">0%</div>
+				</div>
+				<div id="status"></div>
+				<br>
+				<div>
+					<input type="checkbox" id="opendapDataURLCheck"> Use OPeNDAP data URL
+				</div>
+				<input type="text" id="opendapDataURL" size="100" value="http://localhost:8081/thredds/dodsC/greenpath/Model/topaz" />
+			</div>
+		</div>
+
+		<div id="matchUpTab">
+			<input type='button' id='extractParameterNamesButton' value="Extract parameternames" />
+			<div id="matchUpList"></div>
+			<div id='compareRaster'>
+				<input type="text" id="matchVariable" width="20" value="salinity" />
+				<br>
+				<input type="text" id="matchVariable2" width="20" value="v4_salinity:salinity" />
+				<br>
+				<input type='button' id='compareRasterButton' value="Compare" />
+			</div>
+			<div id="highchartsContainer" style="width: 100%; height: 400px;"></div>
+		</div>
+
+		<div id="layersTab">
+			<p>Select/configure Layers</p>
+			Time/depth/name/URL/File/colorscale/min/max/variable/level on map
+		</div>
+
 	</div>
+
 </div>
 
 <aui:script>
 	$(document).ready(function() {
 		<!-- Initiating all properties from the main properties file -->
-		<%=renderRequest.getAttribute("allProperties")%>
-		<!-- Initiating window.allParametersHeader -->
-		<%=renderRequest.getAttribute("allParametersHeader")%>
-		<!-- Initiating window.allLayersHeader and window.allLayers -->
-		<%=renderRequest.getAttribute("allLayers")%>
+	<%=renderRequest.getAttribute("allProperties")%>
+	<!-- Initiating window.allParametersHeader -->
+	<%=renderRequest.getAttribute("allParametersHeader")%>
+	<!-- Initiating window.allLayersHeader and window.allLayers -->
+	<%=renderRequest.getAttribute("allLayers")%>
 		window.portletNameSpace = '<portlet:namespace />';
 		window.ajaxCallResourceURL = '<%=ajaxCallResourceURL.toString()%>';
 		myNamespace.control.init();

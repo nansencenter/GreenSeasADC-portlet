@@ -9,9 +9,9 @@ myNamespace.handleParameters = (function($) {
 
 	var availableParameters = {};
 	mainParameters = {
-		parameters : [ "location", "point", "depth_of_sea", "depth_of_sample", "date", "time" ],
+		parameters : [ "location", "point", "depth_of_sea", "depth_of_sample", "date", "time", "gs_originator" ],
 		basicHeader : [ "ID", "Lat (dec.deg)", "Long (dec.deg)" ],
-		customHeader : [ "Area", "Depth of Sea (m)", "Depth of Sample (m)", "Date", "Time" ]
+		customHeader : [ "Area", "Depth of Sea (m)", "Depth of Sample (m)", "Date", "Time", "Originator" ]
 	};
 	var chosenParameters = {
 		parametersByTable : {},
@@ -19,9 +19,34 @@ myNamespace.handleParameters = (function($) {
 		tablesSelected : []
 	};
 
+	function resetMetadataSelection() {
+		delete mainParameters.chosenMetadata;
+	}
+
+	function getMetadataHeaders() {
+		var headers = mainParameters.basicHeader.concat([]);
+		// TODO: this will not work after you have run a first query with
+		// metadata since the table is not reset
+		if (mainParameters.chosenMetadata) {
+			if (debughP) {
+				console.log("mainParameters.chosenMetadata:");
+				console.log(mainParameters.chosenMetadata);
+			}
+			$.each(mainParameters.chosenMetadata, function(i, val) {
+				headers.push(getHeader(val, window.metaDataTable));
+			});
+		} else
+			headers = headers.concat(mainParameters.customHeader);
+		if (debughP) {
+			console.log("Returning headers:");
+			console.log(headers);
+		}
+		return headers;
+	}
+
 	function selectParameters(par, flags) {
 		if (debughP)
-			console.log("Setting qf to:"+flags);
+			console.log("Setting qf to:" + flags);
 		qf = flags;
 		chosenParameters.allSelected = [];
 		chosenParameters.tablesSelected = [];
@@ -47,6 +72,24 @@ myNamespace.handleParameters = (function($) {
 			console.log("Setting allSelected to: " + chosenParameters.allSelected.toString());
 			console.log("Setting tablesSelected to: " + chosenParameters.tablesSelected.toString());
 		}
+	}
+
+	function selectMetadata(par) {
+		mainParameters.chosenMetadata = [];
+
+		$.each(par, function(i, val) {
+			var parArr = val.getAttribute("id").split(":");
+			if (debughP)
+				console.log("selectMetadata Checking val: " + parArr[0] + ":" + parArr[1]);
+			if (parArr[1])
+				mainParameters.chosenMetadata.push(parArr[1]);
+		});
+		mainParameters.chosenMetadata.reverse();
+	}
+	
+	function getHeaderFromRawData(parameterTable){
+		var split = parameterTable.split(":");
+		return getHeader(split[1], split[0]);
 	}
 
 	function getHeader(parameter, table) {
@@ -92,12 +135,16 @@ myNamespace.handleParameters = (function($) {
 		return table;
 
 	}
-	
-	function getQF(){
+
+	function getQF() {
 		return qf.valueOf();
 	}
 	// public interface
 	return {
+		getHeaderFromRawData:getHeaderFromRawData,
+		resetMetadataSelection : resetMetadataSelection,
+		getMetadataHeaders : getMetadataHeaders,
+		selectMetadata : selectMetadata,
 		qf : getQF,
 		mainParameters : mainParameters,
 		getTableHeader : getTableHeader,

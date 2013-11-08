@@ -10,8 +10,7 @@ myNamespace.tableConstructor = (function($, hP) {
 			console.log("tableConstructor.js: parameterTable: features=" + JSON.stringify(features));// TEST
 
 		var header = "<table id='parametersResultTable' class='table'>", footer = "</tbody></table>", rows = "";
-		var tableHeader = headerFrom(hP.mainParameters.basicHeader.concat(hP.mainParameters.customHeader).concat(
-				hP.getChosenHeader())) +"\n<tbody>";
+		var tableHeader = headerFrom(hP.getMetadataHeaders().concat(hP.getChosenHeader())) + "\n<tbody>";
 
 		// iterate through all features, generate table row for each
 		$.each(features, function(i, val) {
@@ -51,10 +50,84 @@ myNamespace.tableConstructor = (function($, hP) {
 		return concatTable(header, tableHeader, rows, footer);
 	}
 
+	function generateStatistics(features) {
+		var selectedParameters = hP.chosenParameters.allSelected;
+		var statistics = {};
+		if (debugtC)
+			console.log("generateStatistics1");
+		$.each(selectedParameters, function(j, parameter) {
+			statistics[parameter] = {
+				"quantity" : 0,
+				"sum" : 0.0,
+				"sdSum" : 0.0
+			};
+		});
+		if (debugtC)
+			console.log("generateStatistics2");
+		$.each(features, function(i, feature) {
+			var properties = feature.properties;
+			$.each(selectedParameters, function(j, parameter) {
+				var parVal = properties[parameter];
+				if (parVal != "" && parVal != null && !isNaN(parVal) && parVal != "-999") {
+					parVal = parseFloat(parVal);
+					statistics[parameter].quantity += 1;
+					statistics[parameter].sum += parVal;
+					if (!statistics[parameter].min) {
+						statistics[parameter].min = parVal;
+						statistics[parameter].max = parVal;
+					} else {
+						if (parVal < statistics[parameter].min)
+							statistics[parameter].min = parVal;
+						else if (parVal > statistics[parameter].max)
+							statistics[parameter].max = parVal;
+					}
+				}
+			});
+		});
+
+		$.each(selectedParameters, function(j, parameter) {
+			var quantity = statistics[parameter].quantity;
+			var sum = statistics[parameter].sum;
+			statistics[parameter].average = sum / quantity;
+		});
+		if (debugtC)
+			console.log("generateStatistics5");
+		$.each(features, function(i, feature) {
+			var properties = feature.properties;
+			$.each(selectedParameters, function(j, parameter) {
+				var parVal = properties[parameter];
+				if (parVal != "" && parVal != null && !isNaN(parVal)) {
+					parVal = parseFloat(parVal);
+					statistics[parameter].sdSum += Math.pow(statistics[parameter].average - parVal, 2);
+				}
+			});
+		});
+		if (debugtC)
+			console.log("generateStatistics3");
+		var output = "";
+		$.each(selectedParameters, function(j, parameter) {
+			var quantity = statistics[parameter].quantity;
+			var sum = statistics[parameter].sum;
+			var average = statistics[parameter].average;
+			var variance = statistics[parameter].sdSum / quantity;
+			var sd = Math.sqrt(statistics[parameter].sdSum / (quantity - 1));
+			var parTable = parameter.split(":");
+			var min = statistics[parameter].min;
+			var max = statistics[parameter].max;
+			output += hP.getHeader(parTable[1], parTable[0]) + ": quantity:" + quantity + ", min:" + min + ", max:"
+					+ max + ", sum:" + sum + ", average:" + average + ", sample standard deviation:" + sd
+					+ ", variance:" + variance + "<br>";
+		});
+		output += "<br>";
+		if (debugtC)
+			console.log("generateStatistics4");
+		return output;
+	}
+
 	function featureTable(tableId, features) {
 
 		var header = "<table id='" + tableId + "'class='table'>", tableHeader, footer = "</tbody></table>", rows = "", row = "";
-		tableHeader = headerFrom(hP.mainParameters.basicHeader.concat(hP.mainParameters.customHeader)) + "<tbody>";
+		tableHeader = headerFrom(hP.getMetadataHeaders()) + "<tbody>";
 
 		$.each(features, function(i, val) {
 			var id = val.id, idStr = id.substring(id.indexOf(".") + 1), prop = null;
@@ -102,10 +175,22 @@ myNamespace.tableConstructor = (function($, hP) {
 		return "<li id=\"" + table + ":" + value + "\"><a>" + hP.getHeader(value, table) + "</a></li>";
 	}
 
+	function metadataList() {
+		var str = "<ul><li id=\"" + window.metaDataTable + "\"><a>Available metadata</a>";
+		str += "<ul>";
+		$.each(hP.mainParameters.parameters, function(i, val) {
+			if (val != window.geometryParameter)
+				str += listItem(val, window.metaDataTable);
+		});
+		str += "</ul></li>";
+		str += "</ul>";
+		return str;
+	}
+
 	function parametersList() {
 		if (debugtC)
 			console.log("Making parameters");
-		str = "<ul>";
+		var str = "<ul>";
 		for ( var table in allLayers) {
 			if (debugtC)
 				console.log("tablesDone[table] where table= " + table);
@@ -128,6 +213,8 @@ myNamespace.tableConstructor = (function($, hP) {
 	}
 
 	return {
+		metadataList : metadataList,
+		generateStatistics : generateStatistics,
 		parameterTable : parameterTable,
 		featureTable : featureTable,
 		parametersList : parametersList
