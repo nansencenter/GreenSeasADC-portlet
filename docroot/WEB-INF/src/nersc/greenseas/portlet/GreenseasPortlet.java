@@ -71,12 +71,14 @@ public class GreenseasPortlet extends MVCPortlet {
 		PortletSession session = resourceRequest.getPortletSession();
 		String fileURI = (String) session.getAttribute("rasterFile");
 		String requestType = resourceRequest.getParameter("requestType");
+		System.out.println(requestType);
 		if (requestType.startsWith("getDataValuesOf:")) {
 			//System.out.println("requestType is null:");
 			Map<String, String[]> parameterMap = resourceRequest.getParameterMap();
 			Map<Integer, Double> values = NetCDFReader.getDatavaluesFromNetCDFFile(fileURI,
 					parameterMap);
-
+			if (values == null)
+				return;
 			JSONObject jsonObject = new JSONObject(values);
 			System.out.println("Returning with jsonObject:");
 			System.out.println(jsonObject.toJSONString());
@@ -91,6 +93,8 @@ public class GreenseasPortlet extends MVCPortlet {
 				session.setAttribute("rasterFile", opendapDataURL);
 			}
 			Map<String, String> values = NetCDFReader.getLayersFromRaster(uri);
+			if (values == null)
+				return;
 			JSONObject jsonObject = new JSONObject(values);
 			
 			System.out.println("Returning with jsonObject:");
