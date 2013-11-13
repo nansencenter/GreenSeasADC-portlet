@@ -55,7 +55,7 @@ public class NetCDFReader {
 		JSONParser parser = new JSONParser();
 
 		// -1 because it should contain one requestType
-		Point[] points = new Point[parameterMap.size()-1];
+		Point[] points = new Point[parameterMap.size() - 1];
 		int i = 0;
 		String parameter = null;
 		for (String key : parameterMap.keySet()) {
@@ -82,34 +82,39 @@ public class NetCDFReader {
 	private static void log(String string, Exception e) {
 		System.out.println(string);
 		System.out.println("EXCEPTION:" + e.getMessage());
+		e.printStackTrace();
 	}
 
 	private static Map<Integer, Double> getDatavaluesFromGridDataset(GridDataset gds, Point[] points, String parameter)
 			throws IOException {
-		System.out.println("process file");
+		System.out.println("process file for parameter:" + parameter);
 		GridDatatype grid = gds.findGridDatatype(parameter);
 		GridCoordSystem gcs = grid.getCoordinateSystem();
 		Map<Integer, Double> val = new HashMap<Integer, Double>();
 		for (int i = 0; i < points.length; i++) {
-
+			
 			Point p = points[i];
 			// find the x,y index for a specific lat/lon position
 			// xy[0] = x, xy[1] = y
 			int[] xy = gcs.findXYindexFromLatLon(p.lat, p.lon, null);
-			
 
-			System.out.println("Lat/Long x/y found: " + xy[0] +","+xy[1]);
 			// read the data at that lat, lon and the first time and z level (if
 			// any)
 			// note order is t, z, y, x
 			Array data = grid.readDataSlice(0, 0, xy[1], xy[0]);
 			// we know its a scalar
-			val.put(p.id, data.getDouble(0));
+			if (xy[0] == -1 || xy[1] == -1)
+				System.out.println("Lat/Long x/y NOT FOUND for "+p+": " + xy[0] + "," + xy[1] +" VALUE:"+data.getDouble(0));
+			else {
+				val.put(p.id, data.getDouble(0));
+				System.out.println("Lat/Long x/y FOUND for "+p+": " + xy[0] + "," + xy[1] +" VALUE:"+data.getDouble(0));
+			}
 		}
 		return val;
 	}
 
 	public static Map<String, String> getLayersFromRaster(String uri) {
+		// System.out.println("Getting layers from raster:"+uri);
 		NetcdfDataset ncfile = null;
 		Map<String, String> values = null;
 		try {
@@ -162,7 +167,7 @@ class Point {
 		this.depth = depth;
 		this.date = date;
 		this.time = time;
-		//System.out.println("Generated new point:" + toString());
+		// System.out.println("Generated new point:" + toString());
 	}
 
 	@Override
