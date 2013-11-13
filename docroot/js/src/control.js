@@ -27,20 +27,14 @@ myNamespace.control = (function($, OL, ns) {
 		// hide export option until we have something to export
 		$("#exportParametersDiv").hide();
 		$("#filterParameters").hide();
-		$("#calculateStatisticsButton").hide();
+		$("#statistics").hide();
 		$("#timeSeriesDiv").hide();
+		$("#compareRasterButton").hide();
 
 		// initialize map viewer
 		ns.mapViewer.initMap();
 
 		// Initialize the data from layers in WFS
-		for ( var table in allLayers) {
-			ns.WebFeatureService.describeFeatureType({
-				TYPENAME : table,
-			}, function(response) {
-				initiateParameters(response);
-			});
-		}
 		ns.WebFeatureService.describeFeatureType({
 			TYPENAME : metaDataTable,
 		}, function(response) {
@@ -89,7 +83,7 @@ myNamespace.control = (function($, OL, ns) {
 					status.html("Something went wrong in the file upload");
 			}
 		});
-
+		setUpOPeNDAPSelector();
 	}
 
 	// non-public
@@ -151,7 +145,7 @@ myNamespace.control = (function($, OL, ns) {
 		$("#loadingText").html("Loading data, please wait...");
 		$("#list").html("");
 		$("#parametersTable").html("");
-		$("#calculateStatisticsButton").hide();
+		$("#statistics").hide();
 		$("#timeSeriesDiv").hide();
 		$("#statisticsContainer").html("");
 		$("#timeSeriesContainer").html("");
@@ -267,7 +261,7 @@ myNamespace.control = (function($, OL, ns) {
 			// removing the parameterlayers from previous searches
 			ns.mapViewer.removeAllParameterLayers();
 			$("#parametersTable").html("Loading parameters..");
-			$("#calculateStatisticsButton").hide();
+			$("#statistics").hide();
 			$("#timeSeriesDiv").hide();
 			$("#statisticsContainer").html("");
 			$("#timeSeriesContainer").html("");
@@ -351,7 +345,7 @@ myNamespace.control = (function($, OL, ns) {
 			$("#parametersTable").html(
 					"Entries where the selected parameters are available<br>" + "<div class='scrollArea'>"
 							+ constructedTable + "</div>");
-			$("#calculateStatisticsButton").show();
+			$("#statistics").show();
 			setUpTimeSeriesVariables();
 			$("#timeSeriesDiv").show();
 
@@ -496,6 +490,13 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function initiateMetadata(input) {
+		for ( var table in allLayers) {
+			ns.WebFeatureService.describeFeatureType({
+				TYPENAME : table,
+			}, function(response) {
+				initiateParameters(response);
+			});
+		}
 		ns.handleParameters.initiateParameters(input);
 		$("#metadataTree").html(ns.tableConstructor.metadataList());
 		$("#metadataTree").jstree({
@@ -536,10 +537,12 @@ myNamespace.control = (function($, OL, ns) {
 
 	function compareRasterButton() {
 		if (debugc) {
-			console.log("compareRasterButton for par:" + $("#matchVariable").val());
+			console.log("compareRasterButton for par:" + $("#matchVariable").find(":selected").val());
+			console.log($("#matchVariable").find(":selected"));
 		}
 		var dataRequest = {};
-		dataRequest[portletNameSpace + 'requestType'] = "getDataValuesOf:" + $("#matchVariable").val();
+		dataRequest[portletNameSpace + 'requestType'] = "getDataValuesOf:"
+				+ $("#matchVariable").find(":selected").val();
 		$.each(data, function(i, val) {
 			var point = {};
 			var pos = val.geometry.coordinates;
@@ -556,7 +559,7 @@ myNamespace.control = (function($, OL, ns) {
 
 	function compareData(responseData) {
 		var scatterData = [];
-		var databaseVariable = $("#matchVariable2").val();
+		var databaseVariable = $("#matchVariable2").find(":selected").val();
 		console.log(data);
 		var minX, minY, maxX, maxY;
 		$.each(responseData, function(i, val) {
@@ -647,7 +650,7 @@ myNamespace.control = (function($, OL, ns) {
 
 	function extractParameterNamesButton() {
 		var useOpendap = document.getElementById('opendapDataURLCheck').checked;
-		var opendapDataURL = $("#opendapDataURL").val();
+		var opendapDataURL = $("#opendapDataURL").find(":selected").val();
 		ns.ajax.getLayersFromNetCDFFile(useOpendap, opendapDataURL);
 	}
 
@@ -659,103 +662,154 @@ myNamespace.control = (function($, OL, ns) {
 			list += i + ":" + val + "<br>";
 		});
 		$("#matchUpList").html(list);
+		setUpCompareRasterDiv(parameters);
+	}
+
+	function setUpCompareRasterDiv(parameters) {
+		var selectElement = "<select id=\"matchVariable\">";
+		var options = "";
+		$.each(parameters, function(key, val) {
+			var variable = key.substring(0, key.indexOf("("));
+			var variableName = val.trim();
+			if (variableName == "")
+				variableName = variable;
+			options += "<option value=\"" + variable + "\">" + variableName + "</option>";
+		});
+		selectElement += options + "</select>";
+		selectElement += "<br><select id=\"matchVariable2\">";
+		var selectedParameters = ns.handleParameters.chosenParameters.allSelected;
+		options = "";
+		$.each(selectedParameters, function(i, val) {
+			options += "<option value=\"" + val + "\">" + ns.handleParameters.getHeaderFromRawData(val) + "</option>";
+		});
+		selectElement += options + "</select>";
+		var compareButton = "";
+		$("#compareRaster").html(selectElement + "<br>");
+		$("#compareRasterButton").show();
 	}
 
 	function calculateStatisticsButton() {
 		var statisticsTable = ns.tableConstructor.generateStatistics(data);
 		$("#statisticsContainer").html(statisticsTable);
+		$("#generalStatisticsTable").dataTable({
+			// search functionality not needed for statistics table
+			'bFilter' : false
+		});
+	}
+
+	function generateOneTimeSeriesData(variable) {
+		var tsData = [];
+		$.each(data, function(i, val) {
+			/*
+			 * if (debugc) console.log("Checking:"); if (debugc)
+			 * console.log(val);
+			 */
+			if (val.properties[variable]) {
+				var value = parseFloat(val.properties[variable]);
+				// if (debugc)
+				// console.log(value);
+				if (value != -999 && val.properties.date) {
+					var dateArr = val.properties.date.split("-");
+					if (dateArr.length == 3) {
+						var year = parseInt(dateArr[0]);
+						// Note that in JavaScript, months start at 0 for
+						// January, 1 for February etc.
+						var month = parseInt(dateArr[1]) - 1;
+						var day = parseInt(dateArr[2].substring(0, dateArr[2].length));
+						// Set to mid-day if no time is set
+						var hours = 12, minutes = 0, seconds = 0;
+						var time = false;
+						if (val.properties.time) {
+							var timeSplit = val.properties.time.split(":");
+							if (timeSplit.length == 3) {
+								hours = parseInt(timeSplit[0]);
+								minutes = parseInt(timeSplit[1]);
+								seconds = parseInt(timeSplit[2].substring(0, timeSplit[2].length));
+								time = true;
+							}
+						}
+						tsData.push({
+							x : Date.UTC(year, month, day, hours, minutes, seconds),
+							y : value,
+							id : val.id,
+							time : time
+						});
+					}
+				}
+			}
+		});
+		tsData.sort(function(a, b) {
+			return (a.x - b.x);
+		});
+		return tsData;
+	}
+
+	function generateTimeSeriesData() {
+		var selectElements = $("select[name=timeSeriesVariable]");
+
+		var variables = [];
+		$.each(selectElements, function(i, val) {
+			variables.push(val.value);
+		});
+
+		var data = [];
+
+		$.each(variables, function(i, val) {
+			data.push(generateOneTimeSeriesData(val));
+		});
+		var colors = [ '#89A54E', '#4572A7', '#AA4643', '#D4C601', '#BA00CB', '#15E1C9' ];
+		var opposite = [ false, true, true ];
+
+		var tsData = {};
+		var extraColors = [];
+		for ( var i = colors.length - 1; i < variables.length; i++) {
+			extraColors.push(ns.mapViewer.getRandomColor());
+		}
+		tsData.series = [];
+		$.each(variables, function(i, val) {
+			color = "#AAAAAA";
+			if (i < colors.length)
+				color = colors[i];
+			else
+				color = extraColors[i - colors.length];
+			tsData.series.push({
+				name : ns.handleParameters.getHeaderFromRawData(val),
+				data : data[i],
+				turboThreshold : 100000,
+				yAxis : i,
+				color : color
+			});
+		});
+		tsData.yAxis = [];
+		$.each(variables, function(i, val) {
+			var opp = true;
+			if (i < opposite.length)
+				opp = opposite[i];
+			color = "#AAAAAA";
+			if (i < colors.length)
+				color = colors[i];
+			else
+				color = extraColors[i - colors.length];
+			tsData.yAxis.push({
+				title : {
+					text : ns.handleParameters.getHeaderFromRawData(val),
+					style : {
+						color : color
+					}
+				},
+				labels : {
+					style : {
+						color : color
+					}
+				},
+				opposite : opp
+			});
+		});
+		return tsData;
 	}
 
 	function timeSeriesButton() {
-		var variable = $("#timeSeriesVariable").val();
-		var variable2 = $("#timeSeriesVariable2").val();
-		if (debugc)
-			console.log("variable:" + variable);
-		var tsData = [];
-		var tsData2 = [];
-		if (debugc)
-			console.log("Creating the data!");
-		var min, max;
-		var min2, max2;
-		$.each(data, function(i, val) {
-			/*if (debugc)
-				console.log("Checking:");
-			if (debugc)
-				console.log(val);*/
-			if (val.properties[variable]) {
-				var value = parseFloat(val.properties[variable]);
-//				if (debugc)
-//					console.log(value);
-				if (value != -999 && val.properties.date) {
-					var dateArr = val.properties.date.split("-");
-					if (dateArr.length == 3) {
-						if (!min || min > value)
-							min = value;
-						if (!max || max < value)
-							max = value;
-						var year = parseInt(dateArr[0]);
-						// Note that in JavaScript, months start at 0 for
-						// January, 1 for February etc.
-						var month = parseInt(dateArr[1]) - 1;
-						var day = parseInt(dateArr[2].substring(0, dateArr[2].length));
-						tsData.push({
-							x : Date.UTC(year, month, day),
-							y : value,
-							id : val.id
-						});
-//						if (debugc)
-//							console.log("Pushed:" + year + "," + month + "," + day + "," + value);
-					} else {
-//						if (debugc)
-//							console.log("dateArr.length != 3");
-					}
-				} else {
-//					if (debugc)
-//						console.log("!val.properties.date");
-				}
-			} else {
-//				if (debugc)
-//					console.log("!val.properties[variable]");
-			}
-			if (val.properties[variable2]) {
-				var value = parseFloat(val.properties[variable2]);
-				if (value != -999 && val.properties.date) {
-					var dateArr = val.properties.date.split("-");
-					if (dateArr.length == 3) {
-						if (!min2 || min2 > value)
-							min2 = value;
-						if (!max2 || max2 < value)
-							max2 = value;
-						var year = parseInt(dateArr[0]);
-						// Note that in JavaScript, months start at 0 for
-						// January, 1 for February etc.
-						var month = parseInt(dateArr[1]) - 1;
-						var day = parseInt(dateArr[2].substring(0, dateArr[2].length));
-						tsData2.push({
-							x : Date.UTC(year, month, day),
-							y : value,
-							id : val.id
-						});
-					}
-				}
-			}
-		});
-		tsData.sort(function(a,b) {
-			return(a.x-b.x);
-		});
-		tsData2.sort(function(a,b) {
-			return(a.x-b.x);
-		});
-		if (debugc)
-			console.log("Created the data!");
-		if (debugc)
-			console.log(tsData);
-		var minInt = Math.floor(min);
-		var maxInt = Math.ceil(max);
-		var minInt2 = Math.floor(min2);
-		var maxInt2 = Math.ceil(max2);
-		if (debugc)
-			console.log("min/max:" + minInt + "/" + maxInt);
+		var tsData = generateTimeSeriesData();
 		$('#timeSeriesContainer').highcharts(
 				{
 					chart : {
@@ -771,74 +825,81 @@ myNamespace.control = (function($, OL, ns) {
 					xAxis : {
 						type : 'datetime',
 					},
-					yAxis : [ {
-						title : {
-							text : ns.handleParameters.getHeaderFromRawData(variable),
-							style : {
-								color : '#89A54E'
-							}
-						},
-						labels : {
-							style : {
-								color : '#89A54E'
-							}
-						}
-					}, {
-						title : {
-							text : ns.handleParameters.getHeaderFromRawData(variable2),
-							style : {
-								color : '#4572A7'
-							}
-						},
-						labels : {
-							style : {
-								color : '#4572A7'
-							}
-						},
-						opposite : true
-					/*
-					 * min : minInt, max : maxInt
-					 */
-					} ],
+					yAxis : tsData.yAxis,
 					tooltip : {
 						formatter : function() {
-							if (debugc)
-								console.log(this);
-							return '<b> ID:' + this.point.id + '</b><br/>' + Highcharts.dateFormat('%Y-%m-%d', this.x)
-									+ ': ' + this.y;
+							var clock = "";
+							if (this.point.time) {
+								clock = " " + Highcharts.dateFormat("%H:%M:%S", this.x);
+							}
+							return '<b> ' + this.series.name + ' <br>ID:' + this.point.id + '</b><br/>'
+									+ Highcharts.dateFormat('%Y-%m-%d', this.x) + clock + '<br>Value:' + this.y;
 						}
 					},
+					legend : {
+						layout : 'vertical',
+						borderWidth : 0
+					},
 
-					series : [ {
-						name : ns.handleParameters.getHeaderFromRawData(variable),
-						data : tsData,
-						turboThreshold : 100000,
-						color : '#89A54E',
-					}, {
-						name : ns.handleParameters.getHeaderFromRawData(variable2),
-						data : tsData2,
-						turboThreshold : 100000,
-						yAxis : 1,
-						color : '#4572A7'
-					} ]
+					series : tsData.series
 				});
 	}
 
 	function setUpTimeSeriesVariables() {
-		var selectElement = "<select id=\"timeSeriesVariable\">";
+		var selectElement = "<select name=\"timeSeriesVariable\">";
 		var selectedParameters = ns.handleParameters.chosenParameters.allSelected;
 		var options = "";
 		$.each(selectedParameters, function(i, val) {
 			options += "<option value=\"" + val + "\">" + ns.handleParameters.getHeaderFromRawData(val) + "</option>";
 		});
 		selectElement += options + "</select>";
-		selectElement += "<select id=\"timeSeriesVariable2\">";
-		selectElement += options + "</select>";
 		$("#timeSeriesVariableDiv").html(selectElement);
+	}
+
+	function addTimeSeriesVariableButton() {
+		var selectElement = "<br><select name=\"timeSeriesVariable\">";
+		var selectedParameters = ns.handleParameters.chosenParameters.allSelected;
+		var options = "";
+		$.each(selectedParameters, function(i, val) {
+			options += "<option value=\"" + val + "\">" + ns.handleParameters.getHeaderFromRawData(val) + "</option>";
+		});
+		selectElement += options + "</select>";
+		$("#timeSeriesVariableDiv").append(selectElement);
+	}
+
+	function setUpOPeNDAPSelector() {
+		var URLs = [ {
+			url : "http://localhost:8081/thredds/dodsC/greenpath/Model/topaz",
+			name : "Topaz"
+		}, {
+			url : "http://localhost:8081/thredds/dodsC/greenseasAllData/NACDAILY_2009_06.nc",
+			name : "Topaz NACDAILY_2009_06"
+		}, {
+			url : "http://localhost:8081/thredds/dodsC/greenseasAllData/ssmicon20100830_test.nc",
+			name : "ssmicon20100830"
+		}, {
+			url : "http://localhost:8081/thredds/dodsC/greenseasAllData/seawifs01_05_chl_8Day_360_180_test.nc",
+			name : "seawifs01_05_chl_8Day_360_180"
+		}, {
+			url : "http://localhost:8081/thredds/dodsC/greenseasAllData/chl_seawifs_global_monthly_512x256_test.nc",
+			name : "chl_seawifs_global_monthly_512x256"
+		}, {
+			url : "http://localhost:8081/thredds/dodsC/cmccModel/N1p_2000_2005_merged_mesh.nc",
+			name : "CMCC Phosphate"
+		} ];
+
+		var selectElement = "<select id=\"opendapDataURL\">";
+		var options = "";
+		$.each(URLs, function(i, val) {
+			options += "<option value=\"" + val.url + "\">" + val.name + "</option>";
+		});
+		selectElement += options + "</select>";
+		$("#opendapURLContainer").html(selectElement);
 	}
 
 	// public interface
 	return {
+		addTimeSeriesVariableButton : addTimeSeriesVariableButton,
 		timeSeriesButton : timeSeriesButton,
 		init : init,
 		calculateStatisticsButton : calculateStatisticsButton,

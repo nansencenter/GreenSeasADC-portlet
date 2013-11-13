@@ -16,8 +16,7 @@ myNamespace.fileCreation = (function($) {
 		return headerString;
 	}
 	function createCSV(dataIn) {
-		var csvContent = createCSVHeader(myNamespace.handleParameters.mainParameters.basicHeader.concat(
-				myNamespace.handleParameters.mainParameters.customHeader).concat(
+		var csvContent = createCSVHeader(myNamespace.handleParameters.getMetadataHeaders().concat(
 				myNamespace.handleParameters.getChosenHeader()));
 
 		csvContent += "\n";

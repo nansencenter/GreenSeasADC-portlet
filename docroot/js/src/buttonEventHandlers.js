@@ -57,6 +57,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		var c = myNamespace.control;
 		callFromControl("#filterParameters", c.filterParametersButton);
 		callFromControl("#compareRasterButton", c.compareRasterButton);
+		callFromControl("#addTimeSeriesVariableButton", c.addTimeSeriesVariableButton);
 		callFromControl("#timeSeriesButton", c.timeSeriesButton);
 		callFromControl("#filter", c.mainQueryButton);
 		callFromControl("#toCurrentExtent", c.setBboxInputToCurrentMapExtent);

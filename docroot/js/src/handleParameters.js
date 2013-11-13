@@ -1,17 +1,15 @@
 var myNamespace = myNamespace || {};
 
-var debughP = false;// debug flag
+var debughP = true;// debug flag
 
 myNamespace.handleParameters = (function($) {
-	// TODO: make this a hashtable of hashtable, it must store the type of the
-	// variable: i.e. string, date, point, boolean, for comparison purposes
 	var qf = false;
 
+	// TODO: make this a hashtable of hashtable, it must store the type of the
+	// variable: i.e. string, date, point, boolean, for comparison purposes
 	var availableParameters = {};
 	mainParameters = {
-		parameters : [ "location", "point", "depth_of_sea", "depth_of_sample", "date", "time", "gs_originator" ],
 		basicHeader : [ "ID", "Lat (dec.deg)", "Long (dec.deg)" ],
-		customHeader : [ "Area", "Depth of Sea (m)", "Depth of Sample (m)", "Date", "Time", "Originator" ]
 	};
 	var chosenParameters = {
 		parametersByTable : {},
@@ -24,24 +22,24 @@ myNamespace.handleParameters = (function($) {
 	}
 
 	function getMetadataHeaders() {
-		var headers = mainParameters.basicHeader.concat([]);
-		// TODO: this will not work after you have run a first query with
-		// metadata since the table is not reset
+		var metaHeader = [];
 		if (mainParameters.chosenMetadata) {
 			if (debughP) {
 				console.log("mainParameters.chosenMetadata:");
 				console.log(mainParameters.chosenMetadata);
 			}
 			$.each(mainParameters.chosenMetadata, function(i, val) {
-				headers.push(getHeader(val, window.metaDataTable));
+				metaHeader.push(getHeader(val, window.metaDataTable));
 			});
 		} else
-			headers = headers.concat(mainParameters.customHeader);
+			$.each(mainParameters.parameters, function(i, val) {
+				if (val != "point")
+					metaHeader.push(getHeader(val, window.metaDataTable));
+			});
 		if (debughP) {
 			console.log("Returning headers:");
-			console.log(headers);
 		}
-		return headers;
+		return mainParameters.basicHeader.concat(metaHeader.reverse());
 	}
 
 	function selectParameters(par, flags) {
@@ -86,8 +84,8 @@ myNamespace.handleParameters = (function($) {
 		});
 		mainParameters.chosenMetadata.reverse();
 	}
-	
-	function getHeaderFromRawData(parameterTable){
+
+	function getHeaderFromRawData(parameterTable) {
 		var split = parameterTable.split(":");
 		return getHeader(split[1], split[0]);
 	}
@@ -127,11 +125,13 @@ myNamespace.handleParameters = (function($) {
 		var table = parameters.pop();
 		if (table == metaDataTable) {
 			mainParameters.parameters = parameters;
+			if (debughP)
+				console.log("Initialized metadata:" + table + " to:" + parameters);
 		} else {
 			availableParameters[table] = parameters;
+			if (debughP)
+				console.log("Initialized " + table + " to:" + parameters);
 		}
-		if (debughP)
-			console.log("Initialized " + table + " to:" + parameters);
 		return table;
 
 	}
@@ -141,7 +141,7 @@ myNamespace.handleParameters = (function($) {
 	}
 	// public interface
 	return {
-		getHeaderFromRawData:getHeaderFromRawData,
+		getHeaderFromRawData : getHeaderFromRawData,
 		resetMetadataSelection : resetMetadataSelection,
 		getMetadataHeaders : getMetadataHeaders,
 		selectMetadata : selectMetadata,

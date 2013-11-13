@@ -36,78 +36,43 @@ myNamespace.mapViewer = (function(OL) {
 	var mapLayers = {};
 	function initMapLayers() {
 		mapLayers = {
-			/*seawifs1 : new OpenLayers.Layer.WMS("seawifs1 Test",
-					"http://localhost:8081/thredds/wms/greenseasAllData/seawifs01_05_chl_8Day_360_180_test.nc", {
-						layers : "CHL_FILL",
-						format : window.WMSformat,
-						transparent : true,
-						styles : "boxfill",
-						colorscalerange : "0,2"
-					}, {
-						isBaseLayer : false
-					}),
-			topaz : new OpenLayers.Layer.WMS("Topaz salinity Test",
-					"http://localhost:8081/thredds/wms/greenseasAllData/NACDAILY_2009_06.nc", {
-						layers : "salinity",
-						format : window.WMSformat,
-						transparent : true,
-						styles : "boxfill",
-						colorscalerange : "30,40"
-					}, {
-						isBaseLayer : false
-					}),
-			topaz2 : new OpenLayers.Layer.WMS("Topaz silicon (mg m-3) Test",
-					"http://localhost:8081/thredds/wms/greenseasAllData/NACDAILY_2009_06.nc", {
-						layers : "SIL",
-						format : window.WMSformat,
-						transparent : true,
-						styles : "boxfill",
-						colorscalerange : "0,170"
-					}, {
-						isBaseLayer : false
-					}),
-			topaz3 : new OpenLayers.Layer.WMS("Topaz depth_averaged_chl_one_opt_depth (mg m-3)",
-					"http://localhost:8081/thredds/wms/greenseasAllData/NACDAILY_2009_06.nc", {
-						layers : "chl_opav",
-						format : window.WMSformat,
-						transparent : true,
-						styles : "boxfill",
-						colorscalerange : "0,9"
-					}, {
-						isBaseLayer : false
-					}),
-			cmccPhosphate : new OpenLayers.Layer.WMS("CMCC Phosphate (mmol P/m3)",
-					"http://localhost:8081/thredds/wms/greenseasAllData/N1p_2000_2005_merged_mesh.nc", {
-						layers : "N1p",
-						format : window.WMSformat,
-						transparent : true,
-						styles : "boxfill",
-						colorscalerange : "0.0001,2",
-						logscale : "true"
-					}, {
-						isBaseLayer : false
-					}),
-			cmccChla : new OpenLayers.Layer.WMS("CMCC Chla (mg Chl/m3)",
-					"http://localhost:8081/thredds/wms/greenseasAllData/Chla_2000_2005_merged_mesh.nc", {
-						layers : "Chla",
-						format : window.WMSformat,
-						transparent : true,
-						styles : "boxfill",
-						colorscalerange : "0.0001,35",
-						logscale : "true"
-					}, {
-						isBaseLayer : false
-					}),
-			cmccEICE : new OpenLayers.Layer.WMS("CMCC 2D Sea-ice fraction (fraction)",
-					"http://localhost:8081/thredds/wms/greenseasAllData/EICE_1991_2010_merged_mesh.nc", {
-						layers : "EICE",
-						format : window.WMSformat,
-						transparent : true,
-						styles : "boxfill",
-						colorscalerange : "0,1"
-					}, {
-						isBaseLayer : false
-					}),*/
+			/*
+			 * seawifs1 : new OpenLayers.Layer.WMS("seawifs1 Test",
+			 * "http://localhost:8081/thredds/wms/greenseasAllData/seawifs01_05_chl_8Day_360_180_test.nc", {
+			 * layers : "CHL_FILL", format : window.WMSformat, transparent :
+			 * true, styles : "boxfill", colorscalerange : "0,2" }, {
+			 * isBaseLayer : false }), topaz : new OpenLayers.Layer.WMS("Topaz
+			 * salinity Test",
+			 * "http://localhost:8081/thredds/wms/greenseasAllData/NACDAILY_2009_06.nc", {
+			 * layers : "salinity", format : window.WMSformat, transparent :
+			 * true, styles : "boxfill", colorscalerange : "30,40" }, {
+			 * isBaseLayer : false }), topaz2 : new OpenLayers.Layer.WMS("Topaz
+			 * silicon (mg m-3) Test",
+			 * "http://localhost:8081/thredds/wms/greenseasAllData/NACDAILY_2009_06.nc", {
+			 * layers : "SIL", format : window.WMSformat, transparent : true,
+			 * styles : "boxfill", colorscalerange : "0,170" }, { isBaseLayer :
+			 * false }), topaz3 : new OpenLayers.Layer.WMS("Topaz
+			 * depth_averaged_chl_one_opt_depth (mg m-3)",
+			 * "http://localhost:8081/thredds/wms/greenseasAllData/NACDAILY_2009_06.nc", {
+			 * layers : "chl_opav", format : window.WMSformat, transparent :
+			 * true, styles : "boxfill", colorscalerange : "0,9" }, {
+			 * isBaseLayer : false }), cmccPhosphate : new
+			 * OpenLayers.Layer.WMS("CMCC Phosphate (mmol P/m3)",
+			 * "http://localhost:8081/thredds/wms/greenseasAllData/N1p_2000_2005_merged_mesh.nc", {
+			 * layers : "N1p", format : window.WMSformat, transparent : true,
+			 * styles : "boxfill", colorscalerange : "0.0001,2", logscale :
+			 * "true" }, { isBaseLayer : false }), cmccChla : new
+			 * OpenLayers.Layer.WMS("CMCC Chla (mg Chl/m3)",
+			 * "http://localhost:8081/thredds/wms/greenseasAllData/Chla_2000_2005_merged_mesh.nc", {
+			 * layers : "Chla", format : window.WMSformat, transparent : true,
+			 * styles : "boxfill", colorscalerange : "0.0001,35", logscale :
+			 * "true" }, { isBaseLayer : false }), cmccEICE : new
+			 * OpenLayers.Layer.WMS("CMCC 2D Sea-ice fraction (fraction)",
+			 * "http://localhost:8081/thredds/wms/greenseasAllData/EICE_1991_2010_merged_mesh.nc", {
+			 * layers : "EICE", format : window.WMSformat, transparent : true,
+			 * styles : "boxfill", colorscalerange : "0,1" }, { isBaseLayer :
+			 * false }),
+			 */
 			datapoints : new OpenLayers.Layer.WMS("Data points", window.WMSServer, {
 				layers : window.metaDataTable,
 				format : window.WMSformat,
@@ -375,6 +340,7 @@ myNamespace.mapViewer = (function(OL) {
 
 	// public interface
 	return {
+		getRandomColor : getRandomColor,
 		addLayerWMS : addLayerWMS,
 		addFeaturesFromData : addFeaturesFromData,
 		removeAllParameterLayers : removeAllParameterLayers,

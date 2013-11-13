@@ -23,7 +23,7 @@
 			<li><a href="#queryTab">Query and features</a></li>
 			<li><a href="#parametersTab">Parameters</a></li>
 			<li><a href="#statsTab">Statistics, plots and charts</a></li>
-			<li><a href="#uploadRasterTab">Upload raster data</a></li>
+			<li><a href="#rasterTab">Configure raster data</a></li>
 			<li><a href="#matchUpTab">Model/data matchup</a></li>
 			<li><a href="#layersTab">Configure Map layers</a></li>
 
@@ -36,27 +36,27 @@
 						<span id='bboxHeaderText'>Bounding box <em>(off)</em></span>
 					</h3>
 					<div id='bbox'>
-						<input type="checkbox" id="bboxEnabledCheck"> Enable in query
-						<br>
-						<em>Tip: You can hold shift and draw with mouse on map to set bounding box</em>
-						<br>
+						<input type="checkbox" id="bboxEnabledCheck">
+						Enable in query <br> <em>Tip: You can hold shift and draw with mouse on map to set bounding box</em> <br>
 						<input type='button' id='toCurrentExtent' value="From map extent"
-							title='Sets bounding box to the current extent of the map' /> <input type='button' id='anywhereButton'
-							value="Anywhere" />
+							title='Sets bounding box to the current extent of the map' />
+						<input type='button' id='anywhereButton' value="Anywhere" />
 						<div>
 							<form name="lonlatform">
 								<div class='centered'>
 									<input type='text' id='top' size="5" />
 								</div>
 								<div class='offcentered'>
-									<input type='text' id='left' size="5" /><input type='text' id='right' size="5" />
+									<input type='text' id='left' size="5" />
+									<input type='text' id='right' size="5" />
 								</div>
 								<div class='centered'>
 									<input type='text' id='bottom' size="5" />
 								</div>
 
 								<div title='If checked, map will move to this area when query is run'>
-									<input type="checkbox" name="updatemapcheck"> Update map focus when query is run
+									<input type="checkbox" name="updatemapcheck">
+									Update map focus when query is run
 								</div>
 							</form>
 						</div>
@@ -67,18 +67,18 @@
 					</h3>
 					<div id='datetime'>
 
-						<input type="checkbox" id="dateEnabledCheck"> Enable in query
+						<input type="checkbox" id="dateEnabledCheck">
+						Enable in query <br> <br> <em>Date (Use yyyy-mm-dd format if no date picker appears)</em> <br>
+						Between
+						<input type="date" id="fromDate" value="1915-01-01">
+						and
+						<input type="date" id="toDate" value="2007-01-01">
 						<br>
-						<br>
-						<em>Date (Use yyyy-mm-dd format if no date picker appears)</em>
-						<br>
-						Between <input type="date" id="fromDate" value="1915-01-01"> and <input type="date" id="toDate"
-							value="2007-01-01">
-						<br>
-						<input type="checkbox" id="timeEnabledCheck"> Search for time
-						<br>
-						<br>
-						Between <input type="time" id="fromTime" value="00:00"> and <input type="time" id="toTime" value="23:59">
+						<input type="checkbox" id="timeEnabledCheck">
+						Search for time <br> <br> Between
+						<input type="time" id="fromTime" value="00:00">
+						and
+						<input type="time" id="toTime" value="23:59">
 						<br>
 
 					</div>
@@ -88,17 +88,18 @@
 					</h3>
 					<div id='depth'>
 
-						<input type="checkbox" id="depthEnabledCheck"> Enable in query
-						<br>
-						<br>
+						<input type="checkbox" id="depthEnabledCheck">
+						Enable in query <br> <br>
 
 						<div>
 							<form name="depthform">
 								<div class='left'>
-									<input type='text' id='depthMin' size="3" value="0" /> Minimum depth
+									<input type='text' id='depthMin' size="3" value="0" />
+									Minimum depth
 								</div>
 								<div class='left'>
-									<input type='text' id='depthMax' size="3" value="10" /> Maximum depth
+									<input type='text' id='depthMax' size="3" value="10" />
+									Maximum depth
 								</div>
 
 							</form>
@@ -111,7 +112,8 @@
 					<div id='metadataSelected'>
 
 						<div>
-							<input type="checkbox" id="metadataEnabledCheck"> Enable in query
+							<input type="checkbox" id="metadataEnabledCheck">
+							Enable in query
 						</div>
 						<em>Select the metadata you want to accompany the data. If this is not enabled, then, by default, all
 							metadata will be selected.</em>
@@ -124,7 +126,8 @@
 					<div id='parametersNeeded'>
 
 						<div>
-							<input type="checkbox" id="parametersEnabledCheck"> Enable in query
+							<input type="checkbox" id="parametersEnabledCheck">
+							Enable in query
 						</div>
 
 						<em> Tip: Selecting multiple parameters within a group resolves to "one of these". Selecting variables from
@@ -135,13 +138,14 @@
 						<div id="parametersTree"></div>
 						<br>
 						<div>
-							<input type="checkbox" id="qualityFlagsEnabledCheck"> Include qualityflags
+							<input type="checkbox" id="qualityFlagsEnabledCheck">
+							Include qualityflags
 						</div>
 					</div>
 				</div>
 
-				<input type='button' id='filter' value="Run main query" /> <input type='button' id='filterParameters'
-					value="Filter selected parameters" />
+				<input type='button' id='filter' value="Run main query" />
+				<input type='button' id='filterParameters' value="Filter selected parameters" />
 
 			</div>
 
@@ -166,7 +170,8 @@
 				</div>
 			</div>
 			<div id="exportParametersDiv" class="floatLeft">
-				<input type='button' id='exportParameter' value="Export data" disabled /> <select id="exportParametersFormats">
+				<input type='button' id='exportParameter' value="Export data" disabled />
+				<select id="exportParametersFormats">
 					<option value="csv">CSV</option>
 				</select>
 			</div>
@@ -175,24 +180,29 @@
 
 		<div id="statsTab">
 			<div id="parametersTabText">
-				<p>Run a query and filter selected parameters to view the parameter values here.</p>
+				<p>Run a query and filter selected parameters to view options here.</p>
 			</div>
-			<input type="button" id="calculateStatisticsButton" value="Calculate statistics" />
-			<div id="statisticsContainer"></div>
-			<br>
+			<div id="statistics">
+				<input type="button" id="calculateStatisticsButton" value="Calculate statistics" />
+				<div id="statisticsContainer"></div>
+				<br>
+			</div>
 			<div id='timeSeriesDiv'>
 				<div id="timeSeriesVariableDiv"></div>
 				<br>
-				<input type='button' id='timeSeriesButton' value="generateTimeseries" />
+				<input type='button' id='addTimeSeriesVariableButton' value="Add another variable" />
+				<br>
+				<input type='button' id='timeSeriesButton' value="Generate Timeseries" />
 				<div id="timeSeriesContainer" style="width: 100%; height: 400px;"></div>
 			</div>
 		</div>
 
-		<div id="uploadRasterTab">
+		<div id="rasterTab">
 			<div id='uploadRaster'>
 				<p>Upload the raster data you want to compare to.</p>
 				<form id="uploadRasterForm" action="<%=submitFileAction%>" method="post" enctype="multipart/form-data">
-					<input type="file" id="file" name='<portlet:namespace />file' size="50" /> <input type="submit" value="Upload" />
+					<input type="file" id="file" name='<portlet:namespace />file' size="50" />
+					<input type="submit" value="Upload" />
 				</form>
 				<div id="progress">
 					<div id="bar"></div>
@@ -201,23 +211,19 @@
 				<div id="status"></div>
 				<br>
 				<div>
-					<input type="checkbox" id="opendapDataURLCheck"> Use OPeNDAP data URL
+					<input type="checkbox" id="opendapDataURLCheck" checked>
+					Use OPeNDAP data URL
 				</div>
-				<input type="text" id="opendapDataURL" size="100" value="http://localhost:8081/thredds/dodsC/greenpath/Model/topaz" />
+				<div id="opendapURLContainer"></div>
 			</div>
 		</div>
 
 		<div id="matchUpTab">
-			<input type='button' id='extractParameterNamesButton' value="Extract parameternames" />
+			<input type='button' id='extractParameterNamesButton' value="Initiate raster data" />
 			<div id="matchUpList"></div>
-			<div id='compareRaster'>
-				<input type="text" id="matchVariable" width="20" value="salinity" />
-				<br>
-				<input type="text" id="matchVariable2" width="20" value="v4_salinity:salinity" />
-				<br>
-				<input type='button' id='compareRasterButton' value="Compare" />
-			</div>
-			<div id="highchartsContainer" style="width: 100%; height: 400px;"></div>
+			<div id='compareRaster'></div>
+			<input type='button' id='compareRasterButton' value="Compare" />
+			<div id="highchartsContainer" style="width: 100%; height: 500px;"></div>
 		</div>
 
 		<div id="layersTab">

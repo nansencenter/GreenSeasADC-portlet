@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugtC = false;// debug flag
+var debugtC = true;// debug flag
 
 myNamespace.tableConstructor = (function($, hP) {
 	"use strict";
@@ -51,6 +51,11 @@ myNamespace.tableConstructor = (function($, hP) {
 	}
 
 	function generateStatistics(features) {
+		var header = "<table id='generalStatisticsTable' class='table'>", footer = "</tbody></table>", rows = "";
+		var headers = [ "Parameter", "Quantity", "Min", "Max", "Sum", "Average", "Sample Standard Deviation",
+				"Variance" ];
+		var tableHeader = headerFrom(headers);
+
 		var selectedParameters = hP.chosenParameters.allSelected;
 		var statistics = {};
 		if (debugtC)
@@ -72,14 +77,15 @@ myNamespace.tableConstructor = (function($, hP) {
 					parVal = parseFloat(parVal);
 					statistics[parameter].quantity += 1;
 					statistics[parameter].sum += parVal;
-					if (!statistics[parameter].min) {
+					if (typeof statistics[parameter].min === 'undefined') {
 						statistics[parameter].min = parVal;
 						statistics[parameter].max = parVal;
 					} else {
-						if (parVal < statistics[parameter].min)
+						if (parVal < statistics[parameter].min) {
 							statistics[parameter].min = parVal;
-						else if (parVal > statistics[parameter].max)
+						} else if (parVal > statistics[parameter].max) {
 							statistics[parameter].max = parVal;
+						}
 					}
 				}
 			});
@@ -104,7 +110,7 @@ myNamespace.tableConstructor = (function($, hP) {
 		});
 		if (debugtC)
 			console.log("generateStatistics3");
-		var output = "";
+		// var output = "";
 		$.each(selectedParameters, function(j, parameter) {
 			var quantity = statistics[parameter].quantity;
 			var sum = statistics[parameter].sum;
@@ -114,14 +120,28 @@ myNamespace.tableConstructor = (function($, hP) {
 			var parTable = parameter.split(":");
 			var min = statistics[parameter].min;
 			var max = statistics[parameter].max;
-			output += hP.getHeader(parTable[1], parTable[0]) + ": quantity:" + quantity + ", min:" + min + ", max:"
-					+ max + ", sum:" + sum + ", average:" + average + ", sample standard deviation:" + sd
-					+ ", variance:" + variance + "<br>";
+			var row = "<tr>";
+			/*
+			 * output += hP.getHeader(parTable[1], parTable[0]) + ": quantity:" +
+			 * quantity + ", min:" + min + ", max:" + max + ", sum:" + sum + ",
+			 * average:" + average + ", sample standard deviation:" + sd + ",
+			 * variance:" + variance + "<br>";
+			 */
+			row += data(hP.getHeader(parTable[1], parTable[0]));
+			row += data(quantity);
+			row += data(min);
+			row += data(max);
+			row += data(sum);
+			row += data(average);
+			row += data(sd);
+			row += data(variance);
+			rows += row + "</tr>\n";
 		});
-		output += "<br>";
+		// output += "<br>";
 		if (debugtC)
 			console.log("generateStatistics4");
-		return output;
+		return concatTable(header, tableHeader, rows, footer);
+		// return output;
 	}
 
 	function featureTable(tableId, features) {
@@ -143,7 +163,10 @@ myNamespace.tableConstructor = (function($, hP) {
 			// add all own (not inherited) properties to row
 			for (prop in val.properties) {
 				if (val.properties.hasOwnProperty(prop)) {
-					row += data(val.properties[prop]);
+					if (val.properties[prop] != null)
+						row += data(val.properties[prop]);
+					else
+						row += data("");
 				}
 			}
 			rows += row + "</tr>";
@@ -194,10 +217,14 @@ myNamespace.tableConstructor = (function($, hP) {
 		for ( var table in allLayers) {
 			if (debugtC)
 				console.log("tablesDone[table] where table= " + table);
+			// If the paramters from the table has been initiated (through
+			// ns.hP.initiateParameters())
 			if (allLayers[table]) {
 				str += "<li id=\"" + table + "\"><a>" + hP.getTableHeader(table) + "</a>";
 				str += "<ul>";
 				$.each(hP.availableParameters[table], function(i, val) {
+					// Check if the parameter is not inherited from the
+					// metadatatable
 					if (hP.mainParameters.parameters.indexOf(val) == -1) {
 						if (val.substring(val.length - 2) != qfPostFix)
 							str += listItem(val, table);
