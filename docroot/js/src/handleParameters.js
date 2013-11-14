@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debughP = true;// debug flag
+var debughP = false;// debug flag
 
 myNamespace.handleParameters = (function($) {
 	var qf = false;

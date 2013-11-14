@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugc = true;// debug flag
+var debugc = false;// debug flag
 
 myNamespace.control = (function($, OL, ns) {
 	"use strict";
@@ -123,6 +123,34 @@ myNamespace.control = (function($, OL, ns) {
 		return date;
 	}
 
+	function createMonthArray() {
+		if (debugc)
+			console.log("createMonthArray");
+		var months = null;
+		if (document.getElementById('monthEnabledCheck').checked) {
+			var allMonths = [ "January", "February", "March", "April", "May", "June", "July", "August", "September",
+					"October", "November", "December" ];
+			var fromMonth = $('#fromMonth').val();
+			if (debugc)
+				console.log("fromMonth:" + fromMonth);
+			fromMonth = allMonths.indexOf(fromMonth);
+			var toMonth = $('#toMonth').val();
+			if (debugc)
+				console.log("toMonth:" + toMonth);
+			toMonth = allMonths.indexOf(toMonth);
+			if (fromMonth == -1 || toMonth == -1)
+				return months;
+			months = [];
+			for (; fromMonth != toMonth; fromMonth = (fromMonth + 1) % 12) {
+				months.push(allMonths[fromMonth]);
+			}
+			months.push(allMonths[toMonth]);
+		}
+		if (debugc)
+			console.log(months);
+		return months;
+	}
+
 	function createDepthHashMap() {
 		var depth = null;
 		if (document.getElementById('depthEnabledCheck').checked) {
@@ -152,6 +180,7 @@ myNamespace.control = (function($, OL, ns) {
 
 		var filterBbox = createfilterBoxHashMap();
 		var date = createDateHashMap();
+		var months = createMonthArray();
 		var depth = createDepthHashMap();
 
 		var propertyName = [];
@@ -173,7 +202,7 @@ myNamespace.control = (function($, OL, ns) {
 		if (debugc)
 			console.log("control.js: calling ns.query.constructFilterString()"); // TEST
 
-		var filter = ns.query.constructFilterString(filterBbox, date, attr, depth);
+		var filter = ns.query.constructFilterString(filterBbox, date, attr, depth, months);
 
 		// GetFeature request with filter, callback handles result
 		if (debugc)
@@ -303,8 +332,9 @@ myNamespace.control = (function($, OL, ns) {
 			var depth = createDepthHashMap();
 			var filterBbox = createfilterBoxHashMap();
 			var date = createDateHashMap();
+			var months = createMonthArray();
 
-			var filter = ns.query.constructParameterFilterString(propertyNameNeed, depth, filterBbox, date);
+			var filter = ns.query.constructParameterFilterString(propertyNameNeed, depth, filterBbox, date, months);
 			// Requesting features from the first layer through an asynchronous
 			// request and sending response to displayParameter
 			ns.WebFeatureService.getFeature({
@@ -361,6 +391,7 @@ myNamespace.control = (function($, OL, ns) {
 			var depth = createDepthHashMap();
 			var filterBbox = createfilterBoxHashMap();
 			var date = createDateHashMap();
+			var months = createMonthArray();
 			var layer = tablesToQuery.pop();
 			var propertyName = [];
 			var propertyNameNeed = [];
@@ -374,7 +405,7 @@ myNamespace.control = (function($, OL, ns) {
 				}
 			});
 
-			var filter = ns.query.constructParameterFilterString(propertyNameNeed, depth, filterBbox, date);
+			var filter = ns.query.constructParameterFilterString(propertyNameNeed, depth, filterBbox, date, months);
 			// Requesting features from the first layer through an asynchronous
 			// request and sending response to displayParameter
 			ns.WebFeatureService.getFeature({
@@ -470,6 +501,7 @@ myNamespace.control = (function($, OL, ns) {
 	function updateTreeInventoryNumbers() {
 		var filterBbox = createfilterBoxHashMap();
 		var date = createDateHashMap();
+		var months = createMonthArray();
 		var myTreeContainer = $.jstree._reference("#parametersTree").get_container();
 		var allChildren = myTreeContainer.find("li");
 		$.each(allChildren, function(i, val) {
@@ -480,7 +512,7 @@ myNamespace.control = (function($, OL, ns) {
 					TYPENAME : layer,
 					PROPERTYNAME : splitString[1],
 					FILTER : ns.query.constructParameterFilterString([ splitString[1] ], createDepthHashMap(),
-							filterBbox, date),
+							filterBbox, date, months),
 					RESULTTYPE : "hits"
 				}, function(response) {
 					updateTreeWithInventoryNumbers(response, splitString[1], splitString[0]);

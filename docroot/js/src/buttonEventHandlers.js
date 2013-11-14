@@ -48,7 +48,8 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		add("#toggleResults", toggleButton("#toggleResults", "results", "#featuresAndParams"));
 
 		add("#bboxEnabledCheck", checkParameter("bboxEnabledCheck", "Bounding box", "#bboxHeaderText"));
-		add("#dateEnabledCheck", checkParameter("dateEnabledCheck", "Date/Time", "#dateHeaderText"));
+		add("#dateEnabledCheck", checkParameter("dateEnabledCheck", "Date/Time/Month", "#dateHeaderText"));
+		add("#monthEnabledCheck", checkParameter("monthEnabledCheck", "Date/Time/Month", "#dateHeaderText"));
 		add("#depthEnabledCheck", checkParameter("depthEnabledCheck", "Depth", "#depthHeaderText"));
 		add("#parametersEnabledCheck", checkParameter("parametersEnabledCheck", "Parameters", "#parametersHeaderText"));
 		add("#metadataEnabledCheck", checkParameter("metadataEnabledCheck", "Metadata", "#metadataHeaderText"));

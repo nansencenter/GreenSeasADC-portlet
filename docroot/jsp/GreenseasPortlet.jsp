@@ -37,7 +37,10 @@
 					</h3>
 					<div id='bbox'>
 						<input type="checkbox" id="bboxEnabledCheck">
-						Enable in query <br> <em>Tip: You can hold shift and draw with mouse on map to set bounding box</em> <br>
+						Enable in query
+						<br>
+						<em>Tip: You can hold shift and draw with mouse on map to set bounding box</em>
+						<br>
 						<input type='button' id='toCurrentExtent' value="From map extent"
 							title='Sets bounding box to the current extent of the map' />
 						<input type='button' id='anywhereButton' value="Anywhere" />
@@ -63,22 +66,62 @@
 					</div>
 
 					<h3>
-						<span id='dateHeaderText'>Date/Time <em>(off)</em></span>
+						<span id='dateHeaderText'>Date/Time/Month <em>(off)</em></span>
 					</h3>
 					<div id='datetime'>
 
 						<input type="checkbox" id="dateEnabledCheck">
-						Enable in query <br> <br> <em>Date (Use yyyy-mm-dd format if no date picker appears)</em> <br>
+						Search by date
+						<br>
+						<br>
+						<em>Date (Use yyyy-mm-dd format if no date picker appears)</em>
+						<br>
 						Between
 						<input type="date" id="fromDate" value="1915-01-01">
 						and
 						<input type="date" id="toDate" value="2007-01-01">
 						<br>
 						<input type="checkbox" id="timeEnabledCheck">
-						Search for time <br> <br> Between
+						Include time in the date-search
+						<br>
+						<br>
+						Between
 						<input type="time" id="fromTime" value="00:00">
 						and
 						<input type="time" id="toTime" value="23:59">
+						<br>
+						<input type="checkbox" id="monthEnabledCheck">
+						Search by month
+						<br>
+						<br>
+						Between <select id="fromMonth">
+							<option value="January">January</option>
+							<option value="February">February</option>
+							<option value="March">March</option>
+							<option value="April">April</option>
+							<option value="May">May</option>
+							<option value="June">June</option>
+							<option value="July">July</option>
+							<option value="August">August</option>
+							<option value="September">September</option>
+							<option value="October">October</option>
+							<option value="November">November</option>
+							<option value="December">December</option>
+						</select> and
+						<select id="toMonth">
+							<option value="January">January</option>
+							<option value="February">February</option>
+							<option value="March">March</option>
+							<option value="April">April</option>
+							<option value="May">May</option>
+							<option value="June">June</option>
+							<option value="July">July</option>
+							<option value="August">August</option>
+							<option value="September">September</option>
+							<option value="October">October</option>
+							<option value="November">November</option>
+							<option value="December">December</option>
+						</select>
 						<br>
 
 					</div>
@@ -89,7 +132,9 @@
 					<div id='depth'>
 
 						<input type="checkbox" id="depthEnabledCheck">
-						Enable in query <br> <br>
+						Enable in query
+						<br>
+						<br>
 
 						<div>
 							<form name="depthform">

@@ -308,11 +308,17 @@ myNamespace.mapViewer = (function(OL) {
 				console.log("name in parameterLayers: " + layers[name]);
 			map.removeLayer(layers[name]);
 		}
+		
+		var swapLonLatFilter = swapLonLatInFilteR(filter);
+//		console.log("Filter in:");
+//		console.log(filter);
+//		console.log("Filter out:");
+//		console.log(swapLonLatFilter);
 
 		newLayer = new OpenLayers.Layer.WMS(name, window.WMSServer, {
 			layers : layer,
 			transparent : true,
-			filter : swapLonLatInFilteR(filter),
+			filter : swapLonLatFilter,
 			sld_body : getSLD(name, database + ":" + layer, color, 4),
 			format : window.WMSformat
 		}, {

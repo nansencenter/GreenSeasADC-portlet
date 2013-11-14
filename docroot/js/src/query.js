@@ -8,10 +8,10 @@ myNamespace.query = (function(OL) {
 	var previousFilter;
 
 	// construct an OGC XML filter object from attributes
-	function constructFilter(bbox, date, depth, param) {
+	function constructFilter(bbox, date, depth, param, months) {
 
 		// should we filter at all?
-		if (bbox || date || depth || param) {
+		if (bbox || date || depth || param || months) {
 			var filterArray = [];
 
 			// bbox filter
@@ -36,6 +36,10 @@ myNamespace.query = (function(OL) {
 				var parametersFilter = requiredParameters(param);
 				filterArray.push(parametersFilter);
 			}
+			if (months) {
+				var monthsFilter = createMonthFilter(months);
+				filterArray.push(monthsFilter);
+			}
 
 			// combine all filters together by logical AND
 			return combineFilters(filterArray);
@@ -56,21 +60,21 @@ myNamespace.query = (function(OL) {
 		return depthFilter;
 	}
 
-	function constructFilterString(bbox, date, attributes, depth) {
+	function constructFilterString(bbox, date, attributes, depth, months) {
 		if (debugq)
 			console.log("constructFilterString");
 		// generate filter object
-		var filterObject = constructFilter(bbox, date, depth);
+		var filterObject = constructFilter(bbox, date, depth, null, months);
 
 		return constructString(filterObject);
 
 	}
 
-	function constructParameterFilterString(parameters, depth, bbox, date) {
+	function constructParameterFilterString(parameters, depth, bbox, date,months) {
 		if (debugq)
 			console.log("constructParameterFilterString starting");
 		// generate filter object
-		var filterObject = constructFilter(bbox, date, depth, parameters);
+		var filterObject = constructFilter(bbox, date, depth, parameters,months);
 
 		if (debugq)
 			console.log("constructFilterString ending");// TEST
@@ -133,6 +137,18 @@ myNamespace.query = (function(OL) {
 		}
 	}
 
+	function createMonthFilter(months) {
+		var monthFilterArray = [];
+		for ( var i = 0, len = months.length; i < len; i++) {
+			var filter = new OL.Filter.Comparison({
+				type : OpenLayers.Filter.Comparison.EQUAL_TO,
+				property : "month",
+				value : months[i]
+			});
+			monthFilterArray.push(filter);
+		}
+		return combineFiltersOr(monthFilterArray);
+	}
 	function requiredParameters(parameters) {
 		var requiredParamtersArray = [];
 		for ( var i = 0, len = parameters.length; i < len; i++) {
