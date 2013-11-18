@@ -84,6 +84,7 @@ myNamespace.control = (function($, OL, ns) {
 			}
 		});
 		setUpOPeNDAPSelector();
+		ns.mapLayers.addWMSLayerSelector();
 	}
 
 	// non-public
@@ -899,38 +900,32 @@ myNamespace.control = (function($, OL, ns) {
 		$("#timeSeriesVariableDiv").append(selectElement);
 	}
 
-	function setUpOPeNDAPSelector() {
-		var URLs = [ {
-			url : "http://localhost:8081/thredds/dodsC/greenpath/Model/topaz",
-			name : "Topaz"
-		}, {
-			url : "http://localhost:8081/thredds/dodsC/greenseasAllData/NACDAILY_2009_06.nc",
-			name : "Topaz NACDAILY_2009_06"
-		}, {
-			url : "http://localhost:8081/thredds/dodsC/greenseasAllData/ssmicon20100830_test.nc",
-			name : "ssmicon20100830"
-		}, {
-			url : "http://localhost:8081/thredds/dodsC/greenseasAllData/seawifs01_05_chl_8Day_360_180_test.nc",
-			name : "seawifs01_05_chl_8Day_360_180"
-		}, {
-			url : "http://localhost:8081/thredds/dodsC/greenseasAllData/chl_seawifs_global_monthly_512x256_test.nc",
-			name : "chl_seawifs_global_monthly_512x256"
-		}, {
-			url : "http://localhost:8081/thredds/dodsC/cmccModel/N1p_2000_2005_merged_mesh.nc",
-			name : "CMCC Phosphate"
-		} ];
+	function toggleLayerButton() {
+		ns.mapLayers.toggleLayerButton();
+	}
 
-		var selectElement = "<select id=\"opendapDataURL\">";
-		var options = "";
-		$.each(URLs, function(i, val) {
-			options += "<option value=\"" + val.url + "\">" + val.name + "</option>";
-		});
-		selectElement += options + "</select>";
+	function setUpOPeNDAPSelector() {
+		var URLs = {
+			"http://localhost:8081/thredds/dodsC/greenpath/Model/topaz" : "Topaz",
+			"http://localhost:8081/thredds/dodsC/greenseasAllData/NACDAILY_2009_06.nc" : "Topaz NACDAILY_2009_06",
+			"http://localhost:8081/thredds/dodsC/greenseasAllData/ssmicon20100830_test.nc" : "ssmicon20100830",
+			"http://localhost:8081/thredds/dodsC/greenseasAllData/seawifs01_05_chl_8Day_360_180_test.nc" : "seawifs01_05_chl_8Day_360_180",
+			"http://localhost:8081/thredds/dodsC/greenseasAllData/chl_seawifs_global_monthly_512x256_test.nc" : "chl_seawifs_global_monthly_512x256",
+			"http://localhost:8081/thredds/dodsC/cmccModel/N1p_2000_2005_merged_mesh.nc" : "CMCC Phosphate"
+		};
+
+		var selectElement = myNamespace.mapLayers.setUpSelector(URLs, "opendapDataURL");
 		$("#opendapURLContainer").html(selectElement);
+	}
+
+	function addLayerButton() {
+		ns.mapLayers.addWMSLayerSelector();
 	}
 
 	// public interface
 	return {
+		addLayerButton : addLayerButton,
+		toggleLayerButton : toggleLayerButton,
 		addTimeSeriesVariableButton : addTimeSeriesVariableButton,
 		timeSeriesButton : timeSeriesButton,
 		init : init,

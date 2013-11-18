@@ -40,7 +40,9 @@
 		<header-portlet-javascript>/js/src/errorMessage.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/src/query.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/src/webFeatureService.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/src/webMapService.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/src/tableConstructor.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/src/mapLayers.js</header-portlet-javascript>
 	</portlet>
 	<role-mapper>
 		<role-name>administrator</role-name>

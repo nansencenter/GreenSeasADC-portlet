@@ -14,7 +14,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 	}
 
 	function callFromControl(element, functionValue) {
-		add(element, setThisOfFunction(functionValue, myNamespace.control));
+		add(element, functionValue/*setThisOfFunction(functionValue, myNamespace.control)*/);
 	}
 
 	function toggleButton(buttonId, buttonName, div) {
@@ -57,6 +57,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		// buttons that call methods of control - should have control as "this"
 		var c = myNamespace.control;
 		callFromControl("#filterParameters", c.filterParametersButton);
+		callFromControl("#addLayerButton", c.addLayerButton);
 		callFromControl("#compareRasterButton", c.compareRasterButton);
 		callFromControl("#addTimeSeriesVariableButton", c.addTimeSeriesVariableButton);
 		callFromControl("#timeSeriesButton", c.timeSeriesButton);
@@ -105,9 +106,15 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 
 				});
 	}
+	
+	function change(element,eventFunction){
+		jQ(element).change(eventFunction);
+	}
 
 	// public interface
 	return {
+		change : change,
+		callFromControl : callFromControl,
 		initHandlers : initHandlers,
 		linkParametersExportButton : linkParametersExportButton,
 	};

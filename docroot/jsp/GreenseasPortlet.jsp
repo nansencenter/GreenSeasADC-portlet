@@ -107,8 +107,7 @@
 							<option value="October">October</option>
 							<option value="November">November</option>
 							<option value="December">December</option>
-						</select> and
-						<select id="toMonth">
+						</select> and <select id="toMonth">
 							<option value="January">January</option>
 							<option value="February">February</option>
 							<option value="March">March</option>
@@ -272,8 +271,13 @@
 		</div>
 
 		<div id="layersTab">
-			<p>Select/configure Layers</p>
-			Time/depth/name/URL/File/colorscale/min/max/variable/level on map
+			<p>Select/configure Layers:</p>
+			Dataset/Variable/Colorscale(min/max/auto)/Layertype(boxfill/contour)/Scale(linear/logarithmic)/Elevation/Date/Time
+			<br>
+			<div id="layerURLSelectorContainer" >
+			
+			</div>
+			<input type='button' id='addLayerButton' value="Add new layer" />
 		</div>
 
 	</div>

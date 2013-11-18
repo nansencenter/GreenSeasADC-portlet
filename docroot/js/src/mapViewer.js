@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugmW = false;// debug flag
+var debugmW = true;// debug flag
 
 myNamespace.mapViewer = (function(OL) {
 	"use strict";
@@ -14,6 +14,7 @@ myNamespace.mapViewer = (function(OL) {
 
 	// Object that stores the layers for the parameters
 	var parameterLayers = {};
+	var customLayers = {};
 
 	// This SLD is partly taken from
 	// http://docs.geoserver.org/stable/en/user/styling/sld-cookbook/points.html#simple-point
@@ -97,6 +98,13 @@ myNamespace.mapViewer = (function(OL) {
 
 	// some background layers, user may select one
 	var backgroundLayers = {
+		demis : new OpenLayers.Layer.WMS(
+				"Demis WMS",
+				"http://www2.demis.nl/wms/wms.ashx?WMS=WorldMap",
+				{
+					layers : 'Countries,Bathymetry,Topography,Hillshading,Coastlines,Builtup+areas,Waterbodies,Rivers,Streams,Railroads,Highways,Roads,Trails,Borders,Cities,Airports',
+					format : 'image/png'
+				}),
 		generic : new OpenLayers.Layer.WMS("Generic background", "http://vmap0.tiles.osgeo.org/wms/vmap0", {
 			layers : 'basic',
 			format : window.WMSformat
@@ -106,13 +114,6 @@ myNamespace.mapViewer = (function(OL) {
 					layers : 'gebco_08_grid',
 					format : window.WMSformat
 				}),
-		demis : new OpenLayers.Layer.WMS(
-				"Demis WMS",
-				"http://www2.demis.nl/wms/wms.ashx?WMS=WorldMap",
-				{
-					layers : 'Countries,Bathymetry,Topography,Hillshading,Coastlines,Builtup+areas,Waterbodies,Rivers,Streams,Railroads,Highways,Roads,Trails,Borders,Cities,Airports',
-					format : 'image/png'
-				})
 	};
 
 	function initMap() {
@@ -308,12 +309,12 @@ myNamespace.mapViewer = (function(OL) {
 				console.log("name in parameterLayers: " + layers[name]);
 			map.removeLayer(layers[name]);
 		}
-		
+
 		var swapLonLatFilter = swapLonLatInFilteR(filter);
-//		console.log("Filter in:");
-//		console.log(filter);
-//		console.log("Filter out:");
-//		console.log(swapLonLatFilter);
+		// console.log("Filter in:");
+		// console.log(filter);
+		// console.log("Filter out:");
+		// console.log(swapLonLatFilter);
 
 		newLayer = new OpenLayers.Layer.WMS(name, window.WMSServer, {
 			layers : layer,
@@ -336,6 +337,42 @@ myNamespace.mapViewer = (function(OL) {
 			console.log("Added the layer: " + name);
 	}
 
+	function addWMSLayer(url, name, layerID, colorscalerange, style, logscale, elevation, time) {
+		if (debugmW)
+			console.log("Adding the WMS layer");
+		if (debugmW)
+			console.log("elevation:"+elevation+", time:"+time);
+		parameters = {
+			layers : layerID,
+			format : window.WMSformat,
+			transparent : true,
+			styles : style,
+			colorscalerange : colorscalerange,
+			logscale : logscale,
+		};
+		if (!(typeof elevation === 'undefined') && elevation != "") {
+			parameters.elevation = elevation;
+		}
+		if (!(typeof time === 'undefined') && time != "") {
+			parameters.time = time;
+		}
+		var layer = new OpenLayers.Layer.WMS(name, url, parameters, {
+			isBaseLayer : false
+		});
+		if (debugmW)
+			console.log("Created the WMS layer");
+		if (name in customLayers) {
+			map.removeLayer(customLayers[name]);
+			if (debugmW)
+				console.log("Removed the existing WMS layer");
+		}
+		customLayers[name] = layer;
+		map.addLayer(layer);
+		map.setLayerIndex(layer, 5000);
+		if (debugmW)
+			console.log("Added the WMS layer");
+	}
+
 	function getExtent() {
 		return map.getExtent();
 	}
@@ -346,6 +383,7 @@ myNamespace.mapViewer = (function(OL) {
 
 	// public interface
 	return {
+		addWMSLayer : addWMSLayer,
 		getRandomColor : getRandomColor,
 		addLayerWMS : addLayerWMS,
 		addFeaturesFromData : addFeaturesFromData,

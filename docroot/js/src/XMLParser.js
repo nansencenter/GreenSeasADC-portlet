@@ -28,12 +28,37 @@ myNamespace.XMLParser = (function($) {
 	function getXmlDoc(xmlSchema) {
 		var xmlDoc;
 		var browser = findBrowser();
-		/*if (browser == "Chrome" || browser == "Firefox") {
-			xmlDoc = xmlSchema.responseXML;
-		} else {*/
+		/*
+		 * if (browser == "Chrome" || browser == "Firefox") { xmlDoc =
+		 * xmlSchema.responseXML; } else {
+		 */
+		//if (xmlSchema._object) {
 			xmlDoc = xmlSchema._object.responseXML;
-		//}
+		/*} else {
+			xmlDoc = xmlSchema.responseXML;
+		}*/
 		return xmlDoc;
+	}
+
+	function extractWMSParameters(xmlSchema) {
+		if (debugXML)
+			console.log("extractWMSParameters:");
+		if (debugXML)
+			console.log(xmlSchema);
+		var parameters = {};
+		var xmlDoc = getXmlDoc(xmlSchema);
+		// if (debugXML)
+		if (debugXML)
+			console.log(xmlDoc);
+		var layers = $(xmlDoc.documentElement).find("Layer[queryable=1]");
+		if (debugXML)
+			console.log(layers);
+		$.each(layers, function(i, val) {
+			var parameter = val.getElementsByTagName("Name")[0].childNodes[0].nodeValue;
+			var description = val.getElementsByTagName("Title")[0].childNodes[0].nodeValue;
+			parameters[parameter] = description;
+		});
+		return parameters;
 	}
 
 	function extractParameters(xmlSchema) {
@@ -70,6 +95,7 @@ myNamespace.XMLParser = (function($) {
 	}
 	// public interface
 	return {
+		extractWMSParameters : extractWMSParameters,
 		getNumberOfFeatures : getNumberOfFeatures,
 		extractParameters : extractParameters
 	};
