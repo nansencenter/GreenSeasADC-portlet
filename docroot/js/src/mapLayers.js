@@ -9,16 +9,16 @@ myNamespace.mapLayers = (function(jQ, bH) {
 	function addWMSLayerSelector() {
 		var URLs = {
 			"NONE" : "Select layer",
-			"http://thredds.nersc.no/thredds/wms/greenpath/Model/topaz":"Topaz",
-			"http://thredds.nersc.no/thredds/wms/greenpath/Model/cmcc_phosphate":"CMCC Phosphate",
-			"http://thredds.nersc.no/thredds/wms/greenpath/Model/cmcc_chla":"CMCC Chlorophyll-a",
-			"http://thredds.nersc.no/thredds/wms/greenpath/Model/cmcc_sea_ice":"CMCC Sea Ice",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/chlor_seawifs_Sep97_Dec10_360x180gt":"PML Chlorophyll-a",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/fmicro_seawifs_Sep97_Dec10_360x180gt":"PML Fraction of Microphytoplankton",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/fnano_seawifs_Sep97_Dec10_360x180gt":"PML Fraction of Nanophytoplankton",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/fpico_seawifs_Sep97_Dec10_360x180gt":"PML Fraction of Picophytoplankton",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/zeu_seawifs_zmld_soda_Sep97_Dec07_360x180gt":"PML Ratio euphotic depth to mixed layer depth",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/ssmicon":"ssmicon",
+			"http://thredds.nersc.no/thredds/wms/greenpath/Model/topaz" : "Topaz",
+			"http://thredds.nersc.no/thredds/wms/greenpath/Model/cmcc_phosphate" : "CMCC Phosphate",
+			"http://thredds.nersc.no/thredds/wms/greenpath/Model/cmcc_chla" : "CMCC Chlorophyll-a",
+			"http://thredds.nersc.no/thredds/wms/greenpath/Model/cmcc_sea_ice" : "CMCC Sea Ice",
+			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/chlor_seawifs_Sep97_Dec10_360x180gt" : "PML Chlorophyll-a",
+			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/fmicro_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Microphytoplankton",
+			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/fnano_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Nanophytoplankton",
+			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/fpico_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Picophytoplankton",
+			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/zeu_seawifs_zmld_soda_Sep97_Dec07_360x180gt" : "PML Ratio euphotic depth to mixed layer depth",
+			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/ssmicon" : "ssmicon",
 		};
 
 		var selectElement = setUpSelector(URLs, "mapLayersWMSURL" + activeLayers, activeLayers);
@@ -77,15 +77,17 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		var units = "";
 		if (!(typeof obj.units === 'undefined')) {
 			units = "(Units:" + obj.units + ")";
+			if (debugMl)
+				console.log(units);
 		}
 		var zAxis = "";
 		if (!(typeof obj.zaxis === 'undefined')) {
 			if (!(typeof obj.zaxis.values === 'undefined')) {
-				var units = "";
+				var unitsZ = "";
 				if (!(typeof obj.zaxis.units === 'undefined')) {
-					units = "(Units:" + obj.zaxis.units + ")";
+					unitsZ = "(Units:" + obj.zaxis.units + ")";
 				}
-				zAxis = "Elevation" + units + ":";
+				zAxis = "Elevation" + unitsZ + ":";
 				zAxisMap = {};
 				$.each(obj.zaxis.values, function(i, val) {
 					zAxisMap[val] = val;
@@ -112,10 +114,18 @@ myNamespace.mapLayers = (function(jQ, bH) {
 			});
 			tAxis = setUpSelector(tAxisMap, "dateVariable" + activeLayer, activeLayer);
 		}
+		var colorscaleMin = 0;
+		var colorscaleMax = 1;
+		if (!(typeof obj.scaleRange === 'undefined')) {
+			if (obj.scaleRange.length == 2) {
+				colorscaleMin = obj.scaleRange[0];
+				colorscaleMax = obj.scaleRange[1];
+			}
+		}
 		var colorscalerange = "Colorscalerange " + units + "(Auto:<input type='checkbox' id='colorscalerangeAuto"
 				+ activeLayer + "'/>)" + " from <input type='text' id='colorscalerangeMin" + activeLayer
-				+ "' size='3' value='0'/>" + "to <input type='text' id='colorscalerangeMax" + activeLayer
-				+ "' size='3' value='1'/>";
+				+ "' size='3' value='" + colorscaleMin + "'/>" + "to <input type='text' id='colorscalerangeMax"
+				+ activeLayer + "' size='3' value='" + colorscaleMax + "'/>";
 		var styles = {};
 		$.each(obj.supportedStyles, function(i, val) {
 			styles[val] = val;
@@ -262,8 +272,8 @@ myNamespace.mapLayers = (function(jQ, bH) {
 			console.log("logscale:" + logscale);
 		var elevation = $('#zAxisVariable' + activeLayer).find(":selected").val();
 		var time = $('#timeVariable' + activeLayer).find(":selected").val();
-		myNamespace.mapViewer.addWMSLayer(url,activeLayer, name, layer, colorscalerange, style, logscale, elevation, date + "T"
-				+ time);
+		myNamespace.mapViewer.addWMSLayer(url, activeLayer, name, layer, colorscalerange, style, logscale, elevation,
+				date + "T" + time);
 		if (debugMl)
 			console.log("Toggled layer");
 	}

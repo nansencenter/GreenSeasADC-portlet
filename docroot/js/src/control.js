@@ -756,7 +756,7 @@ myNamespace.control = (function($, OL, ns) {
 		if (!(typeof $("#matchVariable2") === 'undefined')) {
 			var options = generateOptionsFromAllSelectedParameters();
 			$("#matchVariable2").html(options);
-			if (!typeof $("#searchBeforeMatchup") === 'undefined') {
+			if (!(typeof $("#searchBeforeMatchup") === 'undefined')) {
 				$("#searchBeforeMatchup").html("");
 			}
 			$("#compareRasterButton").show();
