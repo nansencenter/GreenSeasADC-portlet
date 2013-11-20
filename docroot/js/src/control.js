@@ -759,6 +759,7 @@ myNamespace.control = (function($, OL, ns) {
 			if (!typeof $("#searchBeforeMatchup") === 'undefined') {
 				$("#searchBeforeMatchup").html("");
 			}
+			$("#compareRasterButton").show();
 		}
 	}
 
