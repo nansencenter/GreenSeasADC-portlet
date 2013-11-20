@@ -51,6 +51,11 @@ myNamespace.control = (function($, OL, ns) {
 			active : false,
 			heightStyle : "content"
 		});
+		$("#modelOptions").accordion({
+			collapsible : true,
+			active : false,
+			heightStyle : "content"
+		});
 
 		// Make the tabs jquery-tabs
 		$("#tabs").tabs();
@@ -178,6 +183,10 @@ myNamespace.control = (function($, OL, ns) {
 		$("#timeSeriesDiv").hide();
 		$("#statisticsContainer").html("");
 		$("#timeSeriesContainer").html("");
+		$("#matchVariable2").html("");
+		$("#compareRasterButton").hide();
+		$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
+		$("#highchartsContainer").html("");
 
 		var filterBbox = createfilterBoxHashMap();
 		var date = createDateHashMap();
@@ -295,6 +304,10 @@ myNamespace.control = (function($, OL, ns) {
 			$("#timeSeriesDiv").hide();
 			$("#statisticsContainer").html("");
 			$("#timeSeriesContainer").html("");
+			$("#matchVariable2").html("");
+			$("#compareRasterButton").hide();
+			$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
+			$("#highchartsContainer").html("");
 
 			ns.handleParameters.selectParameters($("#parametersTree").jstree("get_checked", null, true), document
 					.getElementById('qualityFlagsEnabledCheck').checked);
@@ -388,6 +401,7 @@ myNamespace.control = (function($, OL, ns) {
 			ns.mapViewer.addFeaturesFromData(data, "All parameters");
 			document.getElementById('exportParameter').disabled = false;
 			$("#exportParametersDiv").show();
+			updateMatchupParameter();
 		} else {
 			var depth = createDepthHashMap();
 			var filterBbox = createfilterBoxHashMap();
@@ -694,7 +708,6 @@ myNamespace.control = (function($, OL, ns) {
 		$.each(parameters, function(i, val) {
 			list += i + ":" + val + "<br>";
 		});
-		$("#matchUpList").html(list);
 		setUpCompareRasterDiv(parameters);
 	}
 
@@ -709,16 +722,44 @@ myNamespace.control = (function($, OL, ns) {
 			options += "<option value=\"" + variable + "\">" + variableName + "</option>";
 		});
 		selectElement += options + "</select>";
-		selectElement += "<br><select id=\"matchVariable2\">";
+		selectElement += "<select id=\"matchVariable2\">";
+		var selectedParameters = ns.handleParameters.chosenParameters.allSelected;
+		options = generateOptionsFromAllSelectedParameters();
+		selectElement += options + "</select>";
+		/*
+		 * selectElement += "<br><input type='checkbox'
+		 * id='updateComparedParameterInData'/>" + "Update the compared
+		 * parameter to the dataoutput " + "(this will join the new parameter
+		 * from the raster to the output in the parameters-tab)";
+		 */
+
+		if (selectedParameters.length != 0) {
+			$("#compareRasterButton").show();
+			$("#compareRaster").html(selectElement + "<div id='searchBeforeMatchup'></div>");
+		} else
+			$("#compareRaster")
+					.html(
+							selectElement
+									+ "<div id='searchBeforeMatchup'>You need to search for data in order to be able to do a matchup</div>");
+	}
+
+	function generateOptionsFromAllSelectedParameters() {
 		var selectedParameters = ns.handleParameters.chosenParameters.allSelected;
 		options = "";
 		$.each(selectedParameters, function(i, val) {
 			options += "<option value=\"" + val + "\">" + ns.handleParameters.getHeaderFromRawData(val) + "</option>";
 		});
-		selectElement += options + "</select>";
-		var compareButton = "";
-		$("#compareRaster").html(selectElement + "<br>");
-		$("#compareRasterButton").show();
+		return options;
+	}
+
+	function updateMatchupParameter() {
+		if (!(typeof $("#matchVariable2") === 'undefined')) {
+			var options = generateOptionsFromAllSelectedParameters();
+			$("#matchVariable2").html(options);
+			if (!typeof $("#searchBeforeMatchup") === 'undefined') {
+				$("#searchBeforeMatchup").html("");
+			}
+		}
 	}
 
 	function calculateStatisticsButton() {
@@ -906,12 +947,16 @@ myNamespace.control = (function($, OL, ns) {
 
 	function setUpOPeNDAPSelector() {
 		var URLs = {
-			"http://localhost:8081/thredds/dodsC/greenpath/Model/topaz" : "Topaz",
-			"http://localhost:8081/thredds/dodsC/greenseasAllData/NACDAILY_2009_06.nc" : "Topaz NACDAILY_2009_06",
-			"http://localhost:8081/thredds/dodsC/greenseasAllData/ssmicon20100830_test.nc" : "ssmicon20100830",
-			"http://localhost:8081/thredds/dodsC/greenseasAllData/seawifs01_05_chl_8Day_360_180_test.nc" : "seawifs01_05_chl_8Day_360_180",
-			"http://localhost:8081/thredds/dodsC/greenseasAllData/chl_seawifs_global_monthly_512x256_test.nc" : "chl_seawifs_global_monthly_512x256",
-			"http://localhost:8081/thredds/dodsC/cmccModel/N1p_2000_2005_merged_mesh.nc" : "CMCC Phosphate"
+			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/topaz" : "Topaz",
+			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/cmcc_phosphate" : "CMCC Phosphate",
+			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/cmcc_chla" : "CMCC Chlorophyll-a",
+			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/cmcc_sea_ice" : "CMCC Sea Ice",
+			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/chlor_seawifs_Sep97_Dec10_360x180gt" : "PML Chlorophyll-a",
+			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/fmicro_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Microphytoplankton",
+			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/fnano_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Nanophytoplankton",
+			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/fpico_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Picophytoplankton",
+			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/zeu_seawifs_zmld_soda_Sep97_Dec07_360x180gt" : "PML Ratio euphotic depth to mixed layer depth",
+			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/ssmicon" : "ssmicon",
 		};
 
 		var selectElement = myNamespace.mapLayers.setUpSelector(URLs, "opendapDataURL");

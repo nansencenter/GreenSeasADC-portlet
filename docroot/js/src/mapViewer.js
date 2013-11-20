@@ -1,8 +1,8 @@
 var myNamespace = myNamespace || {};
 
-var debugmW = true;// debug flag
+var debugmW = false;// debug flag
 
-myNamespace.mapViewer = (function(OL) {
+myNamespace.mapViewer = (function(OL, $) {
 	"use strict";
 	// TODO fix bound
 	var currentBounds = new OpenLayers.Bounds(-60, -72, 82, 88), maxExtent = new OpenLayers.Bounds(-120, -88, 120, 88);
@@ -98,6 +98,10 @@ myNamespace.mapViewer = (function(OL) {
 
 	// some background layers, user may select one
 	var backgroundLayers = {
+		generic : new OpenLayers.Layer.WMS("Generic background", "http://vmap0.tiles.osgeo.org/wms/vmap0", {
+			layers : 'basic',
+			format : window.WMSformat
+		}),
 		demis : new OpenLayers.Layer.WMS(
 				"Demis WMS",
 				"http://www2.demis.nl/wms/wms.ashx?WMS=WorldMap",
@@ -105,15 +109,15 @@ myNamespace.mapViewer = (function(OL) {
 					layers : 'Countries,Bathymetry,Topography,Hillshading,Coastlines,Builtup+areas,Waterbodies,Rivers,Streams,Railroads,Highways,Roads,Trails,Borders,Cities,Airports',
 					format : 'image/png'
 				}),
-		generic : new OpenLayers.Layer.WMS("Generic background", "http://vmap0.tiles.osgeo.org/wms/vmap0", {
-			layers : 'basic',
-			format : window.WMSformat
-		}),
 		ocean : new OpenLayers.Layer.WMS('GEBCO Bathymetry',
 				'http://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?', {
 					layers : 'gebco_08_grid',
 					format : window.WMSformat
 				}),
+		longhurst : new OpenLayers.Layer.WMS('Longhurst Regions', 'http://geonode.iwlearn.org/geoserver/geonode/wms?', {
+			layers : 'geonode:Longhurst_world_v4_2010',
+			format : window.WMSformat
+		}),
 	};
 
 	function initMap() {
@@ -241,6 +245,7 @@ myNamespace.mapViewer = (function(OL) {
 		}
 		pointLayer.addFeatures(pointFeatures);
 		map.addLayer(pointLayer);
+		map.setLayerIndex(pointLayer, 10);
 		parameterLayers[name] = pointLayer;
 
 		if (debugmW)
@@ -295,11 +300,11 @@ myNamespace.mapViewer = (function(OL) {
 		if (debugmW)
 			console.log("addLayerWMS started");
 		var layers = parameterLayers;
-		var index = 9999;
+		var index = 999;
 		var color = window[layer + "Color"] || "#610B0B";
 		var newLayer;
 		if (layer == window.metaDataTable) {
-			index = 9998;
+			index = 998;
 			layers = mapLayers;
 		} else {
 			color = window[layer + "Color"] || getRandomColor();
@@ -337,11 +342,22 @@ myNamespace.mapViewer = (function(OL) {
 			console.log("Added the layer: " + name);
 	}
 
-	function addWMSLayer(url, name, layerID, colorscalerange, style, logscale, elevation, time) {
+	function updateIndices() {
+		$.each(mapLayers, function(i, layer) {
+			map.removeLayer(layer);
+			map.addLayer(layer);
+		});
+		$.each(parameterLayers, function(i, layer) {
+			map.removeLayer(layer);
+			map.addLayer(layer);
+		});
+	}
+
+	function addWMSLayer(url,id, name, layerID, colorscalerange, style, logscale, elevation, time) {
 		if (debugmW)
 			console.log("Adding the WMS layer");
 		if (debugmW)
-			console.log("elevation:"+elevation+", time:"+time);
+			console.log("elevation:" + elevation + ", time:" + time);
 		parameters = {
 			layers : layerID,
 			format : window.WMSformat,
@@ -361,14 +377,15 @@ myNamespace.mapViewer = (function(OL) {
 		});
 		if (debugmW)
 			console.log("Created the WMS layer");
-		if (name in customLayers) {
-			map.removeLayer(customLayers[name]);
+		if (id in customLayers) {
+			map.removeLayer(customLayers[id]);
 			if (debugmW)
 				console.log("Removed the existing WMS layer");
 		}
-		customLayers[name] = layer;
+		customLayers[id] = layer;
 		map.addLayer(layer);
-		map.setLayerIndex(layer, 5000);
+		map.setLayerIndex(layer, 500);
+		updateIndices();
 		if (debugmW)
 			console.log("Added the WMS layer");
 	}
@@ -394,4 +411,4 @@ myNamespace.mapViewer = (function(OL) {
 		zoomToExtent : zoomToExtent,
 	};
 
-}(OpenLayers));
+}(OpenLayers, jQuery));

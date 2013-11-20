@@ -20,10 +20,10 @@
 
 	<div id="tabs">
 		<ul>
-			<li><a href="#queryTab">Query and features</a></li>
-			<li><a href="#parametersTab">Parameters</a></li>
+			<li><a href="#queryTab">Search</a></li>
+			<li><a href="#parametersTab">Search results</a></li>
 			<li><a href="#statsTab">Statistics, plots and charts</a></li>
-			<li><a href="#rasterTab">Configure raster data</a></li>
+			<!-- 			<li><a href="#rasterTab">Configure raster data</a></li> -->
 			<li><a href="#matchUpTab">Model/data matchup</a></li>
 			<li><a href="#layersTab">Configure Map layers</a></li>
 
@@ -242,29 +242,38 @@
 		</div>
 
 		<div id="rasterTab">
-			<div id='uploadRaster'>
-				<p>Upload the raster data you want to compare to.</p>
-				<form id="uploadRasterForm" action="<%=submitFileAction%>" method="post" enctype="multipart/form-data">
-					<input type="file" id="file" name='<portlet:namespace />file' size="50" />
-					<input type="submit" value="Upload" />
-				</form>
-				<div id="progress">
-					<div id="bar"></div>
-					<div id="percent">0%</div>
-				</div>
-				<div id="status"></div>
-				<br>
-				<div>
-					<input type="checkbox" id="opendapDataURLCheck" checked>
-					Use OPeNDAP data URL
-				</div>
-				<div id="opendapURLContainer"></div>
-			</div>
+			<div id='uploadRaster'></div>
 		</div>
 
 		<div id="matchUpTab">
+			<div id='modelOptions'>
+				<h3>
+					<span id='modelOptionsHeaderText'>Upload File <em>(off)</em></span>
+				</h3>
+				<div id='fileOption'>
+					<p>Upload the raster data you want to compare to.</p>
+					<form id="uploadRasterForm" action="<%=submitFileAction%>" method="post" enctype="multipart/form-data">
+						<input type="file" id="file" name='<portlet:namespace />file' size="50" />
+						<input type="submit" value="Upload" />
+					</form>
+					<div id="progress">
+						<div id="bar"></div>
+						<div id="percent">0%</div>
+					</div>
+					<div id="status"></div>
+				</div>
+				<h3>
+					<span id='openDAPOptionHeaderText'>Use dataset from OpenDAP <em>(on)</em></span>
+				</h3>
+				<div id='openDAPOption'>
+					<div>
+						<input type="checkbox" id="opendapDataURLCheck" checked>
+						Use OPeNDAP data URL
+					</div>
+					<div id="opendapURLContainer"></div>
+				</div>
+			</div>
 			<input type='button' id='extractParameterNamesButton' value="Initiate raster data" />
-			<div id="matchUpList"></div>
 			<div id='compareRaster'></div>
 			<input type='button' id='compareRasterButton' value="Compare" />
 			<div id="highchartsContainer" style="width: 100%; height: 500px;"></div>
@@ -272,11 +281,9 @@
 
 		<div id="layersTab">
 			<p>Select/configure Layers:</p>
-			Dataset/Variable/Colorscale(min/max/auto)/Layertype(boxfill/contour)/Scale(linear/logarithmic)/Elevation/Date/Time
+			Dataset/Variable/Colorscale(min/max/auto)/Layertype(boxfill/contour/etc)/Scale(linear/logarithmic)/Elevation/Date/Time
 			<br>
-			<div id="layerURLSelectorContainer" >
-			
-			</div>
+			<div id="layerURLSelectorContainer"></div>
 			<input type='button' id='addLayerButton' value="Add new layer" />
 		</div>
 

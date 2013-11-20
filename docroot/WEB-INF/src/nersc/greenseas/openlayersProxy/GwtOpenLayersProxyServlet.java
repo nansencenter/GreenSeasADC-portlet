@@ -36,9 +36,10 @@ import org.apache.log4j.Logger;
 @SuppressWarnings("serial")
 public class GwtOpenLayersProxyServlet extends HttpServlet {
 
+	
 	Logger logger = Logger.getLogger(GwtOpenLayersProxyServlet.class);
 
-	static private String[] allowedHosts = { "localhost", "tomcat.nersc.no" };
+	static private String[] allowedHosts = { "localhost", "tomcat.nersc.no","thredds.nersc.no" };
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		processRequest(request, response);

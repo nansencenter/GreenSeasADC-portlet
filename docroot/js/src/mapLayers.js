@@ -9,17 +9,21 @@ myNamespace.mapLayers = (function(jQ, bH) {
 	function addWMSLayerSelector() {
 		var URLs = {
 			"NONE" : "Select layer",
-			"http://localhost:8081/thredds/wms/greenpath/Model/topaz" : "Topaz",
-			"http://localhost:8081/thredds/wms/greenseasAllData/NACDAILY_2009_06.nc" : "Topaz NACDAILY_2009_06",
-			"http://localhost:8081/thredds/wms/greenseasAllData/ssmicon20100830_test.nc" : "ssmicon20100830",
-			"http://localhost:8081/thredds/wms/greenseasAllData/seawifs01_05_chl_8Day_360_180_test.nc" : "seawifs01_05_chl_8Day_360_180",
-			"http://localhost:8081/thredds/wms/greenseasAllData/chl_seawifs_global_monthly_512x256_test.nc" : "chl_seawifs_global_monthly_512x256",
-			"http://localhost:8081/thredds/wms/cmccModel/N1p_2000_2005_merged_mesh.nc" : "CMCC Phosphate"
+			"http://thredds.nersc.no/thredds/wms/greenpath/Model/topaz":"Topaz",
+			"http://thredds.nersc.no/thredds/wms/greenpath/Model/cmcc_phosphate":"CMCC Phosphate",
+			"http://thredds.nersc.no/thredds/wms/greenpath/Model/cmcc_chla":"CMCC Chlorophyll-a",
+			"http://thredds.nersc.no/thredds/wms/greenpath/Model/cmcc_sea_ice":"CMCC Sea Ice",
+			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/chlor_seawifs_Sep97_Dec10_360x180gt":"PML Chlorophyll-a",
+			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/fmicro_seawifs_Sep97_Dec10_360x180gt":"PML Fraction of Microphytoplankton",
+			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/fnano_seawifs_Sep97_Dec10_360x180gt":"PML Fraction of Nanophytoplankton",
+			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/fpico_seawifs_Sep97_Dec10_360x180gt":"PML Fraction of Picophytoplankton",
+			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/zeu_seawifs_zmld_soda_Sep97_Dec07_360x180gt":"PML Ratio euphotic depth to mixed layer depth",
+			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/ssmicon":"ssmicon",
 		};
 
 		var selectElement = setUpSelector(URLs, "mapLayersWMSURL" + activeLayers, activeLayers);
 		var button = "<input type='button' id='toggleLayerButton" + activeLayers + "' name='" + activeLayers
-				+ "' value='Update layer' />";
+				+ "' value='Update on map' />";
 		$("#layerURLSelectorContainer").append(button + selectElement);
 		bH.change("#mapLayersWMSURL" + activeLayers, addWMSLayerVariableSelector);
 		bH.callFromControl("#toggleLayerButton" + activeLayers, toggleLayerButton);
@@ -112,10 +116,10 @@ myNamespace.mapLayers = (function(jQ, bH) {
 				+ activeLayer + "'/>)" + " from <input type='text' id='colorscalerangeMin" + activeLayer
 				+ "' size='3' value='0'/>" + "to <input type='text' id='colorscalerangeMax" + activeLayer
 				+ "' size='3' value='1'/>";
-		var styles = {
-			"boxfill" : "Boxfill",
-			"contour" : "Contour",
-		};
+		var styles = {};
+		$.each(obj.supportedStyles, function(i, val) {
+			styles[val] = val;
+		});
 		var logscales = {
 			"false" : "Linear Scale",
 			"true" : "Logarithmic Scale",
@@ -183,7 +187,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		$("#timeVariable" + activeLayer).remove();
 		$("#dateVariable" + activeLayer).after(selectElement);
 		if ($('#colorscalerangeAuto' + activeLayer).is(":checked"))
-			updateAutoRange();
+			updateAutoRange(activeLayer);
 	}
 
 	function setupVariableSelectorForWMSLayer(response, selectedElement) {
@@ -233,6 +237,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		}, $('#mapLayersWMSURL' + activeLayer).val(), $('#WMSLayerVariable' + activeLayer).find(":selected").val());
 	}
 
+	// TODO: The layer does not need a time variable - topaz sea floor depth
 	function toggleLayerButton(event) {
 		activeLayer = event.target.name;
 		if (debugMl)
@@ -257,7 +262,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 			console.log("logscale:" + logscale);
 		var elevation = $('#zAxisVariable' + activeLayer).find(":selected").val();
 		var time = $('#timeVariable' + activeLayer).find(":selected").val();
-		myNamespace.mapViewer.addWMSLayer(url, name, layer, colorscalerange, style, logscale, elevation, date + "T"
+		myNamespace.mapViewer.addWMSLayer(url,activeLayer, name, layer, colorscalerange, style, logscale, elevation, date + "T"
 				+ time);
 		if (debugMl)
 			console.log("Toggled layer");
