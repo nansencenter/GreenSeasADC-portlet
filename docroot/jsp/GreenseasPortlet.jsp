@@ -251,6 +251,10 @@
 					<span id='modelOptionsHeaderText'>Upload File <em>(off)</em></span>
 				</h3>
 				<div id='fileOption'>
+					<div>
+						<input type="checkbox" id="fileOptionCheck" />
+						Use an uploaded file
+					</div>
 					<p>Upload the raster data you want to compare to.</p>
 					<form id="uploadRasterForm" action="<%=submitFileAction%>" method="post" enctype="multipart/form-data">
 						<input type="file" id="file" name='<portlet:namespace />file' size="50" />
@@ -267,7 +271,7 @@
 				</h3>
 				<div id='openDAPOption'>
 					<div>
-						<input type="checkbox" id="opendapDataURLCheck" checked>
+						<input type="checkbox" id="opendapDataURLCheck" checked />
 						Use OPeNDAP data URL
 					</div>
 					<div id="opendapURLContainer"></div>

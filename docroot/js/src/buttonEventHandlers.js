@@ -48,6 +48,8 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		add("#toggleResults", toggleButton("#toggleResults", "results", "#featuresAndParams"));
 
 		add("#bboxEnabledCheck", checkParameter("bboxEnabledCheck", "Bounding box", "#bboxHeaderText"));
+		add("#fileOptionCheck", checkParameter("fileOptionCheck", "Upload File", "#modelOptionsHeaderText"));
+		add("#opendapDataURLCheck", checkParameter("opendapDataURLCheck", "Use dataset from OpenDAP", "#openDAPOptionHeaderText"));
 		add("#dateEnabledCheck", checkParameter("dateEnabledCheck", "Date/Time/Month", "#dateHeaderText"));
 		add("#monthEnabledCheck", checkParameter("monthEnabledCheck", "Date/Time/Month", "#dateHeaderText"));
 		add("#depthEnabledCheck", checkParameter("depthEnabledCheck", "Depth", "#depthHeaderText"));

@@ -12,8 +12,8 @@ myNamespace.control = (function($, OL, ns) {
 	// The data from the basic search result is stored for being able to
 	// re-apply parameter-filter without having to do the basic query
 	var basicData = null;
-	// Table of all tables available in the database and a boolean that
-	// represents if they have been initiated/analyzed
+	// True if a raster file has been uploaded
+	var uploadedRaster = false;
 
 	function init() {
 		if (debugc) {
@@ -82,10 +82,13 @@ myNamespace.control = (function($, OL, ns) {
 				percent.html(percentVal);
 			},
 			complete : function(xhr) {
-				if (xhr.status == 200)
+				if (xhr.status == 200) {
 					status.html("File uploaded succesfully");
-				else
+					uploadedRaster = true;
+				} else {
 					status.html("Something went wrong in the file upload");
+					uploadedRaster = false;
+				}
 			}
 		});
 		setUpOPeNDAPSelector();
@@ -696,7 +699,14 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function extractParameterNamesButton() {
-		var useOpendap = document.getElementById('opendapDataURLCheck').checked;
+		$("#compareRaster").html("");
+		var useOpendap = Boolean(document.getElementById('opendapDataURLCheck').checked);
+		if (!useOpendap)
+			if (!document.getElementById('fileOptionCheck').checked) {
+				ns.errorMessage.showErrorMessage("Either file or dataset options have to be turned on");
+				return;
+			} else if(!uploadedRaster){ns.errorMessage.showErrorMessage("A file must be successfully uploaded first.");
+			return;}
 		var opendapDataURL = $("#opendapDataURL").find(":selected").val();
 		ns.ajax.getLayersFromNetCDFFile(useOpendap, opendapDataURL);
 	}
