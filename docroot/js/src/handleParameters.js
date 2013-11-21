@@ -123,7 +123,7 @@ myNamespace.handleParameters = (function($) {
 			console.log("Initiating Parameters");
 		var parameters = myNamespace.XMLParser.extractParameters(input);
 		var table = parameters.pop();
-		if (table == metaDataTable) {
+		if (table == window.metaDataTable) {
 			mainParameters.parameters = parameters;
 			if (debughP)
 				console.log("Initialized metadata:" + table + " to:" + parameters);
@@ -136,11 +136,30 @@ myNamespace.handleParameters = (function($) {
 
 	}
 
+	function getHeadersFromFeatures(features) {
+		var parameterHeaders = [];
+		$.each(features[Object.keys(features)[0]].properties, function(key) {
+			var split = key.split(":");
+			var table = "";
+			var parameter = "";
+			if (split.length == 2) {
+				table = split[0];
+				parameter = split[1];
+			} else {
+				table = window.metaDataTable;
+				parameter = split[0];
+			}
+			parameterHeaders.push(getHeader(parameter, table));
+		});
+		return mainParameters.basicHeader.concat(parameterHeaders);
+	}
+
 	function getQF() {
 		return qf.valueOf();
 	}
 	// public interface
 	return {
+		getHeadersFromFeatures : getHeadersFromFeatures,
 		getHeaderFromRawData : getHeaderFromRawData,
 		resetMetadataSelection : resetMetadataSelection,
 		getMetadataHeaders : getMetadataHeaders,

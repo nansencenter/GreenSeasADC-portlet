@@ -95,81 +95,6 @@ myNamespace.control = (function($, OL, ns) {
 		ns.mapLayers.addWMSLayerSelector();
 	}
 
-	// non-public
-	function createfilterBoxHashMap() {
-		var filterBbox = null;
-		if (document.getElementById('bboxEnabledCheck').checked) {
-			var top = $('#top').val(), left = $('#left').val(), right = $('#right').val(), bottom = $('#bottom').val();
-
-			// bbox for filter
-			filterBbox = new OL.Bounds(bottom, left, top, right);
-
-			// bbox for zoom
-			var zoomBbox = new OL.Bounds(left, bottom, right, top);
-
-			if (document.lonlatform.updatemapcheck.checked) {
-				ns.mapViewer.zoomToExtent(zoomBbox, true);
-			}
-		}
-		return filterBbox;
-	}
-
-	// non-public
-	function createDateHashMap() {
-		var date = null;
-		if (document.getElementById('dateEnabledCheck').checked) {
-			if (debugc)
-				console.log("Date is enabled");
-			date = {};
-
-			date.fromDate = $('#fromDate').val();
-			date.toDate = $('#toDate').val();
-
-			date.time = document.getElementById('timeEnabledCheck').checked;
-			date.fromTime = $('#fromTime').val();
-			date.toTime = $('#toTime').val();
-		}
-		return date;
-	}
-
-	function createMonthArray() {
-		if (debugc)
-			console.log("createMonthArray");
-		var months = null;
-		if (document.getElementById('monthEnabledCheck').checked) {
-			var allMonths = [ "January", "February", "March", "April", "May", "June", "July", "August", "September",
-					"October", "November", "December" ];
-			var fromMonth = $('#fromMonth').val();
-			if (debugc)
-				console.log("fromMonth:" + fromMonth);
-			fromMonth = allMonths.indexOf(fromMonth);
-			var toMonth = $('#toMonth').val();
-			if (debugc)
-				console.log("toMonth:" + toMonth);
-			toMonth = allMonths.indexOf(toMonth);
-			if (fromMonth == -1 || toMonth == -1)
-				return months;
-			months = [];
-			for (; fromMonth != toMonth; fromMonth = (fromMonth + 1) % 12) {
-				months.push(allMonths[fromMonth]);
-			}
-			months.push(allMonths[toMonth]);
-		}
-		if (debugc)
-			console.log(months);
-		return months;
-	}
-
-	function createDepthHashMap() {
-		var depth = null;
-		if (document.getElementById('depthEnabledCheck').checked) {
-			depth = {};
-			depth.min = $('#depthMin').val();
-			depth.max = $('#depthMax').val();
-		}
-		return depth;
-	}
-
 	function mainQueryButton() {
 		// removing the parameterlayers from previous searches
 		ns.mapViewer.removeAllParameterLayers();
@@ -191,10 +116,10 @@ myNamespace.control = (function($, OL, ns) {
 		$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
 		$("#highchartsContainer").html("");
 
-		var filterBbox = createfilterBoxHashMap();
-		var date = createDateHashMap();
-		var months = createMonthArray();
-		var depth = createDepthHashMap();
+		var filterBbox = ns.query.createfilterBoxHashMap();
+		var date = ns.query.createDateHashMap();
+		var months = ns.query.createMonthArray();
+		var depth = ns.query.createDepthHashMap();
 
 		var propertyName = [];
 		// Adding the parameters to the array
@@ -234,27 +159,6 @@ myNamespace.control = (function($, OL, ns) {
 		$("#featuresAndParams").show();
 	}
 
-	function linkParametersExportButton() {
-		ns.buttonEventHandlers.linkParametersExportButton(ns.fileCreation.createCSV, data,
-				"data:text/csv;charset=utf-8", "Greenseas_Downloaded_Parameters.csv");
-	}
-
-	// non-public
-	function convertInputToFeatures(input) {
-		var gformat = new OL.Format.GeoJSON();
-		var features = gformat.read(input.responseText);
-		return features;
-	}
-
-	// non-public
-	function highLightFeaturesWMS(filter, layer, name) {
-		if (debugc)
-			console.log("highLightFeaturesWMS started");
-		ns.mapViewer.addLayerWMS(filter, layer, name);
-		if (debugc)
-			console.log("highLightFeaturesWMS finished");
-	}
-
 	// non-public
 	function displayFeatures(response, filter) {
 		if (debugc)
@@ -269,7 +173,6 @@ myNamespace.control = (function($, OL, ns) {
 
 		// **** output to table ****
 		var jsonObject = JSON.parse(response.responseText);
-
 		// saving the data for merging
 		basicData = jsonObject.features;
 		replaceId(basicData);
@@ -277,14 +180,12 @@ myNamespace.control = (function($, OL, ns) {
 
 		var length = jsonObject.features.length;
 
-		if (debugc)
-			console.log("length is ok");
 		if (length < 1) {
 			document.getElementById('list').innerHTML = "No results found.";
 		} else {
 			highLightFeaturesWMS(filter, metaDataTable, window.basicSearchName);
 			updateTreeInventoryNumbers();
-			var constructedTable = ns.tableConstructor.featureTable("filterTable", jsonObject.features);
+			var constructedTable = ns.tableConstructor.featureTable("filterTable", data);
 
 			// remove "loading..." text
 			$("#loadingText").html("");
@@ -346,10 +247,10 @@ myNamespace.control = (function($, OL, ns) {
 				}
 			});
 
-			var depth = createDepthHashMap();
-			var filterBbox = createfilterBoxHashMap();
-			var date = createDateHashMap();
-			var months = createMonthArray();
+			var depth = ns.query.createDepthHashMap();
+			var filterBbox = ns.query.createfilterBoxHashMap();
+			var date = ns.query.createDateHashMap();
+			var months = ns.query.createMonthArray();
 
 			var filter = ns.query.constructParameterFilterString(propertyNameNeed, depth, filterBbox, date, months);
 			// Requesting features from the first layer through an asynchronous
@@ -370,6 +271,16 @@ myNamespace.control = (function($, OL, ns) {
 		}
 	}
 
+	// non-public
+	function highLightFeaturesWMS(filter, layer, name) {
+		ns.mapViewer.addLayerWMS(filter, layer, name);
+	}
+
+	function linkParametersExportButton() {
+		ns.buttonEventHandlers.linkParametersExportButton(ns.fileCreation.createCSV, data,
+				"data:text/csv;charset=utf-8", "Greenseas_Downloaded_Parameters.csv");
+	}
+
 	// display a parameter as a table
 	// non-public
 	function displayParameter(response, layer, filterIn) {
@@ -380,7 +291,8 @@ myNamespace.control = (function($, OL, ns) {
 		try {
 			responseAsJSON = JSON.parse(response.responseText);
 		} catch (SyntaxError) {
-			console.error("Could not parse response to parameter data request");
+			if (debugc)
+				console.error("Could not parse response to parameter data request");
 			return;
 		}
 		addData(responseAsJSON);
@@ -396,20 +308,17 @@ myNamespace.control = (function($, OL, ns) {
 			setUpTimeSeriesVariables();
 			$("#timeSeriesDiv").show();
 
-			$("#parametersResultTable").dataTable({
-			// search functionality not needed for parameter tables
-			// 'bFilter' : false
-			});
+			$("#parametersResultTable").dataTable();
 			linkParametersExportButton();
 			ns.mapViewer.addFeaturesFromData(data, "All parameters");
 			document.getElementById('exportParameter').disabled = false;
 			$("#exportParametersDiv").show();
 			updateMatchupParameter();
 		} else {
-			var depth = createDepthHashMap();
-			var filterBbox = createfilterBoxHashMap();
-			var date = createDateHashMap();
-			var months = createMonthArray();
+			var depth = ns.query.createDepthHashMap();
+			var filterBbox = ns.query.createfilterBoxHashMap();
+			var date = ns.query.createDateHashMap();
+			var months = ns.query.createMonthArray();
 			var layer = tablesToQuery.pop();
 			var propertyName = [];
 			var propertyNameNeed = [];
@@ -517,9 +426,9 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function updateTreeInventoryNumbers() {
-		var filterBbox = createfilterBoxHashMap();
-		var date = createDateHashMap();
-		var months = createMonthArray();
+		var filterBbox = ns.query.createfilterBoxHashMap();
+		var date = ns.query.createDateHashMap();
+		var months = ns.query.createMonthArray();
 		var myTreeContainer = $.jstree._reference("#parametersTree").get_container();
 		var allChildren = myTreeContainer.find("li");
 		$.each(allChildren, function(i, val) {
@@ -529,7 +438,7 @@ myNamespace.control = (function($, OL, ns) {
 				ns.WebFeatureService.getFeature({
 					TYPENAME : layer,
 					PROPERTYNAME : splitString[1],
-					FILTER : ns.query.constructParameterFilterString([ splitString[1] ], createDepthHashMap(),
+					FILTER : ns.query.constructParameterFilterString([ splitString[1] ], ns.query.createDepthHashMap(),
 							filterBbox, date, months),
 					RESULTTYPE : "hits"
 				}, function(response) {
@@ -591,6 +500,7 @@ myNamespace.control = (function($, OL, ns) {
 			console.log($("#matchVariable").find(":selected"));
 		}
 		var dataRequest = {};
+		var useOpendap = Boolean(document.getElementById('opendapDataURLCheck').checked);
 		dataRequest[portletNameSpace + 'requestType'] = "getDataValuesOf:"
 				+ $("#matchVariable").find(":selected").val();
 		$.each(data, function(i, val) {
@@ -604,12 +514,37 @@ myNamespace.control = (function($, OL, ns) {
 			var id = val.id;
 			dataRequest[portletNameSpace + id] = JSON.stringify(point);
 		});
+		if (useOpendap)
+			dataRequest[portletNameSpace + 'opendapDataURL'] = $("#opendapDataURL").find(":selected").val();
 		var values = ns.ajax.getDatavaluesFromRaster(dataRequest);
+	}
+
+	function addAParameterToData(values, parameter) {
+//		console.log("addAParameterToData:"+values+","+parameter);
+//		console.log(values);
+//		console.log(data);
+		$.each(data, function(id) {
+			val = null;
+			if (!(typeof values[id] === 'undefined')){
+				val = values[id];
+			}
+			data[id].properties[parameter] = val;
+		});
+//		console.log(data);
+		var constructedTable = ns.tableConstructor.parameterTable(data);
+//		console.log(constructedTable);
+		$("#parametersTable").html(
+				"Entries where the selected parameters are available<br>" + "<div class='scrollArea'>"
+						+ constructedTable + "</div>");
+		$("#parametersResultTable").dataTable();
+//		console.log("addAParameterToData DONE");
 	}
 
 	function compareData(responseData) {
 		var scatterData = [];
 		var databaseVariable = $("#matchVariable2").find(":selected").val();
+		if (Boolean(document.getElementById('updateComparedParameterInData').checked))
+			addAParameterToData(responseData, $("#matchVariable").find(":selected").val());
 		console.log(data);
 		var minX, minY, maxX, maxY;
 		$.each(responseData, function(i, val) {
@@ -672,7 +607,7 @@ myNamespace.control = (function($, OL, ns) {
 					yAxis : 0,
 					xAxis : 0,
 					type : 'scatter',
-					name : databaseVariable,
+					name : ns.handleParameters.getHeaderFromRawData(databaseVariable),
 					data : scatterData,
 					// cropThreshold : 20000,
 					animation : false
@@ -705,8 +640,10 @@ myNamespace.control = (function($, OL, ns) {
 			if (!document.getElementById('fileOptionCheck').checked) {
 				ns.errorMessage.showErrorMessage("Either file or dataset options have to be turned on");
 				return;
-			} else if(!uploadedRaster){ns.errorMessage.showErrorMessage("A file must be successfully uploaded first.");
-			return;}
+			} else if (!uploadedRaster) {
+				ns.errorMessage.showErrorMessage("A file must be successfully uploaded first.");
+				return;
+			}
 		var opendapDataURL = $("#opendapDataURL").find(":selected").val();
 		ns.ajax.getLayersFromNetCDFFile(useOpendap, opendapDataURL);
 	}
@@ -736,12 +673,10 @@ myNamespace.control = (function($, OL, ns) {
 		var selectedParameters = ns.handleParameters.chosenParameters.allSelected;
 		options = generateOptionsFromAllSelectedParameters();
 		selectElement += options + "</select>";
-		/*
-		 * selectElement += "<br><input type='checkbox'
-		 * id='updateComparedParameterInData'/>" + "Update the compared
-		 * parameter to the dataoutput " + "(this will join the new parameter
-		 * from the raster to the output in the parameters-tab)";
-		 */
+
+		selectElement += "<br><input type='checkbox'id='updateComparedParameterInData'/>"
+				+ "Update the compared parameter to the dataoutput "
+				+ "(this will join the new parameter from the raster to the output in the parameters-tab)";
 
 		if (selectedParameters.length != 0) {
 			$("#compareRasterButton").show();

@@ -267,8 +267,86 @@ myNamespace.query = (function(OL) {
 		}
 	}
 
+	// non-public
+	function createfilterBoxHashMap() {
+		var filterBbox = null;
+		if (document.getElementById('bboxEnabledCheck').checked) {
+			var top = $('#top').val(), left = $('#left').val(), right = $('#right').val(), bottom = $('#bottom').val();
+
+			// bbox for filter
+			filterBbox = new OL.Bounds(bottom, left, top, right);
+
+			// bbox for zoom
+			var zoomBbox = new OL.Bounds(left, bottom, right, top);
+
+			if (document.lonlatform.updatemapcheck.checked) {
+				ns.mapViewer.zoomToExtent(zoomBbox, true);
+			}
+		}
+		return filterBbox;
+	}
+
+	function createDateHashMap() {
+		var date = null;
+		if (document.getElementById('dateEnabledCheck').checked) {
+			if (debugc)
+				console.log("Date is enabled");
+			date = {};
+
+			date.fromDate = $('#fromDate').val();
+			date.toDate = $('#toDate').val();
+
+			date.time = document.getElementById('timeEnabledCheck').checked;
+			date.fromTime = $('#fromTime').val();
+			date.toTime = $('#toTime').val();
+		}
+		return date;
+	}
+
+	function createMonthArray() {
+		if (debugc)
+			console.log("createMonthArray");
+		var months = null;
+		if (document.getElementById('monthEnabledCheck').checked) {
+			var allMonths = [ "January", "February", "March", "April", "May", "June", "July", "August", "September",
+					"October", "November", "December" ];
+			var fromMonth = $('#fromMonth').val();
+			if (debugc)
+				console.log("fromMonth:" + fromMonth);
+			fromMonth = allMonths.indexOf(fromMonth);
+			var toMonth = $('#toMonth').val();
+			if (debugc)
+				console.log("toMonth:" + toMonth);
+			toMonth = allMonths.indexOf(toMonth);
+			if (fromMonth == -1 || toMonth == -1)
+				return months;
+			months = [];
+			for (; fromMonth != toMonth; fromMonth = (fromMonth + 1) % 12) {
+				months.push(allMonths[fromMonth]);
+			}
+			months.push(allMonths[toMonth]);
+		}
+		if (debugc)
+			console.log(months);
+		return months;
+	}
+
+	function createDepthHashMap() {
+		var depth = null;
+		if (document.getElementById('depthEnabledCheck').checked) {
+			depth = {};
+			depth.min = $('#depthMin').val();
+			depth.max = $('#depthMax').val();
+		}
+		return depth;
+	}
+	
 	// public interface
 	return {
+		createfilterBoxHashMap:createfilterBoxHashMap,
+		createDateHashMap:createDateHashMap,
+		createMonthArray:createMonthArray,
+		createDepthHashMap:createDepthHashMap,
 		constructFilter : constructFilter,
 		constructFilterString : constructFilterString,
 		constructParameterFilterString : constructParameterFilterString

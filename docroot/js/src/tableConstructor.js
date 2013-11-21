@@ -10,34 +10,20 @@ myNamespace.tableConstructor = (function($, hP) {
 			console.log("tableConstructor.js: parameterTable: features=" + JSON.stringify(features));// TEST
 
 		var header = "<table id='parametersResultTable' class='table'>", footer = "</tbody></table>", rows = "";
-		var tableHeader = headerFrom(hP.getMetadataHeaders().concat(hP.getChosenHeader())) + "\n<tbody>";
+
+		var parameterHeaders = hP.getHeadersFromFeatures(features);
+		var tableHeader = headerFrom(parameterHeaders) + "\n<tbody>";
 
 		// iterate through all features, generate table row for each
 		$.each(features, function(i, val) {
-			var properties = val.properties;
-			if (debugtC) {
-				console.log("properties:");
-				console.log(properties);
-				console.log("property VALUES:");
-				$.each(properties, function(i, property) {
-					console.log(property);
-				});
-				console.log("property VALUES done");
-			}
-			if (debugtC)
-				console.log("tableConstructor.js: parameterTable: val.properties=" + JSON.stringify(val.properties));// TEST
-			if (debugtC)
-				console.log("tableConstructor.js: parameterTable: val=" + JSON.stringify(val));// TEST
-
 			var row = "<tr>";
 			row += data(val.id);
 			var pos = val.geometry.coordinates;
-			if (debugtC)
-				console.log("tableConstructor.js: parameterTable: pos=" + pos);// TEST
 			row += data(pos[0]);
 			row += data(pos[1]);
 
 			// adding the data
+			var properties = val.properties;
 			for (prop in properties) {
 				var value = properties[prop];
 				if (value == null)
@@ -147,12 +133,12 @@ myNamespace.tableConstructor = (function($, hP) {
 	function featureTable(tableId, features) {
 
 		var header = "<table id='" + tableId + "'class='table'>", tableHeader, footer = "</tbody></table>", rows = "", row = "";
-		tableHeader = headerFrom(hP.getMetadataHeaders()) + "<tbody>";
+		tableHeader = headerFrom(hP.getHeadersFromFeatures(features)) + "<tbody>";
 
 		$.each(features, function(i, val) {
-			var id = val.id, idStr = id.substring(id.indexOf(".") + 1), prop = null;
+			var id = i;
 
-			row = data(idStr);
+			row = data(id);
 
 			// extract position of data point (lat,long)
 			var pos = val.geometry.coordinates[0];
@@ -160,14 +146,12 @@ myNamespace.tableConstructor = (function($, hP) {
 			pos = val.geometry.coordinates[1];
 			row += data(pos);
 
-			// add all own (not inherited) properties to row
+			// add all properties to row
 			for (prop in val.properties) {
-				if (val.properties.hasOwnProperty(prop)) {
-					if (val.properties[prop] != null)
-						row += data(val.properties[prop]);
-					else
-						row += data("");
-				}
+				if (val.properties[prop] != null)
+					row += data(val.properties[prop]);
+				else
+					row += data("");
 			}
 			rows += row + "</tr>";
 		});
