@@ -3,6 +3,7 @@ package nersc.greenseas.rasterData;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -55,13 +56,14 @@ public class NetCDFReader {
 		JSONParser parser = new JSONParser();
 
 		// -1 because it should contain one requestType
+		Set<String> keySet = parameterMap.keySet();
 		Point[] points = new Point[parameterMap.size() - 1];
 		int i = 0;
 		String parameter = null;
-		for (String key : parameterMap.keySet()) {
+		for (String key : keySet) {
 			if (key.startsWith("requestType")) {
 				parameter = parameterMap.get(key)[0].substring(16);
-			} else {
+			} else if (!key.startsWith("opendapDataURL")) {
 				String values = parameterMap.get(key)[0];
 				try {
 					JSONObject jsonO = (JSONObject) parser.parse(values);
@@ -92,22 +94,27 @@ public class NetCDFReader {
 		GridCoordSystem gcs = grid.getCoordinateSystem();
 		Map<Integer, Double> val = new HashMap<Integer, Double>();
 		for (int i = 0; i < points.length; i++) {
-			
+
 			Point p = points[i];
 			// find the x,y index for a specific lat/lon position
 			// xy[0] = x, xy[1] = y
-			int[] xy = gcs.findXYindexFromLatLon(p.lat, p.lon, null);
+			if (p != null) {
+				int[] xy = gcs.findXYindexFromLatLon(p.lat, p.lon, null);
 
-			// read the data at that lat, lon and the first time and z level (if
-			// any)
-			// note order is t, z, y, x
-			Array data = grid.readDataSlice(0, 0, xy[1], xy[0]);
-			// we know its a scalar
-			if (xy[0] == -1 || xy[1] == -1)
-				System.out.println("Lat/Long x/y NOT FOUND for "+p+": " + xy[0] + "," + xy[1] +" VALUE:"+data.getDouble(0));
-			else {
-				val.put(p.id, data.getDouble(0));
-				System.out.println("Lat/Long x/y FOUND for "+p+": " + xy[0] + "," + xy[1] +" VALUE:"+data.getDouble(0));
+				// read the data at that lat, lon and the first time and z level
+				// (if
+				// any)
+				// note order is t, z, y, x
+				Array data = grid.readDataSlice(0, 0, xy[1], xy[0]);
+				// we know its a scalar
+				if (xy[0] == -1 || xy[1] == -1)
+					System.out.println("Lat/Long x/y NOT FOUND for " + p + ": " + xy[0] + "," + xy[1] + " VALUE:"
+							+ data.getDouble(0));
+				else {
+					val.put(p.id, data.getDouble(0));
+					System.out.println("Lat/Long x/y FOUND for " + p + ": " + xy[0] + "," + xy[1] + " VALUE:"
+							+ data.getDouble(0));
+				}
 			}
 		}
 		return val;

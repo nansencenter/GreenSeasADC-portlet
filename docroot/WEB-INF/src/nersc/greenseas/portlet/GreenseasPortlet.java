@@ -72,34 +72,34 @@ public class GreenseasPortlet extends MVCPortlet {
 		String fileURI = (String) session.getAttribute("rasterFile");
 		String requestType = resourceRequest.getParameter("requestType");
 		System.out.println(requestType);
+		String opendapDataURL = resourceRequest.getParameter("opendapDataURL");
+		String uri = fileURI;
+		if (opendapDataURL != null) {
+			uri = opendapDataURL;
+			System.out.println("uri set to:"+opendapDataURL);
+		}
+		if (uri == null)
+			return;
 		if (requestType.startsWith("getDataValuesOf:")) {
-			//System.out.println("requestType is null:");
+			System.out.println("requestType is getDataValuesOf:");
 			Map<String, String[]> parameterMap = resourceRequest.getParameterMap();
-			Map<Integer, Double> values = NetCDFReader.getDatavaluesFromNetCDFFile(fileURI,
-					parameterMap);
+			Map<Integer, Double> values = NetCDFReader.getDatavaluesFromNetCDFFile(uri, parameterMap);
 			if (values == null)
 				return;
 			JSONObject jsonObject = new JSONObject(values);
 			System.out.println("Returning with jsonObject:");
 			System.out.println(jsonObject.toJSONString());
-			
+
 			PrintWriter writer = resourceResponse.getWriter();
 			writer.write(jsonObject.toString());
 		} else if (requestType.equals("getLayersFromNetCDFFile")) {
-			String opendapDataURL = resourceRequest.getParameter("opendapDataURL");
-			System.out.println("opendapDataURL:"+opendapDataURL);
-			System.out.println("fileURI:"+fileURI);
-			String uri = fileURI;
-			if (opendapDataURL != null){
-				uri = opendapDataURL;
-			}
-			if (uri == null)
-				return;
+			System.out.println("opendapDataURL:" + opendapDataURL);
+			System.out.println("fileURI:" + fileURI);
 			Map<String, String> values = NetCDFReader.getLayersFromRaster(uri);
 			if (values == null)
 				return;
 			JSONObject jsonObject = new JSONObject(values);
-			
+
 			System.out.println("Returning with jsonObject:");
 			System.out.println(jsonObject.toJSONString());
 
