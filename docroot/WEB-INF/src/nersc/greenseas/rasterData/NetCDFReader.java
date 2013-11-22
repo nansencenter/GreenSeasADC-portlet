@@ -29,9 +29,10 @@ public class NetCDFReader {
 	 * @return Map with key=ID and value the datavalue from the file, or null if
 	 *         not present.
 	 */
-	public static Map<Integer, Map<String, Double>> getDatavaluesFromNetCDFFile(String uri, Map<String, String[]> parameterMap) {
+	public static Map<Integer, Map<String, Double>> getDatavaluesFromNetCDFFile(String uri,
+			Map<String, String[]> parameterMap) {
 		NetcdfDataset ncfile = null;
-		Map<Integer, Map<String,Double>> values = null;
+		Map<Integer, Map<String, Double>> values = null;
 		try {
 			ncfile = NetcdfDataset.openDataset(uri);
 			GridDataset grid = new GridDataset(ncfile);
@@ -88,12 +89,12 @@ public class NetCDFReader {
 		e.printStackTrace();
 	}
 
-	private static Map<Integer, Map<String,Double>> getDatavaluesFromGridDataset(GridDataset gds, Point[] points, String parameter)
-			throws IOException {
+	private static Map<Integer, Map<String, Double>> getDatavaluesFromGridDataset(GridDataset gds, Point[] points,
+			String parameter) throws IOException {
 		System.out.println("process file for parameter:" + parameter);
 		GridDatatype grid = gds.findGridDatatype(parameter);
 		GridCoordSystem gcs = grid.getCoordinateSystem();
-		Map<Integer, Map<String,Double>> val = new HashMap<Integer, Map<String,Double>>();
+		Map<Integer, Map<String, Double>> val = new HashMap<Integer, Map<String, Double>>();
 		for (int i = 0; i < points.length; i++) {
 			Point p = points[i];
 			// find the x,y index for a specific lat/lon position
@@ -113,11 +114,11 @@ public class NetCDFReader {
 					// ": " + xy[0] + "," + xy[1] + " VALUE:"
 					// + data.getDouble(0));
 				} else {
-					Map<String,Double> values = new HashMap<String,Double>();
-					values.put("value",data.getDouble(0));
+					Map<String, Double> values = new HashMap<String, Double>();
+					values.put("value", data.getDouble(0));
 					LatLonPoint latlonP = gcs.getLatLon(xy[0], xy[1]);
-					values.put("lat",latlonP.getLatitude());
-					values.put("lon",latlonP.getLongitude());
+					values.put("lat", latlonP.getLatitude());
+					values.put("lon", latlonP.getLongitude());
 					// System.out.println("Lat/Long x/y FOUND for " + p + ": " +
 					// xy[0] + "," + xy[1] + " VALUE:"
 					// + data.getDouble(0));
@@ -154,7 +155,9 @@ public class NetCDFReader {
 	private static Map<String, String> getLayersFromNetCDFFile(NetcdfDataset ncfile) {
 		HashMap<String, String> layers = new HashMap<String, String>();
 		for (Variable v : ncfile.getVariables()) {
-			layers.put(v.getNameAndDimensions(), v.getDescription());
+			// Check that its not an dimension, like time, depth,lan,lot
+			if (v.getRank() > 1)
+				layers.put(v.getNameAndDimensions(), v.getDescription());
 		}
 		return layers;
 	}
