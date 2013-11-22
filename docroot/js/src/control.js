@@ -12,8 +12,6 @@ myNamespace.control = (function($, OL, ns) {
 	// The data from the basic search result is stored for being able to
 	// re-apply parameter-filter without having to do the basic query
 	var basicData = null;
-	// True if a raster file has been uploaded
-	var uploadedRaster = false;
 
 	function init() {
 		if (debugc) {
@@ -60,37 +58,7 @@ myNamespace.control = (function($, OL, ns) {
 		// Make the tabs jquery-tabs
 		$("#tabs").tabs();
 
-		var bar = $('#bar');
-		var percent = $('#percent');
-		var status = $('#status');
-		// Make the upload raster function
-		$('#uploadRasterForm').ajaxForm({
-			beforeSend : function() {
-				status.empty();
-				var percentVal = '0%';
-				bar.width(percentVal);
-				percent.html(percentVal);
-			},
-			uploadProgress : function(event, position, total, percentComplete) {
-				var percentVal = percentComplete + '%';
-				bar.width(percentVal);
-				percent.html(percentVal);
-			},
-			success : function() {
-				var percentVal = '100%';
-				bar.width(percentVal);
-				percent.html(percentVal);
-			},
-			complete : function(xhr) {
-				if (xhr.status == 200) {
-					status.html("File uploaded succesfully");
-					uploadedRaster = true;
-				} else {
-					status.html("Something went wrong in the file upload");
-					uploadedRaster = false;
-				}
-			}
-		});
+		ns.matchup.setUpUploadRaster();
 		ns.matchup.setUpOPeNDAPSelector();
 		ns.mapLayers.addWMSLayerSelector();
 	}

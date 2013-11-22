@@ -5,6 +5,9 @@ var debugmu = false;// debug flag
 myNamespace.matchup = (function($, ns) {
 	"use strict";
 
+	// True if a raster file has been uploaded
+	var uploadedRaster = false;
+
 	function setUpOPeNDAPSelector() {
 		var URLs = {
 			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/topaz" : "Topaz",
@@ -33,8 +36,8 @@ myNamespace.matchup = (function($, ns) {
 			$("#compareRasterButton").show();
 		}
 	}
-	
-	function initiateRasterData(){
+
+	function initiateRasterData() {
 		$("#compareRaster").html("");
 		var useOpendap = Boolean(document.getElementById('opendapDataURLCheck').checked);
 		if (!useOpendap)
@@ -86,10 +89,44 @@ myNamespace.matchup = (function($, ns) {
 		});
 		return options;
 	}
+	function setUpUploadRaster() {
+		var bar = $('#bar');
+		var percent = $('#percent');
+		var status = $('#status');
+		// Make the upload raster function
+		$('#uploadRasterForm').ajaxForm({
+			beforeSend : function() {
+				status.empty();
+				var percentVal = '0%';
+				bar.width(percentVal);
+				percent.html(percentVal);
+			},
+			uploadProgress : function(event, position, total, percentComplete) {
+				var percentVal = percentComplete + '%';
+				bar.width(percentVal);
+				percent.html(percentVal);
+			},
+			success : function() {
+				var percentVal = '100%';
+				bar.width(percentVal);
+				percent.html(percentVal);
+			},
+			complete : function(xhr) {
+				if (xhr.status == 200) {
+					status.html("File uploaded succesfully");
+					uploadedRaster = true;
+				} else {
+					status.html("Something went wrong in the file upload");
+					uploadedRaster = false;
+				}
+			}
+		});
+	}
 
 	// public interface
 	return {
-		initiateRasterData:initiateRasterData,
+		setUpUploadRaster : setUpUploadRaster,
+		initiateRasterData : initiateRasterData,
 		setUpCompareRasterDiv : setUpCompareRasterDiv,
 		updateMatchupParameter : updateMatchupParameter,
 		setUpOPeNDAPSelector : setUpOPeNDAPSelector,
