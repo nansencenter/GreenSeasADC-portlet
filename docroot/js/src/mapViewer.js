@@ -61,10 +61,6 @@ myNamespace.mapViewer = (function(OL, $) {
 
 	// some background layers, user may select one
 	var backgroundLayers = {
-		generic : new OpenLayers.Layer.WMS("Generic background", "http://vmap0.tiles.osgeo.org/wms/vmap0", {
-			layers : 'basic',
-			format : window.WMSformat
-		}),
 		demis : new OpenLayers.Layer.WMS(
 				"Demis WMS",
 				"http://www2.demis.nl/wms/wms.ashx?WMS=WorldMap",
@@ -72,15 +68,20 @@ myNamespace.mapViewer = (function(OL, $) {
 					layers : 'Countries,Bathymetry,Topography,Hillshading,Coastlines,Builtup+areas,Waterbodies,Rivers,Streams,Borders,Cities',
 					format : 'image/png'
 				}),
+		generic : new OpenLayers.Layer.WMS("Generic background", "http://vmap0.tiles.osgeo.org/wms/vmap0", {
+			layers : 'basic',
+			format : window.WMSformat
+		}),
 		ocean : new OpenLayers.Layer.WMS('GEBCO Bathymetry',
 				'http://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?', {
 					layers : 'gebco_08_grid',
 					format : window.WMSformat
 				}),
-		longhurst : new OpenLayers.Layer.WMS('Longhurst Regions', 'http://geonode.iwlearn.org/geoserver/geonode/wms?', {
-			layers : 'geonode:Longhurst_world_v4_2010',
-			format : window.WMSformat
-		}),
+		longhurst : new OpenLayers.Layer.WMS('Longhurst Regions', 'http://geonode.iwlearn.org/geoserver/geonode/wms?',
+				{
+					layers : 'geonode:Longhurst_world_v4_2010',
+					format : window.WMSformat
+				}),
 	};
 
 	function initMap() {
@@ -316,7 +317,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		});
 	}
 
-	function addWMSLayer(url,id, name, layerID, colorscalerange, style, logscale, elevation, time) {
+	function addWMSLayer(url, id, name, layerID, colorscalerange, style, logscale, elevation, time) {
 		if (debugmW)
 			console.log("Adding the WMS layer");
 		if (debugmW)
