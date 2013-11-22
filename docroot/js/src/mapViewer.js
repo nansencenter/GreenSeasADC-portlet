@@ -69,7 +69,7 @@ myNamespace.mapViewer = (function(OL, $) {
 				"Demis WMS",
 				"http://www2.demis.nl/wms/wms.ashx?WMS=WorldMap",
 				{
-					layers : 'Countries,Bathymetry,Topography,Hillshading,Coastlines,Builtup+areas,Waterbodies,Rivers,Streams,Railroads,Highways,Roads,Trails,Borders,Cities,Airports',
+					layers : 'Countries,Bathymetry,Topography,Hillshading,Coastlines,Builtup+areas,Waterbodies,Rivers,Streams,Borders,Cities',
 					format : 'image/png'
 				}),
 		ocean : new OpenLayers.Layer.WMS('GEBCO Bathymetry',
