@@ -277,7 +277,7 @@
 					<div id="opendapURLContainer"></div>
 				</div>
 			</div>
-			<input type='button' id='extractParameterNamesButton' value="Initiate raster data" />
+			<input type='button' id='initiateRasterDataButton' value="Initiate raster data" />
 			<div id='compareRaster'></div>
 			<input type='button' id='compareRasterButton' value="Compare" />
 			<div id="highchartsContainer" style="width: 100%; height: 500px;"></div>

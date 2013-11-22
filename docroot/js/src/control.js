@@ -91,7 +91,7 @@ myNamespace.control = (function($, OL, ns) {
 				}
 			}
 		});
-		setUpOPeNDAPSelector();
+		ns.matchup.setUpOPeNDAPSelector();
 		ns.mapLayers.addWMSLayerSelector();
 	}
 
@@ -313,7 +313,7 @@ myNamespace.control = (function($, OL, ns) {
 			ns.mapViewer.addFeaturesFromData(data, "All parameters");
 			document.getElementById('exportParameter').disabled = false;
 			$("#exportParametersDiv").show();
-			updateMatchupParameter();
+			myNamespace.matchup.updateMatchupParameter();
 		} else {
 			var depth = ns.query.createDepthHashMap();
 			var filterBbox = ns.query.createfilterBoxHashMap();
@@ -520,37 +520,37 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function addAParameterToData(values, parameter) {
-//		console.log("addAParameterToData:"+values+","+parameter);
-//		console.log(values);
-//		console.log(data);
+		// console.log("addAParameterToData:"+values+","+parameter);
+		// console.log(values);
+		// console.log(data);
 		$.each(data, function(id) {
 			val = null;
 			lat = null;
 			lon = null;
-			if (!(typeof values[id] === 'undefined')){
+			if (!(typeof values[id] === 'undefined')) {
 				val = values[id].value;
 				lat = values[id].lat;
 				lon = values[id].lon;
 			}
 			data[id].properties[parameter] = val;
-			data[id].properties["Model lat for "+parameter] = lat;
-			data[id].properties["Model lon for "+parameter] = lon;
+			data[id].properties["Model lat for " + parameter] = lat;
+			data[id].properties["Model lon for " + parameter] = lon;
 		});
-//		console.log(data);
+		// console.log(data);
 		var constructedTable = ns.tableConstructor.parameterTable(data);
-//		console.log(constructedTable);
+		// console.log(constructedTable);
 		$("#parametersTable").html(
 				"Entries where the selected parameters are available<br>" + "<div class='scrollArea'>"
 						+ constructedTable + "</div>");
 		$("#parametersResultTable").dataTable();
-//		console.log("addAParameterToData DONE");
+		// console.log("addAParameterToData DONE");
 	}
 
 	function compareData(responseData) {
 		var scatterData = [];
 		var databaseVariable = $("#matchVariable2").find(":selected").val();
 		if (Boolean(document.getElementById('updateComparedParameterInData').checked))
-			addAParameterToData(responseData, $("#matchVariable").find(":selected").val());
+			addAParameterToData(responseData, $("#matchVariable").find(":selected").html());
 		console.log(data);
 		var minX, minY, maxX, maxY;
 		$.each(responseData, function(i, val) {
@@ -639,79 +639,18 @@ myNamespace.control = (function($, OL, ns) {
 		});
 	}
 
-	function extractParameterNamesButton() {
-		$("#compareRaster").html("");
-		var useOpendap = Boolean(document.getElementById('opendapDataURLCheck').checked);
-		if (!useOpendap)
-			if (!document.getElementById('fileOptionCheck').checked) {
-				ns.errorMessage.showErrorMessage("Either file or dataset options have to be turned on");
-				return;
-			} else if (!uploadedRaster) {
-				ns.errorMessage.showErrorMessage("A file must be successfully uploaded first.");
-				return;
-			}
-		var opendapDataURL = $("#opendapDataURL").find(":selected").val();
-		ns.ajax.getLayersFromNetCDFFile(useOpendap, opendapDataURL);
+	function initiateRasterDataButton() {
+		ns.matchup.initiateRasterData();
 	}
 
 	function viewParameterNames(parameters) {
-		if (debugc)
+		/*if (debugc)
 			console.log("Starting viewParameterNames");
 		var list = "";
 		$.each(parameters, function(i, val) {
 			list += i + ":" + val + "<br>";
-		});
-		setUpCompareRasterDiv(parameters);
-	}
-
-	function setUpCompareRasterDiv(parameters) {
-		var selectElement = "<select id=\"matchVariable\">";
-		var options = "";
-		$.each(parameters, function(key, val) {
-			var variable = key.substring(0, key.indexOf("("));
-			var variableName = val.trim();
-			if (variableName == "")
-				variableName = variable;
-			options += "<option value=\"" + variable + "\">" + variableName + "</option>";
-		});
-		selectElement += options + "</select>";
-		selectElement += "<select id=\"matchVariable2\">";
-		var selectedParameters = ns.handleParameters.chosenParameters.allSelected;
-		options = generateOptionsFromAllSelectedParameters();
-		selectElement += options + "</select>";
-
-		selectElement += "<br><input type='checkbox'id='updateComparedParameterInData'/>"
-				+ "Update the compared parameter to the dataoutput "
-				+ "(this will join the new parameter from the raster to the output in the parameters-tab)";
-
-		if (selectedParameters.length != 0) {
-			$("#compareRasterButton").show();
-			$("#compareRaster").html(selectElement + "<div id='searchBeforeMatchup'></div>");
-		} else
-			$("#compareRaster")
-					.html(
-							selectElement
-									+ "<div id='searchBeforeMatchup'>You need to search for data in order to be able to do a matchup</div>");
-	}
-
-	function generateOptionsFromAllSelectedParameters() {
-		var selectedParameters = ns.handleParameters.chosenParameters.allSelected;
-		options = "";
-		$.each(selectedParameters, function(i, val) {
-			options += "<option value=\"" + val + "\">" + ns.handleParameters.getHeaderFromRawData(val) + "</option>";
-		});
-		return options;
-	}
-
-	function updateMatchupParameter() {
-		if (!(typeof $("#matchVariable2") === 'undefined')) {
-			var options = generateOptionsFromAllSelectedParameters();
-			$("#matchVariable2").html(options);
-			if (!(typeof $("#searchBeforeMatchup") === 'undefined')) {
-				$("#searchBeforeMatchup").html("");
-			}
-			$("#compareRasterButton").show();
-		}
+		});*/
+		ns.matchup.setUpCompareRasterDiv(parameters);
 	}
 
 	function calculateStatisticsButton() {
@@ -897,24 +836,6 @@ myNamespace.control = (function($, OL, ns) {
 		ns.mapLayers.toggleLayerButton();
 	}
 
-	function setUpOPeNDAPSelector() {
-		var URLs = {
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/topaz" : "Topaz",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/cmcc_phosphate" : "CMCC Phosphate",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/cmcc_chla" : "CMCC Chlorophyll-a",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/cmcc_sea_ice" : "CMCC Sea Ice",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/chlor_seawifs_Sep97_Dec10_360x180gt" : "PML Chlorophyll-a",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/fmicro_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Microphytoplankton",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/fnano_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Nanophytoplankton",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/fpico_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Picophytoplankton",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/zeu_seawifs_zmld_soda_Sep97_Dec07_360x180gt" : "PML Ratio euphotic depth to mixed layer depth",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/ssmicon" : "ssmicon",
-		};
-
-		var selectElement = myNamespace.mapLayers.setUpSelector(URLs, "opendapDataURL");
-		$("#opendapURLContainer").html(selectElement);
-	}
-
 	function addLayerButton() {
 		ns.mapLayers.addWMSLayerSelector();
 	}
@@ -928,7 +849,7 @@ myNamespace.control = (function($, OL, ns) {
 		init : init,
 		calculateStatisticsButton : calculateStatisticsButton,
 		viewParameterNames : viewParameterNames,
-		extractParameterNamesButton : extractParameterNamesButton,
+		initiateRasterDataButton : initiateRasterDataButton,
 		compareData : compareData,
 		compareRasterButton : compareRasterButton,
 		initiateParameters : initiateParameters,

@@ -66,7 +66,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		callFromControl("#filter", c.mainQueryButton);
 		callFromControl("#toCurrentExtent", c.setBboxInputToCurrentMapExtent);
 		callFromControl("#anywhereButton", c.lonLatAnywhere);
-		callFromControl("#extractParameterNamesButton", c.extractParameterNamesButton);
+		callFromControl("#initiateRasterDataButton", c.initiateRasterDataButton);
 		callFromControl("#calculateStatisticsButton", c.calculateStatisticsButton);
 
 		// on change events
