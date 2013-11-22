@@ -525,10 +525,16 @@ myNamespace.control = (function($, OL, ns) {
 //		console.log(data);
 		$.each(data, function(id) {
 			val = null;
+			lat = null;
+			lon = null;
 			if (!(typeof values[id] === 'undefined')){
-				val = values[id];
+				val = values[id].value;
+				lat = values[id].lat;
+				lon = values[id].lon;
 			}
 			data[id].properties[parameter] = val;
+			data[id].properties["Model lat for "+parameter] = lat;
+			data[id].properties["Model lon for "+parameter] = lon;
 		});
 //		console.log(data);
 		var constructedTable = ns.tableConstructor.parameterTable(data);
@@ -549,15 +555,15 @@ myNamespace.control = (function($, OL, ns) {
 		var minX, minY, maxX, maxY;
 		$.each(responseData, function(i, val) {
 			var databaseValue = parseFloat(data[i].properties[databaseVariable]);
-			if (databaseValue != -999 && val != null) {
-				val = parseFloat(val);
-				scatterData.push([ val, databaseValue ]);
-				if (!minX || minX > val)
-					minX = val;
+			if (databaseValue != -999 && val.value != null) {
+				val.value = parseFloat(val.value);
+				scatterData.push([ val.value, databaseValue ]);
+				if (!minX || minX > val.value)
+					minX = val.value;
 				if (!minY || minY > databaseValue)
 					minY = databaseValue;
-				if (!maxX || maxX < val)
-					maxX = val;
+				if (!maxX || maxX < val.value)
+					maxX = val.value;
 				if (!maxY || maxY < databaseValue)
 					maxY = databaseValue;
 			}

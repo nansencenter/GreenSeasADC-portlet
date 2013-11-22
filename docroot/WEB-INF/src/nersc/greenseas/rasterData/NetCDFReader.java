@@ -15,6 +15,7 @@ import ucar.nc2.dataset.NetcdfDataset;
 import ucar.nc2.dt.GridCoordSystem;
 import ucar.nc2.dt.GridDatatype;
 import ucar.nc2.dt.grid.GridDataset;
+import ucar.unidata.geoloc.LatLonPoint;
 
 public class NetCDFReader {
 
@@ -28,9 +29,9 @@ public class NetCDFReader {
 	 * @return Map with key=ID and value the datavalue from the file, or null if
 	 *         not present.
 	 */
-	public static Map<Integer, Double> getDatavaluesFromNetCDFFile(String uri, Map<String, String[]> parameterMap) {
+	public static Map<Integer, Map<String, Double>> getDatavaluesFromNetCDFFile(String uri, Map<String, String[]> parameterMap) {
 		NetcdfDataset ncfile = null;
-		Map<Integer, Double> values = null;
+		Map<Integer, Map<String,Double>> values = null;
 		try {
 			ncfile = NetcdfDataset.openDataset(uri);
 			GridDataset grid = new GridDataset(ncfile);
@@ -87,14 +88,13 @@ public class NetCDFReader {
 		e.printStackTrace();
 	}
 
-	private static Map<Integer, Double> getDatavaluesFromGridDataset(GridDataset gds, Point[] points, String parameter)
+	private static Map<Integer, Map<String,Double>> getDatavaluesFromGridDataset(GridDataset gds, Point[] points, String parameter)
 			throws IOException {
 		System.out.println("process file for parameter:" + parameter);
 		GridDatatype grid = gds.findGridDatatype(parameter);
 		GridCoordSystem gcs = grid.getCoordinateSystem();
-		Map<Integer, Double> val = new HashMap<Integer, Double>();
+		Map<Integer, Map<String,Double>> val = new HashMap<Integer, Map<String,Double>>();
 		for (int i = 0; i < points.length; i++) {
-
 			Point p = points[i];
 			// find the x,y index for a specific lat/lon position
 			// xy[0] = x, xy[1] = y
@@ -105,15 +105,23 @@ public class NetCDFReader {
 				// (if
 				// any)
 				// note order is t, z, y, x
+				// TODO: TIME/DEPTH
 				Array data = grid.readDataSlice(0, 0, xy[1], xy[0]);
-				// we know its a scalar
-				if (xy[0] == -1 || xy[1] == -1)
-					System.out.println("Lat/Long x/y NOT FOUND for " + p + ": " + xy[0] + "," + xy[1] + " VALUE:"
-							+ data.getDouble(0));
-				else {
-					val.put(p.id, data.getDouble(0));
-					System.out.println("Lat/Long x/y FOUND for " + p + ": " + xy[0] + "," + xy[1] + " VALUE:"
-							+ data.getDouble(0));
+				// we know its a scalar //TODO?
+				if (xy[0] == -1 || xy[1] == -1) {
+					// System.out.println("Lat/Long x/y NOT FOUND for " + p +
+					// ": " + xy[0] + "," + xy[1] + " VALUE:"
+					// + data.getDouble(0));
+				} else {
+					Map<String,Double> values = new HashMap<String,Double>();
+					values.put("value",data.getDouble(0));
+					LatLonPoint latlonP = gcs.getLatLon(xy[0], xy[1]);
+					values.put("lat",latlonP.getLatitude());
+					values.put("lon",latlonP.getLongitude());
+					// System.out.println("Lat/Long x/y FOUND for " + p + ": " +
+					// xy[0] + "," + xy[1] + " VALUE:"
+					// + data.getDouble(0));
+					val.put(p.id, values);
 				}
 			}
 		}

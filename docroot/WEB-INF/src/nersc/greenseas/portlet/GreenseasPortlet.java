@@ -83,7 +83,7 @@ public class GreenseasPortlet extends MVCPortlet {
 		if (requestType.startsWith("getDataValuesOf:")) {
 			System.out.println("requestType is getDataValuesOf:");
 			Map<String, String[]> parameterMap = resourceRequest.getParameterMap();
-			Map<Integer, Double> values = NetCDFReader.getDatavaluesFromNetCDFFile(uri, parameterMap);
+			Map<Integer, Map<String,Double>> values = NetCDFReader.getDatavaluesFromNetCDFFile(uri, parameterMap);
 			if (values == null)
 				return;
 			JSONObject jsonObject = new JSONObject(values);
