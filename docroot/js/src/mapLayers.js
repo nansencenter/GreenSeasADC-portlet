@@ -24,10 +24,11 @@ myNamespace.mapLayers = (function(jQ, bH) {
 
 		var selectElement = setUpSelector(URLs, "mapLayersWMSURL" + activeLayers, activeLayers);
 		var button = "<input type='button' id='toggleLayerButton" + activeLayers + "' name='" + activeLayers
-				+ "' value='Update on map' />";
+				+ "' value='Update on map'/>";
 		$("#layerURLSelectorContainer").append(button + selectElement);
 		bH.change("#mapLayersWMSURL" + activeLayers, addWMSLayerVariableSelector);
 		bH.callFromControl("#toggleLayerButton" + activeLayers, toggleLayerButton);
+		$("#toggleLayerButton" + activeLayers).prop("disabled",true);
 		activeLayers++;
 	}
 
@@ -49,6 +50,16 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		var selectedOption = selectedElement.options[selectedElement.selectedIndex].value;
 		if (debugMl) {
 			console.log(selectedOption);
+		}
+		var html = "Loading variables..";
+		if ($("#" + selectedElement.id + "variable" + activeLayer).length) {
+			$("#" + selectedElement.id + "variable" + activeLayer).html(html);
+		} else {
+			if (debugMl)
+				console.log("Setting value");
+			$(selectedElement).after(
+					"<div id ='" + selectedElement.id + "variable" + activeLayer + "' style='display: inline'>" + html
+							+ "</div>");
 		}
 		myNamespace.WebMapService.getCapabilities(function(response) {
 			setupVariableSelectorForWMSLayer(response, selectedElement);
@@ -101,9 +112,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		// 2005-12-15T16%3A42%3A25.789Z
 		if (!(typeof obj.datesWithData === 'undefined')) {
 			var date;
-			tAxisMap = {
-				"NONE" : "Select date",
-			};
+			tAxisMap = {};
 			$.each(obj.datesWithData, function(year, val) {
 				$.each(val, function(month, days) {
 					var monthInt = parseInt(month) + 1;
@@ -155,15 +164,13 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		});
 		bH.change("#dateVariable" + activeLayer, function(event) {
 			var date = event.target.options[event.target.selectedIndex].value;
-			if (date != "NONE") {
-				myNamespace.WebMapService.getTimesteps(function(response) {
-					setUpTimeSelector(response, activeLayer);
-				}, $('#mapLayersWMSURL' + activeLayer).val(), $('#WMSLayerVariable' + activeLayer).find(":selected")
-						.val(), date);
-
-			} else
-				$("#timeVariable" + activeLayer).remove();
+			myNamespace.WebMapService.getTimesteps(function(response) {
+				setUpTimeSelector(response, activeLayer);
+			}, $('#mapLayersWMSURL' + activeLayer).val(), $('#WMSLayerVariable' + activeLayer).find(":selected").val(),
+					date);
 		});
+		$("#toggleLayerButton" + activeLayer).prop("disabled",false);
+		$("#dateVariable" + activeLayer).trigger("change");
 	}
 
 	function updateAutoRange(activeLayer) {
@@ -219,17 +226,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		var selectElement = setUpSelector(hashMap, "WMSLayerVariable" + activeLayer, activeLayer);
 
 		var html = selectElement + "<div id='layerMetaData" + activeLayer + "'></div>";
-		if ($("#" + selectedElement.id + "variable" + activeLayer).length) {
-			if (debugMl)
-				console.log("Changing the value");
-			$("#" + selectedElement.id + "variable" + activeLayer).html(html);
-		} else {
-			if (debugMl)
-				console.log("Setting value");
-			$(selectedElement).after(
-					"<div id ='" + selectedElement.id + "variable" + activeLayer + "' style='display: inline'>" + html
-							+ "</div>");
-		}
+		$("#" + selectedElement.id + "variable" + activeLayer).html(html);
 		bH.change("#WMSLayerVariable" + activeLayer, updateMetaDataSelection);
 	}
 
@@ -254,11 +251,6 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		if (debugMl)
 			console.log("Toggleing layer #" + activeLayer);
 		var date = $('#dateVariable' + activeLayer).find(":selected").val();
-		if (typeof date === 'undefined' || date == "" || date == "NONE") {
-			if (debugMl)
-				console.log("No date (layer) selected");
-			return;
-		}
 		var url = $('#mapLayersWMSURL' + activeLayer).val();
 		if (url == "NONE")
 			return;
