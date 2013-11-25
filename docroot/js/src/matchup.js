@@ -55,7 +55,7 @@ myNamespace.matchup = (function($, ns) {
 
 	function setUpCompareRasterDiv(parameters) {
 		var selectElement = "<select id=\"matchVariable\">";
-		var options = "";
+		var options = "<option value='NONE'>Select variable</option>";
 		$.each(parameters, function(key, val) {
 			var variable = key.substring(0, key.indexOf("("));
 			var variableName = val.trim();
@@ -64,7 +64,7 @@ myNamespace.matchup = (function($, ns) {
 			options += "<option value=\"" + variable + "\">" + variableName + "</option>";
 		});
 		selectElement += options + "</select>";
-		selectElement += "<select id=\"matchVariable2\">";
+		selectElement += "<br><select id=\"matchVariable2\">";
 		var selectedParameters = ns.handleParameters.chosenParameters.allSelected;
 		options = generateOptionsFromAllSelectedParameters();
 		selectElement += options + "</select>";
@@ -73,13 +73,44 @@ myNamespace.matchup = (function($, ns) {
 				+ "Update the compared parameter to the dataoutput "
 				+ "(this will join the new parameter from the raster to the output in the parameters-tab)";
 
+		$("#compareRaster").html(selectElement);
+		ns.buttonEventHandlers.change("#matchVariable", getMetaDimension);
+		var searchBeforeMatchupText = "";
 		if (selectedParameters.length != 0) {
 			$("#compareRasterButton").show();
-			$("#compareRaster").html(selectElement + "<div id='searchBeforeMatchup'></div>");
 		} else {
-			var searchBeforeMatchup = "<div id='searchBeforeMatchup'>You need to search for data in order to be able to do a matchup</div>";
-			$("#compareRaster").html(selectElement + searchBeforeMatchup);
+			searchBeforeMatchupText = "You need to search for data in order to be able to do a matchup";
 		}
+		$("#compareRaster").append("<div id='searchBeforeMatchup'>"+"<br><br>"+searchBeforeMatchupText+"</div>");
+	}
+	
+	function getMetaDimension(event){
+		$("#matchVariable").after("<div id='timeElevationText' style='display: inline'>Loading Time/Elevation...</div>");
+		$("#timeMatchupVariable").remove();
+		$("#elevationText").remove();
+		var rasterParameter = $("#matchVariable").find(":selected").val();
+		ns.ajax.getDimension(rasterParameter);
+	}	
+	
+	function setUpParameterMetaSelector(parameters){
+		console.log(parameters);
+		var selectElement = "<select id='timeMatchupVariable'>";
+		var options = "";
+		$.each(parameters.time, function(key, val) {
+			options += "<option value=\"" + key + "\">" + val + "</option>";
+		});
+		selectElement += options + "</select>";
+		if (!(typeof parameters.elevation === 'undefined')){
+			selectElement += "<div id='elevationText' style='display: inline'>Elevation (Units:"+parameters.elevation.units+"):<select id='elevationMatchupVariable'></div>";
+			delete parameters.elevation.units;
+			options = "";
+			$.each(parameters.elevation, function(key, val) {
+				options += "<option value=\"" + key + "\">" + val + "</option>";
+			});
+			selectElement += options + "</select>";
+		}
+		$("#timeElevationText").remove();
+		$("#matchVariable").after(selectElement);
 	}
 
 	function generateOptionsFromAllSelectedParameters() {
@@ -126,6 +157,7 @@ myNamespace.matchup = (function($, ns) {
 
 	// public interface
 	return {
+		setUpParameterMetaSelector:setUpParameterMetaSelector,
 		setUpUploadRaster : setUpUploadRaster,
 		initiateRasterData : initiateRasterData,
 		setUpCompareRasterDiv : setUpCompareRasterDiv,

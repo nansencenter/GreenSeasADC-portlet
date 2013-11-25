@@ -463,14 +463,21 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function compareRasterButton() {
+		var rasterParameter = $("#matchVariable").find(":selected").val();
+		if (rasterParameter == "NONE"){
+			ns.errorMessage.showErrorMessage("You must choose a parameter from the raster");
+			return;
+		}
 		if (debugc) {
-			console.log("compareRasterButton for par:" + $("#matchVariable").find(":selected").val());
+			console.log("compareRasterButton for par:" + rasterParameter);
 			console.log($("#matchVariable").find(":selected"));
 		}
 		var dataRequest = {};
 		var useOpendap = Boolean(document.getElementById('opendapDataURLCheck').checked);
-		dataRequest[portletNameSpace + 'requestType'] = "getDataValuesOf:"
-				+ $("#matchVariable").find(":selected").val();
+		dataRequest[portletNameSpace + 'requestType'] = "getDataValuesOf:" + rasterParameter;
+		//TODO: ensure that these are selected and exists
+		dataRequest[portletNameSpace + 'time'] = $("#timeMatchupVariable").find(":selected").val();
+		dataRequest[portletNameSpace + 'elevation'] = $("#elevationMatchupVariable").find(":selected").val();
 		$.each(data, function(i, val) {
 			var point = {};
 			var pos = val.geometry.coordinates;
@@ -612,12 +619,6 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function viewParameterNames(parameters) {
-		/*if (debugc)
-			console.log("Starting viewParameterNames");
-		var list = "";
-		$.each(parameters, function(i, val) {
-			list += i + ":" + val + "<br>";
-		});*/
 		ns.matchup.setUpCompareRasterDiv(parameters);
 	}
 

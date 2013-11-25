@@ -72,8 +72,43 @@ myNamespace.ajax = (function($) {
 			});
 		});
 	}
+
+	function getDimension(rasterParameter) {
+		AUI().use('aui-io-request', function(A) {
+			if (debuga) {
+				console.log("Started getDimension");
+			}
+			var url = ajaxCallResourceURL;
+			var data = {};
+			data[portletNameSpace + 'rasterParameter'] = rasterParameter;
+			data[portletNameSpace + 'requestType'] = 'getMetaDimensions';
+
+			A.io.request(url, {
+				// data to be sent to server
+				data : data,
+				dataType : 'json',
+
+				on : {
+					failure : function() {
+						alert("SOMETHING WENT WRONG!");
+					},
+
+					success : function(event, id, obj) {
+						var instance = this;
+
+						// JSON Data coming back from Server
+						var responseData = instance.get('responseData');
+						myNamespace.matchup.setUpParameterMetaSelector(responseData);
+
+					}
+
+				}
+			});
+		});
+	}
 	// public interface
 	return {
+		getDimension : getDimension,
 		getLayersFromNetCDFFile : getLayersFromNetCDFFile,
 		getDatavaluesFromRaster : getDatavaluesFromRaster
 	};
