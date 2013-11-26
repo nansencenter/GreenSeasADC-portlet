@@ -85,7 +85,7 @@ myNamespace.matchup = (function($, ns) {
 	}
 	
 	function getMetaDimension(event){
-		$("#matchVariable").after("<div id='timeElevationText' style='display: inline'>Loading Time/Elevation...</div>");
+		$("#matchVariable").after("<div id='timeElevationText' style='display: inline'>Loading Time/Elevation, please wait...</div>");
 		$("#timeMatchupVariable").remove();
 		$("#elevationText").remove();
 		var rasterParameter = $("#matchVariable").find(":selected").val();

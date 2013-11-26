@@ -51,7 +51,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		if (debugMl) {
 			console.log(selectedOption);
 		}
-		var html = "Loading variables..";
+		var html = "Loading variables, please wait...";
 		if ($("#" + selectedElement.id + "variable" + activeLayer).length) {
 			$("#" + selectedElement.id + "variable" + activeLayer).html(html);
 		} else {

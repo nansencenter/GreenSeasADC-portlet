@@ -171,7 +171,7 @@ myNamespace.control = (function($, OL, ns) {
 		if (document.getElementById('parametersEnabledCheck').checked) {
 			// removing the parameterlayers from previous searches
 			ns.mapViewer.removeAllParameterLayers();
-			$("#parametersTable").html("Loading parameters..");
+			$("#parametersTable").html("Loading parameters, please wait...");
 			$("#statistics").hide();
 			$("#timeSeriesDiv").hide();
 			$("#statisticsContainer").html("");
