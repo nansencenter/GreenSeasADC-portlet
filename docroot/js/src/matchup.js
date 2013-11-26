@@ -39,7 +39,7 @@ myNamespace.matchup = (function($, ns) {
 	}
 
 	function initiateRasterData() {
-		$("#compareRaster").html("");
+		$("#compareRaster").html("Loading raster, please wait...");
 		var useOpendap = Boolean(document.getElementById('opendapDataURLCheck').checked);
 		if (!useOpendap)
 			if (!document.getElementById('fileOptionCheck').checked) {
@@ -79,7 +79,7 @@ myNamespace.matchup = (function($, ns) {
 		if (selectedParameters.length != 0) {
 			$("#compareRasterButton").show();
 		} else {
-			searchBeforeMatchupText = "You need to search for data in order to be able to do a matchup";
+			searchBeforeMatchupText = "You need to search for data to be able to do a matchup";
 		}
 		$("#compareRaster").append("<div id='searchBeforeMatchup'>"+"<br><br>"+searchBeforeMatchupText+"</div>");
 	}

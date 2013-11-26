@@ -19,7 +19,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/fpico_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Picophytoplankton",
 			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/zeu_seawifs_zmld_soda_Sep97_Dec07_360x180gt" : "PML Ratio euphotic depth to mixed layer depth",
 			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/phenology_seawifs_98_07_360x180g" : "PML Phenology",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/ssmicon" : "ssmicon",
+			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/ssmicon" : "NERSC Arctic ice concentration maps from SSMI data based on the NORSEX algorithm",
 		};
 
 		var selectElement = setUpSelector(URLs, "mapLayersWMSURL" + activeLayers, activeLayers);

@@ -30,7 +30,7 @@
 		</ul>
 		<div id="queryTab">
 			<div id='search'>
-				<p>Search layers with various parameters.</p>
+				<p>Search options.</p>
 				<div id='queryOptions'>
 					<h3>
 						<span id='bboxHeaderText'>Bounding box <em>(off)</em></span>
@@ -206,7 +206,7 @@
 
 		<div id="parametersTab">
 			<div id="parametersTabText">
-				<p>Run a query and filter selected parameters to view the parameter values here.</p>
+				<p>Run a query and filter selected parameters to view the search results here.</p>
 			</div>
 			<div id="singlePlots">
 				<div id="parametersContainer" class="container">
