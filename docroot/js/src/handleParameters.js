@@ -137,20 +137,24 @@ myNamespace.handleParameters = (function($) {
 	}
 
 	function getHeadersFromFeatures(features) {
+		if (debughP)
+			console.log("getHeadersFromFeatures");
 		var parameterHeaders = [];
-		$.each(features[Object.keys(features)[0]].properties, function(key) {
-			var split = key.split(":");
-			var table = "";
-			var parameter = "";
-			if (split.length == 2) {
-				table = split[0];
-				parameter = split[1];
-			} else {
-				table = window.metaDataTable;
-				parameter = split[0];
-			}
-			parameterHeaders.push(getHeader(parameter, table));
-		});
+		var feature = features[Object.keys(features)[0]];
+		if (!(typeof feature === 'undefined'))
+			$.each(feature.properties, function(key) {
+				var split = key.split(":");
+				var table = "";
+				var parameter = "";
+				if (split.length == 2) {
+					table = split[0];
+					parameter = split[1];
+				} else {
+					table = window.metaDataTable;
+					parameter = split[0];
+				}
+				parameterHeaders.push(getHeader(parameter, table));
+			});
 		return mainParameters.basicHeader.concat(parameterHeaders);
 	}
 
