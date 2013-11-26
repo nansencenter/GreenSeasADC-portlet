@@ -280,7 +280,7 @@ myNamespace.query = (function(OL) {
 			var zoomBbox = new OL.Bounds(left, bottom, right, top);
 
 			if (document.lonlatform.updatemapcheck.checked) {
-				ns.mapViewer.zoomToExtent(zoomBbox, true);
+				myNamespace.mapViewer.zoomToExtent(zoomBbox, true);
 			}
 		}
 		return filterBbox;
