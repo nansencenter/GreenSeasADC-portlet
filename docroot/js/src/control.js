@@ -149,7 +149,8 @@ myNamespace.control = (function($, OL, ns) {
 		var length = jsonObject.features.length;
 
 		if (length < 1) {
-			document.getElementById('list').innerHTML = "No results found.";
+			$("#loadingText").html("");
+			$("#list").html("No results found");
 		} else {
 			highLightFeaturesWMS(filter, metaDataTable, window.basicSearchName);
 			updateTreeInventoryNumbers();
