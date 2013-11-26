@@ -210,7 +210,7 @@ myNamespace.tableConstructor = (function($, hP) {
 					// Check if the parameter is not inherited from the
 					// metadatatable
 					if (hP.mainParameters.parameters.indexOf(val) == -1) {
-						if (val.substring(val.length - 2) != qfPostFix)
+						if (val.substring(val.length - qfPostFix.length) != qfPostFix)
 							str += listItem(val, table);
 					}
 				});

@@ -3,8 +3,6 @@ var myNamespace = myNamespace || {};
 var debughP = false;// debug flag
 
 myNamespace.handleParameters = (function($) {
-	var qf = false;
-
 	// TODO: make this a hashtable of hashtable, it must store the type of the
 	// variable: i.e. string, date, point, boolean, for comparison purposes
 	var availableParameters = {};
@@ -33,7 +31,7 @@ myNamespace.handleParameters = (function($) {
 			});
 		} else
 			$.each(mainParameters.parameters, function(i, val) {
-				if (val != "point")
+				if (val != window.geometryParameter)
 					metaHeader.push(getHeader(val, window.metaDataTable));
 			});
 		if (debughP) {
@@ -42,10 +40,7 @@ myNamespace.handleParameters = (function($) {
 		return mainParameters.basicHeader.concat(metaHeader.reverse());
 	}
 
-	function selectParameters(par, flags) {
-		if (debughP)
-			console.log("Setting qf to:" + flags);
-		qf = flags;
+	function selectParameters(par) {
 		chosenParameters.allSelected = [];
 		chosenParameters.tablesSelected = [];
 		chosenParameters.parametersByTable = {};
@@ -104,20 +99,6 @@ myNamespace.handleParameters = (function($) {
 		return allLayersHeader[table] ? allLayersHeader[table] : table;
 	}
 
-	function getChosenHeader() {
-		chosenHeader = [];
-		for ( var i = chosenParameters.allSelected.length - 1; i >= 0; i--) {
-			var parArr = chosenParameters.allSelected[i].split(":");
-			chosenHeader.push(getHeader(parArr[1], parArr[0]));
-			if (qf) {
-				chosenHeader.push(qfHeader);
-			}
-		}
-		if (debughP)
-			console.log(chosenHeader);
-		return chosenHeader;
-	}
-
 	function initiateParameters(input) {
 		if (debughP)
 			console.log("Initiating Parameters");
@@ -153,14 +134,15 @@ myNamespace.handleParameters = (function($) {
 					table = window.metaDataTable;
 					parameter = split[0];
 				}
-				parameterHeaders.push(getHeader(parameter, table));
+				// test if it is a qf
+				if (parameter.substring(parameter.length - window.qfPostFix.length) == window.qfPostFix)
+					parameterHeaders.push(window.qfHeader);
+				else
+					parameterHeaders.push(getHeader(parameter, table));
 			});
 		return mainParameters.basicHeader.concat(parameterHeaders);
 	}
 
-	function getQF() {
-		return qf.valueOf();
-	}
 	// public interface
 	return {
 		getHeadersFromFeatures : getHeadersFromFeatures,
@@ -168,11 +150,9 @@ myNamespace.handleParameters = (function($) {
 		resetMetadataSelection : resetMetadataSelection,
 		getMetadataHeaders : getMetadataHeaders,
 		selectMetadata : selectMetadata,
-		qf : getQF,
 		mainParameters : mainParameters,
 		getTableHeader : getTableHeader,
 		initiateParameters : initiateParameters,
-		getChosenHeader : getChosenHeader,
 		chosenParameters : chosenParameters,
 		availableParameters : availableParameters,
 		selectParameters : selectParameters,

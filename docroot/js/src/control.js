@@ -182,8 +182,7 @@ myNamespace.control = (function($, OL, ns) {
 			$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
 			$("#highchartsContainer").html("");
 
-			ns.handleParameters.selectParameters($("#parametersTree").jstree("get_checked", null, true), document
-					.getElementById('qualityFlagsEnabledCheck').checked);
+			ns.handleParameters.selectParameters($("#parametersTree").jstree("get_checked", null, true));
 
 			// Resetting tablesToQuery between filters
 			tablesToQuery = [];
