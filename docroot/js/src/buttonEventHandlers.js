@@ -14,7 +14,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 	}
 
 	function callFromControl(element, functionValue) {
-		add(element, functionValue/*setThisOfFunction(functionValue, myNamespace.control)*/);
+		add(element, functionValue);
 	}
 
 	function toggleButton(buttonId, buttonName, div) {
@@ -56,7 +56,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		add("#parametersEnabledCheck", checkParameter("parametersEnabledCheck", "Parameters", "#parametersHeaderText"));
 		add("#metadataEnabledCheck", checkParameter("metadataEnabledCheck", "Metadata", "#metadataHeaderText"));
 
-		// buttons that call methods of control - should have control as "this"
+		// buttons that call methods
 		var c = myNamespace.control;
 		callFromControl("#filterParameters", c.filterParametersButton);
 		callFromControl("#addLayerButton", c.addLayerButton);
