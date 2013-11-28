@@ -18,5 +18,6 @@
 			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="docroot/WEB-INF/lib/json-simple-1.1.1.jar"/>
 	<classpathentry kind="output" path="docroot/WEB-INF/classes"/>
 </classpath>

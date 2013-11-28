@@ -58,9 +58,32 @@ myNamespace.control = (function($, OL, ns) {
 		// Make the tabs jquery-tabs
 		$("#tabs").tabs();
 
+		setUpRegions();
 		ns.matchup.setUpUploadRaster();
 		ns.matchup.setUpOPeNDAPSelector();
 		ns.mapLayers.addWMSLayerSelector();
+	}
+
+	function setUpRegions() {
+		var findRegions = "<a href='"
+				+ "http://geonode.iwlearn.org/geoserver/geonode/wms?service=WMS&version=1.1.0&request=GetMap&layers=geonode:Longhurst_world_v4_2010&styles=&bbox=-180.0,-78.5001564788404,180.0,90.0000019073487&width=705&height=330&srs=EPSG:4326&format=application/openlayers'"
+				+ " target='_new'>Use this link to find your region</a><br>";
+		$("#regionList").html(
+				findRegions
+						+ ns.mapLayers.setUpSelector(window.longhurstRegions, "longhurstRegionSelected",
+								"longhurstRegionSelected"));
+		var my_options = $("#longhurstRegionSelected option");
+
+		my_options.sort(function(a, b) {
+			if (a.text > b.text)
+				return 1;
+			else if (a.text < b.text)
+				return -1;
+			else
+				return 0;
+		});
+
+		$("#longhurstRegionSelected").empty().append(my_options);
 	}
 
 	function mainQueryButton() {
@@ -88,6 +111,7 @@ myNamespace.control = (function($, OL, ns) {
 		var date = ns.query.createDateHashMap();
 		var months = ns.query.createMonthArray();
 		var depth = ns.query.createDepthHashMap();
+		var region = ns.query.createRegionArray();
 
 		var propertyName = [];
 		// Adding the parameters to the array
@@ -108,7 +132,7 @@ myNamespace.control = (function($, OL, ns) {
 		if (debugc)
 			console.log("control.js: calling ns.query.constructFilterString()"); // TEST
 
-		var filter = ns.query.constructFilterString(filterBbox, date, attr, depth, months);
+		var filter = ns.query.constructFilterString(filterBbox, date, attr, depth, months, region);
 
 		// GetFeature request with filter, callback handles result
 		if (debugc)
@@ -216,11 +240,13 @@ myNamespace.control = (function($, OL, ns) {
 			});
 
 			var depth = ns.query.createDepthHashMap();
+			var region = ns.query.createRegionArray();
 			var filterBbox = ns.query.createfilterBoxHashMap();
 			var date = ns.query.createDateHashMap();
 			var months = ns.query.createMonthArray();
 
-			var filter = ns.query.constructParameterFilterString(propertyNameNeed, depth, filterBbox, date, months);
+			var filter = ns.query.constructParameterFilterString(propertyNameNeed, depth, filterBbox, date, months,
+					region);
 			// Requesting features from the first layer through an asynchronous
 			// request and sending response to displayParameter
 			ns.WebFeatureService.getFeature({
@@ -284,6 +310,7 @@ myNamespace.control = (function($, OL, ns) {
 			myNamespace.matchup.updateMatchupParameter();
 		} else {
 			var depth = ns.query.createDepthHashMap();
+			var region = ns.query.createRegionArray();
 			var filterBbox = ns.query.createfilterBoxHashMap();
 			var date = ns.query.createDateHashMap();
 			var months = ns.query.createMonthArray();
@@ -300,7 +327,8 @@ myNamespace.control = (function($, OL, ns) {
 				}
 			});
 
-			var filter = ns.query.constructParameterFilterString(propertyNameNeed, depth, filterBbox, date, months);
+			var filter = ns.query.constructParameterFilterString(propertyNameNeed, depth, filterBbox, date, months,
+					region);
 			// Requesting features from the first layer through an asynchronous
 			// request and sending response to displayParameter
 			ns.WebFeatureService.getFeature({
@@ -397,6 +425,8 @@ myNamespace.control = (function($, OL, ns) {
 		var filterBbox = ns.query.createfilterBoxHashMap();
 		var date = ns.query.createDateHashMap();
 		var months = ns.query.createMonthArray();
+		var depth = ns.query.createDepthHashMap();
+		var region = ns.query.createRegionArray();
 		var myTreeContainer = $.jstree._reference("#parametersTree").get_container();
 		var allChildren = myTreeContainer.find("li");
 		$.each(allChildren, function(i, val) {
@@ -406,8 +436,8 @@ myNamespace.control = (function($, OL, ns) {
 				ns.WebFeatureService.getFeature({
 					TYPENAME : layer,
 					PROPERTYNAME : splitString[1],
-					FILTER : ns.query.constructParameterFilterString([ splitString[1] ], ns.query.createDepthHashMap(),
-							filterBbox, date, months),
+					FILTER : ns.query.constructParameterFilterString([ splitString[1] ], depth, filterBbox, date,
+							months, region),
 					RESULTTYPE : "hits"
 				}, function(response) {
 					updateTreeWithInventoryNumbers(response, splitString[1], splitString[0]);
@@ -464,7 +494,7 @@ myNamespace.control = (function($, OL, ns) {
 
 	function compareRasterButton() {
 		var rasterParameter = $("#matchVariable").find(":selected").val();
-		if (rasterParameter == "NONE"){
+		if (rasterParameter == "NONE") {
 			ns.errorMessage.showErrorMessage("You must choose a parameter from the raster");
 			return;
 		}
@@ -475,7 +505,7 @@ myNamespace.control = (function($, OL, ns) {
 		var dataRequest = {};
 		var useOpendap = Boolean(document.getElementById('opendapDataURLCheck').checked);
 		dataRequest[portletNameSpace + 'requestType'] = "getDataValuesOf:" + rasterParameter;
-		//TODO: ensure that these are selected and exists
+		// TODO: ensure that these are selected and exists
 		dataRequest[portletNameSpace + 'time'] = $("#timeMatchupVariable").find(":selected").val();
 		dataRequest[portletNameSpace + 'elevation'] = $("#elevationMatchupVariable").find(":selected").val();
 		$.each(data, function(i, val) {

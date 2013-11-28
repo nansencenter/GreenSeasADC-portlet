@@ -90,6 +90,40 @@ public class DatabaseProperties {
 		return allLayersHeader.toString() + allLayers.toString();
 	}
 
+	public static String getLonghurstRegions() {
+		StringBuffer properties = new StringBuffer();
+		properties.append("window.longhurstRegions = {");
+		try {
+			Properties prop = new Properties();
+			prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream("Longhurst_regions.properties"));
+			Set<String> propNameSet = prop.stringPropertyNames();
+			for (String propName : propNameSet) {
+				properties.append("\"" + propName + "\":" + prop.getProperty(propName) + ",");
+			}
+
+		} catch (Exception e) {
+			return "";
+		}
+		properties.append("};");
+		return properties.toString();
+	}
+
+	public static String getLonghurstPolygon(String region) {
+		System.out.println("getLonghurstPolygon");
+		String polygon = null;
+		try {
+			Properties prop = new Properties();
+			prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream(
+					"Longhurst_regions_polygons.properties"));
+			polygon = prop.getProperty(region);
+		} catch (Exception e) {
+			System.out.println("getLonghurstPolygon EXCEPTION");
+			return polygon;
+		}
+		System.out.println("getLonghurstPolygon returns:" + polygon);
+		return polygon;
+	}
+
 	public static String getAllProperties() {
 		StringBuffer properties = new StringBuffer();
 		try {

@@ -163,6 +163,18 @@
 							metadata will be selected.</em>
 						<div id="metadataTree"></div>
 					</div>
+					
+					<h3>
+						<span id='regionHeaderText'>Longhurst region <em>(off)</em></span>
+					</h3>
+					<div id='regionSelected'>
+						<div>
+							<input type="checkbox" id="regionEnabledCheck">
+							Enable in query
+						</div>
+						<em>Select the region you want to search by. Only a few regions are currently supported.</em>
+						<div id="regionList"></div>
+					</div>
 
 					<h3>
 						<span id='parametersHeaderText'>Parameters <em>(off)</em></span>
@@ -248,7 +260,7 @@
 		<div id="matchUpTab">
 			<div id='modelOptions'>
 				<h3>
-					<span id='modelOptionsHeaderText'>Upload File <em>(off)</em></span>
+					<span id='modelOptionsHeaderText'>Upload NetCDF File <em>(off)</em></span>
 				</h3>
 				<div id='fileOption'>
 					<div>
@@ -301,6 +313,8 @@
 	<%=renderRequest.getAttribute("allProperties")%>
 	<!-- Initiating window.allParametersHeader -->
 	<%=renderRequest.getAttribute("allParametersHeader")%>
+	<!-- Initiating window.longhurstRegions -->
+	<%=renderRequest.getAttribute("longhurstRegions")%>
 	<!-- Initiating window.allLayersHeader and window.allLayers -->
 	<%=renderRequest.getAttribute("allLayers")%>
 		window.portletNameSpace = '<portlet:namespace />';

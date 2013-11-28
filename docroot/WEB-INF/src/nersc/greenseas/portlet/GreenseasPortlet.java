@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.portlet.ActionRequest;
@@ -60,6 +61,7 @@ public class GreenseasPortlet extends MVCPortlet {
 		renderRequest.setAttribute("allParametersHeader", DatabaseProperties.getAllParametersHeader());
 		renderRequest.setAttribute("allLayers", DatabaseProperties.getAllLayers());
 		renderRequest.setAttribute("allProperties", DatabaseProperties.getAllProperties());
+		renderRequest.setAttribute("longhurstRegions", DatabaseProperties.getLonghurstRegions());
 		super.doView(renderRequest, renderResponse);
 	}
 
@@ -71,55 +73,72 @@ public class GreenseasPortlet extends MVCPortlet {
 		PortletSession session = resourceRequest.getPortletSession();
 		String uri = (String) session.getAttribute("rasterFile");
 		String requestType = resourceRequest.getParameter("requestType");
-		System.out.println(requestType);
+		System.out.println("requestType:'" + requestType + "'");
 		String opendapDataURL = resourceRequest.getParameter("opendapDataURL");
 		if (opendapDataURL != null) {
 			uri = opendapDataURL;
-			System.out.println("uri set to:"+opendapDataURL);
+			System.out.println("uri set to:" + opendapDataURL);
 		}
-		if (uri == null)
+		if (uri != null) {
+			if (requestType.startsWith("getDataValuesOf:")) {
+				System.out.println("requestType is getDataValuesOf:");
+				Map<String, String[]> parameterMap = resourceRequest.getParameterMap();
+				Map<Integer, Map<String, Double>> values = NetCDFReader.getDatavaluesFromNetCDFFile(uri, parameterMap);
+				if (values == null)
+					return;
+				JSONObject jsonObject = new JSONObject(values);
+				System.out.println("Returning with jsonObject:");
+				System.out.println(jsonObject.toJSONString());
+
+				PrintWriter writer = resourceResponse.getWriter();
+				writer.write(jsonObject.toString());
+				return;
+			} else if (requestType.equals("getLayersFromNetCDFFile")) {
+				System.out.println("opendapDataURL:" + opendapDataURL);
+				System.out.println("uri:" + uri);
+				Map<String, String> values = NetCDFReader.getLayersFromRaster(uri);
+				if (values == null)
+					return;
+				JSONObject jsonObject = new JSONObject(values);
+
+				System.out.println("Returning with jsonObject:");
+				System.out.println(jsonObject.toJSONString());
+
+				PrintWriter writer = resourceResponse.getWriter();
+				writer.write(jsonObject.toString());
+				session.setAttribute("rasterFile", uri);
+				return;
+			} else if (requestType.equals("getMetaDimensions")) {
+				System.out.println("getMetaDimensions:" + uri);
+				String parameter = resourceRequest.getParameter("rasterParameter");
+				if (parameter == null)
+					return;
+				Map<String, Map<String, String>> values = NetCDFReader.getDimensionsFromRasterParameter(uri, parameter);
+				if (values == null)
+					return;
+				JSONObject jsonObject = new JSONObject(values);
+
+				System.out.println("Returning with jsonObject:");
+				System.out.println(jsonObject.toJSONString());
+
+				PrintWriter writer = resourceResponse.getWriter();
+				writer.write(jsonObject.toString());
+				return;
+			}
+		}
+		if (requestType.equals("getLonghurstPolygon")) {
+			Map<String, String> values = new HashMap<String, String>();
+			String region = resourceRequest.getParameter("longhurstRegion");
+			System.out.println("getLonghurstPolygon:" + region);
+			String polygon = DatabaseProperties.getLonghurstPolygon(region);
+			values.put(region, polygon);
+			JSONObject jsonObject = new JSONObject(values);
+
+			System.out.println("Returning with polygon!=null:" + (polygon != null));
+
+			PrintWriter writer = resourceResponse.getWriter();
+			writer.write(jsonObject.toString());
 			return;
-		if (requestType.startsWith("getDataValuesOf:")) {
-			System.out.println("requestType is getDataValuesOf:");
-			Map<String, String[]> parameterMap = resourceRequest.getParameterMap();
-			Map<Integer, Map<String,Double>> values = NetCDFReader.getDatavaluesFromNetCDFFile(uri, parameterMap);
-			if (values == null)
-				return;
-			JSONObject jsonObject = new JSONObject(values);
-			System.out.println("Returning with jsonObject:");
-			System.out.println(jsonObject.toJSONString());
-
-			PrintWriter writer = resourceResponse.getWriter();
-			writer.write(jsonObject.toString());
-		} else if (requestType.equals("getLayersFromNetCDFFile")) {
-			System.out.println("opendapDataURL:" + opendapDataURL);
-			System.out.println("uri:" + uri);
-			Map<String, String> values = NetCDFReader.getLayersFromRaster(uri);
-			if (values == null)
-				return;
-			JSONObject jsonObject = new JSONObject(values);
-
-			System.out.println("Returning with jsonObject:");
-			System.out.println(jsonObject.toJSONString());
-
-			PrintWriter writer = resourceResponse.getWriter();
-			writer.write(jsonObject.toString());
-			session.setAttribute("rasterFile", uri);
-		} else if (requestType.equals("getMetaDimensions")) {
-			System.out.println("getMetaDimensions:" + uri);
-			String parameter = resourceRequest.getParameter("rasterParameter");
-			if (parameter == null)
-				return;
-			Map<String, Map<String, String>> values = NetCDFReader.getDimensionsFromRasterParameter(uri,parameter);
-			if (values == null)
-				return;
-			JSONObject jsonObject = new JSONObject(values);
-
-			System.out.println("Returning with jsonObject:");
-			System.out.println(jsonObject.toJSONString());
-
-			PrintWriter writer = resourceResponse.getWriter();
-			writer.write(jsonObject.toString());
 		}
 	}
 

@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debuga = true;// debug flag
+var debuga = false;// debug flag
 
 myNamespace.ajax = (function($) {
 	"use strict";
@@ -106,8 +106,45 @@ myNamespace.ajax = (function($) {
 			});
 		});
 	}
+
+	function getLonghurstPolygon(region) {
+		if (!window.polygon) window.polygon ={};
+		//AUI().use('aui-io-request', function(A) {
+			if (debuga) {
+				console.log("Started getDimension");
+			}
+			var url = ajaxCallResourceURL;
+			var data = {};
+			data[portletNameSpace + 'longhurstRegion'] = region;
+			data[portletNameSpace + 'requestType'] = 'getLonghurstPolygon';
+
+			//A.io.request(url, {
+			$.ajax({url:url,
+				// data to be sent to server
+				data : data,
+				dataType : 'json',
+				async : false,
+
+				//on : {
+					error : function() {
+						alert("SOMETHING WENT WRONG!");
+					},
+
+					success : function(result,status,xhr) {
+						//var instance = this;
+
+						// JSON Data coming back from Server
+						//var responseData = instance.get('responseData');
+						window.polygon[region] = result[region].slice(1,result[region].length-1);
+					}
+
+				//}
+			});
+		//});
+	}
 	// public interface
 	return {
+		getLonghurstPolygon : getLonghurstPolygon,
 		getDimension : getDimension,
 		getLayersFromNetCDFFile : getLayersFromNetCDFFile,
 		getDatavaluesFromRaster : getDatavaluesFromRaster
