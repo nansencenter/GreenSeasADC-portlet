@@ -172,7 +172,7 @@
 							<input type="checkbox" id="regionEnabledCheck">
 							Enable in query
 						</div>
-						<em>Select the region you want to search by. Only a few regions are currently supported.</em>
+						<em>Select the region you want to search by. There is currently no support for the Austral Polar Province and the Boreal Polar Province.</em>
 						<div id="regionList"></div>
 					</div>
 

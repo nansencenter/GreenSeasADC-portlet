@@ -43,10 +43,7 @@ myNamespace.WebFeatureService = (function($, OL) {
 				xmlDoc.async = false;
 				xmlDoc.loadXML(filter);
 			}
-			console.log(xmlDoc);
 			var elements = $(xmlDoc).find("posList");
-			console.log("BEFORE:");
-			console.log(elements);
 			$.each(elements,function(i,val){
 				var stringArray = val.childNodes[0].nodeValue.split(" ");
 				var output = "";
@@ -55,8 +52,6 @@ myNamespace.WebFeatureService = (function($, OL) {
 				}
 				val.childNodes[0].nodeValue = output;
 			});
-			console.log("AFTER:");
-			console.log(elements);
 		} catch (err) {
 			return filter;
 		}
@@ -81,10 +76,10 @@ myNamespace.WebFeatureService = (function($, OL) {
 			outputFormat = "text/xml";
 		}
 		var filter = parameters.FILTER || "";
-		console.log("-------------------filter-------------------");
+		//console.log("-------------------filter-------------------");
 		filter = swapPosList(filter);
 		//console.log(filter);
-		console.log("-------------------filter-------------------");
+		//console.log("-------------------filter-------------------");
 		var xml = "<GetFeature service=\"WFS\" version=\"1.1.0\" outputFormat=\"" + outputFormat + "\" " + propertyName
 				+ resultType + "xmlns=\"http://www.opengis.net/wfs\" "
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "

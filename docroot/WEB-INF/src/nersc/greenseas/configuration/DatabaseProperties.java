@@ -109,7 +109,7 @@ public class DatabaseProperties {
 	}
 
 	public static String getLonghurstPolygon(String region) {
-		System.out.println("getLonghurstPolygon");
+		//System.out.println("getLonghurstPolygon");
 		String polygon = null;
 		try {
 			Properties prop = new Properties();
@@ -120,7 +120,7 @@ public class DatabaseProperties {
 			System.out.println("getLonghurstPolygon EXCEPTION");
 			return polygon;
 		}
-		System.out.println("getLonghurstPolygon returns:" + polygon);
+		//System.out.println("getLonghurstPolygon returns:" + polygon);
 		return polygon;
 	}
 
