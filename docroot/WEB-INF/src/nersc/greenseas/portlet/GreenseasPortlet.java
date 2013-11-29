@@ -151,14 +151,40 @@ public class GreenseasPortlet extends MVCPortlet {
 		// TODO: must delete these files when done with!
 		File submissionFile = uploadRequest.getFile("file");
 		System.out.println("Uploaded files");
-
-		String fileURI = System.getProperty("user.home") + "\\GreenSeasRaster\\" + submissionFileName;
+		/* System.getProperty("user.home") */
+		String[] folders = {"content","gsadbc","uploadedFiles"};
+		String filePath = createDirectory(System.getProperty("catalina.base"), folders);
+		String fileURI = filePath + submissionFileName;
 		moveFile(submissionFile.getAbsolutePath(), fileURI);
 
 		PortletSession session = actionRequest.getPortletSession();
 		// String oldFileName = (String) session.getAttribute("rasterFile");
 		session.setAttribute("rasterFile", fileURI);
 
+	}
+
+	private String createDirectory(String base, String[] subFolders) {
+		base += File.separator;
+		File directory = new File(base);
+		// if the directory does not exist, create it
+		if (directory.exists()) {
+			for (int i = 0; i < subFolders.length; i++) {
+				base += subFolders[i] + File.separator;
+				directory = new File(base);
+				if (!directory.exists()) {
+					System.out.println("creating directory: " + base);
+					boolean result = directory.mkdir();
+
+					if (result) {
+						System.out.println("DIR created");
+					} else {
+						System.out.println("Did not manage to create '"+base+"'");
+						return null;}
+				}
+			}
+		} else
+			return null;
+		return base;
 	}
 
 	private void moveFile(String moveFrom, String moveTo) {
@@ -190,7 +216,7 @@ public class GreenseasPortlet extends MVCPortlet {
 			// delete the original file
 			afile.delete();
 
-			System.out.println("File is copied successful!");
+			System.out.println("File is copied successful from '" + moveFrom + "' to '" + moveTo + "'");
 
 		} catch (IOException e) {
 			e.printStackTrace();
