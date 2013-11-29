@@ -2,7 +2,7 @@ var myNamespace = myNamespace || {};
 
 var debugwfs = false;// debug flag
 
-myNamespace.WebFeatureService = (function(jQ, OL) {
+myNamespace.WebFeatureService = (function($, OL) {
 	"use strict";
 
 	// fires an asyn. HTTP GET request to server
@@ -30,6 +30,39 @@ myNamespace.WebFeatureService = (function(jQ, OL) {
 
 	}
 
+	function swapPosList(filter) {
+		var newFilter = "";
+		var xmlDoc;
+		try {
+			if (window.DOMParser) {
+				parser = new DOMParser();
+				xmlDoc = parser.parseFromString(filter, "text/xml");
+			} else // Internet Explorer
+			{
+				xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+				xmlDoc.async = false;
+				xmlDoc.loadXML(filter);
+			}
+			console.log(xmlDoc);
+			var elements = $(xmlDoc).find("posList");
+			console.log("BEFORE:");
+			console.log(elements);
+			$.each(elements,function(i,val){
+				var stringArray = val.childNodes[0].nodeValue.split(" ");
+				var output = "";
+				for(var i = 0; i < stringArray.length;i = i+2){
+					output += stringArray[i+1]+" "+stringArray[i]+" ";
+				}
+				val.childNodes[0].nodeValue = output;
+			});
+			console.log("AFTER:");
+			console.log(elements);
+		} catch (err) {
+			return filter;
+		}
+		return new XMLSerializer().serializeToString(xmlDoc);
+	}
+
 	function convertParametersToGetFeatureXML(parameters) {
 		var propertyName = "";
 		if (parameters.PROPERTYNAME) {
@@ -37,7 +70,7 @@ myNamespace.WebFeatureService = (function(jQ, OL) {
 		}
 		var propertyNames = "";
 		if (parameters.PROPERTYNAMES) {
-			jQ.each(parameters.PROPERTYNAMES, function(i, val) {
+			$.each(parameters.PROPERTYNAMES, function(i, val) {
 				propertyNames += "<PropertyName>" + window.database + ":" + val + "</PropertyName>";
 			});
 		}
@@ -48,6 +81,10 @@ myNamespace.WebFeatureService = (function(jQ, OL) {
 			outputFormat = "text/xml";
 		}
 		var filter = parameters.FILTER || "";
+		console.log("-------------------filter-------------------");
+		filter = swapPosList(filter);
+		//console.log(filter);
+		console.log("-------------------filter-------------------");
 		var xml = "<GetFeature service=\"WFS\" version=\"1.1.0\" outputFormat=\"" + outputFormat + "\" " + propertyName
 				+ resultType + "xmlns=\"http://www.opengis.net/wfs\" "
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
@@ -62,7 +99,7 @@ myNamespace.WebFeatureService = (function(jQ, OL) {
 	function getFeature(extraParameters, callback) {
 		if (debugwfs)
 			console.log("getFeature: calling asyncGetRequest()");// TEST
-		// asyncGetRequest(jQ.extend(parameters, extraParameters), callback);
+		// asyncGetRequest($.extend(parameters, extraParameters), callback);
 		var parametersXML = convertParametersToGetFeatureXML(extraParameters);
 		asyncPostRequest(parametersXML, callback);
 	}
@@ -82,7 +119,7 @@ myNamespace.WebFeatureService = (function(jQ, OL) {
 		// extend provided parameters onto default parameters, make request
 		if (debugwfs)
 			console.log("webFeatureService.js: calling asyncGetRequest()");// TEST
-		asyncGetRequest(jQ.extend(parameters, extraParameters), callback);
+		asyncGetRequest($.extend(parameters, extraParameters), callback);
 	}
 
 	// public interface
