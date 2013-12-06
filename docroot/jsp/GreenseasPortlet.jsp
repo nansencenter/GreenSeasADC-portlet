@@ -244,18 +244,41 @@
 			<div id="parametersTabText">
 				<p>Run a query and filter selected parameters to view options here.</p>
 			</div>
-			<div id="statistics">
-				<input type="button" id="calculateStatisticsButton" value="Calculate statistics" />
-				<div id="statisticsContainer"></div>
-				<br>
-			</div>
-			<div id='timeSeriesDiv'>
-				<div id="timeSeriesVariableDiv"></div>
-				<br>
-				<input type='button' id='addTimeSeriesVariableButton' value="Add another variable" />
-				<br>
-				<input type='button' id='timeSeriesButton' value="Generate Timeseries" />
-				<div id="timeSeriesContainer" style="width: 100%; height: 400px;"></div>
+			<div id='statsOptions'>
+				<h3>
+					<span>Statistics</span>
+				</h3>
+				<div id="outerStatistics">
+					<div id="statistics">
+						<input type="button" id="calculateStatisticsButton" value="Calculate statistics" />
+						<div id="statisticsContainer"></div>
+						<br>
+					</div>
+				</div>
+				<h3>
+					<span>Time Series</span>
+				</h3>
+				<div id='outerTimeSeriesDiv'>
+					<div id='timeSeriesDiv'>
+						<div id="timeSeriesVariableDiv"></div>
+						<br>
+						<input type='button' id='addTimeSeriesVariableButton' value="Add another variable" />
+						<br>
+						<input type='button' id='timeSeriesButton' value="Generate Timeseries" />
+						<div id="timeSeriesContainer" style="width: 100%; height: 400px;"></div>
+					</div>
+				</div>
+				<h3>
+					<span>Properties Plot</span>
+				</h3>
+				<div id='outerPropertiesPlotDiv'>
+					<div id='propertiesPlotDiv'>
+						<div id="propertiesPlotVariableDiv"></div>
+						<br>
+						<input type='button' id='propertiesPlotButton' value="Generate Properties Plot" />
+						<div id="propertiesPlotContainer" style="width: 100%; height: 400px;"></div>
+					</div>
+				</div>
 			</div>
 		</div>
 

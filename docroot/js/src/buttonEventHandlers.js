@@ -63,6 +63,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		callFromControl("#addLayerButton", c.addLayerButton);
 		callFromControl("#compareRasterButton", c.compareRasterButton);
 		callFromControl("#addTimeSeriesVariableButton", c.addTimeSeriesVariableButton);
+		callFromControl("#propertiesPlotButton", c.propertiesPlotButton);
 		callFromControl("#timeSeriesButton", c.timeSeriesButton);
 		callFromControl("#filter", c.mainQueryButton);
 		callFromControl("#toCurrentExtent", c.setBboxInputToCurrentMapExtent);
