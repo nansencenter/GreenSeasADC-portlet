@@ -20,7 +20,6 @@ myNamespace.control = (function($, OL, ns) {
 		tablesToQuery = [];
 		data = null;
 		basicData = null;
-		// ns.ajax.doAjax();
 
 		// hide export option until we have something to export
 		$("#exportParametersDiv").hide();
