@@ -16,7 +16,10 @@
 
 <div id="portlet">
 
-	<div id="simple_map"></div>
+	<div id="mapContainer" >
+		<div id="simple_map"></div>
+		<div id="rightOfMap" ><div id="legend"></div></div>
+	</div>
 
 	<div id="tabs">
 		<ul>
@@ -163,7 +166,7 @@
 							metadata will be selected.</em>
 						<div id="metadataTree"></div>
 					</div>
-					
+
 					<h3>
 						<span id='regionHeaderText'>Longhurst region <em>(off)</em></span>
 					</h3>
@@ -172,7 +175,8 @@
 							<input type="checkbox" id="regionEnabledCheck">
 							Enable in query
 						</div>
-						<em>Select the region you want to search by. There is currently no support for the Austral Polar Province and the Boreal Polar Province.</em>
+						<em>Select the region you want to search by. There is currently no support for the Austral Polar Province and
+							the Boreal Polar Province.</em>
 						<div id="regionList"></div>
 					</div>
 
@@ -309,7 +313,9 @@
 
 <aui:script>
 	$(document).ready(function() {
-		<!-- Initiating all properties from the main properties file -->
+	<!-- Initiating context path for images -->
+	window.contextPath = "<%=request.getContextPath()%>";
+	<!-- Initiating all properties from the main properties file -->
 	<%=renderRequest.getAttribute("allProperties")%>
 	<!-- Initiating window.allParametersHeader -->
 	<%=renderRequest.getAttribute("allParametersHeader")%>
