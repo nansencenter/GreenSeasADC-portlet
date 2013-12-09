@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debughP = false;// debug flag
+var debughP = true;// debug flag
 
 myNamespace.handleParameters = (function($) {
 	// TODO: make this a hashtable of hashtable, it must store the type of the
@@ -44,14 +44,17 @@ myNamespace.handleParameters = (function($) {
 		chosenParameters.allSelected = [];
 		chosenParameters.tablesSelected = [];
 		chosenParameters.parametersByTable = {};
+		chosenParameters.combined = [];
 		$.each(par, function(i, val) {
 			var parArr = val.getAttribute("id").split(":");
 			if (debughP)
 				console.log("Checking val: " + parArr[0] + ":" + parArr[1]);
 			// if the parameter is an actual available parameter in that table
 			// (minor check for error) TODO: remove?
-			if (availableParameters[parArr[0]].indexOf(parArr[1]) != -1) {
-				chosenParameters.allSelected.push(val.getAttribute("id"));
+			chosenParameters.allSelected.push(val.getAttribute("id"));
+			if (parArr[0] == "combined") {
+				chosenParameters.combined.push(val.getAttribute("id"));
+			} else {
 				// if its the first registered parameter from that table
 				if (chosenParameters.tablesSelected.indexOf(parArr[0]) == -1) {
 					chosenParameters.tablesSelected.push(parArr[0]);
@@ -60,6 +63,23 @@ myNamespace.handleParameters = (function($) {
 					chosenParameters.parametersByTable[parArr[0]].push(parArr[1]);
 				}
 			}
+		});
+		if (debughP)
+			console.log("Adding extra parameters: ");
+		if (debughP)
+			console.log(chosenParameters.combined);
+		// Adding the extra parameters from combine.
+		$.each(chosenParameters.combined, function(i, val) {
+			var combine = window.combinedParameters[val];
+			if (chosenParameters.tablesSelected.indexOf(combine.layer) == -1) {
+				chosenParameters.tablesSelected[combine.layer] = [];
+				chosenParameters.tablesSelected.push(combine.layer);
+				chosenParameters.parametersByTable[combine.layer] = [];
+			}
+			$.each(combine.parameters, function(j, par) {
+				if (chosenParameters.parametersByTable[combine.layer].indexOf(par) == -1)
+					chosenParameters.parametersByTable[combine.layer].push(par);
+			});
 		});
 		if (debughP) {
 			console.log("Setting allSelected to: " + chosenParameters.allSelected.toString());
@@ -88,7 +108,10 @@ myNamespace.handleParameters = (function($) {
 	function getHeader(parameter, table) {
 		var header;
 		try {
-			header = allParametersHeader[table][parameter];
+			if (table == "combined")
+				header = window.combinedParameters["combined:" + parameter].header;
+			else
+				header = allParametersHeader[table][parameter];
 		} catch (e) {
 			return parameter;
 		}
@@ -96,6 +119,9 @@ myNamespace.handleParameters = (function($) {
 	}
 
 	function getTableHeader(table) {
+		if (table.indexOf("combined") == 0) {
+			return window.combinedParameters[table].header;
+		}
 		return allLayersHeader[table] ? allLayersHeader[table] : table;
 	}
 

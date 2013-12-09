@@ -26,33 +26,31 @@ public class DatabaseProperties {
 	 */
 	public static String getAllParametersHeader() {
 		StringBuffer allParametersHeader = new StringBuffer("window.allParametersHeader = {");
-		try {
-			Properties prop = new Properties();
-			prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream("parameterHeaders.properties"));
-			Set<String> propNameSet = prop.stringPropertyNames();
-			ArrayList<String[]> propList = new ArrayList<String[]>();
-			for (String propName : propNameSet) {
-				String[] splitPropName = propName.split("\\.");
-				String[] propArray = { splitPropName[0], splitPropName[1], prop.getProperty(propName) };
-				propList.add(propArray);
-			}
-			Collections.sort(propList, SORT_BY_FIRST_VALUE);
-
-			String table = null;
-			for (String[] propArray : propList) {
-				if (table == null || !table.equals(propArray[0])) {
-					if (table != null) {
-						allParametersHeader.append("},");
-					}
-					allParametersHeader.append(propArray[0] + ":" + "{");
-				} else {
-					allParametersHeader.append(",");
-				}
-				table = propArray[0];
-				allParametersHeader.append(propArray[1] + ":" + propArray[2]);
-			}
-		} catch (Exception e) {
+		String fileName = "parameterHeaders.properties";
+		Properties prop = getProperties(fileName);
+		if (prop == null)
 			return "window.allParametersHeader = {};";
+		Set<String> propNameSet = prop.stringPropertyNames();
+		ArrayList<String[]> propList = new ArrayList<String[]>();
+		for (String propName : propNameSet) {
+			String[] splitPropName = propName.split("\\.");
+			String[] propArray = { splitPropName[0], splitPropName[1], prop.getProperty(propName) };
+			propList.add(propArray);
+		}
+		Collections.sort(propList, SORT_BY_FIRST_VALUE);
+
+		String table = null;
+		for (String[] propArray : propList) {
+			if (table == null || !table.equals(propArray[0])) {
+				if (table != null) {
+					allParametersHeader.append("},");
+				}
+				allParametersHeader.append(propArray[0] + ":" + "{");
+			} else {
+				allParametersHeader.append(",");
+			}
+			table = propArray[0];
+			allParametersHeader.append(propArray[1] + ":" + propArray[2]);
 		}
 		allParametersHeader.append("}};");
 		return allParametersHeader.toString();
@@ -69,21 +67,18 @@ public class DatabaseProperties {
 	public static String getAllLayers() {
 		StringBuffer allLayersHeader = new StringBuffer("window.allLayersHeader = {");
 		StringBuffer allLayers = new StringBuffer("window.allLayers = {");
-		try {
-			Properties prop = new Properties();
-			prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream("layerHeaders.properties"));
-			Set<String> propNameSet = prop.stringPropertyNames();
-			String prefix = "";
-			for (String propName : propNameSet) {
-				allLayers.append(prefix);
-				allLayersHeader.append(prefix);
-				prefix = ",";
-				allLayers.append(propName + ": false");
-				allLayersHeader.append(propName + ":" + prop.getProperty(propName));
-			}
-
-		} catch (Exception e) {
+		String fileName = "layerHeaders.properties";
+		Properties prop = getProperties(fileName);
+		if (prop == null)
 			return "window.allLayersHeader = {};window.allLayers = {};";
+		Set<String> propNameSet = prop.stringPropertyNames();
+		String prefix = "";
+		for (String propName : propNameSet) {
+			allLayers.append(prefix);
+			allLayersHeader.append(prefix);
+			prefix = ",";
+			allLayers.append(propName + ": false");
+			allLayersHeader.append(propName + ":" + prop.getProperty(propName));
 		}
 		allLayersHeader.append("};");
 		allLayers.append("};");
@@ -93,50 +88,65 @@ public class DatabaseProperties {
 	public static String getLonghurstRegions() {
 		StringBuffer properties = new StringBuffer();
 		properties.append("window.longhurstRegions = {");
-		try {
-			Properties prop = new Properties();
-			prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream("Longhurst_regions.properties"));
-			Set<String> propNameSet = prop.stringPropertyNames();
-			for (String propName : propNameSet) {
-				properties.append("\"" + propName + "\":" + prop.getProperty(propName) + ",");
-			}
-
-		} catch (Exception e) {
-			return "";
+		String fileName = "Longhurst_regions.properties";
+		Properties prop = getProperties(fileName);
+		Set<String> propNameSet = prop.stringPropertyNames();
+		for (String propName : propNameSet) {
+			properties.append("\"" + propName + "\":" + prop.getProperty(propName) + ",");
 		}
 		properties.append("};");
 		return properties.toString();
 	}
 
 	public static String getLonghurstPolygon(String region) {
-		//System.out.println("getLonghurstPolygon");
 		String polygon = null;
-		try {
-			Properties prop = new Properties();
-			prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream(
-					"Longhurst_regions_polygons.properties"));
-			polygon = prop.getProperty(region);
-		} catch (Exception e) {
-			System.out.println("getLonghurstPolygon EXCEPTION");
-			return polygon;
-		}
-		//System.out.println("getLonghurstPolygon returns:" + polygon);
+		String fileName = "Longhurst_regions_polygons.properties";
+		Properties prop = getProperties(fileName);
+		polygon = prop.getProperty(region);
 		return polygon;
 	}
 
 	public static String getAllProperties() {
+		String fileName = "greenSeas.properties";
 		StringBuffer properties = new StringBuffer();
-		try {
-			Properties prop = new Properties();
-			prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream("greenSeas.properties"));
-			Set<String> propNameSet = prop.stringPropertyNames();
-			for (String propName : propNameSet) {
-				properties.append("window." + propName + "=" + prop.getProperty(propName) + ";");
-			}
-
-		} catch (Exception e) {
-			return "";
+		Properties prop = getProperties(fileName);
+		Set<String> propNameSet = prop.stringPropertyNames();
+		for (String propName : propNameSet) {
+			properties.append("window." + propName + "=" + prop.getProperty(propName) + ";");
 		}
 		return properties.toString();
+	}
+
+	private static Properties getProperties(String fileName) {
+		try {
+			Properties prop = new Properties();
+			prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream(fileName));
+			return prop;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public static String getCombinedParameters() {
+		StringBuffer parameters = new StringBuffer();
+		parameters.append("window.combinedParameters = {");
+		String fileName = "combinedParameters.properties";
+		Properties prop = getProperties(fileName);
+		Set<String> propNameSet = prop.stringPropertyNames();
+		for (String propName : propNameSet) {
+			String[] splitP = prop.getProperty(propName).split(";");
+			parameters.append("'combined:" + propName + "': { header:'" + splitP[0] + "'");
+			parameters.append(",method:'" + splitP[2] + "'");
+			parameters.append(",layer:'" + splitP[1] + "'");
+			parameters.append(",parameters:[");
+			String separator = "";
+			for (int i = 3; i < splitP.length; i++) {
+				parameters.append(separator + "'" + splitP[i] + "'");
+				separator = ",";
+			}
+			parameters.append("]},");
+		}
+		parameters.append("};");
+		return parameters.toString();
 	}
 }

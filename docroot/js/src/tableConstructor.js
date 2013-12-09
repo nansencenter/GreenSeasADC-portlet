@@ -204,15 +204,40 @@ myNamespace.tableConstructor = (function($, hP) {
 			// If the paramters from the table has been initiated (through
 			// ns.hP.initiateParameters())
 			if (allLayers[table]) {
+				// Find combinations:
+				var combinations = [];
+				$.each(window.combinedParameters, function(i, val) {
+					if (window.combinedParameters[i].layer == table) {
+						combinations.push(i);
+					}
+				});
 				str += "<li id=\"" + table + "\"><a>" + hP.getTableHeader(table) + "</a>";
 				str += "<ul>";
+				// Add combined parameters to the top:
+				$.each(combinations, function(j, comb) {
+					str += "<li id=\"" + comb + "\"><a>" + hP.getTableHeader(comb) + "</a>";
+					str += "<ul>";
+					$.each(window.combinedParameters[comb].parameters, function(i, val) {
+						str += listItem(val, table);
+					});
+					str += "</ul></li>";
+				});
 				$.each(hP.availableParameters[table], function(i, val) {
+					// Check if the parameter is not to be combined:
+					var found = false;
+					for ( var j = 0; !found && j < combinations.length; j++) {
+						var parArr = window.combinedParameters[combinations[j]].parameters;
+						for ( var k = 0; !found && k < parArr.length; k++)
+							if (val == parArr[k])
+								found = true;
+					}
 					// Check if the parameter is not inherited from the
 					// metadatatable
-					if (hP.mainParameters.parameters.indexOf(val) == -1) {
+					if (!found && hP.mainParameters.parameters.indexOf(val) == -1) {
 						if (val.substring(val.length - qfPostFix.length) != qfPostFix)
 							str += listItem(val, table);
 					}
+
 				});
 				str += "</ul></li>";
 			}

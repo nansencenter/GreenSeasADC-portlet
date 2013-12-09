@@ -313,6 +313,8 @@
 	<%=renderRequest.getAttribute("allProperties")%>
 	<!-- Initiating window.allParametersHeader -->
 	<%=renderRequest.getAttribute("allParametersHeader")%>
+	<!-- Initiating window.combinedParamaters -->
+	<%=renderRequest.getAttribute("combinedParameters")%>
 	<!-- Initiating window.longhurstRegions -->
 	<%=renderRequest.getAttribute("longhurstRegions")%>
 	<!-- Initiating window.allLayersHeader and window.allLayers -->

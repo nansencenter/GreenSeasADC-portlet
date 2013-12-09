@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugc = false;// debug flag
+var debugc = true;// debug flag
 
 myNamespace.control = (function($, OL, ns) {
 	"use strict";
@@ -215,46 +215,24 @@ myNamespace.control = (function($, OL, ns) {
 			if (debugc)
 				console.log("Adding all selected tables to tablesSelected");
 
+			// var foundCombine = false;
 			// Adding all selected layers to tablesToQuery
 			$.each(ns.handleParameters.chosenParameters.tablesSelected, function(i, table) {
+				// if (table != "combined")
 				tablesToQuery.push(table);
-			});
-
-			// pop the first layer
-			var layer = tablesToQuery.pop();
-			// Array with all parameters for the current layer
-			var propertyName = [];
-			var propertyNameNeed = [];
-
-			// Add qualityFlags?
-			var qf = document.getElementById('qualityFlagsEnabledCheck').checked;
-
-			// Adding the parameters to the array
-			$.each(ns.handleParameters.chosenParameters.parametersByTable[layer], function(j, parameter) {
-				propertyName.push(parameter);
-				propertyNameNeed.push(parameter);
-				if (qf) {
-					propertyName.push(parameter + qfPostFix);
-				}
-			});
-
-			var depth = ns.query.createDepthHashMap();
-			var region = ns.query.createRegionArray();
-			var filterBbox = ns.query.createfilterBoxHashMap();
-			var date = ns.query.createDateHashMap();
-			var months = ns.query.createMonthArray();
-
-			var filter = ns.query.constructParameterFilterString(propertyNameNeed, depth, filterBbox, date, months,
-					region);
-			// Requesting features from the first layer through an asynchronous
-			// request and sending response to displayParameter
-			ns.WebFeatureService.getFeature({
-				TYPENAME : layer,
-				PROPERTYNAMES : [ window.geometryParameter ].concat(propertyName),
-				FILTER : filter,
-			}, function(response) {
-				displayParameter(response, layer, filter);
-			});
+				// else
+				// foundCombine = true;
+			});/*
+				 * // Adding extra layers from combined to tablesToQuery: if
+				 * (foundCombine)
+				 * $.each(ns.handleParameters.chosenParameters.parametersByTable.combined,
+				 * function(i, val) { var table =
+				 * window.combinedParameters[val].layer; if (typeof
+				 * tablesToQuery[table] === "undefined")
+				 * tablesToQuery.push(table); });
+				 */
+			// query the first layer
+			queryLayer();
 
 			// jump to the parameters tab
 			$('#tabs').tabs("option", "active", 1);
@@ -262,6 +240,42 @@ myNamespace.control = (function($, OL, ns) {
 			ns.errorMessage
 					.showErrorMessage("You need to enable parameters in the query and select parameters before filtering");
 		}
+	}
+
+	function queryLayer() {
+		var layer = tablesToQuery.pop();
+		// Array with all parameters for the current layer
+		var propertyName = [];
+		var propertyNameNeed = [];
+
+		// Add qualityFlags?
+		var qf = document.getElementById('qualityFlagsEnabledCheck').checked;
+
+		// Adding the parameters to the array
+		$.each(ns.handleParameters.chosenParameters.parametersByTable[layer], function(j, parameter) {
+			propertyName.push(parameter);
+			propertyNameNeed.push(parameter);
+			if (qf) {
+				propertyName.push(parameter + qfPostFix);
+			}
+		});
+
+		var depth = ns.query.createDepthHashMap();
+		var region = ns.query.createRegionArray();
+		var filterBbox = ns.query.createfilterBoxHashMap();
+		var date = ns.query.createDateHashMap();
+		var months = ns.query.createMonthArray();
+
+		var filter = ns.query.constructParameterFilterString(propertyNameNeed, depth, filterBbox, date, months, region);
+		// Requesting features from the first layer through an asynchronous
+		// request and sending response to displayParameter
+		ns.WebFeatureService.getFeature({
+			TYPENAME : layer,
+			PROPERTYNAMES : [ window.geometryParameter ].concat(propertyName),
+			FILTER : filter,
+		}, function(response) {
+			displayParameter(response, layer, filter);
+		});
 	}
 
 	// non-public
@@ -308,35 +322,7 @@ myNamespace.control = (function($, OL, ns) {
 			$("#exportParametersDiv").show();
 			myNamespace.matchup.updateMatchupParameter();
 		} else {
-			var depth = ns.query.createDepthHashMap();
-			var region = ns.query.createRegionArray();
-			var filterBbox = ns.query.createfilterBoxHashMap();
-			var date = ns.query.createDateHashMap();
-			var months = ns.query.createMonthArray();
-			var layer = tablesToQuery.pop();
-			var propertyName = [];
-			var propertyNameNeed = [];
-			// Add qualityFlags?
-			var qf = document.getElementById('qualityFlagsEnabledCheck').checked;
-			$.each(ns.handleParameters.chosenParameters.parametersByTable[layer], function(j, parameter) {
-				propertyName.push(parameter);
-				propertyNameNeed.push(parameter);
-				if (qf) {
-					propertyName.push(parameter + qfPostFix);
-				}
-			});
-
-			var filter = ns.query.constructParameterFilterString(propertyNameNeed, depth, filterBbox, date, months,
-					region);
-			// Requesting features from the first layer through an asynchronous
-			// request and sending response to displayParameter
-			ns.WebFeatureService.getFeature({
-				TYPENAME : layer,
-				PROPERTYNAMES : [ window.geometryParameter ].concat(propertyName),
-				FILTER : filter,
-			}, function(response) {
-				displayParameter(response, layer, filter);
-			});
+			queryLayer();
 		}
 	}
 
@@ -367,7 +353,7 @@ myNamespace.control = (function($, OL, ns) {
 		return output;
 	}
 
-	// non-public
+	// non-public TODO: combine
 	function addData(response) {
 		if (debugc) {
 			console.log("Started adding Data:");
@@ -380,14 +366,49 @@ myNamespace.control = (function($, OL, ns) {
 			data = {};
 			return;
 		}
+
+		var combined = [];
+		// Add all combine filters for this layer to combined (val could be
+		// "combined:temperature")
+		$.each(ns.handleParameters.chosenParameters.combined, function(i, val) {
+			if (window.combinedParameters[val].layer == layer) {
+				combined.push(val);
+			}
+		});
+
+		var outPutParameters = ns.handleParameters.chosenParameters.parametersByTable[layer];
+
 		if (debugc) {
 			console.log(features);
+			console.log(combined);
+			console.log(outPutParameters);
 		}
 		$.each(features, function(i, feature) {
 			$.each(feature.properties, function(j, parameter) {
+				if (outPutParameters.indexOf(j) > -1)
+					if (feature.id in data) {
+						newData[feature.id] = data[feature.id];
+						newData[feature.id].properties[layer + ":" + j] = parameter;
+					}
+			});
+			$.each(combined, function(j, comb) {
+				// if (debugc) {
+				// console.log("Checking:" + comb);
+				// }
+				var val = null;
+				for ( var k = 0; k < window.combinedParameters[comb].parameters.length; k++) {
+					if (feature.properties[window.combinedParameters[comb].parameters[k]] != null
+							&& feature.properties[window.combinedParameters[comb].parameters[k]].trim() != "") {
+						val = feature.properties[window.combinedParameters[comb].parameters[k]];
+						break;
+					}
+				}
 				if (feature.id in data) {
 					newData[feature.id] = data[feature.id];
-					newData[feature.id].properties[layer + ":" + j] = parameter;
+					newData[feature.id].properties[comb] = val;
+					// if (debugc) {
+					// console.log("Found and added:" + val);
+					// }
 				}
 			});
 		});
@@ -479,6 +500,9 @@ myNamespace.control = (function($, OL, ns) {
 		// init the parameters tree
 		$("#parametersTree").jstree({
 			"plugins" : [ "themes", "html_data", "checkbox" ],
+			"checkbox" : {
+				"two_state" : true
+			},
 			"themes" : {
 				"theme" : "default",
 				/*
