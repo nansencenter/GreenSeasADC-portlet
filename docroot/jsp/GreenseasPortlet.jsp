@@ -30,7 +30,7 @@
 		</ul>
 		<div id="queryTab">
 			<div id='search'>
-				<p>Search options.</p>
+				<p>Search options. Remember: if the search is too big, it may take some time.</p>
 				<div id='queryOptions'>
 					<h3>
 						<span id='bboxHeaderText'>Bounding box <em>(off)</em></span>
@@ -163,7 +163,7 @@
 							metadata will be selected.</em>
 						<div id="metadataTree"></div>
 					</div>
-					
+
 					<h3>
 						<span id='regionHeaderText'>Longhurst region <em>(off)</em></span>
 					</h3>
@@ -172,26 +172,32 @@
 							<input type="checkbox" id="regionEnabledCheck">
 							Enable in query
 						</div>
-						<em>Select the region you want to search by. There is currently no support for the Austral Polar Province and the Boreal Polar Province.</em>
+						<em>Select the region you want to search by. There is currently no support for the Austral Polar Province and
+							the Boreal Polar Province.</em>
 						<div id="regionList"></div>
 					</div>
 
 					<h3>
-						<span id='parametersHeaderText'>Parameters <em>(off)</em></span>
+						<span id='parametersHeaderText'>Parameters</span>
 					</h3>
 					<div id='parametersNeeded'>
 
-						<div>
-							<input type="checkbox" id="parametersEnabledCheck">
-							Enable in query
-						</div>
-
-						<em> Tip: Selecting multiple parameters within a group resolves to "one of these". Selecting variables from
+						<!-- 						<div> -->
+						<!-- 							<input type="checkbox" id="parametersEnabledCheck"> -->
+						<!-- 							Enable in query -->
+						<!-- 						</div> -->
+						<em>Tip1: Start with a main query based on the different search criteria above, and press the button for main
+							query. Now a number should be updated behind each parameter (it will take some time to compute them all), which
+							indicates how many entries of this kind there are available in the first search. Then select parameters and press
+							the filter button. </em>
+						<br>
+						<em> Tip2: Selecting multiple parameters within a group resolves to "one of these". Selecting variables from
 							different groups resolves to "all of these". <br> Example: Selecting variables Physical.x1, Phyiscal.x2,
 							Plankton.y1, Plankton.y2 and Plankton.y3 would resolve in the query: ((Physical.x1 OR Phyiscal.x2)AND(Plankton.y1
 							OR Plankton.y2 OR Plankton.y3)).
 						</em>
 						<div id="parametersTree"></div>
+						<br>
 						<br>
 						<div>
 							<input type="checkbox" id="qualityFlagsEnabledCheck">

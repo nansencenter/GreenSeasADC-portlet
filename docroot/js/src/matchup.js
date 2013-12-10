@@ -70,7 +70,7 @@ myNamespace.matchup = (function($, ns) {
 		selectElement += options + "</select>";
 
 		selectElement += "<br><input type='checkbox'id='updateComparedParameterInData'/>"
-				+ "Update the compared parameter to the dataoutput "
+				+ "Update the compared parameter to the data output "
 				+ "(this will join the new parameter from the raster to the output in the search results-tab)";
 
 		$("#compareRaster").html(selectElement);
