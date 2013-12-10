@@ -192,7 +192,9 @@ myNamespace.control = (function($, OL, ns) {
 
 	// view all parameters of a feature
 	function filterParametersButton() {
-		if (document.getElementById('parametersEnabledCheck').checked) {
+		var selected = $("#parametersTree").jstree("get_checked", null, true);
+		console.log(selected);
+		if (selected.length != 0) {
 			// removing the parameterlayers from previous searches
 			ns.mapViewer.removeAllParameterLayers();
 			$("#parametersTable").html("Loading parameters, please wait...");
@@ -205,7 +207,7 @@ myNamespace.control = (function($, OL, ns) {
 			$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
 			$("#highchartsContainer").html("");
 
-			ns.handleParameters.selectParameters($("#parametersTree").jstree("get_checked", null, true));
+			ns.handleParameters.selectParameters(selected);
 
 			// Resetting tablesToQuery between filters
 			tablesToQuery = [];
@@ -259,8 +261,7 @@ myNamespace.control = (function($, OL, ns) {
 			// jump to the parameters tab
 			$('#tabs').tabs("option", "active", 1);
 		} else {
-			ns.errorMessage
-					.showErrorMessage("You need to enable parameters in the query and select parameters before filtering");
+			ns.errorMessage.showErrorMessage("You need to select at least one parameter before filtering");
 		}
 	}
 

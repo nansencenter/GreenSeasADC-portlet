@@ -32,11 +32,11 @@ myNamespace.XMLParser = (function($) {
 		 * if (browser == "Chrome" || browser == "Firefox") { xmlDoc =
 		 * xmlSchema.responseXML; } else {
 		 */
-		//if (xmlSchema._object) {
-			xmlDoc = xmlSchema._object.responseXML;
-		/*} else {
-			xmlDoc = xmlSchema.responseXML;
-		}*/
+		// if (xmlSchema._object) {
+		xmlDoc = xmlSchema._object.responseXML;
+		/*
+		 * } else { xmlDoc = xmlSchema.responseXML; }
+		 */
 		return xmlDoc;
 	}
 
@@ -97,7 +97,8 @@ myNamespace.XMLParser = (function($) {
 	return {
 		extractWMSParameters : extractWMSParameters,
 		getNumberOfFeatures : getNumberOfFeatures,
-		extractParameters : extractParameters
+		extractParameters : extractParameters,
+		findBrowser : findBrowser
 	};
 
 }(jQuery));
