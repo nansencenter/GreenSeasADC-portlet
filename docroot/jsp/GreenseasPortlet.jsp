@@ -33,7 +33,7 @@
 		</ul>
 		<div id="queryTab">
 			<div id='search'>
-				<p>Search options.</p>
+				<p>Search options. Remember: if the search is too big, it may take some time.</p>
 				<div id='queryOptions'>
 					<h3>
 						<span id='bboxHeaderText'>Bounding box <em>(off)</em></span>
@@ -85,7 +85,7 @@
 						<input type="date" id="toDate" value="2007-01-01">
 						<br>
 						<input type="checkbox" id="timeEnabledCheck">
-						Include time in the date-search
+						Include time in the date-search (date search must be enabled for this)
 						<br>
 						<br>
 						Between
@@ -181,25 +181,30 @@
 					</div>
 
 					<h3>
-						<span id='parametersHeaderText'>Parameters <em>(off)</em></span>
+						<span id='parametersHeaderText'>Parameters</span>
 					</h3>
 					<div id='parametersNeeded'>
 
-						<div>
-							<input type="checkbox" id="parametersEnabledCheck">
-							Enable in query
-						</div>
-
-						<em> Tip: Selecting multiple parameters within a group resolves to "one of these". Selecting variables from
+						<!-- 						<div> -->
+						<!-- 							<input type="checkbox" id="parametersEnabledCheck"> -->
+						<!-- 							Enable in query -->
+						<!-- 						</div> -->
+						<em>Tip1: Start with a main query based on the different search criteria above, and press the button for main
+							query. Now a number should be updated behind each parameter (it will take some time to compute them all), which
+							indicates how many entries of this kind there are available in the first search. Then select parameters and press
+							the filter button. </em>
+						<br>
+						<em> Tip2: Selecting multiple parameters within a group resolves to "one of these". Selecting variables from
 							different groups resolves to "all of these". <br> Example: Selecting variables Physical.x1, Phyiscal.x2,
 							Plankton.y1, Plankton.y2 and Plankton.y3 would resolve in the query: ((Physical.x1 OR Phyiscal.x2)AND(Plankton.y1
 							OR Plankton.y2 OR Plankton.y3)).
 						</em>
 						<div id="parametersTree"></div>
 						<br>
+						<br>
 						<div>
 							<input type="checkbox" id="qualityFlagsEnabledCheck">
-							Include qualityflags
+							Include qualityflags (This will include an extra collumn for quality flags for each variable in the output).
 						</div>
 					</div>
 				</div>
@@ -242,18 +247,41 @@
 			<div id="parametersTabText">
 				<p>Run a query and filter selected parameters to view options here.</p>
 			</div>
-			<div id="statistics">
-				<input type="button" id="calculateStatisticsButton" value="Calculate statistics" />
-				<div id="statisticsContainer"></div>
-				<br>
-			</div>
-			<div id='timeSeriesDiv'>
-				<div id="timeSeriesVariableDiv"></div>
-				<br>
-				<input type='button' id='addTimeSeriesVariableButton' value="Add another variable" />
-				<br>
-				<input type='button' id='timeSeriesButton' value="Generate Timeseries" />
-				<div id="timeSeriesContainer" style="width: 100%; height: 400px;"></div>
+			<div id='statsOptions'>
+				<h3>
+					<span>Statistics</span>
+				</h3>
+				<div id="outerStatistics">
+					<div id="statistics">
+						<input type="button" id="calculateStatisticsButton" value="Calculate statistics" />
+						<div id="statisticsContainer"></div>
+						<br>
+					</div>
+				</div>
+				<h3>
+					<span>Time Series</span>
+				</h3>
+				<div id='outerTimeSeriesDiv'>
+					<div id='timeSeriesDiv'>
+						<div id="timeSeriesVariableDiv"></div>
+						<br>
+						<input type='button' id='addTimeSeriesVariableButton' value="Add another variable" />
+						<br>
+						<input type='button' id='timeSeriesButton' value="Generate Timeseries" />
+						<div id="timeSeriesContainer" style="width: 100%; height: 400px;"></div>
+					</div>
+				</div>
+				<h3>
+					<span>Properties Plot</span>
+				</h3>
+				<div id='outerPropertiesPlotDiv'>
+					<div id='propertiesPlotDiv'>
+						<div id="propertiesPlotVariableDiv"></div>
+						<br>
+						<input type='button' id='propertiesPlotButton' value="Generate Properties Plot" />
+						<div id="propertiesPlotContainer" style="width: 100%; height: 400px;"></div>
+					</div>
+				</div>
 			</div>
 		</div>
 

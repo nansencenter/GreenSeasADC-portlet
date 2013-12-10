@@ -69,6 +69,8 @@ myNamespace.query = (function(OL, $) {
 			console.log("createRegionFilter");
 		// var format = new OpenLayers.Format.WKT();
 		var geometry = OL.Geometry.fromWKT(region);
+		if (debugq)
+			console.log(geometry);
 		var regionFilter = new OL.Filter.Spatial({
 			type : OL.Filter.Spatial.WITHIN,
 			value : geometry,
