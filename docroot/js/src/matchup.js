@@ -54,7 +54,7 @@ myNamespace.matchup = (function($, ns) {
 	}
 
 	function setUpCompareRasterDiv(parameters) {
-		var selectElement = "<select id=\"matchVariable\">";
+		var selectElement = "Raster variable:<select id=\"matchVariable\">";
 		var options = "<option value='NONE'>Select variable</option>";
 		$.each(parameters, function(key, val) {
 			var variable = key.substring(0, key.indexOf("("));
@@ -64,7 +64,7 @@ myNamespace.matchup = (function($, ns) {
 			options += "<option value=\"" + variable + "\">" + variableName + "</option>";
 		});
 		selectElement += options + "</select>";
-		selectElement += "<br><select id=\"matchVariable2\">";
+		selectElement += "<br>Parameter from the search:<select id=\"matchVariable2\">";
 		var selectedParameters = ns.handleParameters.chosenParameters.allSelected;
 		options = generateOptionsFromAllSelectedParameters();
 		selectElement += options + "</select>";
