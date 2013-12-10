@@ -82,7 +82,7 @@
 						<input type="date" id="toDate" value="2007-01-01">
 						<br>
 						<input type="checkbox" id="timeEnabledCheck">
-						Include time in the date-search
+						Include time in the date-search (date search must be enabled for this)
 						<br>
 						<br>
 						Between
@@ -201,7 +201,7 @@
 						<br>
 						<div>
 							<input type="checkbox" id="qualityFlagsEnabledCheck">
-							Include qualityflags
+							Include qualityflags (This will include an extra collumn for quality flags for each variable in the output).
 						</div>
 					</div>
 				</div>
