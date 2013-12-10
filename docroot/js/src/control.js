@@ -607,6 +607,9 @@ myNamespace.control = (function($, OL, ns) {
 		}
 		//$(function() {
 			$('#highchartsContainer').highcharts({
+				chart: {
+	                zoomType: 'xy'
+	            },
 				title : {
 					text : 'Scatter plot'
 				},
