@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugMl = true;// debug flag
+var debugMl = false;// debug flag
 
 myNamespace.mapLayers = (function(jQ, bH) {
 	"use strict";
@@ -268,7 +268,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		if (debugMl)
 			console.log("logscale:" + logscale);
 		// Adding the colorscaleLegend
-		if (!(typeof $('#colorScaleLegend' + activeLayer) === 'undefined')) {
+		if ($('#colorScaleLegend' + activeLayer).length == 0) {
 			$("#legend").append("<div id='colorScaleLegend" + activeLayer + "' class='colorScaleLegend'></div>");
 		}
 
