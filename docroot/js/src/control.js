@@ -26,6 +26,7 @@ myNamespace.control = (function($, OL, ns) {
 		$("#filterParameters").hide();
 		$("#statistics").hide();
 		$("#timeSeriesDiv").hide();
+		$("#propertiesPlotDiv").hide();
 		$("#compareRasterButton").hide();
 
 		// initialize map viewer
@@ -44,6 +45,11 @@ myNamespace.control = (function($, OL, ns) {
 		setBboxInputToCurrentMapExtent();
 
 		$("#queryOptions").accordion({
+			collapsible : true,
+			active : false,
+			heightStyle : "content"
+		});
+		$("#statsOptions").accordion({
 			collapsible : true,
 			active : false,
 			heightStyle : "content"
@@ -99,8 +105,10 @@ myNamespace.control = (function($, OL, ns) {
 		$("#parametersTable").html("");
 		$("#statistics").hide();
 		$("#timeSeriesDiv").hide();
+		$("#propertiesPlotDiv").hide();
 		$("#statisticsContainer").html("");
 		$("#timeSeriesContainer").html("");
+		$("#propertiesPlotContainer").html("");
 		$("#matchVariable2").html("");
 		$("#compareRasterButton").hide();
 		$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
@@ -192,20 +200,24 @@ myNamespace.control = (function($, OL, ns) {
 
 	// view all parameters of a feature
 	function filterParametersButton() {
-		if (document.getElementById('parametersEnabledCheck').checked) {
+		var selected = $("#parametersTree").jstree("get_checked", null, true);
+		console.log(selected);
+		if (selected.length != 0) {
 			// removing the parameterlayers from previous searches
 			ns.mapViewer.removeAllParameterLayers();
 			$("#parametersTable").html("Loading parameters, please wait...");
 			$("#statistics").hide();
 			$("#timeSeriesDiv").hide();
+			$("#propertiesPlotDiv").hide();
 			$("#statisticsContainer").html("");
 			$("#timeSeriesContainer").html("");
+			$("#propertiesPlotContainer").html("");
 			$("#matchVariable2").html("");
 			$("#compareRasterButton").hide();
 			$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
 			$("#highchartsContainer").html("");
 
-			ns.handleParameters.selectParameters($("#parametersTree").jstree("get_checked", null, true));
+			ns.handleParameters.selectParameters(selected);
 
 			// Resetting tablesToQuery between filters
 			tablesToQuery = [];
@@ -237,8 +249,7 @@ myNamespace.control = (function($, OL, ns) {
 			// jump to the parameters tab
 			$('#tabs').tabs("option", "active", 1);
 		} else {
-			ns.errorMessage
-					.showErrorMessage("You need to enable parameters in the query and select parameters before filtering");
+			ns.errorMessage.showErrorMessage("You need to select at least one parameter before filtering");
 		}
 	}
 
@@ -314,6 +325,8 @@ myNamespace.control = (function($, OL, ns) {
 			$("#statistics").show();
 			setUpTimeSeriesVariables();
 			$("#timeSeriesDiv").show();
+			setUpPropertiesPlotVariables();
+			$("#propertiesPlotDiv").show();
 
 			$("#parametersResultTable").dataTable();
 			linkParametersExportButton();
@@ -616,8 +629,11 @@ myNamespace.control = (function($, OL, ns) {
 			});
 			console.log(sd + "]");
 		}
-		$(function() {
+		//$(function() {
 			$('#highchartsContainer').highcharts({
+				chart: {
+	                zoomType: 'xy'
+	            },
 				title : {
 					text : 'Scatter plot'
 				},
@@ -664,7 +680,7 @@ myNamespace.control = (function($, OL, ns) {
 					enableMouseTracking : false
 				} ]
 			});
-		});
+		//});
 	}
 
 	function initiateRasterDataButton() {
@@ -795,6 +811,66 @@ myNamespace.control = (function($, OL, ns) {
 		return tsData;
 	}
 
+	function propertiesPlotButton() {
+		var horizontalPar = $("#propertiesPlotVariable1").find(":selected").val();
+		var verticalPar = $("#propertiesPlotVariable2").find(":selected").val();
+		var ppData = generatePropertiesPlotData(horizontalPar, verticalPar);
+		//$(function() {
+			$('#propertiesPlotContainer').highcharts({
+				chart: {
+	                type: 'scatter',
+	                zoomType: 'xy'
+	            },
+				title : {
+					text : 'Properties Plot'
+				},
+				xAxis : [ {
+					title : {
+						enabled : true,
+						text : ns.handleParameters.getHeaderFromRawData(horizontalPar)
+					}
+				} ],
+				yAxis : [ {
+					title : {
+						enabled : true,
+						text : ns.handleParameters.getHeaderFromRawData(verticalPar)
+					}
+				} ],
+				series : [ {
+					yAxis : 0,
+					xAxis : 0,
+					showInLegend : false,
+					data : ppData,
+					// cropThreshold : 20000,
+					animation : false
+				} ]
+			});
+		//});
+	}
+
+	function generatePropertiesPlotData(horizontalPar, verticalPar) {
+		var ppData = [];
+		$.each(data, function(i, val) {
+			if (val.properties[horizontalPar]) {
+				var x = parseFloat(val.properties[horizontalPar]);
+				// if (debugc)
+				// console.log(value);
+				if (x != -999 && val.properties[verticalPar]) {
+					if (val.properties[verticalPar]) {
+						var y = parseFloat(val.properties[verticalPar]);
+						if (y != -999) {
+							ppData.push(/*
+										 * { x : x, y : y }
+										 */[ x, y ]);
+							//console.log("Added data:" + x + "," + y);
+						}
+					}
+				}
+			}
+		});
+		return ppData;
+	}
+
 	function timeSeriesButton() {
 		var tsData = generateTimeSeriesData();
 		$('#timeSeriesContainer').highcharts(
@@ -830,6 +906,23 @@ myNamespace.control = (function($, OL, ns) {
 
 					series : tsData.series
 				});
+	}
+
+	function setUpPropertiesPlotVariables() {
+		var selectElement1 = "Horizontal Axis: <select id='propertiesPlotVariable1'>";
+		var selectedParameters = ns.handleParameters.chosenParameters.allSelected;
+		var options = "";
+		$.each(selectedParameters, function(i, val) {
+			options += "<option value=\"" + val + "\">" + ns.handleParameters.getHeaderFromRawData(val) + "</option>";
+		});
+		selectElement1 += options + "</select>";
+		var selectElement2 = " Vertical Axis: <select id='propertiesPlotVariable2'>";
+		options = "";
+		$.each(selectedParameters, function(i, val) {
+			options += "<option value=\"" + val + "\">" + ns.handleParameters.getHeaderFromRawData(val) + "</option>";
+		});
+		selectElement2 += options + "</select>";
+		$("#propertiesPlotVariableDiv").html(selectElement1 + selectElement2);
 	}
 
 	function setUpTimeSeriesVariables() {
@@ -881,6 +974,7 @@ myNamespace.control = (function($, OL, ns) {
 		setBboxInputToCurrentMapExtent : setBboxInputToCurrentMapExtent,
 		lonLatAnywhere : lonLatAnywhere,
 		linkParametersExportButton : linkParametersExportButton,
+		propertiesPlotButton : propertiesPlotButton,
 	};
 
 }(jQuery, OpenLayers, myNamespace));

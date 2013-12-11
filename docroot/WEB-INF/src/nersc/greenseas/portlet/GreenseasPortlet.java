@@ -137,6 +137,9 @@ public class GreenseasPortlet extends MVCPortlet {
 
 			System.out.println("Returning with polygon!=null:" + (polygon != null));
 
+//			System.out.println("Returning with jsonObject:");
+//			System.out.println(jsonObject.toJSONString());
+			
 			PrintWriter writer = resourceResponse.getWriter();
 			writer.write(jsonObject.toString());
 			return;

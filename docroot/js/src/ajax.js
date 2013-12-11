@@ -135,7 +135,9 @@ myNamespace.ajax = (function($) {
 
 						// JSON Data coming back from Server
 						//var responseData = instance.get('responseData');
-						window.polygon[region] = result[region].slice(1,result[region].length-1);
+//						console.log("result:");
+//						console.log(result[region]);
+						window.polygon[region] = result[region];//.slice(1,result[region].length-1);
 					}
 
 				//}
