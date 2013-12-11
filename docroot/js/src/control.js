@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugc = true;// debug flag
+var debugc = false;// debug flag
 
 myNamespace.control = (function($, OL, ns) {
 	"use strict";
@@ -448,11 +448,25 @@ myNamespace.control = (function($, OL, ns) {
 		$("#right").val(right);
 	}
 
-	function updateTreeWithInventoryNumbers(response, par, layer) {
+	function updateTreeWithInventoryNumbers(response, layer, par) {
+		var id, header;
+		if (par == null) {
+			id = layer;
+			header = ns.handleParameters.getTableHeader(layer);
+		} else {
+			id = layer + ":" + par;
+			header = ns.handleParameters.getHeader(par, layer);
+		}
+		var element = $(document.getElementById(id));
 		var numberOfFeatures = ns.XMLParser.getNumberOfFeatures(response);
-		var newText = ns.handleParameters.getHeader(par, layer) + " [" + numberOfFeatures + "]";
-		$("#parametersTree").jstree("set_text", $(document.getElementById(layer + ":" + par)), newText);
+		var newText = header + " [" + numberOfFeatures + "]";
+		$("#parametersTree").jstree("set_text", element, newText);
 	}
+
+	/*
+	 * Array.prototype.diff = function(a) { return this.filter(function(i)
+	 * {return !(a.indexOf(i) > -1);}); };
+	 */
 
 	function updateTreeInventoryNumbers() {
 		var filterBbox = ns.query.createfilterBoxHashMap();
@@ -464,18 +478,37 @@ myNamespace.control = (function($, OL, ns) {
 		var allChildren = myTreeContainer.find("li");
 		$.each(allChildren, function(i, val) {
 			var splitString = val.id.split(":");
+			var layer, propertyNames, par;
 			if (splitString.length == 2) {
-				var layer = splitString[0];
-				ns.WebFeatureService.getFeature({
-					TYPENAME : layer,
-					PROPERTYNAME : splitString[1],
-					FILTER : ns.query.constructParameterFilterString([ splitString[1] ], depth, filterBbox, date,
-							months, region),
-					RESULTTYPE : "hits"
-				}, function(response) {
-					updateTreeWithInventoryNumbers(response, splitString[1], splitString[0]);
+				par = splitString[1];
+				if (splitString[0] == "combined") {
+					layer = window.combinedParameters[val.id].layer;
+					propertyNames = window.combinedParameters[val.id].parameters;
+				} else {
+					layer = splitString[0];
+					propertyNames = [ splitString[1] ];
+				}
+			} else {
+				par = null;
+				layer = splitString[0];
+				propertyNames = [];
+				var mySubChildren = $(val).children().find("li");
+				$.each(mySubChildren, function(j, val2) {
+					var splitString2 = val2.id.split(":");
+					if (splitString2.length == 2) {
+						if (splitString2[0] != "combined")
+							propertyNames.push(splitString2[1]);
+					}
 				});
 			}
+			ns.WebFeatureService.getFeature({
+				TYPENAME : layer,
+				FILTER : ns.query
+						.constructParameterFilterString(propertyNames, depth, filterBbox, date, months, region),
+				RESULTTYPE : "hits"
+			}, function(response) {
+				updateTreeWithInventoryNumbers(response, splitString[0], par);
+			});
 		});
 	}
 
@@ -499,7 +532,16 @@ myNamespace.control = (function($, OL, ns) {
 				 * liferay-portlet.xml to change the theme
 				 */
 				"icons" : false
-			}
+			},
+		/*
+		 * "types" : { "types" : { "layer" : { // Defining new type 'disabled'
+		 * "check_node" : false, "uncheck_node" : false }, "default" : { //
+		 * Override default functionality "check_node" : function(node) {
+		 * $(node).children('ul').children('li').children('a').children('.jstree-checkbox').click();
+		 * return true; }, "uncheck_node" : function(node) {
+		 * $(node).children('ul').children('li').children('a').children('.jstree-checkbox').click();
+		 * return true; } } } }
+		 */
 		});
 	}
 
@@ -525,6 +567,9 @@ myNamespace.control = (function($, OL, ns) {
 				 */
 				"icons" : false
 			}
+		});
+		$("#parametersTree").bind("loaded.jstree", function(event, data) {
+			$(this).find('li[rel=layer]').find('.jstree-checkbox:first').hide();
 		});
 	}
 
@@ -629,58 +674,58 @@ myNamespace.control = (function($, OL, ns) {
 			});
 			console.log(sd + "]");
 		}
-		//$(function() {
-			$('#highchartsContainer').highcharts({
-				chart: {
-	                zoomType: 'xy'
-	            },
+		// $(function() {
+		$('#highchartsContainer').highcharts({
+			chart : {
+				zoomType : 'xy'
+			},
+			title : {
+				text : 'Scatter plot'
+			},
+			xAxis : [ {
+				min : min,
+				max : max,
 				title : {
-					text : 'Scatter plot'
+					enabled : true,
+					text : 'Model value'
+				}
+			}, ],
+			yAxis : [ {
+				min : min,
+				max : max,
+				title : {
+					enabled : true,
+					text : 'Database value'
+				}
+			}, ],
+			series : [ {
+				yAxis : 0,
+				xAxis : 0,
+				type : 'scatter',
+				name : ns.handleParameters.getHeaderFromRawData(databaseVariable),
+				data : scatterData,
+				// cropThreshold : 20000,
+				animation : false
+			}, {
+				showInLegend : false,
+				yAxis : 0,
+				xAxis : 0,
+				type : 'line',
+				name : 'X=Y',
+				data : [ [ min, min ], [ max, max ] ],
+				animation : false,
+				marker : {
+					enabled : false
 				},
-				xAxis : [ {
-					min : min,
-					max : max,
-					title : {
-						enabled : true,
-						text : 'Model value'
+				states : {
+					hover : {
+						lineWidth : 0
 					}
-				}, ],
-				yAxis : [ {
-					min : min,
-					max : max,
-					title : {
-						enabled : true,
-						text : 'Database value'
-					}
-				}, ],
-				series : [ {
-					yAxis : 0,
-					xAxis : 0,
-					type : 'scatter',
-					name : ns.handleParameters.getHeaderFromRawData(databaseVariable),
-					data : scatterData,
-					// cropThreshold : 20000,
-					animation : false
-				}, {
-					showInLegend : false,
-					yAxis : 0,
-					xAxis : 0,
-					type : 'line',
-					name : 'X=Y',
-					data : [ [ min, min ], [ max, max ] ],
-					animation : false,
-					marker : {
-						enabled : false
-					},
-					states : {
-						hover : {
-							lineWidth : 0
-						}
-					},
-					enableMouseTracking : false
-				} ]
-			});
-		//});
+				},
+				enableMouseTracking : false
+			} ]
+		});
+		// });
 	}
 
 	function initiateRasterDataButton() {
@@ -815,37 +860,37 @@ myNamespace.control = (function($, OL, ns) {
 		var horizontalPar = $("#propertiesPlotVariable1").find(":selected").val();
 		var verticalPar = $("#propertiesPlotVariable2").find(":selected").val();
 		var ppData = generatePropertiesPlotData(horizontalPar, verticalPar);
-		//$(function() {
-			$('#propertiesPlotContainer').highcharts({
-				chart: {
-	                type: 'scatter',
-	                zoomType: 'xy'
-	            },
+		// $(function() {
+		$('#propertiesPlotContainer').highcharts({
+			chart : {
+				type : 'scatter',
+				zoomType : 'xy'
+			},
+			title : {
+				text : 'Properties Plot'
+			},
+			xAxis : [ {
 				title : {
-					text : 'Properties Plot'
-				},
-				xAxis : [ {
-					title : {
-						enabled : true,
-						text : ns.handleParameters.getHeaderFromRawData(horizontalPar)
-					}
-				} ],
-				yAxis : [ {
-					title : {
-						enabled : true,
-						text : ns.handleParameters.getHeaderFromRawData(verticalPar)
-					}
-				} ],
-				series : [ {
-					yAxis : 0,
-					xAxis : 0,
-					showInLegend : false,
-					data : ppData,
-					// cropThreshold : 20000,
-					animation : false
-				} ]
-			});
-		//});
+					enabled : true,
+					text : ns.handleParameters.getHeaderFromRawData(horizontalPar)
+				}
+			} ],
+			yAxis : [ {
+				title : {
+					enabled : true,
+					text : ns.handleParameters.getHeaderFromRawData(verticalPar)
+				}
+			} ],
+			series : [ {
+				yAxis : 0,
+				xAxis : 0,
+				showInLegend : false,
+				data : ppData,
+				// cropThreshold : 20000,
+				animation : false
+			} ]
+		});
+		// });
 	}
 
 	function generatePropertiesPlotData(horizontalPar, verticalPar) {
@@ -862,7 +907,7 @@ myNamespace.control = (function($, OL, ns) {
 							ppData.push(/*
 										 * { x : x, y : y }
 										 */[ x, y ]);
-							//console.log("Added data:" + x + "," + y);
+							// console.log("Added data:" + x + "," + y);
 						}
 					}
 				}

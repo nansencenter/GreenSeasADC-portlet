@@ -211,7 +211,7 @@ myNamespace.tableConstructor = (function($, hP) {
 						combinations.push(i);
 					}
 				});
-				str += "<li id=\"" + table + "\"><a>" + hP.getTableHeader(table) + "</a>";
+				str += "<li id=\"" + table + "\" rel='layer'><a>" + hP.getTableHeader(table) + "</a>";
 				str += "<ul>";
 				// Add combined parameters to the top:
 				$.each(combinations, function(j, comb) {
