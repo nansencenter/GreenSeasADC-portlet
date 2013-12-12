@@ -366,7 +366,7 @@ myNamespace.control = (function($, OL, ns) {
 		return output;
 	}
 
-	// non-public TODO: combine
+	// non-public
 	function addData(response) {
 		if (debugc) {
 			console.log("Started adding Data:");
@@ -408,20 +408,22 @@ myNamespace.control = (function($, OL, ns) {
 				// if (debugc) {
 				// console.log("Checking:" + comb);
 				// }
-				var val = null;
-				for ( var k = 0; k < window.combinedParameters[comb].parameters.length; k++) {
-					if (feature.properties[window.combinedParameters[comb].parameters[k]] != null
-							&& feature.properties[window.combinedParameters[comb].parameters[k]].trim() != "") {
-						val = feature.properties[window.combinedParameters[comb].parameters[k]];
-						break;
+				if (window.combinedParameters[comb].method == "prioritized") {
+					var val = null;
+					for ( var k = 0; k < window.combinedParameters[comb].parameters.length; k++) {
+						if (feature.properties[window.combinedParameters[comb].parameters[k]] != null
+								&& feature.properties[window.combinedParameters[comb].parameters[k]].trim() != "") {
+							val = feature.properties[window.combinedParameters[comb].parameters[k]];
+							break;
+						}
 					}
-				}
-				if (feature.id in data) {
-					newData[feature.id] = data[feature.id];
-					newData[feature.id].properties[comb] = val;
-					// if (debugc) {
-					// console.log("Found and added:" + val);
-					// }
+					if (feature.id in data) {
+						newData[feature.id] = data[feature.id];
+						newData[feature.id].properties[comb] = val;
+						// if (debugc) {
+						// console.log("Found and added:" + val);
+						// }
+					}
 				}
 			});
 		});
@@ -554,7 +556,7 @@ myNamespace.control = (function($, OL, ns) {
 		$("#parametersTree").html(ns.tableConstructor.parametersList());
 		// init the parameters tree
 		$("#parametersTree").jstree({
-			"plugins" : [ "themes", "html_data", "checkbox" ],
+			"plugins" : [ "themes", "html_data", "checkbox", "ui" ],
 			"checkbox" : {
 				"two_state" : true
 			},
@@ -568,8 +570,16 @@ myNamespace.control = (function($, OL, ns) {
 				"icons" : false
 			}
 		});
+		// Toggle node when clicking the text.
+		$("#parametersTree").bind("select_node.jstree", function(event, data) {
+			// `data.rslt.obj` is the jquery extended node that was clicked
+			if ($("#parametersTree").jstree("is_checked", data.rslt.obj))
+				$("#parametersTree").jstree("uncheck_node", data.rslt.obj);
+			else
+				$("#parametersTree").jstree("check_node", data.rslt.obj);
+		});
 		$("#parametersTree").bind("loaded.jstree", function(event, data) {
-			$(this).find('li[rel=layer]').find('.jstree-checkbox:first').hide();
+			$(this).find('li[rel=noBox]').find('.jstree-checkbox:first').hide();
 		});
 	}
 

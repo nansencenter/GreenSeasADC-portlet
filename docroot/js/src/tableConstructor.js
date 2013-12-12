@@ -178,8 +178,10 @@ myNamespace.tableConstructor = (function($, hP) {
 		return headerString + "</thead>";
 	}
 
-	function listItem(value, table) {
-		return "<li id=\"" + table + ":" + value + "\"><a>" + hP.getHeader(value, table) + "</a></li>";
+	function listItem(value, table, header) {
+		if (typeof header == "undefined")
+			header = hP.getHeader(value, table);
+		return "<li id=\"" + table + ":" + value + "\"><a>" + header + "</a></li>";
 	}
 
 	function metadataList() {
@@ -211,14 +213,25 @@ myNamespace.tableConstructor = (function($, hP) {
 						combinations.push(i);
 					}
 				});
-				str += "<li id=\"" + table + "\" rel='layer'><a>" + hP.getTableHeader(table) + "</a>";
+				str += "<li id=\"" + table + "\" rel='noBox'><a>" + hP.getTableHeader(table) + "</a>";
 				str += "<ul>";
 				// Add combined parameters to the top:
 				$.each(combinations, function(j, comb) {
-					str += "<li id=\"" + comb + "\"><a>" + hP.getTableHeader(comb) + "</a>";
+					var rel = "";
+					var group = false;
+					if (window.combinedParameters[comb].method == "group") {
+						rel = " rel='noBox'";
+						group = true;
+					}
+					var combHeader = hP.getTableHeader(comb);
+					str += "<li id='" + comb + "'" + rel + "><a>" + combHeader + "</a>";
 					str += "<ul>";
 					$.each(window.combinedParameters[comb].parameters, function(i, val) {
-						str += listItem(val, table);
+						if (group) {
+							var header = hP.getHeader(val, table).replace(combHeader, "");
+							str += listItem(val, table, header);
+						} else
+							str += listItem(val, table);
 					});
 					str += "</ul></li>";
 				});
