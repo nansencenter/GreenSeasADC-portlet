@@ -136,11 +136,12 @@ public class DatabaseProperties {
 		for (String propName : propNameSet) {
 			String[] splitP = prop.getProperty(propName).split(";");
 			parameters.append("'combined:" + propName + "': { header:'" + splitP[0] + "'");
-			parameters.append(",method:'" + splitP[2] + "'");
 			parameters.append(",layer:'" + splitP[1] + "'");
+			parameters.append(",method:'" + splitP[2] + "'");
+			parameters.append(",index:'" + splitP[3] + "'");
 			parameters.append(",parameters:[");
 			String separator = "";
-			for (int i = 3; i < splitP.length; i++) {
+			for (int i = 4; i < splitP.length; i++) {
 				parameters.append(separator + "'" + splitP[i] + "'");
 				separator = ",";
 			}

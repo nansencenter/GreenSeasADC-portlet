@@ -142,7 +142,7 @@
 									Minimum depth
 								</div>
 								<div class='left'>
-									<input type='text' id='depthMax' size="3" value="10" />
+									<input type='text' id='depthMax' size="3" value="0" />
 									Maximum depth
 								</div>
 
@@ -196,6 +196,14 @@
 							Plankton.y1, Plankton.y2 and Plankton.y3 would resolve in the query: ((Physical.x1 OR Phyiscal.x2)AND(Plankton.y1
 							OR Plankton.y2 OR Plankton.y3)).
 						</em>
+						<br>
+						Search the parameterslist:
+						<input type='text' id='treeSearchParameter' size="10" />
+						<input type='button' id=filterParametersTreeButton value="Search" />
+						<input type="button" id="clearSelectionButton" value="Clear selection">
+						<input type="button" id="collapseAllButton" value="Collapse All">
+						<input type="button" id="expandAllButton" value="Expand All">
+						<input type="button" id="toggleOrderPlanktonButton" value="Sort plankton by type">
 						<div id="parametersTree"></div>
 						<br>
 						<br>
