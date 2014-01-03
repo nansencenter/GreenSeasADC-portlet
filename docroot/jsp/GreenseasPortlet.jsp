@@ -16,9 +16,11 @@
 
 <div id="portlet">
 
-	<div id="mapContainer" >
+	<div id="mapContainer">
 		<div id="simple_map"></div>
-		<div id="rightOfMap" ><div id="legend"></div></div>
+		<div id="rightOfMap">
+			<div id="legend" ></div>
+		</div>
 	</div>
 
 	<div id="tabs">

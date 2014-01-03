@@ -63,6 +63,9 @@ myNamespace.control = (function($, OL, ns) {
 		// Make the tabs jquery-tabs
 		$("#tabs").tabs();
 
+		// Set up legend inline (special display case for ie and firefox)
+		ns.mapLayers.setUpStyleForLegend();
+
 		setUpRegions();
 		ns.matchup.setUpUploadRaster();
 		ns.matchup.setUpOPeNDAPSelector();
@@ -172,17 +175,16 @@ myNamespace.control = (function($, OL, ns) {
 
 		// **** output to table ****
 
-		
-//		$("#loadingText").html("<br>The data has been downloaded and is now being processed.<br>Please wait for the data to finish loading...");
-		
+		// $("#loadingText").html("<br>The data has been downloaded and is now
+		// being processed.<br>Please wait for the data to finish loading...");
+
 		var text = response.responseText;
 		var jsonObject = JSON.parse(text);
 		var length = jsonObject.features.length;
-			// saving the data for merging
+		// saving the data for merging
 		basicData = jsonObject.features;
 		replaceId(basicData);
 		data = convertArrayToHashMap($.extend(true, {}, basicData));
-
 
 		if (length < 1) {
 			$("#loadingText").html("");
