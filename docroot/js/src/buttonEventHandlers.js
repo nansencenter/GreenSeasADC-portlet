@@ -43,7 +43,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 	function checkParameters(checkBoxIds, divName, divId) {
 		return function() {
 			var checked = false;
-			for (var i = 0; !checked && i < checkBoxIds.length;i++)
+			for ( var i = 0; !checked && i < checkBoxIds.length; i++)
 				if (document.getElementById(checkBoxIds[i]).checked)
 					checked = true;
 			if (checked) {
@@ -62,21 +62,28 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 
 		add("#bboxEnabledCheck", checkParameter("bboxEnabledCheck", "Bounding box", "#bboxHeaderText"));
 		add("#regionEnabledCheck", checkParameter("regionEnabledCheck", "Longhurst region", "#regionHeaderText"));
-		
 
-		add("#dateEnabledCheck", checkParameters(["monthEnabledCheck","dateEnabledCheck"], "Date/Time/Month", "#dateHeaderText"));
-		add("#monthEnabledCheck", checkParameters(["monthEnabledCheck","dateEnabledCheck"], "Date/Time/Month", "#dateHeaderText"));
-		
+		add("#dateEnabledCheck", checkParameters([ "monthEnabledCheck", "dateEnabledCheck" ], "Date/Time/Month",
+				"#dateHeaderText"));
+		add("#monthEnabledCheck", checkParameters([ "monthEnabledCheck", "dateEnabledCheck" ], "Date/Time/Month",
+				"#dateHeaderText"));
+
 		add("#depthEnabledCheck", checkParameter("depthEnabledCheck", "Depth", "#depthHeaderText"));
 		add("#metadataEnabledCheck", checkParameter("metadataEnabledCheck", "Metadata", "#metadataHeaderText"));
 
-		//matchup
+		// matchup
 		add("#fileOptionCheck", checkParameter("fileOptionCheck", "Upload NetCDF File", "#modelOptionsHeaderText"));
-		add("#opendapDataURLCheck", checkParameter("opendapDataURLCheck", "Use dataset from OpenDAP", "#openDAPOptionHeaderText"));
-		
+		add("#opendapDataURLCheck", checkParameter("opendapDataURLCheck", "Use dataset from OpenDAP",
+				"#openDAPOptionHeaderText"));
+
 		// buttons that call methods
 		var c = myNamespace.control;
 		callFromControl("#filterParameters", c.filterParametersButton);
+		callFromControl("#filterParametersTreeButton", c.filterParametersTreeButton);
+		callFromControl("#toggleOrderPlanktonButton", c.toggleOrderPlanktonButton);
+		callFromControl("#clearSelectionButton", c.clearSelectionButton);
+		callFromControl("#collapseAllButton", c.collapseAllButton);
+		callFromControl("#expandAllButton", c.expandAllButton);
 		callFromControl("#addLayerButton", c.addLayerButton);
 		callFromControl("#compareRasterButton", c.compareRasterButton);
 		callFromControl("#addTimeSeriesVariableButton", c.addTimeSeriesVariableButton);
@@ -127,8 +134,8 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 
 				});
 	}
-	
-	function change(element,eventFunction){
+
+	function change(element, eventFunction) {
 		jQ(element).change(eventFunction);
 	}
 

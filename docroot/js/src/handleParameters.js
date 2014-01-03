@@ -44,22 +44,47 @@ myNamespace.handleParameters = (function($) {
 		chosenParameters.allSelected = [];
 		chosenParameters.tablesSelected = [];
 		chosenParameters.parametersByTable = {};
+		chosenParameters.combined = [];
 		$.each(par, function(i, val) {
-			var parArr = val.getAttribute("id").split(":");
-			if (debughP)
-				console.log("Checking val: " + parArr[0] + ":" + parArr[1]);
-			// if the parameter is an actual available parameter in that table
-			// (minor check for error) TODO: remove?
-			if (availableParameters[parArr[0]].indexOf(parArr[1]) != -1) {
-				chosenParameters.allSelected.push(val.getAttribute("id"));
-				// if its the first registered parameter from that table
-				if (chosenParameters.tablesSelected.indexOf(parArr[0]) == -1) {
-					chosenParameters.tablesSelected.push(parArr[0]);
-					chosenParameters.parametersByTable[parArr[0]] = [ parArr[1] ];
+			var id = val;
+			if ((typeof window.combinedParameters[id] === "undefined")
+					|| (window.combinedParameters[id].method != "groupLayers")) {
+				var parArr = id.split(":");
+				if (debughP)
+					console.log("Checking val: " + parArr[0] + ":" + parArr[1]);
+				// if the parameter is an actual available parameter in that
+				// table
+				// (minor check for error) TODO: remove?
+				chosenParameters.allSelected.push(id);
+				if (parArr[0] == "combined") {
+					chosenParameters.combined.push(id);
 				} else {
-					chosenParameters.parametersByTable[parArr[0]].push(parArr[1]);
+					// if its the first registered parameter from that table
+					if (chosenParameters.tablesSelected.indexOf(parArr[0]) == -1) {
+						chosenParameters.tablesSelected.push(parArr[0]);
+						chosenParameters.parametersByTable[parArr[0]] = [ parArr[1] ];
+					} else {
+						chosenParameters.parametersByTable[parArr[0]].push(parArr[1]);
+					}
 				}
 			}
+		});
+		if (debughP)
+			console.log("Adding extra parameters: ");
+		if (debughP)
+			console.log(chosenParameters.combined);
+		// Adding the extra parameters from combine.
+		$.each(chosenParameters.combined, function(i, val) {
+			var combine = window.combinedParameters[val];
+			if (chosenParameters.tablesSelected.indexOf(combine.layer) == -1) {
+				chosenParameters.tablesSelected[combine.layer] = [];
+				chosenParameters.tablesSelected.push(combine.layer);
+				chosenParameters.parametersByTable[combine.layer] = [];
+			}
+			$.each(combine.parameters, function(j, par) {
+				if (chosenParameters.parametersByTable[combine.layer].indexOf(par) == -1)
+					chosenParameters.parametersByTable[combine.layer].push(par);
+			});
 		});
 		if (debughP) {
 			console.log("Setting allSelected to: " + chosenParameters.allSelected.toString());
@@ -88,7 +113,10 @@ myNamespace.handleParameters = (function($) {
 	function getHeader(parameter, table) {
 		var header;
 		try {
-			header = allParametersHeader[table][parameter];
+			if (table == "combined")
+				header = window.combinedParameters["combined:" + parameter].header;
+			else
+				header = allParametersHeader[table][parameter];
 		} catch (e) {
 			return parameter;
 		}
@@ -96,6 +124,9 @@ myNamespace.handleParameters = (function($) {
 	}
 
 	function getTableHeader(table) {
+		if (table.indexOf("combined") == 0) {
+			return window.combinedParameters[table].header;
+		}
 		return allLayersHeader[table] ? allLayersHeader[table] : table;
 	}
 
@@ -122,6 +153,8 @@ myNamespace.handleParameters = (function($) {
 			console.log("getHeadersFromFeatures");
 		var parameterHeaders = [];
 		var feature = features[Object.keys(features)[0]];
+		if (debughP)
+			console.log(feature);
 		if (!(typeof feature === 'undefined'))
 			$.each(feature.properties, function(key) {
 				var split = key.split(":");
@@ -134,11 +167,18 @@ myNamespace.handleParameters = (function($) {
 					table = window.metaDataTable;
 					parameter = split[0];
 				}
+				if (debughP)
+					console.log("Parameter:" + parameter);
 				// test if it is a qf
-				if (parameter.substring(parameter.length - window.qfPostFix.length) == window.qfPostFix)
+				if (parameter.substring(parameter.length - window.qfPostFix.length) == window.qfPostFix) {
 					parameterHeaders.push(window.qfHeader);
-				else
+					if (debughP)
+						console.log("Found QF");
+				} else {
+					if (debughP)
+						console.log("NO QF");
 					parameterHeaders.push(getHeader(parameter, table));
+				}
 			});
 		return mainParameters.basicHeader.concat(parameterHeaders);
 	}
