@@ -1,13 +1,19 @@
 package nersc.greenseas.rasterData;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.geotoolkit.referencing.CRS;
+import org.geotoolkit.referencing.crs.DefaultGeographicCRS;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.opengis.referencing.NoSuchAuthorityCodeException;
+import org.opengis.util.FactoryException;
 
 import ucar.ma2.Array;
 import ucar.ma2.IndexIterator;
@@ -21,6 +27,13 @@ import ucar.nc2.dt.GridDatatype;
 import ucar.nc2.dt.grid.GridDataset;
 import ucar.nc2.units.DateUnit;
 import ucar.unidata.geoloc.LatLonPoint;
+import uk.ac.rdg.resc.edal.cdm.LookUpTableGrid;
+import uk.ac.rdg.resc.edal.coverage.grid.GridCoordinates;
+import uk.ac.rdg.resc.edal.coverage.grid.HorizontalGrid;
+import uk.ac.rdg.resc.edal.geometry.HorizontalPosition;
+import uk.ac.rdg.resc.edal.geometry.LonLatPosition;
+import uk.ac.rdg.resc.edal.geometry.impl.HorizontalPositionImpl;
+import uk.ac.rdg.resc.edal.util.Utils;
 
 public class NetCDFReader {
 
@@ -102,10 +115,15 @@ public class NetCDFReader {
 	}
 
 	private static Map<Integer, Map<String, Double>> getDatavaluesFromGridDataset(GridDataset gds, Point[] points,
-			String parameter, Integer time, Integer elevation) throws IOException {
+			String parameter, Integer time, Integer elevation) throws IOException, NoSuchAuthorityCodeException,
+			FactoryException {
 		System.out.println("process file for parameter:" + parameter);
 		GridDatatype grid = gds.findGridDatatype(parameter);
 		GridCoordSystem gcs = grid.getCoordinateSystem();
+		HorizontalGrid horizontalGrid = null;
+		if (gcs.getXHorizAxis().getRank() > 1) {
+			horizontalGrid = LookUpTableGrid.generate(gcs);
+		}
 		Map<Integer, Map<String, Double>> val = new HashMap<Integer, Map<String, Double>>();
 		if (time == null)
 			time = 0;
@@ -116,29 +134,58 @@ public class NetCDFReader {
 			// find the x,y index for a specific lat/lon position
 			// xy[0] = x, xy[1] = y
 			if (p != null) {
-				int[] xy = gcs.findXYindexFromLatLon(p.lat, p.lon, null);
-
-				// read the data at that lat, lon and the first time and z level
-				// (if
-				// any)
-				// note order is t, z, y, x
-				// TODO: TIME/DEPTH
-				Array data = grid.readDataSlice(time, elevation, xy[1], xy[0]);
-				// we know its a scalar //TODO?
-				if (xy[0] == -1 || xy[1] == -1) {
-					// System.out.println("Lat/Long x/y NOT FOUND for " + p +
-					// ": " + xy[0] + "," + xy[1] + " VALUE:"
-					// + data.getDouble(0));
+				if (horizontalGrid != null) {
+					HorizontalPosition pos = new HorizontalPositionImpl(p.lon, p.lat, CRS.decode("EPSG:4326"));
+					GridCoordinates gridCoords = horizontalGrid.findNearestGridPoint(pos);
+					Array data = grid.readDataSlice(time, elevation, gridCoords.getCoordinateValue(1),
+							gridCoords.getCoordinateValue(0));
+					// we know its a scalar //TODO?
+					if (data.getDouble(0) == Double.NaN) {
+						// System.out.println("Lat/Long x/y NOT FOUND for " + p
+						// +
+						// ": " + xy[0] + "," + xy[1] + " VALUE:"
+						// + data.getDouble(0));
+					} else {
+						Map<String, Double> values = new HashMap<String, Double>();
+						values.put("value", data.getDouble(0));
+						LatLonPoint latlonP = gcs.getLatLon(gridCoords.getCoordinateValue(0),
+								gridCoords.getCoordinateValue(1));
+						values.put("lat", latlonP.getLatitude());
+						values.put("lon", latlonP.getLongitude());
+						// System.out.println("Lat/Long x/y FOUND for " + p +
+						// ": " +
+						// xy[0] + "," + xy[1] + " VALUE:"
+						// + data.getDouble(0));
+						val.put(p.id, values);
+					}
 				} else {
-					Map<String, Double> values = new HashMap<String, Double>();
-					values.put("value", data.getDouble(0));
-					LatLonPoint latlonP = gcs.getLatLon(xy[0], xy[1]);
-					values.put("lat", latlonP.getLatitude());
-					values.put("lon", latlonP.getLongitude());
-					// System.out.println("Lat/Long x/y FOUND for " + p + ": " +
-					// xy[0] + "," + xy[1] + " VALUE:"
-					// + data.getDouble(0));
-					val.put(p.id, values);
+					int[] xy = gcs.findXYindexFromLatLon(p.lat, p.lon, null);
+
+					// read the data at that lat, lon and the first time and z
+					// level
+					// (if
+					// any)
+					// note order is t, z, y, x
+					// TODO: TIME/DEPTH
+					Array data = grid.readDataSlice(time, elevation, xy[1], xy[0]);
+					// we know its a scalar //TODO?
+					if (data.getDouble(0) == Double.NaN) {
+						// System.out.println("Lat/Long x/y NOT FOUND for " + p
+						// +
+						// ": " + xy[0] + "," + xy[1] + " VALUE:"
+						// + data.getDouble(0));
+					} else {
+						Map<String, Double> values = new HashMap<String, Double>();
+						values.put("value", data.getDouble(0));
+						LatLonPoint latlonP = gcs.getLatLon(xy[0], xy[1]);
+						values.put("lat", latlonP.getLatitude());
+						values.put("lon", latlonP.getLongitude());
+						// System.out.println("Lat/Long x/y FOUND for " + p +
+						// ": " +
+						// xy[0] + "," + xy[1] + " VALUE:"
+						// + data.getDouble(0));
+						val.put(p.id, values);
+					}
 				}
 			}
 		}
@@ -146,7 +193,7 @@ public class NetCDFReader {
 	}
 
 	public static Map<String, String> getLayersFromRaster(String uri) {
-		// System.out.println("Getting layers from raster:"+uri);
+		System.out.println("Getting layers from raster:" + uri);
 		NetcdfDataset ncfile = null;
 		Map<String, String> values = null;
 		try {
@@ -169,10 +216,15 @@ public class NetCDFReader {
 	}
 
 	private static Map<String, String> getLayersFromNetCDFFile(NetcdfDataset ncfile) {
+		System.out.println("getLayersFromNetCDFFile");
 		HashMap<String, String> layers = new HashMap<String, String>();
+		List<String> axisName = new ArrayList<String>();
+		for (CoordinateAxis axis : ncfile.getCoordinateAxes()) {
+			axisName.add(axis.getFullNameEscaped());
+		}
 		for (Variable v : ncfile.getVariables()) {
 			// Check that its not an dimension, like time, depth,lan,lot
-			if (v.getRank() > 1)
+			if (v.getRank() > 1 && axisName.indexOf(v.getFullNameEscaped()) == -1)
 				layers.put(v.getNameAndDimensions(), v.getDescription());
 		}
 		return layers;

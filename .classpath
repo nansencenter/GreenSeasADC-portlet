@@ -19,5 +19,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="docroot/WEB-INF/lib/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="docroot/WEB-INF/lib/geotk-bundle-referencing-3.17.jar"/>
+	<classpathentry kind="lib" path="docroot/WEB-INF/lib/prtree.jar"/>
 	<classpathentry kind="output" path="docroot/WEB-INF/classes"/>
 </classpath>
