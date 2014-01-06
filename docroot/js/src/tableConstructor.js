@@ -178,8 +178,12 @@ myNamespace.tableConstructor = (function($, hP) {
 		return headerString + "</thead>";
 	}
 
-	function listItem(value, table) {
-		return "<li id=\"" + table + ":" + value + "\"><a>" + hP.getHeader(value, table) + "</a></li>";
+	function listItem(value, table, header) {
+		displayed.push(table + ":" + value);
+		if (typeof header == "undefined")
+			header = hP.getHeader(value, table);
+		return "<li id='" + table + ":" + value + "' data-baseheader='" + header + "' data-index='0'><a>" + header
+				+ "</a></li>";
 	}
 
 	function metadataList() {
@@ -194,32 +198,167 @@ myNamespace.tableConstructor = (function($, hP) {
 		return str;
 	}
 
-	function parametersList() {
+	var displayed = [];
+
+	function parametersList(multi) {
+		if (typeof multi === 'undefined')
+			multi = [ 0 ];
 		if (debugtC)
 			console.log("Making parameters");
+		displayed = [];
 		var str = "<ul>";
+		var groupLayers = [];
+		$.each(window.combinedParameters, function(i, val) {
+			if (window.combinedParameters[i].method == "groupLayers") {
+				groupLayers.push(i);
+			}
+		});
+		// if (debugtC)
+		// console.log("groupLayers:");
+		// if (debugtC)
+		// console.log(groupLayers);
+		// if (debugtC)
+		// console.log(window.combinedParameters);
+		var tablesDoneInGroup = [];
+		$.each(groupLayers, function(i, groupLayer) {
+			// if (debugtC)
+			// console.log("groupLayer:");
+			// if (debugtC)
+			// console.log(groupLayer);
+			var group = window.combinedParameters[groupLayer];
+			// if (debugtC)
+			// console.log("group:");
+			// if (debugtC)
+			// console.log(group);
+			str += "<li id=\"" + groupLayer + "\" rel='noBox' data-baseheader='" + group.header + "' data-index='"
+					+ window.combinedParameters[groupLayer].index + "'><a>" + group.header + "</a>";
+			str += "<ul>";
+			$.each(group.parameters, function(j, table) {
+				tablesDoneInGroup.push(table);
+				str += generateListElementOfTable(table, multi);
+			});
+			str += "</ul></li>";
+		});
 		for ( var table in allLayers) {
 			if (debugtC)
 				console.log("tablesDone[table] where table= " + table);
 			// If the paramters from the table has been initiated (through
 			// ns.hP.initiateParameters())
-			if (allLayers[table]) {
-				str += "<li id=\"" + table + "\"><a>" + hP.getTableHeader(table) + "</a>";
-				str += "<ul>";
-				$.each(hP.availableParameters[table], function(i, val) {
-					// Check if the parameter is not inherited from the
-					// metadatatable
-					if (hP.mainParameters.parameters.indexOf(val) == -1) {
-						if (val.substring(val.length - qfPostFix.length) != qfPostFix)
-							str += listItem(val, table);
-					}
-				});
-				str += "</ul></li>";
-			}
+			if (tablesDoneInGroup.indexOf(table) == -1)
+				str += generateListElementOfTable(table, multi);
 		}
 		str += "</ul>";
 		if (debugtC)
 			console.log(str);
+		return str;
+	}
+
+	function generateListElementOfTable(table, multi) {
+		// if (debugtC)
+		// console.log("generateListElementOfTable for:" + table);
+		var str = "";
+		if (allLayers[table]) {
+			// Find combinations:
+			var combinations = [];
+			var multiCombinations = [];
+			$.each(window.combinedParameters, function(i, val) {
+				if (window.combinedParameters[i].layer == table) {
+					var found = false;
+					for ( var j = 0; !found && j < multi.length; j++) {
+						if (window.combinedParameters[i].method == ("multi" + multi[j])) {
+							found = true;
+						}
+					}
+					if (found)
+						multiCombinations.push(i);
+					else
+						combinations.push(i);
+				}
+			});
+			combinations = multiCombinations.concat(combinations);
+			var header = hP.getTableHeader(table);
+			str += "<li id=\"" + table + "\" rel='noBox' data-baseheader='" + header + "' data-index='-100'><a>"
+					+ header + "</a>";
+			str += "<ul>";
+			// Add combined parameters to the top:
+			$.each(combinations, function(j, comb) {
+				str += setupCombination(comb, multi);
+			});
+			$.each(hP.availableParameters[table], function(i, val) {
+				// Check if the parameter is already written
+				if (displayed.indexOf(table + ":" + val) == -1) {
+					// Check if the parameter is not to be combined:
+					var found = false;
+					for ( var j = 0; !found && j < combinations.length; j++) {
+						var parArr = window.combinedParameters[combinations[j]].parameters;
+						for ( var k = 0; !found && k < parArr.length; k++)
+							if (val == parArr[k])
+								found = true;
+					}
+					// Check if the parameter is not inherited from the
+					// metadatatable
+					if (!found && hP.mainParameters.parameters.indexOf(val) == -1) {
+						if (val.substring(val.length - qfPostFix.length) != qfPostFix)
+							str += listItem(val, table);
+					}
+				}
+
+			});
+			str += "</ul></li>";
+		}
+		return str;
+	}
+
+	function setupCombination(comb, multiArr) {
+//		console.log("setupCombination for:" + comb);
+		// console.log(displayed);
+		var str = "";
+		if (displayed.indexOf(comb) == -1) {
+			var table = window.combinedParameters[comb].layer;
+			var rel = "";
+			var group = false;
+			var multi = false;
+			var wrongmulti = false;
+			if (window.combinedParameters[comb].method == "group") {
+				rel = " rel='noBox'";
+				group = true;
+			} else {
+				var method = window.combinedParameters[comb].method;
+				if (method.indexOf("multi") == 0) {
+					var multiInt = parseInt(method.substring(5));
+					if (multiArr.indexOf(multiInt) > -1) {
+						rel = " rel='noBox'";
+						multi = true;
+					} else {
+						wrongmulti = true;
+					}
+				}
+			}
+			if (!wrongmulti) {
+				displayed.push(comb);
+				var combHeader = hP.getTableHeader(comb);
+				str += "<li id='" + comb + "'" + rel + " data-baseheader='" + combHeader + "' data-index='"
+						+ window.combinedParameters[comb].index + "'><a>" + combHeader + "</a>";
+				str += "<ul>";
+				$.each(window.combinedParameters[comb].parameters, function(i, val) {
+					if (multi) {
+						var splitString = val.split(":");
+						if (splitString[0] == "combined") {
+							str += setupCombination(val, multiArr);
+						} else if (allLayers[splitString[0]]) {
+							str += listItem(splitString[1], splitString[0]);
+						}
+					} else if (group) {
+						var header = hP.getHeader(val, table).replace(combHeader + " - ", "");
+						str += listItem(val, table, header);
+					} else
+						str += listItem(val, table);
+				});
+				str += "</ul></li>";
+			}
+		} else {
+			// console.log("comb was done already");
+		}
 		return str;
 	}
 

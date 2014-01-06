@@ -31,30 +31,93 @@ myNamespace.WebFeatureService = (function($, OL) {
 	}
 
 	function swapPosList(filter) {
+		if (debugwfs)
+			console.log("swapPosList START");
 		var newFilter = "";
 		var xmlDoc;
-		try {
-			if (window.DOMParser) {
-				parser = new DOMParser();
-				xmlDoc = parser.parseFromString(filter, "text/xml");
-			} else // Internet Explorer
-			{
-				xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
-				xmlDoc.async = false;
-				xmlDoc.loadXML(filter);
-			}
-			var elements = $(xmlDoc).find("posList");
-			$.each(elements,function(i,val){
-				var stringArray = val.childNodes[0].nodeValue.split(" ");
-				var output = "";
-				for(var i = 0; i < stringArray.length;i = i+2){
-					output += stringArray[i+1]+" "+stringArray[i]+" ";
+		if (myNamespace.XMLParser.findBrowser() != "Firefox") {
+			try {
+				if (window.DOMParser) {
+					parser = new DOMParser();
+					xmlDoc = parser.parseFromString(filter, "text/xml");
+				} else // Internet Explorer
+				{
+					if (debugwfs)
+						console.log("Not window.DOMParser");
+					xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+					xmlDoc.async = false;
+					xmlDoc.loadXML(filter);
 				}
-				val.childNodes[0].nodeValue = output;
-			});
-		} catch (err) {
-			return filter;
+				var elements = xmlDoc.getElementsByTagNameNS("http://www.opengis.net/gml", "posList");
+				// if (debugwfs)
+				// console.log("xmlDoc:");
+				// if (debugwfs)
+				// console.log(xmlDoc);
+				if (debugwfs)
+					console.log("elements:" + elements.length);
+				// if (debugwfs)
+				// console.log(elements);
+				$.each(elements, function(i, val) {
+
+					if (debugwfs)
+						console.log("val:");
+					if (debugwfs)
+						console.log(val);
+					var stringArray = val.childNodes[0].nodeValue.split(" ");
+					var output = "";
+					if (debugwfs)
+						console.log("SWAPPING, stringArray.length:" + stringArray.length);
+					for ( var i = 0; i < stringArray.length; i = i + 2) {
+						output += stringArray[i + 1] + " " + stringArray[i] + " ";
+						// if (debugwfs)
+						// console.log(stringArray[i+1]+" "+stringArray[i]+" ");
+					}
+					val.childNodes[0].nodeValue = output;
+					if (debugwfs)
+						console.log("Set nodeValue correctly:" + (val.childNodes[0].nodeValue == output));
+				});
+			} catch (err) {
+				if (debugwfs)
+					console.log("Some error");
+				return filter;
+			}
+		} else {
+			// Browser is firefox
+			// Normal xml parsing does not work for some reason
+			// Using custom code
+			var endIndex = 0;
+			while (true) {
+				var startIndex = filter.indexOf("<gml:posList>", endIndex) + 13;
+				if (startIndex == 12)
+					break;
+				if (debugwfs)
+					console.log("Adding to filter:" + filter.slice(endIndex, startIndex));
+				newFilter += filter.slice(endIndex, startIndex);
+				endIndex = filter.indexOf("</gml:posList>", startIndex);
+				if (endIndex == -1) {
+					console.log("Malformed fitler");
+					return "";
+				}
+				var stringArray = filter.slice(startIndex, endIndex).split(" ");
+				var output = "";
+				for ( var i = 0; i < stringArray.length; i = i + 2) {
+					output += stringArray[i + 1] + " " + stringArray[i] + " ";
+				}
+				if (debugwfs)
+					console.log("Adding output to filter:" + output);
+				newFilter += output;
+			}
+			if (debugwfs)
+				console.log("Finishing filter:" + filter.slice(endIndex));
+			newFilter += filter.slice(endIndex);
+			if (debugwfs)
+				console.log("FIREFOX NEW FILTER:" + newFilter);
+			return newFilter;
 		}
+		if (debugwfs)
+			console.log("swapPosList DONE");
+		// if (debugwfs)
+		// console.log(XMLSerializer().serializeToString(xmlDoc));
 		return new XMLSerializer().serializeToString(xmlDoc);
 	}
 
@@ -76,10 +139,10 @@ myNamespace.WebFeatureService = (function($, OL) {
 			outputFormat = "text/xml";
 		}
 		var filter = parameters.FILTER || "";
-		//console.log("-------------------filter-------------------");
+		// console.log("-------------------filter-------------------");
 		filter = swapPosList(filter);
-		//console.log(filter);
-		//console.log("-------------------filter-------------------");
+		// console.log(filter);
+		// console.log("-------------------filter-------------------");
 		var xml = "<GetFeature service=\"WFS\" version=\"1.1.0\" outputFormat=\"" + outputFormat + "\" " + propertyName
 				+ resultType + "xmlns=\"http://www.opengis.net/wfs\" "
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "

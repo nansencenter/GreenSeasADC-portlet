@@ -3,7 +3,7 @@
 
 <liferay-portlet-app>
 	<portlet>
-		<portlet-name>GreenseasV.2</portlet-name>
+		<portlet-name>GreenseasV.9</portlet-name>
 		<icon>/icon.png</icon>
 		<instanceable>false</instanceable>
 		<!-- jquery ui css-->
@@ -14,7 +14,7 @@
 		<!-- qUnit css-->
 		<header-portlet-css>/css/qunit-1.11.0.css</header-portlet-css>
 		<!-- application css-->
-		<header-portlet-css>/css/main.css</header-portlet-css>
+		<header-portlet-css>/css/greenSeasMain.css</header-portlet-css>
 		<header-portlet-css>/js/lib/theme/default/style.css</header-portlet-css>
 		<!-- application libs -->
 		<header-portlet-javascript>/js/lib/jquery.js</header-portlet-javascript>

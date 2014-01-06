@@ -39,7 +39,7 @@ public class GwtOpenLayersProxyServlet extends HttpServlet {
 	
 	Logger logger = Logger.getLogger(GwtOpenLayersProxyServlet.class);
 
-	static private String[] allowedHosts = { "localhost", "tomcat.nersc.no","thredds.nersc.no" };
+	static private String[] allowedHosts = { "localhost", "tomcat.nersc.no","thredds.nersc.no","10.47.10.39" };
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		processRequest(request, response);

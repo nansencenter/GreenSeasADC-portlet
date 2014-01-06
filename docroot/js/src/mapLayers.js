@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugMl = true;// debug flag
+var debugMl = false;// debug flag
 
 myNamespace.mapLayers = (function(jQ, bH) {
 	"use strict";
@@ -28,7 +28,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		$("#layerURLSelectorContainer").append(button + selectElement);
 		bH.change("#mapLayersWMSURL" + activeLayers, addWMSLayerVariableSelector);
 		bH.callFromControl("#toggleLayerButton" + activeLayers, toggleLayerButton);
-		$("#toggleLayerButton" + activeLayers).prop("disabled",true);
+		$("#toggleLayerButton" + activeLayers).prop("disabled", true);
 		activeLayers++;
 	}
 
@@ -169,7 +169,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 			}, $('#mapLayersWMSURL' + activeLayer).val(), $('#WMSLayerVariable' + activeLayer).find(":selected").val(),
 					date);
 		});
-		$("#toggleLayerButton" + activeLayer).prop("disabled",false);
+		$("#toggleLayerButton" + activeLayer).prop("disabled", false);
 		$("#dateVariable" + activeLayer).trigger("change");
 	}
 
@@ -254,15 +254,43 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		var url = $('#mapLayersWMSURL' + activeLayer).val();
 		if (url == "NONE")
 			return;
-		var name = $('#mapLayersWMSURL' + activeLayer).find(":selected").text() + ":"
-				+ $('#WMSLayerVariable' + activeLayer).find(":selected").text();
+		var layerAsText = $('#mapLayersWMSURL' + activeLayer).find(":selected").text();
+		var variableAsText = $('#WMSLayerVariable' + activeLayer).find(":selected").text();
+		var name = layerAsText + ":" + variableAsText;
 		var layer = $('#WMSLayerVariable' + activeLayer).find(":selected").val();
-		var colorscalerange = $('#colorscalerangeMin' + activeLayer).val() + ","
-				+ $('#colorscalerangeMax' + activeLayer).val();
+		var min = $('#colorscalerangeMin' + activeLayer).val();
+		var max = $('#colorscalerangeMax' + activeLayer).val();
+		var colorscalerange = min + "," + max;
+		min = parseFloat(min);
+		max = parseFloat(max);
 		var style = $('#styleVariable' + activeLayer).find(":selected").val();
 		var logscale = $('#logscaleVariable' + activeLayer).find(":selected").val();
 		if (debugMl)
 			console.log("logscale:" + logscale);
+		// Adding the colorscaleLegend
+		if ($('#colorScaleLegend' + activeLayer).length == 0) {
+			$("#legend").append("<div id='colorScaleLegend" + activeLayer + "' class='colorScaleLegend'></div>");
+		}
+		var colorScaleLegendDiv = $('#colorScaleLegend' + activeLayer);
+		// if not countour, then add logscale
+		if (style == "contour")
+			colorScaleLegendDiv.html("");
+		else {
+			var legend = "<img src='" + window.contextPath + "/images/legendGraphicV.png' alt='Color Scale'>";
+			var isLogscale = (logscale == "true");
+			// console.log(isLogscale);
+			var minT = isLogscale ? Math.log(min) : min;
+			var maxT = isLogscale ? Math.log(max) : max;
+			var third = (maxT - minT) / 3;
+			var scaleOneThird = isLogscale ? Math.exp(minT + third) : minT + third;
+			var scaleTwoThird = isLogscale ? Math.exp(minT + 2 * third) : minT + 2 * third;
+			var minDiv = "<div id='scaleMin'>" + min.toPrecision(4) + "</div>";
+			var oneThirdDiv = "<div id='scaleOneThird'>" + scaleOneThird.toPrecision(4) + "</div>";
+			var nameDiv = "<div id='scaleName'>" + layerAsText + "<br>" + variableAsText + "</div>";
+			var twoThirdDiv = "<div id='scaleTwoThird'>" + scaleTwoThird.toPrecision(4) + "</div>";
+			var maxDiv = "<div id='scaleMax'>" + max.toPrecision(4) + "</div>";
+			colorScaleLegendDiv.html(legend + maxDiv + twoThirdDiv + nameDiv + oneThirdDiv + minDiv);
+		}
 		var elevation = $('#zAxisVariable' + activeLayer).find(":selected").val();
 		var time = $('#timeVariable' + activeLayer).find(":selected").val();
 		myNamespace.mapViewer.addWMSLayer(url, activeLayer, name, layer, colorscalerange, style, logscale, elevation,
@@ -271,9 +299,23 @@ myNamespace.mapLayers = (function(jQ, bH) {
 			console.log("Toggled layer");
 	}
 
+	function setUpStyleForLegend() {
+		var browser = myNamespace.XMLParser.findBrowser();
+		console.log("Browser:" + browser);
+		var legend = $("#legend");
+		if (browser == "Trident") {
+			legend.css("display", [ "-ms-inline-flexbox" ]);
+		} else if (browser == "Firefox") {
+			legend.css("display", [ "inline-flex" ]);
+		} else {
+			legend.css("display", [ "-webkit-inline-box" ]);
+		}
+	}
+
 	// public interface
 	return {
 		setUpSelector : setUpSelector,
+		setUpStyleForLegend : setUpStyleForLegend,
 		addWMSLayerSelector : addWMSLayerSelector,
 		toggleLayerButton : toggleLayerButton,
 	};

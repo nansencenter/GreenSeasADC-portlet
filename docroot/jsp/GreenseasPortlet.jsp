@@ -16,7 +16,12 @@
 
 <div id="portlet">
 
-	<div id="simple_map"></div>
+	<div id="mapContainer">
+		<div id="simple_map"></div>
+		<div id="rightOfMap">
+			<div id="legend" ></div>
+		</div>
+	</div>
 
 	<div id="tabs">
 		<ul>
@@ -30,7 +35,7 @@
 		</ul>
 		<div id="queryTab">
 			<div id='search'>
-				<p>Search options.</p>
+				<p>Search options. Remember: if the search is too big, it may take some time.</p>
 				<div id='queryOptions'>
 					<h3>
 						<span id='bboxHeaderText'>Bounding box <em>(off)</em></span>
@@ -82,7 +87,7 @@
 						<input type="date" id="toDate" value="2007-01-01">
 						<br>
 						<input type="checkbox" id="timeEnabledCheck">
-						Include time in the date-search
+						Include time in the date-search (date search must be enabled for this)
 						<br>
 						<br>
 						Between
@@ -142,7 +147,7 @@
 									Minimum depth
 								</div>
 								<div class='left'>
-									<input type='text' id='depthMax' size="3" value="10" />
+									<input type='text' id='depthMax' size="3" value="0" />
 									Maximum depth
 								</div>
 
@@ -163,7 +168,7 @@
 							metadata will be selected.</em>
 						<div id="metadataTree"></div>
 					</div>
-					
+
 					<h3>
 						<span id='regionHeaderText'>Longhurst region <em>(off)</em></span>
 					</h3>
@@ -172,30 +177,44 @@
 							<input type="checkbox" id="regionEnabledCheck">
 							Enable in query
 						</div>
-						<em>Select the region you want to search by. There is currently no support for the Austral Polar Province and the Boreal Polar Province.</em>
+						<em>Select the region you want to search by. There is currently no support for the Austral Polar Province and
+							the Boreal Polar Province.</em>
 						<div id="regionList"></div>
 					</div>
 
 					<h3>
-						<span id='parametersHeaderText'>Parameters <em>(off)</em></span>
+						<span id='parametersHeaderText'>Parameters</span>
 					</h3>
 					<div id='parametersNeeded'>
 
-						<div>
-							<input type="checkbox" id="parametersEnabledCheck">
-							Enable in query
-						</div>
-
-						<em> Tip: Selecting multiple parameters within a group resolves to "one of these". Selecting variables from
-							different groups resolves to "all of these". <br> Example: Selecting variables Physical.x1, Phyiscal.x2,
-							Plankton.y1, Plankton.y2 and Plankton.y3 would resolve in the query: ((Physical.x1 OR Phyiscal.x2)AND(Plankton.y1
+						<!-- 						<div> -->
+						<!-- 							<input type="checkbox" id="parametersEnabledCheck"> -->
+						<!-- 							Enable in query -->
+						<!-- 						</div> -->
+						<em>Tip1: Start with a main query based on the different search criteria above, and press the button for main
+							query. Now a number should be updated behind each parameter (it will take some time to compute them all), which
+							indicates how many entries of this kind there are available in the first search. Then select parameters and press
+							the filter button. </em>
+						<br>
+						<em> Tip2: Selecting multiple parameters within a group resolves to "one of these". Selecting variables from
+							different groups resolves to "all of these". <br> Example: Selecting variables Salinity.x1, Salinity.x2,
+							Plankton.y1, Plankton.y2 and Plankton.y3 would resolve in the query: ((Salinity.x1 OR Salinity.x2)AND(Plankton.y1
 							OR Plankton.y2 OR Plankton.y3)).
 						</em>
+						<br>
+						Search the parameterslist:
+						<input type='text' id='treeSearchParameter' size="10" />
+						<input type='button' id=filterParametersTreeButton value="Search" />
+						<input type="button" id="clearSelectionButton" value="Clear selection">
+						<input type="button" id="collapseAllButton" value="Collapse All">
+						<input type="button" id="expandAllButton" value="Expand All">
+						<input type="button" id="toggleOrderPlanktonButton" value="Sort plankton by type">
 						<div id="parametersTree"></div>
+						<br>
 						<br>
 						<div>
 							<input type="checkbox" id="qualityFlagsEnabledCheck">
-							Include qualityflags
+							Include qualityflags (This will include an extra collumn for quality flags for each variable in the output).
 						</div>
 					</div>
 				</div>
@@ -238,18 +257,41 @@
 			<div id="parametersTabText">
 				<p>Run a query and filter selected parameters to view options here.</p>
 			</div>
-			<div id="statistics">
-				<input type="button" id="calculateStatisticsButton" value="Calculate statistics" />
-				<div id="statisticsContainer"></div>
-				<br>
-			</div>
-			<div id='timeSeriesDiv'>
-				<div id="timeSeriesVariableDiv"></div>
-				<br>
-				<input type='button' id='addTimeSeriesVariableButton' value="Add another variable" />
-				<br>
-				<input type='button' id='timeSeriesButton' value="Generate Timeseries" />
-				<div id="timeSeriesContainer" style="width: 100%; height: 400px;"></div>
+			<div id='statsOptions'>
+				<h3>
+					<span>Statistics</span>
+				</h3>
+				<div id="outerStatistics">
+					<div id="statistics">
+						<input type="button" id="calculateStatisticsButton" value="Calculate statistics" />
+						<div id="statisticsContainer"></div>
+						<br>
+					</div>
+				</div>
+				<h3>
+					<span>Time Series</span>
+				</h3>
+				<div id='outerTimeSeriesDiv'>
+					<div id='timeSeriesDiv'>
+						<div id="timeSeriesVariableDiv"></div>
+						<br>
+						<input type='button' id='addTimeSeriesVariableButton' value="Add another variable" />
+						<br>
+						<input type='button' id='timeSeriesButton' value="Generate Timeseries" />
+						<div id="timeSeriesContainer" style="width: 100%; height: 400px;"></div>
+					</div>
+				</div>
+				<h3>
+					<span>Properties Plot</span>
+				</h3>
+				<div id='outerPropertiesPlotDiv'>
+					<div id='propertiesPlotDiv'>
+						<div id="propertiesPlotVariableDiv"></div>
+						<br>
+						<input type='button' id='propertiesPlotButton' value="Generate Properties Plot" />
+						<div id="propertiesPlotContainer" style="width: 100%; height: 400px;"></div>
+					</div>
+				</div>
 			</div>
 		</div>
 
@@ -309,10 +351,14 @@
 
 <aui:script>
 	$(document).ready(function() {
-		<!-- Initiating all properties from the main properties file -->
+	<!-- Initiating context path for images -->
+	window.contextPath = "<%=request.getContextPath()%>";
+	<!-- Initiating all properties from the main properties file -->
 	<%=renderRequest.getAttribute("allProperties")%>
 	<!-- Initiating window.allParametersHeader -->
 	<%=renderRequest.getAttribute("allParametersHeader")%>
+	<!-- Initiating window.combinedParamaters -->
+	<%=renderRequest.getAttribute("combinedParameters")%>
 	<!-- Initiating window.longhurstRegions -->
 	<%=renderRequest.getAttribute("longhurstRegions")%>
 	<!-- Initiating window.allLayersHeader and window.allLayers -->

@@ -62,6 +62,7 @@ public class GreenseasPortlet extends MVCPortlet {
 		renderRequest.setAttribute("allLayers", DatabaseProperties.getAllLayers());
 		renderRequest.setAttribute("allProperties", DatabaseProperties.getAllProperties());
 		renderRequest.setAttribute("longhurstRegions", DatabaseProperties.getLonghurstRegions());
+		renderRequest.setAttribute("combinedParameters", DatabaseProperties.getCombinedParameters());
 		super.doView(renderRequest, renderResponse);
 	}
 
@@ -94,11 +95,12 @@ public class GreenseasPortlet extends MVCPortlet {
 				writer.write(jsonObject.toString());
 				return;
 			} else if (requestType.equals("getLayersFromNetCDFFile")) {
+				System.out.println("requestType is getLayersFromNetCDFFile:");
 				System.out.println("opendapDataURL:" + opendapDataURL);
 				System.out.println("uri:" + uri);
 				Map<String, String> values = NetCDFReader.getLayersFromRaster(uri);
-				if (values == null)
-					return;
+				if (values == null){System.out.println("No values found!");
+					return;}
 				JSONObject jsonObject = new JSONObject(values);
 
 				System.out.println("Returning with jsonObject:");
@@ -136,6 +138,9 @@ public class GreenseasPortlet extends MVCPortlet {
 
 			System.out.println("Returning with polygon!=null:" + (polygon != null));
 
+//			System.out.println("Returning with jsonObject:");
+//			System.out.println(jsonObject.toJSONString());
+			
 			PrintWriter writer = resourceResponse.getWriter();
 			writer.write(jsonObject.toString());
 			return;

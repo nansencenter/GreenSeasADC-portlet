@@ -11,16 +11,16 @@ myNamespace.matchup = (function($, ns) {
 	function setUpOPeNDAPSelector() {
 		var URLs = {
 			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/topaz" : "Topaz",
-			/*"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/cmcc_phosphate" : "CMCC Phosphate",
+			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/cmcc_phosphate" : "CMCC Phosphate",
 			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/cmcc_chla" : "CMCC Chlorophyll-a",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/cmcc_sea_ice" : "CMCC Sea Ice",*/
+			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/cmcc_sea_ice" : "CMCC Sea Ice",
 			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/chlor_seawifs_Sep97_Dec10_360x180gt" : "PML Chlorophyll-a",
 			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/fmicro_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Microphytoplankton",
 			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/fnano_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Nanophytoplankton",
 			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/fpico_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Picophytoplankton",
 			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/zeu_seawifs_zmld_soda_Sep97_Dec07_360x180gt" : "PML Ratio euphotic depth to mixed layer depth",
 			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/phenology_seawifs_98_07_360x180g" : "PML Phenology",
-			//"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/ssmicon" : "ssmicon",
+			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/ssmicon" : "ssmicon",
 		};
 
 		var selectElement = ns.mapLayers.setUpSelector(URLs, "opendapDataURL");
@@ -54,7 +54,7 @@ myNamespace.matchup = (function($, ns) {
 	}
 
 	function setUpCompareRasterDiv(parameters) {
-		var selectElement = "<select id=\"matchVariable\">";
+		var selectElement = "Raster variable:<select id=\"matchVariable\">";
 		var options = "<option value='NONE'>Select variable</option>";
 		$.each(parameters, function(key, val) {
 			var variable = key.substring(0, key.indexOf("("));
@@ -64,13 +64,13 @@ myNamespace.matchup = (function($, ns) {
 			options += "<option value=\"" + variable + "\">" + variableName + "</option>";
 		});
 		selectElement += options + "</select>";
-		selectElement += "<br><select id=\"matchVariable2\">";
+		selectElement += "<br>Parameter from the search:<select id=\"matchVariable2\">";
 		var selectedParameters = ns.handleParameters.chosenParameters.allSelected;
 		options = generateOptionsFromAllSelectedParameters();
 		selectElement += options + "</select>";
 
 		selectElement += "<br><input type='checkbox'id='updateComparedParameterInData'/>"
-				+ "Update the compared parameter to the dataoutput "
+				+ "Update the compared parameter to the data output "
 				+ "(this will join the new parameter from the raster to the output in the search results-tab)";
 
 		$("#compareRaster").html(selectElement);

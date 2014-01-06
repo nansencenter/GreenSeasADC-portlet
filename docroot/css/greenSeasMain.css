@@ -1,0 +1,76 @@
+.table {
+	font-size: 11px;
+}
+
+.centered {
+	width: 50%;
+	margin: auto;
+}
+
+.offcentered {
+	width: 60%;
+	margin: auto;
+}
+
+.floatLeft {
+	width: 50%;
+	float: left;
+}
+.floatRight {
+	width: 50%;
+	float: right;
+}
+.container {
+	overflow: hidden;
+}
+
+.ui-widget {
+	font-size: 13px;
+}
+
+/* makes map cooperate with z-indexing, for example when using modal dialog boxes*/
+/* #simple_map { position:relative; height:500px; width:1000px; } */
+#simple_map {
+	float: left;
+	height: 400px;
+	width: 800px;
+}
+#rightOfMap {
+	height: 400px;
+	font-size: 14px;
+}
+#mapContainer {
+	height: 400px;
+}
+.colorScaleLegend{
+	height: 400px;
+}
+#legend {
+	height: 400px;
+	float: left;
+}
+#scaleMax {
+	position: relative;
+	top: -405px;
+	left: 50px;
+}
+#scaleTwoThird {
+	position: relative;
+	top: -300px;
+	left: 50px;
+}
+#scaleName {
+	position: relative;
+	top: -260px;
+	left: 50px;
+}
+#scaleOneThird {
+	position: relative;
+	top: -221px;
+	left: 50px;
+}
+#scaleMin {
+	position: relative;
+	top: -114px;
+	left: 50px;
+}
