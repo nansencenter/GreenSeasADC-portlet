@@ -197,8 +197,8 @@
 							the filter button. </em>
 						<br>
 						<em> Tip2: Selecting multiple parameters within a group resolves to "one of these". Selecting variables from
-							different groups resolves to "all of these". <br> Example: Selecting variables Physical.x1, Phyiscal.x2,
-							Plankton.y1, Plankton.y2 and Plankton.y3 would resolve in the query: ((Physical.x1 OR Phyiscal.x2)AND(Plankton.y1
+							different groups resolves to "all of these". <br> Example: Selecting variables Salinity.x1, Salinity.x2,
+							Plankton.y1, Plankton.y2 and Plankton.y3 would resolve in the query: ((Salinity.x1 OR Salinity.x2)AND(Plankton.y1
 							OR Plankton.y2 OR Plankton.y3)).
 						</em>
 						<br>
