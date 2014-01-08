@@ -373,7 +373,9 @@ myNamespace.control = (function($, OL, ns) {
 			console.log("convertArrayToHashMap");
 		var output = {};
 		$.each(inputArray, function(k, dataValue) {
-			output[dataValue.id] = dataValue;
+			if ((typeof dataValue) != 'function') {
+				output[dataValue.id] = dataValue;
+			}
 		});
 		if (debugc)
 			console.log("Converted Array");

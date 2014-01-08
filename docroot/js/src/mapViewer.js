@@ -11,6 +11,8 @@ myNamespace.mapViewer = (function(OL, $) {
 
 	// map on which layers are drawn
 	var map;
+	
+	var mapPanel, printProvider;
 
 	// Object that stores the layers for the parameters
 	var parameterLayers = {};
@@ -97,25 +99,75 @@ myNamespace.mapViewer = (function(OL, $) {
 		OpenLayers.DOTS_PER_INCH = (25.4 / 0.28);
 		OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
 
-		map = new OpenLayers.Map('simple_map', {
+		map = new OpenLayers.Map();
+//				'simple_map', 
+		map.setOptions({
+			scales : [ 150000000, 80000000, 50000000, 30000000, 10000000, 5000000, 2500000, 1000000, 500000 ],
 			maxExtent : maxExtent,
 			maxResolution : 'auto',
 			units : 'degrees',
+			
 			// actively excluding the standard zoom control, which is there by
 			// default
-			controls : [ new OpenLayers.Control.Navigation(), new OpenLayers.Control.ArgParser(),
-					new OpenLayers.Control.Attribution() ]
+//			map.addControls([ new OpenLayers.Control.Navigation(), new OpenLayers.Control.ArgParser(),
+//					new OpenLayers.Control.Attribution() ]);
 		});
 
+		mapPanel = new GeoExt.MapPanel({
+	        //region: "center",
+			map: map,
+			/*center: [0,0],
+	        zoom: 1,*/
+		});
+		
+
+		url = "http://localhost:8090/geoserver/pdf";
+		 printProvider = new GeoExt.data.PrintProvider({
+		        // using get for remote service access without same origin restriction.
+		        // For asynchronous requests, we would set method to "POST".
+//		        method: "GET",
+		        method: "POST",
+		        
+		        // capabilities from script tag in Printing.html. For asynchonous
+		        // loading, we would configure url instead of capabilities.
+//		        capabilities: printCapabilities
+		        url: url,
+		    });
+		 printProvider.loadCapabilities();
+		 
+//		renderTo: "simple_map"
+		new Ext.Panel({
+			renderTo : "simple_map",
+			layout: "fit",
+			width : 800,
+			height : 400,
+			items : [ mapPanel ]
+		});
+		
+		
 		// Adding the controls to the map
 		map.addControl(new OpenLayers.Control.LayerSwitcher());
 		map.addControl(new OpenLayers.Control.MousePosition());
 		map.addControl(new OpenLayers.Control.OverviewMap());
-		map.addControl(new OpenLayers.Control.PanZoomBar());
-		var graticule = new OpenLayers.Control.Graticule();
-		graticule.displayInLayerSwitcher = true;
-		map.addControl(graticule);
+//		map.addControl(new OpenLayers.Control.PanZoomBar());
 
+		// createPDF
+		var pdfButton = new OpenLayers.Control.Button({
+			displayClass : "olPDFButton",
+			title: "Create PDF",
+	        id: 'PDFButton',
+			trigger : createPDF,
+		});
+		var panel = new OpenLayers.Control.Panel({defaultControl: pdfButton});
+		panel.addControls([pdfButton]);
+		map.addControl(panel);
+
+		
+		//TODO: does not work with the Ext
+//		var graticule = new OpenLayers.Control.Graticule();
+//		graticule.displayInLayerSwitcher = true;
+//		map.addControl(graticule);
+		
 		// Adding the layers to the map
 		var bg = backgroundLayers, fg = mapLayers;
 		layers = [];
@@ -159,6 +211,18 @@ myNamespace.mapViewer = (function(OL, $) {
 		// registerClickBehaviour(fg.ncWMSTEST);
 		if (debugmW)
 			console.log("Finished initMap");
+	}
+
+	function createPDF() {
+		 var printPage = new GeoExt.data.PrintPage({
+			    printProvider: printProvider,
+			    customParams: {
+			        mapTitle: "Greenseas Analytical Database Client",
+			        comment: "Map printed from: "+ document.URL
+			    }
+			});
+		 printPage.fit(mapPanel);
+		 printProvider.print(mapPanel, printPage);
 	}
 
 	function registerClickBehaviour(layer) {
