@@ -891,7 +891,10 @@ myNamespace.control = (function($, OL, ns) {
 							x : Date.UTC(year, month, day, hours, minutes, seconds),
 							y : value,
 							id : val.id,
-							time : time
+							time : time,
+							depth : val.properties[depthParameterName],
+							lat : val.geometry.coordinates[0],
+							long : val.geometry.coordinates[1]
 						});
 					}
 				}
@@ -926,7 +929,7 @@ myNamespace.control = (function($, OL, ns) {
 		}
 		tsData.series = [];
 		$.each(variables, function(i, val) {
-			color = "#AAAAAA";
+			var color = "#AAAAAA";
 			if (i < colors.length)
 				color = colors[i];
 			else
@@ -944,7 +947,7 @@ myNamespace.control = (function($, OL, ns) {
 			var opp = true;
 			if (i < opposite.length)
 				opp = opposite[i];
-			color = "#AAAAAA";
+			var color = "#AAAAAA";
 			if (i < colors.length)
 				color = colors[i];
 			else
@@ -1051,7 +1054,11 @@ myNamespace.control = (function($, OL, ns) {
 							if (this.point.time) {
 								clock = " " + Highcharts.dateFormat("%H:%M:%S", this.x);
 							}
-							return '<b> ' + this.series.name + ' <br>ID:' + this.point.id + '</b><br/>'
+							var depth = "";
+							if (this.point.depth)
+								depth = " Depth:" + this.point.depth;
+							return '<b> ' + this.series.name + ' <br>ID:' + this.point.id + '<br>Lat:' + this.point.lat
+									+ ' Long:' + this.point.long + depth + '</b><br/>'
 									+ Highcharts.dateFormat('%Y-%m-%d', this.x) + clock + '<br>Value:' + this.y;
 						}
 					},
