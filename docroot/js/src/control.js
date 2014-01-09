@@ -685,35 +685,7 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function compareRasterButton() {
-		var rasterParameter = $("#matchVariable").find(":selected").val();
-		if (rasterParameter == "NONE") {
-			ns.errorMessage.showErrorMessage("You must choose a parameter from the raster");
-			return;
-		}
-		if (debugc) {
-			console.log("compareRasterButton for par:" + rasterParameter);
-			console.log($("#matchVariable").find(":selected"));
-		}
-		var dataRequest = {};
-		var useOpendap = Boolean(document.getElementById('opendapDataURLCheck').checked);
-		dataRequest[portletNameSpace + 'requestType'] = "getDataValuesOf:" + rasterParameter;
-		// TODO: ensure that these are selected and exists
-		dataRequest[portletNameSpace + 'time'] = $("#timeMatchupVariable").find(":selected").val();
-		dataRequest[portletNameSpace + 'elevation'] = $("#elevationMatchupVariable").find(":selected").val();
-		$.each(data, function(i, val) {
-			var point = {};
-			var pos = val.geometry.coordinates;
-			point["lat"] = pos[0];
-			point["lon"] = pos[1];
-			/*
-			 * point[""]= val.date+";"+val.time+";"; point[""]= val.location;
-			 */
-			var id = val.id;
-			dataRequest[portletNameSpace + id] = JSON.stringify(point);
-		});
-		if (useOpendap)
-			dataRequest[portletNameSpace + 'opendapDataURL'] = $("#opendapDataURL").find(":selected").val();
-		var values = ns.ajax.getDatavaluesFromRaster(dataRequest);
+		ns.matchup.compareRaster(data);
 	}
 
 	function addAParameterToData(values, parameter) {
