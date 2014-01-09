@@ -351,7 +351,7 @@
 					<input type='button' id='addLayerButton' value="Add new layer" />
 				</div>
 				<h3>
-					<span id='editResultsLayerDivHeaderText'>Layers from search results</span>
+					<span id='editResultsLayerDivHeaderText'>Add layers from search results</span>
 				</h3>
 				<div id="editResultsLayerDiv">
 					<p>Select/configure Layers:</p>
