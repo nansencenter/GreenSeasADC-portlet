@@ -38,7 +38,7 @@ myNamespace.tableConstructor = (function($, hP) {
 
 	function generateStatistics(features) {
 		var header = "<table id='generalStatisticsTable' class='table'>", footer = "</tbody></table>", rows = "";
-		var headers = [ "Parameter", "Quantity", "Min", "Max", "Sum", "Average", "Sample Standard Deviation",
+		var headers = [ "Parameter", "Quantity", "Min", "Max",/* "Sum", */"Average", "Sample Standard Deviation",
 				"Variance" ];
 		var tableHeader = headerFrom(headers);
 
@@ -117,10 +117,10 @@ myNamespace.tableConstructor = (function($, hP) {
 			row += data(quantity);
 			row += data(min);
 			row += data(max);
-			row += data(sum);
-			row += data(average);
-			row += data(sd);
-			row += data(variance);
+			//row += data(sum);
+			row += data(average.toFixed(3));
+			row += data(sd.toFixed(3));
+			row += data(variance.toFixed(3));
 			rows += row + "</tr>\n";
 		});
 		// output += "<br>";
