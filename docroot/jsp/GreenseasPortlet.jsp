@@ -19,7 +19,7 @@
 	<div id="mapContainer">
 		<div id="simple_map"></div>
 		<div id="rightOfMap">
-			<div id="legend" ></div>
+			<div id="legend"></div>
 		</div>
 	</div>
 
@@ -339,10 +339,25 @@
 
 		<div id="layersTab">
 			<p>Select/configure Layers:</p>
-			Dataset/Variable/Colorscale(min/max/auto)/Layertype(boxfill/contour/etc)/Scale(linear/logarithmic)/Elevation/Date/Time
-			<br>
-			<div id="layerURLSelectorContainer"></div>
-			<input type='button' id='addLayerButton' value="Add new layer" />
+			<div id='configureLayersDiv'>
+				<h3>
+					<span id='rasterLayersDivHeaderText'>Add raster layers</span>
+				</h3>
+				<div id="rasterLayersDiv">
+					Select
+					Dataset/Variable/Colorscale(min/max/auto)/Layertype(boxfill/contour/etc)/Scale(linear/logarithmic)/Elevation/Date/Time
+					<br>
+					<div id="layerURLSelectorContainer"></div>
+					<input type='button' id='addLayerButton' value="Add new layer" />
+				</div>
+				<h3>
+					<span id='editResultsLayerDivHeaderText'>Layers from search results</span>
+				</h3>
+				<div id="editResultsLayerDiv">
+					<p>Select/configure Layers:</p>
+					<br>
+				</div>
+			</div>
 		</div>
 
 	</div>

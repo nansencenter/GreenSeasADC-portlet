@@ -43,8 +43,12 @@ myNamespace.control = (function($, OL, ns) {
 		ns.buttonEventHandlers.initHandlers();
 
 		setBboxInputToCurrentMapExtent();
-
 		$("#queryOptions").accordion({
+			collapsible : true,
+			active : false,
+			heightStyle : "content"
+		});
+		$("#configureLayersDiv").accordion({
 			collapsible : true,
 			active : false,
 			heightStyle : "content"
