@@ -715,102 +715,6 @@ myNamespace.control = (function($, OL, ns) {
 		// console.log("addAParameterToData DONE");
 	}
 
-	function compareData(responseData) {
-		var scatterData = [];
-		var databaseVariable = $("#matchVariable2").find(":selected").val();
-		if (Boolean(document.getElementById('updateComparedParameterInData').checked))
-			addAParameterToData(responseData, $("#matchVariable").find(":selected").html());
-		console.log(data);
-		var minX, minY, maxX, maxY;
-		$.each(responseData, function(i, val) {
-			var databaseValue = parseFloat(data[i].properties[databaseVariable]);
-			if (databaseValue != -999 && val.value != null) {
-				val.value = parseFloat(val.value);
-				scatterData.push([ val.value, databaseValue ]);
-				if (!minX || minX > val.value)
-					minX = val.value;
-				if (!minY || minY > databaseValue)
-					minY = databaseValue;
-				if (!maxX || maxX < val.value)
-					maxX = val.value;
-				if (!maxY || maxY < databaseValue)
-					maxY = databaseValue;
-			}
-		});
-		minX = (minX - 0.5).toFixed();
-		maxX = (maxX + 0.5).toFixed();
-		minY = (minY - 0.5).toFixed();
-		maxY = (maxY + 0.5).toFixed();
-		var min = minX < minY ? minX : minY;
-		var max = maxX > maxY ? maxX : maxY;
-		min = parseFloat(min);
-		max = parseFloat(max);
-
-		if (debugc) {
-			console.log("min/max:" + minX + "," + minY + "," + maxX + "," + maxY);
-
-			console.log(responseData);
-			console.log("scatterData:");
-			var sd = "[";
-			$.each(scatterData, function(i, d) {
-				sd += "[" + d[0] + "," + d[1] + "],";
-			});
-			console.log(sd + "]");
-		}
-		// $(function() {
-		$('#highchartsContainer').highcharts({
-			chart : {
-				zoomType : 'xy'
-			},
-			title : {
-				text : 'Scatter plot'
-			},
-			xAxis : [ {
-				min : min,
-				max : max,
-				title : {
-					enabled : true,
-					text : 'Model value'
-				}
-			}, ],
-			yAxis : [ {
-				min : min,
-				max : max,
-				title : {
-					enabled : true,
-					text : 'Database value'
-				}
-			}, ],
-			series : [ {
-				yAxis : 0,
-				xAxis : 0,
-				type : 'scatter',
-				name : ns.handleParameters.getHeaderFromRawData(databaseVariable),
-				data : scatterData,
-				// cropThreshold : 20000,
-				animation : false
-			}, {
-				showInLegend : false,
-				yAxis : 0,
-				xAxis : 0,
-				type : 'line',
-				name : 'X=Y',
-				data : [ [ min, min ], [ max, max ] ],
-				animation : false,
-				marker : {
-					enabled : false
-				},
-				states : {
-					hover : {
-						lineWidth : 0
-					}
-				},
-				enableMouseTracking : false
-			} ]
-		});
-		// });
-	}
-
 	function initiateRasterDataButton() {
 		ns.matchup.initiateRasterData();
 	}
@@ -947,35 +851,47 @@ myNamespace.control = (function($, OL, ns) {
 		var verticalPar = $("#propertiesPlotVariable2").find(":selected").val();
 		var ppData = generatePropertiesPlotData(horizontalPar, verticalPar);
 		// $(function() {
-		$('#propertiesPlotContainer').highcharts({
-			chart : {
-				type : 'scatter',
-				zoomType : 'xy'
-			},
-			title : {
-				text : 'Properties Plot'
-			},
-			xAxis : [ {
-				title : {
-					enabled : true,
-					text : ns.handleParameters.getHeaderFromRawData(horizontalPar)
-				}
-			} ],
-			yAxis : [ {
-				title : {
-					enabled : true,
-					text : ns.handleParameters.getHeaderFromRawData(verticalPar)
-				}
-			} ],
-			series : [ {
-				yAxis : 0,
-				xAxis : 0,
-				showInLegend : false,
-				data : ppData,
-				// cropThreshold : 20000,
-				animation : false
-			} ]
-		});
+		$('#propertiesPlotContainer').highcharts(
+				{
+					chart : {
+						type : 'scatter',
+						zoomType : 'xy'
+					},
+					title : {
+						text : 'Properties Plot'
+					},
+					xAxis : [ {
+						title : {
+							enabled : true,
+							text : ns.handleParameters.getHeaderFromRawData(horizontalPar)
+						}
+					} ],
+					yAxis : [ {
+						title : {
+							enabled : true,
+							text : ns.handleParameters.getHeaderFromRawData(verticalPar)
+						}
+					} ],
+					tooltip : {
+						formatter : function() {
+							var depth = "";
+							if (this.point.depth)
+								depth = " Depth:" + this.point.depth;
+							return 'ID:' + this.point.id + '<br>Lat:' + this.point.lat + ' Long:' + this.point.long
+									+ depth + '</b><br/>' + ns.handleParameters.getHeaderFromRawData(horizontalPar)
+									+ ':' + this.x + '<br>' + ns.handleParameters.getHeaderFromRawData(verticalPar)
+									+ ':' + this.y;
+						}
+					},
+					series : [ {
+						yAxis : 0,
+						xAxis : 0,
+						showInLegend : false,
+						data : ppData,
+						// cropThreshold : 20000,
+						animation : false
+					} ]
+				});
 		// });
 	}
 
@@ -990,10 +906,14 @@ myNamespace.control = (function($, OL, ns) {
 					if (val.properties[verticalPar]) {
 						var y = parseFloat(val.properties[verticalPar]);
 						if (y != -999) {
-							ppData.push(/*
-										 * { x : x, y : y }
-										 */[ x, y ]);
-							// console.log("Added data:" + x + "," + y);
+							ppData.push({
+								x : x,
+								y : y,
+								id : val.id,
+								depth : val.properties[depthParameterName],
+								lat : val.geometry.coordinates[0],
+								long : val.geometry.coordinates[1]
+							});
 						}
 					}
 				}
@@ -1140,7 +1060,6 @@ myNamespace.control = (function($, OL, ns) {
 		calculateStatisticsButton : calculateStatisticsButton,
 		viewParameterNames : viewParameterNames,
 		initiateRasterDataButton : initiateRasterDataButton,
-		compareData : compareData,
 		compareRasterButton : compareRasterButton,
 		initiateParameters : initiateParameters,
 		setLonLatInput : setLonLatInput,
@@ -1155,6 +1074,7 @@ myNamespace.control = (function($, OL, ns) {
 		expandAllButton : expandAllButton,
 		toggleOrderPlanktonButton : toggleOrderPlanktonButton,
 		clearSelectionButton : clearSelectionButton,
+		addAParameterToData : addAParameterToData,
 	};
 
 }(jQuery, OpenLayers, myNamespace));

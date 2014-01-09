@@ -37,7 +37,7 @@ myNamespace.ajax = (function($) {
 		});
 	}
 
-	function getDatavaluesFromRaster(dataRequest) {
+	function getDatavaluesFromRaster(dataRequest, data) {
 		AUI().use('aui-io-request', function(A) {
 			if (debuga) {
 				console.log("Started getDatavaluesFromRaster");
@@ -64,7 +64,7 @@ myNamespace.ajax = (function($) {
 
 						// JSON Data coming back from Server
 						var responseData = instance.get('responseData');
-						myNamespace.control.compareData(responseData);
+						myNamespace.matchup.compareData(responseData, data);
 
 					}
 
@@ -108,41 +108,43 @@ myNamespace.ajax = (function($) {
 	}
 
 	function getLonghurstPolygon(region) {
-		if (!window.polygon) window.polygon ={};
-		//AUI().use('aui-io-request', function(A) {
-			if (debuga) {
-				console.log("Started getDimension");
+		if (!window.polygon)
+			window.polygon = {};
+		// AUI().use('aui-io-request', function(A) {
+		if (debuga) {
+			console.log("Started getDimension");
+		}
+		var url = ajaxCallResourceURL;
+		var data = {};
+		data[portletNameSpace + 'longhurstRegion'] = region;
+		data[portletNameSpace + 'requestType'] = 'getLonghurstPolygon';
+
+		// A.io.request(url, {
+		$.ajax({
+			url : url,
+			// data to be sent to server
+			data : data,
+			dataType : 'json',
+			async : false,
+
+			// on : {
+			error : function() {
+				alert("SOMETHING WENT WRONG!");
+			},
+
+			success : function(result, status, xhr) {
+				// var instance = this;
+
+				// JSON Data coming back from Server
+				// var responseData = instance.get('responseData');
+				// console.log("result:");
+				// console.log(result[region]);
+				window.polygon[region] = result[region];// .slice(1,result[region].length-1);
 			}
-			var url = ajaxCallResourceURL;
-			var data = {};
-			data[portletNameSpace + 'longhurstRegion'] = region;
-			data[portletNameSpace + 'requestType'] = 'getLonghurstPolygon';
 
-			//A.io.request(url, {
-			$.ajax({url:url,
-				// data to be sent to server
-				data : data,
-				dataType : 'json',
-				async : false,
-
-				//on : {
-					error : function() {
-						alert("SOMETHING WENT WRONG!");
-					},
-
-					success : function(result,status,xhr) {
-						//var instance = this;
-
-						// JSON Data coming back from Server
-						//var responseData = instance.get('responseData');
-//						console.log("result:");
-//						console.log(result[region]);
-						window.polygon[region] = result[region];//.slice(1,result[region].length-1);
-					}
-
-				//}
-			});
-		//});
+		// }
+		});
+		// });
 	}
 	// public interface
 	return {

@@ -81,18 +81,19 @@ myNamespace.matchup = (function($, ns) {
 		} else {
 			searchBeforeMatchupText = "You need to search for data to be able to do a matchup";
 		}
-		$("#compareRaster").append("<div id='searchBeforeMatchup'>"+"<br><br>"+searchBeforeMatchupText+"</div>");
+		$("#compareRaster").append("<div id='searchBeforeMatchup'>" + "<br><br>" + searchBeforeMatchupText + "</div>");
 	}
-	
-	function getMetaDimension(event){
-		$("#matchVariable").after("<div id='timeElevationText' style='display: inline'>Loading Time/Elevation, please wait...</div>");
+
+	function getMetaDimension(event) {
+		$("#matchVariable").after(
+				"<div id='timeElevationText' style='display: inline'>Loading Time/Elevation, please wait...</div>");
 		$("#timeMatchupVariable").remove();
 		$("#elevationText").remove();
 		var rasterParameter = $("#matchVariable").find(":selected").val();
 		ns.ajax.getDimension(rasterParameter);
-	}	
-	
-	function setUpParameterMetaSelector(parameters){
+	}
+
+	function setUpParameterMetaSelector(parameters) {
 		console.log(parameters);
 		var selectElement = "<select id='timeMatchupVariable'>";
 		var options = "";
@@ -100,8 +101,9 @@ myNamespace.matchup = (function($, ns) {
 			options += "<option value=\"" + key + "\">" + val + "</option>";
 		});
 		selectElement += options + "</select>";
-		if (!(typeof parameters.elevation === 'undefined')){
-			selectElement += "<div id='elevationText' style='display: inline'>Elevation (Units:"+parameters.elevation.units+"):<select id='elevationMatchupVariable'></div>";
+		if (!(typeof parameters.elevation === 'undefined')) {
+			selectElement += "<div id='elevationText' style='display: inline'>Elevation (Units:"
+					+ parameters.elevation.units + "):<select id='elevationMatchupVariable'></div>";
 			delete parameters.elevation.units;
 			options = "";
 			$.each(parameters.elevation, function(key, val) {
@@ -154,8 +156,8 @@ myNamespace.matchup = (function($, ns) {
 			}
 		});
 	}
-	
-	function compareRaster(data){
+
+	function compareRaster(data) {
 		var rasterParameter = $("#matchVariable").find(":selected").val();
 		if (rasterParameter == "NONE") {
 			ns.errorMessage.showErrorMessage("You must choose a parameter from the raster");
@@ -164,7 +166,7 @@ myNamespace.matchup = (function($, ns) {
 		var dataRequest = {};
 		var useOpendap = Boolean(document.getElementById('opendapDataURLCheck').checked);
 		dataRequest[portletNameSpace + 'requestType'] = "getDataValuesOf:" + rasterParameter;
-		
+
 		// TODO: ensure that these are selected and exists
 		dataRequest[portletNameSpace + 'time'] = $("#timeMatchupVariable").find(":selected").val();
 		dataRequest[portletNameSpace + 'elevation'] = $("#elevationMatchupVariable").find(":selected").val();
@@ -181,18 +183,114 @@ myNamespace.matchup = (function($, ns) {
 		});
 		if (useOpendap)
 			dataRequest[portletNameSpace + 'opendapDataURL'] = $("#opendapDataURL").find(":selected").val();
-		var values = ns.ajax.getDatavaluesFromRaster(dataRequest);
+		var values = ns.ajax.getDatavaluesFromRaster(dataRequest, data);
+	}
+
+	function compareData(responseData, data) {
+		var scatterData = [];
+		var databaseVariable = $("#matchVariable2").find(":selected").val();
+		if (Boolean(document.getElementById('updateComparedParameterInData').checked))
+			ns.control.addAParameterToData(responseData, $("#matchVariable").find(":selected").html());
+		var minX, minY, maxX, maxY;
+		$.each(responseData, function(i, val) {
+			var databaseValue = parseFloat(data[i].properties[databaseVariable]);
+			if (databaseValue != -999 && val.value != null) {
+				val.value = parseFloat(val.value);
+				scatterData.push([ val.value, databaseValue ]);
+				if (!minX || minX > val.value)
+					minX = val.value;
+				if (!minY || minY > databaseValue)
+					minY = databaseValue;
+				if (!maxX || maxX < val.value)
+					maxX = val.value;
+				if (!maxY || maxY < databaseValue)
+					maxY = databaseValue;
+			}
+		});
+		minX = (minX - 0.5).toFixed();
+		maxX = (maxX + 0.5).toFixed();
+		minY = (minY - 0.5).toFixed();
+		maxY = (maxY + 0.5).toFixed();
+		var min = minX < minY ? minX : minY;
+		var max = maxX > maxY ? maxX : maxY;
+		min = parseFloat(min);
+		max = parseFloat(max);
+
+		if (debugc) {
+			console.log("min/max:" + minX + "," + minY + "," + maxX + "," + maxY);
+
+			console.log(responseData);
+			console.log("scatterData:");
+			var sd = "[";
+			$.each(scatterData, function(i, d) {
+				sd += "[" + d[0] + "," + d[1] + "],";
+			});
+			console.log(sd + "]");
+		}
+		// $(function() {
+		$('#highchartsContainer').highcharts({
+			chart : {
+				zoomType : 'xy'
+			},
+			title : {
+				text : 'Scatter plot'
+			},
+			xAxis : [ {
+				min : min,
+				max : max,
+				title : {
+					enabled : true,
+					text : 'Model value'
+				}
+			}, ],
+			yAxis : [ {
+				min : min,
+				max : max,
+				title : {
+					enabled : true,
+					text : 'Database value'
+				}
+			}, ],
+			series : [ {
+				yAxis : 0,
+				xAxis : 0,
+				type : 'scatter',
+				name : ns.handleParameters.getHeaderFromRawData(databaseVariable),
+				data : scatterData,
+				// cropThreshold : 20000,
+				animation : false
+			}, {
+				showInLegend : false,
+				yAxis : 0,
+				xAxis : 0,
+				type : 'line',
+				name : 'X=Y',
+				data : [ [ min, min ], [ max, max ] ],
+				animation : false,
+				marker : {
+					enabled : false
+				},
+				states : {
+					hover : {
+						lineWidth : 0
+					}
+				},
+				enableMouseTracking : false
+			} ]
+		});
+		// });
 	}
 
 	// public interface
 	return {
-		setUpParameterMetaSelector:setUpParameterMetaSelector,
+		setUpParameterMetaSelector : setUpParameterMetaSelector,
 		setUpUploadRaster : setUpUploadRaster,
 		initiateRasterData : initiateRasterData,
 		setUpCompareRasterDiv : setUpCompareRasterDiv,
 		updateMatchupParameter : updateMatchupParameter,
 		setUpOPeNDAPSelector : setUpOPeNDAPSelector,
-		compareRaster:compareRaster,
+		compareRaster : compareRaster,
+		compareData : compareData,
 	};
 
 }(jQuery, myNamespace));
