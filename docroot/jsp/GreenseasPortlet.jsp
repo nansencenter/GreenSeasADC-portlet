@@ -19,7 +19,7 @@
 	<div id="mapContainer">
 		<div id="simple_map"></div>
 		<div id="rightOfMap">
-			<div id="legend" ></div>
+			<div id="legend"></div>
 		</div>
 	</div>
 
@@ -218,7 +218,9 @@
 						</div>
 					</div>
 				</div>
-
+				<input type="checkbox" id="updateParametersList" checked />
+				Update the list of parameters with inventory numbers when the main query is run.
+				<br>
 				<input type='button' id='filter' value="Run main query" />
 				<input type='button' id='filterParameters' value="Filter selected parameters" />
 

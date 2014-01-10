@@ -191,7 +191,8 @@ myNamespace.control = (function($, OL, ns) {
 			$("#list").html("No results found");
 		} else {
 			highLightFeaturesWMS(filter, metaDataTable, window.basicSearchName);
-			updateTreeInventoryNumbers();
+			if ($('#updateParametersList').is(':checked'))
+				updateTreeInventoryNumbers();
 			var constructedTable = ns.tableConstructor.featureTable("filterTable", data);
 
 			// remove "loading..." text
@@ -774,16 +775,16 @@ myNamespace.control = (function($, OL, ns) {
 	function clearSelectionButton() {
 		$("#parametersTree").jstree("uncheck_all");
 	}
-	
-	function addTimeSeriesVariableButton(){
+
+	function addTimeSeriesVariableButton() {
 		ns.statistics.addTimeSeriesVariable();
 	}
-	
-	function timeSeriesButton(){
+
+	function timeSeriesButton() {
 		ns.statistics.generateTimeSeries(data);
 	}
-	
-	function propertiesPlotButton(){
+
+	function propertiesPlotButton() {
 		ns.statistics.generatePropertiesPlot(data);
 	}
 
