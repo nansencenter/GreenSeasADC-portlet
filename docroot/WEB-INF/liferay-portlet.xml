@@ -49,6 +49,7 @@
 		<header-portlet-javascript>/js/src/tableConstructor.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/src/mapLayers.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/src/matchup.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/src/statistics.js</header-portlet-javascript>
 	</portlet>
 	<role-mapper>
 		<role-name>administrator</role-name>
