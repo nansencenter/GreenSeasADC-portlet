@@ -117,7 +117,7 @@ myNamespace.matchup = (function($, ns) {
 
 	function generateOptionsFromAllSelectedParameters() {
 		var selectedParameters = ns.handleParameters.chosenParameters.allSelected;
-		options = "";
+		var options = "";
 		$.each(selectedParameters, function(i, val) {
 			options += "<option value=\"" + val + "\">" + ns.handleParameters.getHeaderFromRawData(val) + "</option>";
 		});
@@ -196,7 +196,42 @@ myNamespace.matchup = (function($, ns) {
 			var databaseValue = parseFloat(data[i].properties[databaseVariable]);
 			if (databaseValue != -999 && val.value != null) {
 				val.value = parseFloat(val.value);
-				scatterData.push([ val.value, databaseValue ]);
+				var properties = {
+					id : data[i].id,
+					depth : data[i].properties[depthParameterName],
+					lat : data[i].geometry.coordinates[0],
+					long : data[i].geometry.coordinates[1],
+					rasterLat : val.lat,
+					rasterLong : val.lon,
+					x : val.value,
+					y : databaseValue
+				};
+				if (data[i].properties.date) {
+					var dateArr = data[i].properties.date.split("-");
+					if (dateArr.length == 3) {
+						var year = parseInt(dateArr[0]);
+						// Note that in JavaScript, months start at
+						// 0 for
+						// January, 1 for February etc.
+						var month = parseInt(dateArr[1]) - 1;
+						var day = parseInt(dateArr[2].substring(0, dateArr[2].length));
+						// Set to mid-day if no time is set
+						var hours = 12, minutes = 0, seconds = 0;
+						var time = false;
+						if (data[i].properties.time) {
+							var timeSplit = data[i].properties.time.split(":");
+							if (timeSplit.length == 3) {
+								hours = parseInt(timeSplit[0]);
+								minutes = parseInt(timeSplit[1]);
+								seconds = parseInt(timeSplit[2].substring(0, timeSplit[2].length));
+								time = true;
+							}
+						}
+						properties.time = time;
+						properties.date = Date.UTC(year, month, day, hours, minutes, seconds);
+					}
+				}
+				scatterData.push(properties);
 				if (!minX || minX > val.value)
 					minX = val.value;
 				if (!minY || minY > databaseValue)
@@ -228,56 +263,75 @@ myNamespace.matchup = (function($, ns) {
 			console.log(sd + "]");
 		}
 		// $(function() {
-		$('#highchartsContainer').highcharts({
-			chart : {
-				zoomType : 'xy'
-			},
-			title : {
-				text : 'Scatter plot'
-			},
-			xAxis : [ {
-				min : min,
-				max : max,
-				title : {
-					enabled : true,
-					text : 'Model value'
-				}
-			}, ],
-			yAxis : [ {
-				min : min,
-				max : max,
-				title : {
-					enabled : true,
-					text : 'Database value'
-				}
-			}, ],
-			series : [ {
-				yAxis : 0,
-				xAxis : 0,
-				type : 'scatter',
-				name : ns.handleParameters.getHeaderFromRawData(databaseVariable),
-				data : scatterData,
-				// cropThreshold : 20000,
-				animation : false
-			}, {
-				showInLegend : false,
-				yAxis : 0,
-				xAxis : 0,
-				type : 'line',
-				name : 'X=Y',
-				data : [ [ min, min ], [ max, max ] ],
-				animation : false,
-				marker : {
-					enabled : false
-				},
-				states : {
-					hover : {
-						lineWidth : 0
-					}
-				},
-				enableMouseTracking : false
-			} ]
-		});
+		$('#highchartsContainer').highcharts(
+				{
+					chart : {
+						zoomType : 'xy'
+					},
+					title : {
+						text : 'Scatter plot'
+					},
+					xAxis : [ {
+						min : min,
+						max : max,
+						title : {
+							enabled : true,
+							text : 'Model value'
+						}
+					}, ],
+					yAxis : [ {
+						min : min,
+						max : max,
+						title : {
+							enabled : true,
+							text : 'Database value'
+						}
+					}, ],
+					tooltip : {
+						formatter : function() {
+							var time = "";
+							if (!(typeof this.point.date === "undefined")) {
+								time = " Time:" + Highcharts.dateFormat('%Y-%m-%d', this.point.date);
+							}
+							if (this.point.time) {
+								time += " " + Highcharts.dateFormat("%H:%M:%S", this.point.date);
+							}
+							var depth = "";
+							if (!(typeof this.point.depth === "undefined"))
+								depth = " Depth:" + this.point.depth;
+							return 'ID:' + this.point.id + time + '<br>Lat:' + this.point.lat + ' Long:'
+									+ this.point.long + depth + '<br>' + 'Database value:' + ':' + this.y
+									+ '<br>Raster Lat:' + this.point.rasterLat + ' Raster Long:'
+									+ this.point.rasterLong + '</b><br/>' + 'Raster value:' + ':' + this.x;
+						}
+					},
+					series : [ {
+						yAxis : 0,
+						xAxis : 0,
+						type : 'scatter',
+						name : ns.handleParameters.getHeaderFromRawData(databaseVariable),
+						data : scatterData,
+						// cropThreshold : 20000,
+						animation : false
+					}, {
+						showInLegend : false,
+						yAxis : 0,
+						xAxis : 0,
+						type : 'line',
+						name : 'X=Y',
+						data : [ [ min, min ], [ max, max ] ],
+						animation : false,
+						marker : {
+							enabled : false
+						},
+						states : {
+							hover : {
+								lineWidth : 0
+							}
+						},
+						enableMouseTracking : false
+					} ]
+				});
 		// });
 	}
 

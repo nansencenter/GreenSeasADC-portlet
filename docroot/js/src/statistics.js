@@ -4,7 +4,7 @@ var debugSt = false;// debug flag
 
 myNamespace.statistics = (function($, ns) {
 
-	function generateOneTimeSeriesData(variable,allData) {
+	function generateOneTimeSeriesData(variable, allData) {
 		var tsData = [];
 		$.each(allData, function(i, val) {
 			/*
@@ -65,7 +65,7 @@ myNamespace.statistics = (function($, ns) {
 		var data = [];
 
 		$.each(variables, function(i, val) {
-			data.push(generateOneTimeSeriesData(val,allData));
+			data.push(generateOneTimeSeriesData(val, allData));
 		});
 		var colors = [ '#89A54E', '#4572A7', '#AA4643', '#D4C601', '#BA00CB', '#15E1C9' ];
 		var opposite = [ false, true, true ];
@@ -121,7 +121,7 @@ myNamespace.statistics = (function($, ns) {
 	function generatePropertiesPlot(allData) {
 		var horizontalPar = $("#propertiesPlotVariable1").find(":selected").val();
 		var verticalPar = $("#propertiesPlotVariable2").find(":selected").val();
-		var ppData = generatePropertiesPlotData(horizontalPar, verticalPar,allData);
+		var ppData = generatePropertiesPlotData(horizontalPar, verticalPar, allData);
 		// $(function() {
 		$('#propertiesPlotContainer').highcharts(
 				{
@@ -146,14 +146,20 @@ myNamespace.statistics = (function($, ns) {
 					} ],
 					tooltip : {
 						formatter : function() {
-							//TODO: add time
+							var time = "";
+							if (!(typeof this.point.date === "undefined")) {
+								time = " Time:" + Highcharts.dateFormat('%Y-%m-%d', this.point.date);
+							}
+							if (this.point.time) {
+								time += " " + Highcharts.dateFormat("%H:%M:%S", this.point.date);
+							}
 							var depth = "";
-							if (this.point.depth)
+							if (!(typeof this.point.depth === "undefined"))
 								depth = " Depth:" + this.point.depth;
-							return 'ID:' + this.point.id + '<br>Lat:' + this.point.lat + ' Long:' + this.point.long
-									+ depth + '</b><br/>' + ns.handleParameters.getHeaderFromRawData(horizontalPar)
-									+ ':' + this.x + '<br>' + ns.handleParameters.getHeaderFromRawData(verticalPar)
-									+ ':' + this.y;
+							return 'ID:' + this.point.id + time + '<br>Lat:' + this.point.lat + ' Long:'
+									+ this.point.long + depth + '</b><br/>'
+									+ ns.handleParameters.getHeaderFromRawData(horizontalPar) + ':' + this.x + '<br>'
+									+ ns.handleParameters.getHeaderFromRawData(verticalPar) + ':' + this.y;
 						}
 					},
 					series : [ {
@@ -168,7 +174,7 @@ myNamespace.statistics = (function($, ns) {
 		// });
 	}
 
-	function generatePropertiesPlotData(horizontalPar, verticalPar,allData) {
+	function generatePropertiesPlotData(horizontalPar, verticalPar, allData) {
 		var ppData = [];
 		$.each(allData, function(i, val) {
 			if (val.properties[horizontalPar]) {
@@ -179,15 +185,41 @@ myNamespace.statistics = (function($, ns) {
 					if (val.properties[verticalPar]) {
 						var y = parseFloat(val.properties[verticalPar]);
 						if (y != -999) {
-							ppData.push({
-								//TODO: add time
+							var properties = {
+								// TODO: add time
 								x : x,
 								y : y,
 								id : val.id,
 								depth : val.properties[depthParameterName],
 								lat : val.geometry.coordinates[0],
 								long : val.geometry.coordinates[1]
-							});
+							};
+							if (val.properties.date) {
+								var dateArr = val.properties.date.split("-");
+								if (dateArr.length == 3) {
+									var year = parseInt(dateArr[0]);
+									// Note that in JavaScript, months start at
+									// 0 for
+									// January, 1 for February etc.
+									var month = parseInt(dateArr[1]) - 1;
+									var day = parseInt(dateArr[2].substring(0, dateArr[2].length));
+									// Set to mid-day if no time is set
+									var hours = 12, minutes = 0, seconds = 0;
+									var time = false;
+									if (val.properties.time) {
+										var timeSplit = val.properties.time.split(":");
+										if (timeSplit.length == 3) {
+											hours = parseInt(timeSplit[0]);
+											minutes = parseInt(timeSplit[1]);
+											seconds = parseInt(timeSplit[2].substring(0, timeSplit[2].length));
+											time = true;
+										}
+									}
+									properties.time = time;
+									properties.date = Date.UTC(year, month, day, hours, minutes, seconds);
+								}
+							}
+							ppData.push(properties);
 						}
 					}
 				}
@@ -221,7 +253,7 @@ myNamespace.statistics = (function($, ns) {
 								clock = " " + Highcharts.dateFormat("%H:%M:%S", this.x);
 							}
 							var depth = "";
-							if (this.point.depth)
+							if (!(typeof this.point.depth === "undefined"))
 								depth = " Depth:" + this.point.depth;
 							return '<b> ' + this.series.name + ' <br>ID:' + this.point.id + '<br>Lat:' + this.point.lat
 									+ ' Long:' + this.point.long + depth + '</b><br/>'
@@ -236,7 +268,7 @@ myNamespace.statistics = (function($, ns) {
 					series : tsData.series
 				});
 	}
-	
+
 	function generateStatistics(data) {
 		var statisticsTable = ns.tableConstructor.generateStatistics(data);
 		$("#statisticsContainer").html(statisticsTable);
@@ -284,13 +316,13 @@ myNamespace.statistics = (function($, ns) {
 		selectElement += options + "</select>";
 		$("#timeSeriesVariableDiv").append(selectElement);
 	}
-	
+
 	return {
-		setUpTimeSeriesVariables:setUpTimeSeriesVariables,
-		setUpPropertiesPlotVariables:setUpPropertiesPlotVariables,
-		addTimeSeriesVariable:addTimeSeriesVariable,
-		generateTimeSeries:generateTimeSeries,
-		generatePropertiesPlot:generatePropertiesPlot,
-		generateStatistics:generateStatistics
+		setUpTimeSeriesVariables : setUpTimeSeriesVariables,
+		setUpPropertiesPlotVariables : setUpPropertiesPlotVariables,
+		addTimeSeriesVariable : addTimeSeriesVariable,
+		generateTimeSeries : generateTimeSeries,
+		generatePropertiesPlot : generatePropertiesPlot,
+		generateStatistics : generateStatistics
 	};
 }(jQuery, myNamespace));
