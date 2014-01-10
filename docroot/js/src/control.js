@@ -191,8 +191,7 @@ myNamespace.control = (function($, OL, ns) {
 			$("#list").html("No results found");
 		} else {
 			highLightFeaturesWMS(filter, metaDataTable, window.basicSearchName);
-			if ($('#updateParametersList').is(':checked'))
-				updateTreeInventoryNumbers();
+			updateTreeInventoryNumbers();
 			var constructedTable = ns.tableConstructor.featureTable("filterTable", data);
 
 			// remove "loading..." text
@@ -564,14 +563,17 @@ myNamespace.control = (function($, OL, ns) {
 					var element = $(document.getElementById(val.id));
 					var newText = element.data("baseheader");
 					$("#parametersTree").jstree("set_text", element, newText);
-					ns.WebFeatureService.getFeature({
-						TYPENAME : layer,
-						FILTER : ns.query.constructParameterFilterString(propertyNames, depth, filterBbox, date,
-								months, region),
-						RESULTTYPE : "hits"
-					}, function(response) {
-						updateTreeWithInventoryNumbers(response, splitString[0], par);
-					});
+					//Should optimize this, most of the above is not needed if this is the case
+					if ($('#updateParametersList').is(':checked')) {
+						ns.WebFeatureService.getFeature({
+							TYPENAME : layer,
+							FILTER : ns.query.constructParameterFilterString(propertyNames, depth, filterBbox, date,
+									months, region),
+							RESULTTYPE : "hits"
+						}, function(response) {
+							updateTreeWithInventoryNumbers(response, splitString[0], par);
+						});
+					}
 				}
 			}
 		});
