@@ -57,7 +57,7 @@ myNamespace.matchup = (function($, ns) {
 		var selectElement = "Raster variable:<select id=\"matchVariable\">";
 		var options = "<option value='NONE'>Select variable</option>";
 		$.each(parameters, function(key, val) {
-			var variable = key.substring(0, key.indexOf("("));
+			var variable = key;// key.substring(0, key.indexOf("("));
 			var variableName = val.trim();
 			if (variableName == "")
 				variableName = variable;

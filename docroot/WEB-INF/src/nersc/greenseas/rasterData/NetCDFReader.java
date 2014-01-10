@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.geotoolkit.referencing.CRS;
-import org.geotoolkit.referencing.crs.DefaultGeographicCRS;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -17,7 +16,6 @@ import org.opengis.util.FactoryException;
 
 import ucar.ma2.Array;
 import ucar.ma2.IndexIterator;
-import ucar.nc2.Dimension;
 import ucar.nc2.Variable;
 import ucar.nc2.dataset.CoordinateAxis;
 import ucar.nc2.dataset.CoordinateAxis1D;
@@ -31,9 +29,7 @@ import uk.ac.rdg.resc.edal.cdm.LookUpTableGrid;
 import uk.ac.rdg.resc.edal.coverage.grid.GridCoordinates;
 import uk.ac.rdg.resc.edal.coverage.grid.HorizontalGrid;
 import uk.ac.rdg.resc.edal.geometry.HorizontalPosition;
-import uk.ac.rdg.resc.edal.geometry.LonLatPosition;
 import uk.ac.rdg.resc.edal.geometry.impl.HorizontalPositionImpl;
-import uk.ac.rdg.resc.edal.util.Utils;
 
 public class NetCDFReader {
 
@@ -224,8 +220,15 @@ public class NetCDFReader {
 		}
 		for (Variable v : ncfile.getVariables()) {
 			// Check that its not an dimension, like time, depth,lan,lot
-			if (v.getRank() > 1 && axisName.indexOf(v.getFullNameEscaped()) == -1)
-				layers.put(v.getNameAndDimensions(), v.getDescription());
+			if (v.getRank() > 1 && axisName.indexOf(v.getFullNameEscaped()) == -1) {
+				String unit = v.getUnitsString();
+				if (unit == null)
+					unit = "No unit set";
+				String description = v.getDescription();
+				if (description.trim().equals(""))
+					description = v.getFullName();
+				layers.put(v.getFullName(), description + "(" + unit + ")");
+			}
 		}
 		return layers;
 	}
