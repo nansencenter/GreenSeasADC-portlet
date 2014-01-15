@@ -170,6 +170,19 @@
 					</div>
 
 					<h3>
+						<span id='cruiseHeaderText'>Cruise <em>(off)</em></span>
+					</h3>
+					<div id='cruiseSelectedDiv'>
+
+						<div>
+							<input type="checkbox" id="cruiseEnabledCheck">
+							Enable in query
+						</div>
+						<em>Select a cruise</em>
+						<div id="cruiseSelectorDiv"></div>
+					</div>
+
+					<h3>
 						<span id='regionHeaderText'>Longhurst region <em>(off)</em></span>
 					</h3>
 					<div id='regionSelected'>

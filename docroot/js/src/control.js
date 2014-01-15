@@ -67,9 +67,37 @@ myNamespace.control = (function($, OL, ns) {
 		ns.mapLayers.setUpStyleForLegend();
 
 		setUpRegions();
+		setUpCruiseSelector();
 		ns.matchup.setUpUploadRaster();
 		ns.matchup.setUpOPeNDAPSelector();
 		ns.mapLayers.addWMSLayerSelector();
+	}
+
+	function setUpCruiseSelector() {
+		var cruises = {
+				AMT1 : "Atlantic Meridional Transect (AMT) 1",
+				AMT2 : "Atlantic Meridional Transect (AMT) 2",
+				AMT3 : "Atlantic Meridional Transect (AMT) 3",
+				AMT4 : "Atlantic Meridional Transect (AMT) 4",
+				AMT5 : "Atlantic Meridional Transect (AMT) 5",
+				AMT6 : "Atlantic Meridional Transect (AMT) 6",
+				AMT6b : "Atlantic Meridional Transect (AMT) 6b",
+				AMT7 : "Atlantic Meridional Transect (AMT) 7",
+				AMT8 : "Atlantic Meridional Transect (AMT) 8",
+				AMT9 : "Atlantic Meridional Transect (AMT) 9",
+				AMT10 : "Atlantic Meridional Transect (AMT) 10",
+				AMT11 : "Atlantic Meridional Transect (AMT) 11",
+				AMT12 : "Atlantic Meridional Transect (AMT) 12",
+				AMT13 : "Atlantic Meridional Transect (AMT) 13",
+				AMT14 : "Atlantic Meridional Transect (AMT) 14",
+				AMT15 : "Atlantic Meridional Transect (AMT) 15",
+				AMT16 : "Atlantic Meridional Transect (AMT) 16",
+				AMT17 : "Atlantic Meridional Transect (AMT) 17",
+				AMT18 : "Atlantic Meridional Transect (AMT) 18",
+				AMT19 : "Atlantic Meridional Transect (AMT) 19",
+				AMT20 : "Atlantic Meridional Transect (AMT) 20",
+		};
+		$("#cruiseSelectorDiv").html(ns.mapLayers.setUpSelector(cruises, "cruiseSelected", "cruiseSelected"));
 	}
 
 	function setUpRegions() {
@@ -122,6 +150,11 @@ myNamespace.control = (function($, OL, ns) {
 		var months = ns.query.createMonthArray();
 		var depth = ns.query.createDepthHashMap();
 		var region = ns.query.createRegionArray();
+		var cruise = null;
+		if (document.getElementById('cruiseEnabledCheck').checked) {
+			cruise = $("#cruiseSelected").find(":selected").val();
+			console.log("Cruise enabled:"+cruise);
+		}
 
 		var propertyName = [];
 		// Adding the parameters to the array
@@ -142,7 +175,7 @@ myNamespace.control = (function($, OL, ns) {
 		if (debugc)
 			console.log("control.js: calling ns.query.constructFilterString()"); // TEST
 
-		var filter = ns.query.constructFilterString(filterBbox, date, attr, depth, months, region);
+		var filter = ns.query.constructFilterString(filterBbox, date, attr, depth, months, region, cruise);
 
 		// GetFeature request with filter, callback handles result
 		if (debugc)
@@ -290,8 +323,11 @@ myNamespace.control = (function($, OL, ns) {
 		var filterBbox = ns.query.createfilterBoxHashMap();
 		var date = ns.query.createDateHashMap();
 		var months = ns.query.createMonthArray();
-
-		var filter = ns.query.constructParameterFilterString(propertyNameNeed, depth, filterBbox, date, months, region);
+		var cruise = null;
+		if (document.getElementById('cruiseEnabledCheck').checked) {
+			cruise = $("#cruiseSelected").find(":selected").val();
+		}
+		var filter = ns.query.constructParameterFilterString(propertyNameNeed, depth, filterBbox, date, months, region,cruise);
 		// Requesting features from the first layer through an asynchronous
 		// request and sending response to displayParameter
 		ns.WebFeatureService.getFeature({
@@ -525,6 +561,10 @@ myNamespace.control = (function($, OL, ns) {
 		var months = ns.query.createMonthArray();
 		var depth = ns.query.createDepthHashMap();
 		var region = ns.query.createRegionArray();
+		var cruise = null;
+		if (document.getElementById('cruiseEnabledCheck').checked) {
+			cruise = $("#cruiseSelected").find(":selected").val();
+		}
 		var myTreeContainer = $.jstree._reference("#parametersTree").get_container();
 		var allChildren = myTreeContainer.find("li");
 		$.each(allChildren, function(i, val) {
@@ -563,12 +603,13 @@ myNamespace.control = (function($, OL, ns) {
 					var element = $(document.getElementById(val.id));
 					var newText = element.data("baseheader");
 					$("#parametersTree").jstree("set_text", element, newText);
-					//Should optimize this, most of the above is not needed if this is the case
+					// Should optimize this, most of the above is not needed if
+					// this is the case
 					if ($('#updateParametersList').is(':checked')) {
 						ns.WebFeatureService.getFeature({
 							TYPENAME : layer,
 							FILTER : ns.query.constructParameterFilterString(propertyNames, depth, filterBbox, date,
-									months, region),
+									months, region,cruise),
 							RESULTTYPE : "hits"
 						}, function(response) {
 							updateTreeWithInventoryNumbers(response, splitString[0], par);
