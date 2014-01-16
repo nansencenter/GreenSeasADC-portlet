@@ -168,9 +168,9 @@
 							metadata will be selected.</em>
 						<div id="metadataTree"></div>
 					</div>
-
+					
 					<h3>
-						<span id='cruiseHeaderText'>Cruise <em>(off)</em></span>
+						<span id='cruiseHeaderText'>Cruise/Station <em>(off)</em></span>
 					</h3>
 					<div id='cruiseSelectedDiv'>
 
