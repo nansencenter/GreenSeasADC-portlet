@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugq = true;// debug flag
+var debugq = false;// debug flag
 
 myNamespace.query = (function(OL, $) {
 	"use strict";

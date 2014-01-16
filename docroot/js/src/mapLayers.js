@@ -301,7 +301,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 
 	function setUpStyleForLegend() {
 		var browser = myNamespace.XMLParser.findBrowser();
-		console.log("Browser:" + browser);
+		//console.log("Browser:" + browser);
 		var legend = $("#legend");
 		if (browser == "Trident") {
 			legend.css("display", [ "-ms-inline-flexbox" ]);
