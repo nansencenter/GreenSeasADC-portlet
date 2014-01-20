@@ -96,6 +96,7 @@ myNamespace.control = (function($, OL, ns) {
 			AMT18 : "Atlantic Meridional Transect (AMT) 18",
 			AMT19 : "Atlantic Meridional Transect (AMT) 19",
 			AMT20 : "Atlantic Meridional Transect (AMT) 20",
+			Polarfront : "Polarfront",
 		};
 		$("#cruiseSelectorDiv").html(ns.mapLayers.setUpSelector(cruises, "cruiseSelected", "cruiseSelected"));
 	}
