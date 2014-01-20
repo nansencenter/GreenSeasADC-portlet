@@ -129,60 +129,69 @@ public class NetCDFReader {
 			Point p = points[i];
 			// find the x,y index for a specific lat/lon position
 			// xy[0] = x, xy[1] = y
-			if (p != null) {
-				if (horizontalGrid != null) {
-					HorizontalPosition pos = new HorizontalPositionImpl(p.lon, p.lat, CRS.decode("EPSG:4326"));
-					GridCoordinates gridCoords = horizontalGrid.findNearestGridPoint(pos);
-					Array data = grid.readDataSlice(time, elevation, gridCoords.getCoordinateValue(1),
-							gridCoords.getCoordinateValue(0));
-					// we know its a scalar //TODO?
-					if (data.getDouble(0) == Double.NaN) {
-						// System.out.println("Lat/Long x/y NOT FOUND for " + p
-						// +
-						// ": " + xy[0] + "," + xy[1] + " VALUE:"
-						// + data.getDouble(0));
+			try {
+				if (p != null) {
+					if (horizontalGrid != null) {
+						HorizontalPosition pos = new HorizontalPositionImpl(p.lon, p.lat, CRS.decode("EPSG:4326"));
+						GridCoordinates gridCoords = horizontalGrid.findNearestGridPoint(pos);
+						Array data = grid.readDataSlice(time, elevation, gridCoords.getCoordinateValue(1),
+								gridCoords.getCoordinateValue(0));
+						// we know its a scalar //TODO?
+						if (data.getDouble(0) == Double.NaN) {
+							// System.out.println("Lat/Long x/y NOT FOUND for "
+							// + p
+							// +
+							// ": " + xy[0] + "," + xy[1] + " VALUE:"
+							// + data.getDouble(0));
+						} else {
+							Map<String, Double> values = new HashMap<String, Double>();
+							values.put("value", data.getDouble(0));
+							LatLonPoint latlonP = gcs.getLatLon(gridCoords.getCoordinateValue(0),
+									gridCoords.getCoordinateValue(1));
+							values.put("lat", latlonP.getLatitude());
+							values.put("lon", latlonP.getLongitude());
+							// System.out.println("Lat/Long x/y FOUND for " + p
+							// +
+							// ": " +
+							// xy[0] + "," + xy[1] + " VALUE:"
+							// + data.getDouble(0));
+							val.put(p.id, values);
+						}
 					} else {
-						Map<String, Double> values = new HashMap<String, Double>();
-						values.put("value", data.getDouble(0));
-						LatLonPoint latlonP = gcs.getLatLon(gridCoords.getCoordinateValue(0),
-								gridCoords.getCoordinateValue(1));
-						values.put("lat", latlonP.getLatitude());
-						values.put("lon", latlonP.getLongitude());
-						// System.out.println("Lat/Long x/y FOUND for " + p +
-						// ": " +
-						// xy[0] + "," + xy[1] + " VALUE:"
-						// + data.getDouble(0));
-						val.put(p.id, values);
-					}
-				} else {
-					int[] xy = gcs.findXYindexFromLatLon(p.lat, p.lon, null);
+						int[] xy = gcs.findXYindexFromLatLon(p.lat, p.lon, null);
 
-					// read the data at that lat, lon and the first time and z
-					// level
-					// (if
-					// any)
-					// note order is t, z, y, x
-					// TODO: TIME/DEPTH
-					Array data = grid.readDataSlice(time, elevation, xy[1], xy[0]);
-					// we know its a scalar //TODO?
-					if (data.getDouble(0) == Double.NaN) {
-						// System.out.println("Lat/Long x/y NOT FOUND for " + p
-						// +
-						// ": " + xy[0] + "," + xy[1] + " VALUE:"
-						// + data.getDouble(0));
-					} else {
-						Map<String, Double> values = new HashMap<String, Double>();
-						values.put("value", data.getDouble(0));
-						LatLonPoint latlonP = gcs.getLatLon(xy[0], xy[1]);
-						values.put("lat", latlonP.getLatitude());
-						values.put("lon", latlonP.getLongitude());
-						// System.out.println("Lat/Long x/y FOUND for " + p +
-						// ": " +
-						// xy[0] + "," + xy[1] + " VALUE:"
-						// + data.getDouble(0));
-						val.put(p.id, values);
+						// read the data at that lat, lon and the first time and
+						// z
+						// level
+						// (if
+						// any)
+						// note order is t, z, y, x
+						// TODO: TIME/DEPTH
+						Array data = grid.readDataSlice(time, elevation, xy[1], xy[0]);
+						// we know its a scalar //TODO?
+						if (data.getDouble(0) == Double.NaN) {
+							// System.out.println("Lat/Long x/y NOT FOUND for "
+							// + p
+							// +
+							// ": " + xy[0] + "," + xy[1] + " VALUE:"
+							// + data.getDouble(0));
+						} else {
+							Map<String, Double> values = new HashMap<String, Double>();
+							values.put("value", data.getDouble(0));
+							LatLonPoint latlonP = gcs.getLatLon(xy[0], xy[1]);
+							values.put("lat", latlonP.getLatitude());
+							values.put("lon", latlonP.getLongitude());
+							// System.out.println("Lat/Long x/y FOUND for " + p
+							// +
+							// ": " +
+							// xy[0] + "," + xy[1] + " VALUE:"
+							// + data.getDouble(0));
+							val.put(p.id, values);
+						}
 					}
 				}
+			} catch (IndexOutOfBoundsException e) {
+				log("Got IndexOutOfBoundsException when processing the point:" + p, e);
 			}
 		}
 		return val;
