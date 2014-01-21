@@ -833,7 +833,10 @@ myNamespace.control = (function($, OL, ns) {
 	function propertiesPlotButton() {
 		ns.statistics.generatePropertiesPlot(data);
 	}
-
+	
+	function createNetCDFButton(){
+		ns.ajax.createNetCDF();
+	}
 	// public interface
 	return {
 		addLayerButton : addLayerButton,
@@ -859,6 +862,7 @@ myNamespace.control = (function($, OL, ns) {
 		toggleOrderPlanktonButton : toggleOrderPlanktonButton,
 		clearSelectionButton : clearSelectionButton,
 		addAParameterToData : addAParameterToData,
+		createNetCDFButton : createNetCDFButton,
 	};
 
 }(jQuery, OpenLayers, myNamespace));

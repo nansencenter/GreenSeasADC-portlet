@@ -31,6 +31,7 @@
 			<!-- 			<li><a href="#rasterTab">Configure raster data</a></li> -->
 			<li><a href="#matchUpTab">Model/data matchup</a></li>
 			<li><a href="#layersTab">Configure Map layers</a></li>
+			<li><a href="#createNetCDFTab">NetCDF</a></li>
 
 		</ul>
 		<div id="queryTab">
@@ -358,6 +359,9 @@
 			<br>
 			<div id="layerURLSelectorContainer"></div>
 			<input type='button' id='addLayerButton' value="Add new layer" />
+		</div>
+		<div id="createNetCDFTab">
+			<input type='button' id='createNetCDFButton' value="Create NetCDF" />
 		</div>
 
 	</div>

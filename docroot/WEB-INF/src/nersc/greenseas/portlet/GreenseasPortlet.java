@@ -42,6 +42,7 @@ import org.json.simple.JSONObject;
 
 import nersc.greenseas.configuration.DatabaseProperties;
 import nersc.greenseas.rasterData.NetCDFReader;
+import nersc.greenseas.rasterData.NetCDFWriter;
 
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.util.PortalUtil;
@@ -144,6 +145,9 @@ public class GreenseasPortlet extends MVCPortlet {
 			PrintWriter writer = resourceResponse.getWriter();
 			writer.write(jsonObject.toString());
 			return;
+		} else if (requestType.equals("createNetCDF")){
+			Map<String, String[]> parameterMap = resourceRequest.getParameterMap();
+			NetCDFWriter.createNetCDF(parameterMap);
 		}
 	}
 
@@ -168,7 +172,7 @@ public class GreenseasPortlet extends MVCPortlet {
 
 	}
 
-	private String createDirectory(String base, String[] subFolders) {
+	static public String createDirectory(String base, String[] subFolders) {
 		base += File.separator;
 		File directory = new File(base);
 		// if the directory does not exist, create it
