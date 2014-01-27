@@ -835,7 +835,7 @@ myNamespace.control = (function($, OL, ns) {
 	}
 	
 	function createNetCDFButton(){
-		ns.ajax.createNetCDF();
+		ns.ajax.createNetCDF(data,$('#timeResolution').val());
 	}
 	// public interface
 	return {

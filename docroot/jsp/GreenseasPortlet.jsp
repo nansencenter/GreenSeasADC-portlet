@@ -28,7 +28,6 @@
 			<li><a href="#queryTab">Search</a></li>
 			<li><a href="#parametersTab">Search results</a></li>
 			<li><a href="#statsTab">Statistics, plots and charts</a></li>
-			<!-- 			<li><a href="#rasterTab">Configure raster data</a></li> -->
 			<li><a href="#matchUpTab">Model/data matchup</a></li>
 			<li><a href="#layersTab">Configure Map layers</a></li>
 			<li><a href="#createNetCDFTab">NetCDF</a></li>
@@ -83,9 +82,9 @@
 						<em>Date (Use yyyy-mm-dd format if no date picker appears)</em>
 						<br>
 						Between
-						<input type="date" id="fromDate" value="1915-01-01">
+						<input type="date" id="fromDate" value="1913-01-01">
 						and
-						<input type="date" id="toDate" value="2007-01-01">
+						<input type="date" id="toDate" value="2012-01-01">
 						<br>
 						<input type="checkbox" id="timeEnabledCheck">
 						Include time in the date-search (date search must be enabled for this)
@@ -148,7 +147,7 @@
 									Minimum depth
 								</div>
 								<div class='left'>
-									<input type='text' id='depthMax' size="3" value="0" />
+									<input type='text' id='depthMax' size="3" value="10" />
 									Maximum depth
 								</div>
 
@@ -169,7 +168,7 @@
 							metadata will be selected.</em>
 						<div id="metadataTree"></div>
 					</div>
-					
+
 					<h3>
 						<span id='cruiseHeaderText'>Cruise/Station <em>(off)</em></span>
 					</h3>
@@ -200,11 +199,6 @@
 						<span id='parametersHeaderText'>Parameters</span>
 					</h3>
 					<div id='parametersNeeded'>
-
-						<!-- 						<div> -->
-						<!-- 							<input type="checkbox" id="parametersEnabledCheck"> -->
-						<!-- 							Enable in query -->
-						<!-- 						</div> -->
 						<em>Tip1: Start with a main query based on the different search criteria above, and press the button for main
 							query. Now a number should be updated behind each parameter (it will take some time to compute them all), which
 							indicates how many entries of this kind there are available in the first search. Then select parameters and press
@@ -361,6 +355,18 @@
 			<input type='button' id='addLayerButton' value="Add new layer" />
 		</div>
 		<div id="createNetCDFTab">
+			Also need some "method" of how to combine/interpolate values - especially points that maps to the same
+			depth/lat/long/time
+			<br>
+			<input type='number' id='timeResolution' value="10080" />
+			timeResolution - make day/week/month/year/decade dropbox
+			<br>
+			<input type='number' id='latLonResolution' value="1" />
+			latLonResolution
+			<br>
+			<input type='text' id='depthInterpolation' size="10" />
+			depthInterpolation
+			<br>
 			<input type='button' id='createNetCDFButton' value="Create NetCDF" />
 		</div>
 
@@ -370,18 +376,18 @@
 
 <aui:script>
 	$(document).ready(function() {
-	<!-- Initiating context path for images -->
-	window.contextPath = "<%=request.getContextPath()%>";
-	<!-- Initiating all properties from the main properties file -->
-	<%=renderRequest.getAttribute("allProperties")%>
-	<!-- Initiating window.allParametersHeader -->
-	<%=renderRequest.getAttribute("allParametersHeader")%>
-	<!-- Initiating window.combinedParamaters -->
-	<%=renderRequest.getAttribute("combinedParameters")%>
-	<!-- Initiating window.longhurstRegions -->
-	<%=renderRequest.getAttribute("longhurstRegions")%>
-	<!-- Initiating window.allLayersHeader and window.allLayers -->
-	<%=renderRequest.getAttribute("allLayers")%>
+		<!-- Initiating context path for images -->
+		window.contextPath = "<%=request.getContextPath()%>";
+		<!-- Initiating all properties from the properties files -->
+		<%=renderRequest.getAttribute("allProperties")%>
+		<!-- Initiating window.allParametersHeader -->
+		<%=renderRequest.getAttribute("allParametersHeader")%>
+		<!-- Initiating window.combinedParamaters -->
+		<%=renderRequest.getAttribute("combinedParameters")%>
+		<!-- Initiating window.longhurstRegions -->
+		<%=renderRequest.getAttribute("longhurstRegions")%>
+		<!-- Initiating window.allLayersHeader and window.allLayers -->
+		<%=renderRequest.getAttribute("allLayers")%>
 		window.portletNameSpace = '<portlet:namespace />';
 		window.ajaxCallResourceURL = '<%=ajaxCallResourceURL.toString()%>';
 		myNamespace.control.init();
