@@ -11,7 +11,7 @@ myNamespace.mapViewer = (function(OL, $) {
 
 	// map on which layers are drawn
 	var map;
-	
+
 	var mapPanel, printProvider;
 
 	// Object that stores the layers for the parameters
@@ -38,16 +38,17 @@ myNamespace.mapViewer = (function(OL, $) {
 	// front layers drawn on the map widget, can be toggled on/off
 	var mapLayers = {};
 	function initMapLayers() {
+		console.log(6);
 		mapLayers = {
 			datapoints : new OpenLayers.Layer.WMS("Data points", window.WMSServer, {
+				version: "1.3",
 				layers : window.metaDataTable,
 				format : window.WMSformat,
-				/*
-				 * styles : "TestingStyle", env : "color:0BFF0B;size:5",
-				 */
 				transparent : true
 			}, {
-				isBaseLayer : false
+				isBaseLayer : false,
+				projection : 'EPSG:4326',
+				yx : {"EPSG:4326":false,"EPSG:32761":true}
 			}),
 		};
 	}
@@ -60,6 +61,16 @@ myNamespace.mapViewer = (function(OL, $) {
 		}
 		return color;
 	}
+
+	var polarMaxExtent = new OpenLayers.Bounds(-10700000, -10700000, 14700000, 14700000);
+	var halfSideLength = (polarMaxExtent.top - polarMaxExtent.bottom) / (4 * 2);
+	var centre = ((polarMaxExtent.top - polarMaxExtent.bottom) / 2) + polarMaxExtent.bottom;
+	var low = centre - halfSideLength;
+	var high = centre + halfSideLength;
+	var polarMaxResolution = (high - low) / 256;
+	var windowLow = centre - 2 * halfSideLength;
+	var windowHigh = centre + 2 * halfSideLength;
+	var polarWindow = new OpenLayers.Bounds(windowLow, windowLow, windowHigh, windowHigh);
 
 	// some background layers, user may select one
 	var backgroundLayers = {
@@ -84,7 +95,60 @@ myNamespace.mapViewer = (function(OL, $) {
 					layers : 'geonode:Longhurst_world_v4_2010',
 					format : window.WMSformat
 				}),
+		northPoleBaseLayer : new OpenLayers.Layer.WMS("North polar stereographic",
+				"http://wms-basemaps.appspot.com/wms", {
+					layers : 'bluemarble_file',
+					format : 'image/jpeg'
+				}, {
+					wrapDateLine : false,
+					transitionEffect : 'resize',
+					projection : 'EPSG:32661',
+					maxExtent : polarWindow,
+					maxResolution : polarMaxResolution,
+				}),
+		southPoleBaseLayer : new OpenLayers.Layer.WMS("South polar stereographic",
+				"http://wms-basemaps.appspot.com/wms", {
+					layers : 'bluemarble_file',
+					format : 'image/jpeg'
+				}, {
+					wrapDateLine : false,
+					transitionEffect : 'resize',
+					projection : 'EPSG:32761',
+					maxExtent : polarWindow,
+					maxResolution : polarMaxResolution,
+				})
 	};
+
+	var projectionCode = null;
+
+	// Called when the user changes the base layer
+	function baseLayerChanged(event) {
+		// clearPopups();
+		// Change the parameters of the map based on the new base layer
+		map.setOptions({
+			// projection: projCode,
+			maxExtent : map.baseLayer.maxExtent,
+			maxResolution : map.baseLayer.maxResolution
+		});
+		if (projectionCode != map.baseLayer.projection.getCode()) {
+			// We've changed the projection of the base layer
+			projectionCode = map.baseLayer.projection.getCode();
+			map.zoomToMaxExtent();
+		}
+		/*
+		 * if (ncwms != null) { ncwms_tiled.maxExtent = map.baseLayer.maxExtent;
+		 * ncwms_tiled.maxResolution = map.baseLayer.maxResolution;
+		 * ncwms_tiled.minResolution = map.baseLayer.minResolution;
+		 * ncwms_tiled.resolutions = map.baseLayer.resolutions; // We only wrap
+		 * the datelinein EPSG:4326 ncwms_tiled.wrapDateLine =
+		 * map.baseLayer.projection == 'EPSG:4326'; ncwms_untiled.maxExtent =
+		 * map.baseLayer.maxExtent; ncwms_untiled.maxResolution =
+		 * map.baseLayer.maxResolution; ncwms_untiled.minResolution =
+		 * map.baseLayer.minResolution; ncwms_untiled.resolutions =
+		 * map.baseLayer.resolutions; ncwms_untiled.wrapDateLine =
+		 * map.baseLayer.projection == 'EPSG:4326'; updateMap(); }
+		 */
+	}
 
 	function initMap() {
 		if (debugmW)
@@ -100,75 +164,70 @@ myNamespace.mapViewer = (function(OL, $) {
 		OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
 
 		map = new OpenLayers.Map();
-//				'simple_map', 
+		// 'simple_map',
 		map.setOptions({
-			scales : [ 150000000, 80000000, 50000000, 30000000, 10000000, 5000000, 2500000, 1000000, 500000 ],
+			// scales : [ 150000000, 80000000, 50000000, 30000000, 10000000,
+			// 5000000, 2500000, 1000000, 500000 ],
 			maxExtent : maxExtent,
 			maxResolution : 'auto',
-			units : 'degrees',
-			
-			// actively excluding the standard zoom control, which is there by
-			// default
-//			map.addControls([ new OpenLayers.Control.Navigation(), new OpenLayers.Control.ArgParser(),
-//					new OpenLayers.Control.Attribution() ]);
+		// units : 'degrees',
+
+		// actively excluding the standard zoom control, which is there by
+		// default
+		// map.addControls([ new OpenLayers.Control.Navigation(), new
+		// OpenLayers.Control.ArgParser(),
+		// new OpenLayers.Control.Attribution() ]);
 		});
+		map.events.register('changebaselayer', map, baseLayerChanged);
 
 		mapPanel = new GeoExt.MapPanel({
-	        //region: "center",
-			map: map,
-			/*center: [0,0],
-	        zoom: 1,*/
+			// region: "center",
+			map : map,
+		/*
+		 * center: [0,0], zoom: 1,
+		 */
 		});
-		
 
-		//url = "http://localhost:8090/geoserver/pdf";
-		/*var url = "http://localhost:8081/print-servlet-1.2.0/pdf";
-		 printProvider = new GeoExt.data.PrintProvider({
-		        // using get for remote service access without same origin restriction.
-		        // For asynchronous requests, we would set method to "POST".
-//		        method: "GET",
-		        method: "POST",
-		        
-		        // capabilities from script tag in Printing.html. For asynchonous
-		        // loading, we would configure url instead of capabilities.
-//		        capabilities: printCapabilities
-		        url: url,
-		    });
-		 printProvider.loadCapabilities();*/
-		 
-//		renderTo: "simple_map"
+		// url = "http://localhost:8090/geoserver/pdf";
+		/*
+		 * var url = "http://localhost:8081/print-servlet-1.2.0/pdf";
+		 * printProvider = new GeoExt.data.PrintProvider({ // using get for
+		 * remote service access without same origin restriction. // For
+		 * asynchronous requests, we would set method to "POST". // method:
+		 * "GET", method: "POST", // capabilities from script tag in
+		 * Printing.html. For asynchonous // loading, we would configure url
+		 * instead of capabilities. // capabilities: printCapabilities url: url,
+		 * }); printProvider.loadCapabilities();
+		 */
+
+		// renderTo: "simple_map"
 		new Ext.Panel({
 			renderTo : "simple_map",
-			layout: "fit",
+			layout : "fit",
 			width : 800,
 			height : 400,
 			items : [ mapPanel ]
 		});
-		
-		
+
 		// Adding the controls to the map
 		map.addControl(new OpenLayers.Control.LayerSwitcher());
 		map.addControl(new OpenLayers.Control.MousePosition());
 		map.addControl(new OpenLayers.Control.OverviewMap());
-//		map.addControl(new OpenLayers.Control.PanZoomBar());
+		// map.addControl(new OpenLayers.Control.PanZoomBar());
 
 		// createPDF
-		/*var pdfButton = new OpenLayers.Control.Button({
-			displayClass : "olPDFButton",
-			title: "Create PDF",
-	        id: 'PDFButton',
-			trigger : createPDF,
-		});
-		var panel = new OpenLayers.Control.Panel({defaultControl: pdfButton});
-		panel.addControls([pdfButton]);
-		map.addControl(panel);*/
+		/*
+		 * var pdfButton = new OpenLayers.Control.Button({ displayClass :
+		 * "olPDFButton", title: "Create PDF", id: 'PDFButton', trigger :
+		 * createPDF, }); var panel = new
+		 * OpenLayers.Control.Panel({defaultControl: pdfButton});
+		 * panel.addControls([pdfButton]); map.addControl(panel);
+		 */
 
-		
-		//TODO: does not work with the Ext
-//		var graticule = new OpenLayers.Control.Graticule();
-//		graticule.displayInLayerSwitcher = true;
-//		map.addControl(graticule);
-		
+		// TODO: does not work with the Ext
+		// var graticule = new OpenLayers.Control.Graticule();
+		// graticule.displayInLayerSwitcher = true;
+		// map.addControl(graticule);
 		// Adding the layers to the map
 		var bg = backgroundLayers, fg = mapLayers;
 		layers = [];
@@ -215,15 +274,15 @@ myNamespace.mapViewer = (function(OL, $) {
 	}
 
 	function createPDF() {
-		 var printPage = new GeoExt.data.PrintPage({
-			    printProvider: printProvider,
-			    customParams: {
-			        mapTitle: "Greenseas Analytical Database Client",
-			        comment: "Map printed from: "+ document.URL
-			    }
-			});
-		 printPage.fit(mapPanel);
-		 printProvider.print(mapPanel, printPage);
+		var printPage = new GeoExt.data.PrintPage({
+			printProvider : printProvider,
+			customParams : {
+				mapTitle : "Greenseas Analytical Database Client",
+				comment : "Map printed from: " + document.URL
+			}
+		});
+		printPage.fit(mapPanel);
+		printProvider.print(mapPanel, printPage);
 	}
 
 	function registerClickBehaviour() {
@@ -234,11 +293,12 @@ myNamespace.mapViewer = (function(OL, $) {
 			title : 'Identify features by clicking',
 			queryVisible : true,
 			maxFeatures : 20,
-			/*infoFormat : "text/xml",*/
+			/* infoFormat : "text/xml", */
 			eventListeners : {
 				getfeatureinfo : function(event) {
-					//TODO: do something useful
-					//Check http://openlayers.org/dev/examples/getfeatureinfo-control.html
+					// TODO: do something useful
+					// Check
+					// http://openlayers.org/dev/examples/getfeatureinfo-control.html
 					map.addPopup(new OpenLayers.Popup.FramedCloud("chicken", map.getLonLatFromPixel(event.xy), null,
 							event.text, null, true));
 				}

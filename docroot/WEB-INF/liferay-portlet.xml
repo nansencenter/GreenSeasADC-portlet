@@ -36,6 +36,7 @@
 		<header-portlet-javascript>/js/lib/qunit-1.11.0.js</header-portlet-javascript>
 		<!-- application script files -->
 		<header-portlet-javascript>/js/src/ajax.js</header-portlet-javascript>
+		<!-- <header-portlet-javascript>/js/src/WMS1_1_1.js</header-portlet-javascript> -->
 		<header-portlet-javascript>/js/src/XMLParser.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/src/fileCreation.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/src/control.js</header-portlet-javascript>
