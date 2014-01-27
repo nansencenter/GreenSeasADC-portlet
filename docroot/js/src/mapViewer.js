@@ -5,7 +5,7 @@ var debugmW = false;// debug flag
 myNamespace.mapViewer = (function(OL, $) {
 	"use strict";
 	// TODO fix bound
-	var currentBounds = new OpenLayers.Bounds(-60, -72, 82, 88), maxExtent = new OpenLayers.Bounds(-120, -88, 120, 88);
+	var currentBounds = new OpenLayers.Bounds(-60, -72, 82, 88), maxExtent = new OpenLayers.Bounds(-180, -90, 180, 90);
 	// from layer preview
 	// -58.2311019897461,-71.0900039672852,80.9666748046875,86.3916702270508
 
@@ -38,17 +38,16 @@ myNamespace.mapViewer = (function(OL, $) {
 	// front layers drawn on the map widget, can be toggled on/off
 	var mapLayers = {};
 	function initMapLayers() {
-		console.log(6);
+		console.log(10);
 		mapLayers = {
 			datapoints : new OpenLayers.Layer.WMS("Data points", window.WMSServer, {
-				version: "1.3",
+				version: "1.1.1",
 				layers : window.metaDataTable,
 				format : window.WMSformat,
 				transparent : true
 			}, {
 				isBaseLayer : false,
-				projection : 'EPSG:4326',
-				yx : {"EPSG:4326":false,"EPSG:32761":true}
+				//projection : 'EPSG:4326',
 			}),
 		};
 	}
@@ -101,10 +100,10 @@ myNamespace.mapViewer = (function(OL, $) {
 					format : 'image/jpeg'
 				}, {
 					wrapDateLine : false,
-					transitionEffect : 'resize',
 					projection : 'EPSG:32661',
 					maxExtent : polarWindow,
 					maxResolution : polarMaxResolution,
+					yx : {"EPSG:32661":true,"EPSG:32761":true}
 				}),
 		southPoleBaseLayer : new OpenLayers.Layer.WMS("South polar stereographic",
 				"http://wms-basemaps.appspot.com/wms", {
@@ -112,10 +111,10 @@ myNamespace.mapViewer = (function(OL, $) {
 					format : 'image/jpeg'
 				}, {
 					wrapDateLine : false,
-					transitionEffect : 'resize',
 					projection : 'EPSG:32761',
 					maxExtent : polarWindow,
 					maxResolution : polarMaxResolution,
+					yx : {"EPSG:32661":true,"EPSG:32761":true}
 				})
 	};
 
