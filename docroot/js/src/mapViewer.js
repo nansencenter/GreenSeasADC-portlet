@@ -63,13 +63,13 @@ myNamespace.mapViewer = (function(OL, $) {
 
 	// some background layers, user may select one
 	var backgroundLayers = {
-		demis : new OpenLayers.Layer.WMS(
+		/* TODO NOT WORKING WITH POST ON MAPFISH PRINT demis : new OpenLayers.Layer.WMS(
 				"Demis WMS",
 				"http://www2.demis.nl/wms/wms.ashx?WMS=WorldMap",
 				{
 					layers : 'Countries,Bathymetry,Topography,Hillshading,Coastlines,Builtup+areas,Waterbodies,Rivers,Streams,Borders,Cities',
 					format : 'image/png'
-				}),
+				}),*/
 		generic : new OpenLayers.Layer.WMS("Generic background", "http://vmap0.tiles.osgeo.org/wms/vmap0", {
 			layers : 'basic',
 			format : window.WMSformat
@@ -121,8 +121,8 @@ myNamespace.mapViewer = (function(OL, $) {
 		});
 		
 
-		//url = "http://localhost:8090/geoserver/pdf";
-		/*var url = "http://localhost:8081/print-servlet-1.2.0/pdf";
+		url = "http://localhost:8090/geoserver/pdf";
+		var url = "http://localhost:8081/print-servlet-1.2.0/pdf";
 		 printProvider = new GeoExt.data.PrintProvider({
 		        // using get for remote service access without same origin restriction.
 		        // For asynchronous requests, we would set method to "POST".
@@ -134,7 +134,7 @@ myNamespace.mapViewer = (function(OL, $) {
 //		        capabilities: printCapabilities
 		        url: url,
 		    });
-		 printProvider.loadCapabilities();*/
+		 printProvider.loadCapabilities();
 		 
 //		renderTo: "simple_map"
 		new Ext.Panel({
@@ -153,7 +153,7 @@ myNamespace.mapViewer = (function(OL, $) {
 //		map.addControl(new OpenLayers.Control.PanZoomBar());
 
 		// createPDF
-		/*var pdfButton = new OpenLayers.Control.Button({
+		var pdfButton = new OpenLayers.Control.Button({
 			displayClass : "olPDFButton",
 			title: "Create PDF",
 	        id: 'PDFButton',
@@ -161,7 +161,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		});
 		var panel = new OpenLayers.Control.Panel({defaultControl: pdfButton});
 		panel.addControls([pdfButton]);
-		map.addControl(panel);*/
+		map.addControl(panel);
 
 		
 		//TODO: does not work with the Ext
