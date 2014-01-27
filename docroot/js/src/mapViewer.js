@@ -209,7 +209,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		});
 
 		map.addControl(control);
-		// registerClickBehaviour(fg.ncWMSTEST);
+		registerClickBehaviour();
 		if (debugmW)
 			console.log("Finished initMap");
 	}
@@ -226,17 +226,19 @@ myNamespace.mapViewer = (function(OL, $) {
 		 printProvider.print(mapPanel, printPage);
 	}
 
-	function registerClickBehaviour(layer) {
+	function registerClickBehaviour() {
 
 		// clicking feature opens popup with basic info
 		var info = new OpenLayers.Control.WMSGetFeatureInfo({
-			url : "http://localhost:8081/ncWMS-1.1.1/wms",
+			url : myNamespace.WMSserver,
 			title : 'Identify features by clicking',
 			queryVisible : true,
-			maxFeatures : 1,
-			infoFormat : "text/xml",
+			maxFeatures : 20,
+			/*infoFormat : "text/xml",*/
 			eventListeners : {
 				getfeatureinfo : function(event) {
+					//TODO: do something useful
+					//Check http://openlayers.org/dev/examples/getfeatureinfo-control.html
 					map.addPopup(new OpenLayers.Popup.FramedCloud("chicken", map.getLonLatFromPixel(event.xy), null,
 							event.text, null, true));
 				}
