@@ -82,9 +82,9 @@
 						<em>Date (Use yyyy-mm-dd format if no date picker appears)</em>
 						<br>
 						Between
-						<input type="date" id="fromDate" value="1915-01-01">
+						<input type="date" id="fromDate" value="1913-01-01">
 						and
-						<input type="date" id="toDate" value="2007-01-01">
+						<input type="date" id="toDate" value="2012-01-01">
 						<br>
 						<input type="checkbox" id="timeEnabledCheck">
 						Include time in the date-search (date search must be enabled for this)
