@@ -63,7 +63,7 @@ myNamespace.mapViewer = (function(OL, $) {
 
 	// some background layers, user may select one
 	var backgroundLayers = {
-		/* TODO NOT WORKING WITH POST ON MAPFISH PRINT */demis : new OpenLayers.Layer.WMS(
+		demis : new OpenLayers.Layer.WMS(
 				"Demis WMS",
 				"http://www2.demis.nl/wms/wms.ashx?WMS=WorldMap",
 				{
