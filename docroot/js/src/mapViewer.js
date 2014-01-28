@@ -63,13 +63,13 @@ myNamespace.mapViewer = (function(OL, $) {
 
 	// some background layers, user may select one
 	var backgroundLayers = {
-		/* TODO NOT WORKING WITH POST ON MAPFISH PRINT demis : new OpenLayers.Layer.WMS(
+		/* TODO NOT WORKING WITH POST ON MAPFISH PRINT */demis : new OpenLayers.Layer.WMS(
 				"Demis WMS",
 				"http://www2.demis.nl/wms/wms.ashx?WMS=WorldMap",
 				{
 					layers : 'Countries,Bathymetry,Topography,Hillshading,Coastlines,Builtup+areas,Waterbodies,Rivers,Streams,Borders,Cities',
 					format : 'image/png'
-				}),*/
+				}),
 		generic : new OpenLayers.Layer.WMS("Generic background", "http://vmap0.tiles.osgeo.org/wms/vmap0", {
 			layers : 'basic',
 			format : window.WMSformat
