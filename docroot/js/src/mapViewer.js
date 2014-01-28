@@ -114,29 +114,17 @@ myNamespace.mapViewer = (function(OL, $) {
 		});
 
 		mapPanel = new GeoExt.MapPanel({
-	        //region: "center",
 			map: map,
-			/*center: [0,0],
-	        zoom: 1,*/
 		});
 		
 
-		url = "http://localhost:8090/geoserver/pdf";
-		var url = "http://localhost:8081/print-servlet-1.2.0/pdf";
+		var url = "http://tomcat.nersc.no:8080/print-servlet-1.2.0/pdf";
 		 printProvider = new GeoExt.data.PrintProvider({
-		        // using get for remote service access without same origin restriction.
-		        // For asynchronous requests, we would set method to "POST".
-//		        method: "GET",
 		        method: "POST",
-		        
-		        // capabilities from script tag in Printing.html. For asynchonous
-		        // loading, we would configure url instead of capabilities.
-//		        capabilities: printCapabilities
 		        url: url,
 		    });
 		 printProvider.loadCapabilities();
 		 
-//		renderTo: "simple_map"
 		new Ext.Panel({
 			renderTo : "simple_map",
 			layout: "fit",
