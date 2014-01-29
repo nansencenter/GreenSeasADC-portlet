@@ -210,29 +210,24 @@ myNamespace.mapViewer = (function(OL, $) {
 			});
 		if (myNamespace.parametersQueryString)
 			comment += "\n" + myNamespace.parametersQueryString;
-		$.each(backgroundLayers, function(i, val) {
-			if (val.getVisibility())
-				comment += "\nBackground Layer:" + val.name;
-		});
-
 		var activeLayers = "";
 		var delimiter = "";
 		$.each(mapLayers, function(i, val) {
-			if (val.getVisibility()) {
+			if (val.visibility) {
 				activeLayers += delimiter + val.name;
 				delimiter = ", ";
 			}
 		});
 		if (parameterLayers)
 			$.each(parameterLayers, function(i, val) {
-				if (val.getVisibility()) {
+				if (val.visibility) {
 					activeLayers += delimiter + val.name;
 					delimiter = ", ";
 				}
 			});
 		if (customLayers)
 			$.each(customLayers, function(i, val) {
-				if (val.getVisibility()) {
+				if (val.visibility) {
 					activeLayers += delimiter + val.name;
 					delimiter = ", ";
 				}
