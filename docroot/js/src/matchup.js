@@ -9,21 +9,7 @@ myNamespace.matchup = (function($, ns) {
 	var uploadedRaster = false;
 
 	function setUpOPeNDAPSelector() {
-		var URLs = {
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/topaz" : "Topaz",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/cmcc_phosphate" : "CMCC Phosphate",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/cmcc_chla" : "CMCC Chlorophyll-a",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/cmcc_sea_ice" : "CMCC Sea Ice",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/chlor_seawifs_Sep97_Dec10_360x180gt" : "PML Chlorophyll-a",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/fmicro_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Microphytoplankton",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/fnano_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Nanophytoplankton",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/fpico_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Picophytoplankton",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/zeu_seawifs_zmld_soda_Sep97_Dec07_360x180gt" : "PML Ratio euphotic depth to mixed layer depth",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/phenology_seawifs_98_07_360x180g" : "PML Phenology",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/ssmicon" : "ssmicon",
-		};
-
-		var selectElement = ns.mapLayers.setUpSelector(URLs, "opendapDataURL");
+		var selectElement = ns.mapLayers.setUpSelectorArray(window.openDAPURLs, "opendapDataURL");
 		$("#opendapURLContainer").html(selectElement);
 	}
 
@@ -57,7 +43,7 @@ myNamespace.matchup = (function($, ns) {
 		var selectElement = "Raster variable:<select id=\"matchVariable\">";
 		var options = "<option value='NONE'>Select variable</option>";
 		$.each(parameters, function(key, val) {
-			var variable = key;// key.substring(0, key.indexOf("("));
+			var variable = key;
 			var variableName = val.trim();
 			if (variableName == "")
 				variableName = variable;
@@ -262,7 +248,6 @@ myNamespace.matchup = (function($, ns) {
 			});
 			console.log(sd + "]");
 		}
-		// $(function() {
 		$('#highchartsContainer').highcharts(
 				{
 					chart : {
@@ -332,7 +317,6 @@ myNamespace.matchup = (function($, ns) {
 						enableMouseTracking : false
 					} ]
 				});
-		// });
 	}
 
 	// public interface

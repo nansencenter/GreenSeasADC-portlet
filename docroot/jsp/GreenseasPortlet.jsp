@@ -372,8 +372,10 @@
 	<%=renderRequest.getAttribute("allProperties")%>
 	<!-- Initiating window.allParametersHeader -->
 	<%=renderRequest.getAttribute("allParametersHeader")%>
-	<!-- Initiating window.allParametersHeader -->
+	<!-- Initiating window.wmsLayers -->
 	<%=renderRequest.getAttribute("wmsLayers")%>
+	<!-- Initiating window.openDAPURLs -->
+	<%=renderRequest.getAttribute("openDAPURLs")%>
 	<!-- Initiating window.combinedParamaters -->
 	<%=renderRequest.getAttribute("combinedParameters")%>
 	<!-- Initiating window.longhurstRegions -->

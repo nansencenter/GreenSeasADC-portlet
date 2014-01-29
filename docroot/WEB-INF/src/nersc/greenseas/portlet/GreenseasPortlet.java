@@ -64,6 +64,7 @@ public class GreenseasPortlet extends MVCPortlet {
 		renderRequest.setAttribute("longhurstRegions", DatabaseProperties.getLonghurstRegions());
 		renderRequest.setAttribute("combinedParameters", DatabaseProperties.getCombinedParameters());
 		renderRequest.setAttribute("wmsLayers", DatabaseProperties.getWmsLayers());
+		renderRequest.setAttribute("openDAPURLs", DatabaseProperties.getOpenDAPURLs());
 		super.doView(renderRequest, renderResponse);
 	}
 

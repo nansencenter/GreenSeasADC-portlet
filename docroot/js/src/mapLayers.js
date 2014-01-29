@@ -311,6 +311,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 	// public interface
 	return {
 		setUpSelector : setUpSelector,
+		setUpSelectorArray : setUpSelectorArray,
 		setUpStyleForLegend : setUpStyleForLegend,
 		addWMSLayerSelector : addWMSLayerSelector,
 		toggleLayerButton : toggleLayerButton,

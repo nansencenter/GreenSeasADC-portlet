@@ -1,5 +1,9 @@
 package nersc.greenseas.configuration;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -114,6 +118,19 @@ public class DatabaseProperties {
 		return properties.toString();
 	}
 
+	public static String getOpenDAPURLs() {
+		StringBuffer properties = new StringBuffer();
+		properties.append("window.openDAPURLs = [");
+		String fileName = "openDAPURLs.properties";
+		Properties prop = getProperties(fileName);
+		for (Enumeration<?> e = prop.propertyNames(); e.hasMoreElements();) {
+			String propName = (String) e.nextElement();
+			properties.append("{value:'" + prop.getProperty(propName) + "',name:'" + propName + "'},");
+		}
+		properties.append("];");
+		return properties.toString();
+	}
+
 	public static String getLonghurstPolygon(String region) {
 		String polygon = null;
 		String fileName = "Longhurst_regions_polygons.properties";
@@ -136,7 +153,12 @@ public class DatabaseProperties {
 	private static Properties getProperties(String fileName) {
 		try {
 			Properties prop = new OrderedProperties();
-			prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream(fileName));
+			String propertiesFolder = System.getProperty("user.home") + "\\.gsadbc\\properties\\";
+			File file = new File(propertiesFolder + fileName);
+			if (file.exists())
+				prop.load(new FileInputStream(file));
+			else
+				prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream(fileName));
 			return prop;
 		} catch (Exception e) {
 			System.out.println("Error reading the property file:" + fileName);
