@@ -152,6 +152,19 @@ myNamespace.mapViewer = (function(OL, $) {
 		panel.addControls([ pdfButton ]);
 		map.addControl(panel);
 
+//remove popups
+		var popupsButton = new OpenLayers.Control.Button({
+			displayClass : "olPopupsButton",
+			title : "Remove all popups",
+			id : 'PopupsButton',
+			trigger : removePopups,
+		});
+		var popupsPanel = new OpenLayers.Control.Panel({
+			defaultControl : popupsButton,
+			displayClass : "olPopupsPanel"
+		});
+		popupsPanel.addControls([ popupsButton ]);
+		map.addControl(popupsPanel);
 		// TODO: does not work with the Ext
 		// var graticule = new OpenLayers.Control.Graticule();
 		// graticule.displayInLayerSwitcher = true;
@@ -246,6 +259,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		printProvider.print(mapPanel, printPage);
 	}
 
+	var popups = [];
 	function registerClickBehaviour() {
 
 		// clicking feature opens popup with basic info
@@ -257,16 +271,22 @@ myNamespace.mapViewer = (function(OL, $) {
 			/* infoFormat : "text/xml", */
 			eventListeners : {
 				getfeatureinfo : function(event) {
-					// TODO: do something useful
-					// Check
-					// http://openlayers.org/dev/examples/getfeatureinfo-control.html
-					map.addPopup(new OpenLayers.Popup.FramedCloud("chicken", map.getLonLatFromPixel(event.xy), null,
-							event.text, null, true));
+					var popup = new OpenLayers.Popup.FramedCloud("chicken", map.getLonLatFromPixel(event.xy), null,
+							event.text, null, true);
+					map.addPopup(popup);
+					popups.push(popup);
 				}
 			}
 		});
 		map.addControl(info);
 		info.activate();
+	}
+
+	function removePopups() {
+		$.each(popups, function(i, val) {
+			map.removePopup(val);
+		});
+		popups = [];
 	}
 
 	function removeAllParameterLayers() {
@@ -461,6 +481,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		initMap : initMap,
 		getExtent : getExtent,
 		zoomToExtent : zoomToExtent,
+		removePopups : removePopups,
 	};
 
 }(OpenLayers, jQuery));
