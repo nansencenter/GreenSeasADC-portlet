@@ -7,22 +7,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 
 	var activeLayers = 0;
 	function addWMSLayerSelector() {
-		var URLs = {
-			"NONE" : "Select layer",
-			"http://thredds.nersc.no/thredds/wms/greenpath/Model/topaz" : "Topaz",
-			"http://thredds.nersc.no/thredds/wms/greenpath/Model/cmcc_phosphate" : "CMCC Phosphate",
-			"http://thredds.nersc.no/thredds/wms/greenpath/Model/cmcc_chla" : "CMCC Chlorophyll-a",
-			"http://thredds.nersc.no/thredds/wms/greenpath/Model/cmcc_sea_ice" : "CMCC Sea Ice",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/chlor_seawifs_Sep97_Dec10_360x180gt" : "PML Chlorophyll-a",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/fmicro_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Microphytoplankton",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/fnano_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Nanophytoplankton",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/fpico_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Picophytoplankton",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/zeu_seawifs_zmld_soda_Sep97_Dec07_360x180gt" : "PML Ratio euphotic depth to mixed layer depth",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/phenology_seawifs_98_07_360x180g" : "PML Phenology",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/ssmicon" : "NERSC Arctic ice concentration maps from SSMI data based on the NORSEX algorithm",
-		};
-
-		var selectElement = setUpSelector(URLs, "mapLayersWMSURL" + activeLayers, activeLayers);
+		var selectElement = setUpSelectorArray(window.wmsLayers, "mapLayersWMSURL" + activeLayers, activeLayers);
 		var button = "<input type='button' id='toggleLayerButton" + activeLayers + "' name='" + activeLayers
 				+ "' value='Update on map'/>";
 		$("#layerURLSelectorContainer").append(button + selectElement);
@@ -64,6 +49,17 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		myNamespace.WebMapService.getCapabilities(function(response) {
 			setupVariableSelectorForWMSLayer(response, selectedElement);
 		}, selectedOption);
+	}
+
+	function setUpSelectorArray(array, id, name) {
+		name = "name='" + name + "'";
+		var selectElement = "<select id='" + id + "' " + name + ">";
+		var options = "";
+		$.each(array, function(i, val) {
+			options += "<option value=\"" + val.value + "\">" + val.name + "</option>";
+		});
+		selectElement += options + "</select>";
+		return selectElement;
 	}
 
 	function setUpSelector(hashMap, id, name) {
@@ -301,7 +297,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 
 	function setUpStyleForLegend() {
 		var browser = myNamespace.XMLParser.findBrowser();
-		//console.log("Browser:" + browser);
+		// console.log("Browser:" + browser);
 		var legend = $("#legend");
 		if (browser == "Trident") {
 			legend.css("display", [ "-ms-inline-flexbox" ]);
