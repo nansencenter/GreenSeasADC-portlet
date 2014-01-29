@@ -118,7 +118,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		});
 		
 
-		var url = "http://tomcat.nersc.no:8080/print-servlet-1.2.0/pdf";
+		var url = window.mapfishPrintServer;
 		 printProvider = new GeoExt.data.PrintProvider({
 		        method: "POST",
 		        url: url,
