@@ -11,7 +11,7 @@ myNamespace.mapViewer = (function(OL, $) {
 
 	// map on which layers are drawn
 	var map;
-	
+
 	var mapPanel, printProvider;
 
 	// Object that stores the layers for the parameters
@@ -100,63 +100,63 @@ myNamespace.mapViewer = (function(OL, $) {
 		OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
 
 		map = new OpenLayers.Map();
-//				'simple_map', 
+		// 'simple_map',
 		map.setOptions({
 			scales : [ 150000000, 80000000, 50000000, 30000000, 10000000, 5000000, 2500000, 1000000, 500000 ],
 			maxExtent : maxExtent,
 			maxResolution : 'auto',
 			units : 'degrees',
-			
-			// actively excluding the standard zoom control, which is there by
-			// default
-//			map.addControls([ new OpenLayers.Control.Navigation(), new OpenLayers.Control.ArgParser(),
-//					new OpenLayers.Control.Attribution() ]);
+
+		// actively excluding the standard zoom control, which is there by
+		// default
+		// map.addControls([ new OpenLayers.Control.Navigation(), new
+		// OpenLayers.Control.ArgParser(),
+		// new OpenLayers.Control.Attribution() ]);
 		});
 
 		mapPanel = new GeoExt.MapPanel({
-			map: map,
+			map : map,
 		});
-		
 
 		var url = window.mapfishPrintServer;
-		 printProvider = new GeoExt.data.PrintProvider({
-		        method: "POST",
-		        url: url,
-		    });
-		 printProvider.loadCapabilities();
-		 
+		printProvider = new GeoExt.data.PrintProvider({
+			method : "POST",
+			url : url,
+		});
+		printProvider.loadCapabilities();
+
 		new Ext.Panel({
 			renderTo : "simple_map",
-			layout: "fit",
+			layout : "fit",
 			width : 800,
 			height : 400,
 			items : [ mapPanel ]
 		});
-		
-		
+
 		// Adding the controls to the map
 		map.addControl(new OpenLayers.Control.LayerSwitcher());
 		map.addControl(new OpenLayers.Control.MousePosition());
 		map.addControl(new OpenLayers.Control.OverviewMap());
-//		map.addControl(new OpenLayers.Control.PanZoomBar());
+		// map.addControl(new OpenLayers.Control.PanZoomBar());
 
 		// createPDF
 		var pdfButton = new OpenLayers.Control.Button({
 			displayClass : "olPDFButton",
-			title: "Create PDF",
-	        id: 'PDFButton',
+			title : "Create PDF",
+			id : 'PDFButton',
 			trigger : createPDF,
 		});
-		var panel = new OpenLayers.Control.Panel({defaultControl: pdfButton});
-		panel.addControls([pdfButton]);
+		var panel = new OpenLayers.Control.Panel({
+			defaultControl : pdfButton
+		});
+		panel.addControls([ pdfButton ]);
 		map.addControl(panel);
 
-		
-		//TODO: does not work with the Ext
-//		var graticule = new OpenLayers.Control.Graticule();
-//		graticule.displayInLayerSwitcher = true;
-//		map.addControl(graticule);
-		
+		// TODO: does not work with the Ext
+		// var graticule = new OpenLayers.Control.Graticule();
+		// graticule.displayInLayerSwitcher = true;
+		// map.addControl(graticule);
+
 		// Adding the layers to the map
 		var bg = backgroundLayers, fg = mapLayers;
 		layers = [];
@@ -203,15 +203,21 @@ myNamespace.mapViewer = (function(OL, $) {
 	}
 
 	function createPDF() {
-		 var printPage = new GeoExt.data.PrintPage({
-			    printProvider: printProvider,
-			    customParams: {
-			        mapTitle: "Greenseas Analytical Database Client",
-			        comment: "Map printed from: "+ document.URL
-			    }
-			});
-		 printPage.fit(mapPanel);
-		 printProvider.print(mapPanel, printPage);
+		var comment = "Map printed from: " + document.URL;
+		$.each(myNamespace.mainQueryArray,function(i,val){
+			comment+="\n"+val;
+		});
+		if (myNamespace.parametersQueryString)
+			comment += "\n" + myNamespace.parametersQueryString;
+		var printPage = new GeoExt.data.PrintPage({
+			printProvider : printProvider,
+			customParams : {
+				mapTitle : "Greenseas Analytical Database Client",
+				comment : comment
+			}
+		});
+		printPage.fit(mapPanel);
+		printProvider.print(mapPanel, printPage);
 	}
 
 	function registerClickBehaviour() {
@@ -222,11 +228,12 @@ myNamespace.mapViewer = (function(OL, $) {
 			title : 'Identify features by clicking',
 			queryVisible : true,
 			maxFeatures : 20,
-			/*infoFormat : "text/xml",*/
+			/* infoFormat : "text/xml", */
 			eventListeners : {
 				getfeatureinfo : function(event) {
-					//TODO: do something useful
-					//Check http://openlayers.org/dev/examples/getfeatureinfo-control.html
+					// TODO: do something useful
+					// Check
+					// http://openlayers.org/dev/examples/getfeatureinfo-control.html
 					map.addPopup(new OpenLayers.Popup.FramedCloud("chicken", map.getLonLatFromPixel(event.xy), null,
 							event.text, null, true));
 				}

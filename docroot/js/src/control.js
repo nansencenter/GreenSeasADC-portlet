@@ -2,7 +2,8 @@ var myNamespace = myNamespace || {};
 
 var debugc = false;// debug flag
 
-myNamespace.mainQueryString = null;
+myNamespace.mainQueryArray = null;
+myNamespace.parametersQueryString = null;
 
 myNamespace.control = (function($, OL, ns) {
 	"use strict";
@@ -106,6 +107,7 @@ myNamespace.control = (function($, OL, ns) {
 		// removing the parameterlayers from previous searches
 		ns.mapViewer.removeAllParameterLayers();
 		ns.mapViewer.removeBasicSearchLayer();
+		myNamespace.parametersQueryString = null;
 		$("#exportParametersDiv").hide();
 		if (debugc)
 			console.log("control.js: start of mainQueryButton()");// TEST
@@ -138,38 +140,39 @@ myNamespace.control = (function($, OL, ns) {
 		}
 		// no attributes are currently supported
 		var attr = null;
-		var mainQueryString = "";
+		var mainQueryArray = [];
 		if (filterBbox)
-			mainQueryString += "Bounding box:" + filterBbox + " ";
+			mainQueryArray.push("Bounding box:" + filterBbox);
 		if (date)
-			mainQueryString += "Date:" + date.dateString + " ";
+			mainQueryArray.push("Date:" + date.dateString);
 		if (attr)
-			mainQueryString += "Attributes:" + attr + " ";
+			mainQueryArray.push("Attributes:" + attr);
 		if (depth)
-			mainQueryString += "Depth:" + depth.depthString + " ";
+			mainQueryArray.push("Depth:" + depth.depthString);
 		if (months)
-			mainQueryString += "Months:" + months + " ";
+			mainQueryArray.push("Months:" + months);
 		if (region)
-			mainQueryString += "Region:" + $("#longhurstRegionSelected").find(":selected").html() + " ";
+			mainQueryArray.push("Region:" + $("#longhurstRegionSelected").find(":selected").html());
 		if (cruise)
-			mainQueryString += "Cruise:" + $("#cruiseSelected").find(":selected").html() + " ";
+			mainQueryArray.push("Cruise:" + $("#cruiseSelected").find(":selected").html());
 
 		var propertyName = [];
 		// Adding the parameters to the array
 		if (document.getElementById('metadataEnabledCheck').checked) {
-			mainQueryString += "Chosen Metadata:";
+			chosenMetaDataString = "Chosen Metadata:";
 			ns.handleParameters.selectMetadata($("#metadataTree").jstree("get_checked", null, true));
 			propertyName = [ window.geometryParameter ];
 			$.each(ns.handleParameters.mainParameters.chosenMetadata, function(j, parameter) {
 				propertyName.push(parameter);
-				mainQueryString += ns.handleParameters.getHeader(parameter,window.metaDataTable) +", ";
+				chosenMetaDataString += ns.handleParameters.getHeader(parameter, window.metaDataTable) + ", ";
 			});
+			mainQueryArray.push(chosenMetaDataString);
 		} else {
 			ns.handleParameters.resetMetadataSelection();
 			propertyName = ns.handleParameters.mainParameters.parameters;
 		}
 
-		myNamespace.mainQueryString = mainQueryString;
+		myNamespace.mainQueryArray = mainQueryArray;
 
 		if (debugc)
 			console.log("control.js: calling ns.query.constructFilterString()"); // TEST
@@ -241,9 +244,15 @@ myNamespace.control = (function($, OL, ns) {
 	function filterParametersButton() {
 		var allSelected = $("#parametersTree").jstree("get_checked", null, true);
 		var selected = [];
+		var parametersQueryString = "Selected parameters:";
+		var delimiter = "";
 		$.each(allSelected, function(i, val) {
-			if (val.getAttribute("rel") != "noBox")
-				selected.push(val.getAttribute("id"));
+			if (val.getAttribute("rel") != "noBox") {
+				var id = val.getAttribute("id");
+				selected.push(id);
+				parametersQueryString += delimiter + ns.handleParameters.getHeaderFromRawData(id) + "";
+				delimiter = ", ";
+			}
 		});
 
 		if (debugc)
@@ -251,6 +260,7 @@ myNamespace.control = (function($, OL, ns) {
 		if (selected.length != 0) {
 			// removing the parameterlayers from previous searches
 			ns.mapViewer.removeAllParameterLayers();
+			myNamespace.parametersQueryString = parametersQueryString;
 			$("#parametersTable").html("Loading parameters, please wait...");
 			$("#statistics").hide();
 			$("#timeSeriesDiv").hide();
