@@ -841,8 +841,14 @@ myNamespace.control = (function($, OL, ns) {
 		ns.statistics.generatePropertiesPlot(data);
 	}
 
+	function activateBbox(){
+		//first set to false, then trigger to true (to get correct behaviour)
+		$("#bboxEnabledCheck").prop("checked",false);
+		$("#bboxEnabledCheck").trigger('click');
+	}
 	// public interface
 	return {
+		activateBbox:activateBbox,
 		addLayerButton : addLayerButton,
 		toggleLayerButton : toggleLayerButton,
 		addTimeSeriesVariableButton : addTimeSeriesVariableButton,

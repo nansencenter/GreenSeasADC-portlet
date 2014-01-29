@@ -193,6 +193,7 @@ myNamespace.mapViewer = (function(OL, $) {
 				// left bottom top right
 				myNamespace.control.setLonLatInput(ll.lon.toFixed(4), ll.lat.toFixed(4), ur.lat.toFixed(4), ur.lon
 						.toFixed(4));
+				myNamespace.control.activateBbox();
 			}
 		});
 
