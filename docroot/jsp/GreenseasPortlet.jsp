@@ -376,6 +376,8 @@
 	<%=renderRequest.getAttribute("wmsLayers")%>
 	<!-- Initiating window.openDAPURLs -->
 	<%=renderRequest.getAttribute("openDAPURLs")%>
+	<!-- Initiating window.cruisesList -->
+	<%=renderRequest.getAttribute("cruisesList")%>
 	<!-- Initiating window.combinedParamaters -->
 	<%=renderRequest.getAttribute("combinedParameters")%>
 	<!-- Initiating window.longhurstRegions -->

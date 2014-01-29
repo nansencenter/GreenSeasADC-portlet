@@ -2,15 +2,12 @@ package nersc.greenseas.configuration;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Enumeration;
-import java.util.Properties;
 import java.util.Vector;
 
 public class DatabaseProperties {
@@ -130,6 +127,20 @@ public class DatabaseProperties {
 		properties.append("];");
 		return properties.toString();
 	}
+	
+
+	public static String getCruisesList() {
+		StringBuffer properties = new StringBuffer();
+		properties.append("window.cruisesList = [");
+		String fileName = "cruisesList.properties";
+		Properties prop = getProperties(fileName);
+		for (Enumeration<?> e = prop.propertyNames(); e.hasMoreElements();) {
+			String propName = (String) e.nextElement();
+			properties.append("{value:'" + propName + "',name:'" + prop.getProperty(propName) + "'},");
+		}
+		properties.append("];");
+		return properties.toString();
+	}
 
 	public static String getLonghurstPolygon(String region) {
 		String polygon = null;
@@ -198,6 +209,11 @@ public class DatabaseProperties {
  * 
  */
 class OrderedProperties extends Properties {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	public OrderedProperties() {
 		super();
