@@ -2,6 +2,8 @@ var myNamespace = myNamespace || {};
 
 var debugc = false;// debug flag
 
+myNamespace.mainQueryString = null;
+
 myNamespace.control = (function($, OL, ns) {
 	"use strict";
 
@@ -134,22 +136,40 @@ myNamespace.control = (function($, OL, ns) {
 			if (debugc)
 				console.log("Cruise enabled:" + cruise);
 		}
+		// no attributes are currently supported
+		var attr = null;
+		var mainQueryString = "";
+		if (filterBbox)
+			mainQueryString += "Bounding box:" + filterBbox + " ";
+		if (date)
+			mainQueryString += "Date:" + date.dateString + " ";
+		if (attr)
+			mainQueryString += "Attributes:" + attr + " ";
+		if (depth)
+			mainQueryString += "Depth:" + depth.depthString + " ";
+		if (months)
+			mainQueryString += "Months:" + months + " ";
+		if (region)
+			mainQueryString += "Region:" + $("#longhurstRegionSelected").find(":selected").html() + " ";
+		if (cruise)
+			mainQueryString += "Cruise:" + $("#cruiseSelected").find(":selected").html() + " ";
 
 		var propertyName = [];
 		// Adding the parameters to the array
 		if (document.getElementById('metadataEnabledCheck').checked) {
+			mainQueryString += "Chosen Metadata:";
 			ns.handleParameters.selectMetadata($("#metadataTree").jstree("get_checked", null, true));
 			propertyName = [ window.geometryParameter ];
 			$.each(ns.handleParameters.mainParameters.chosenMetadata, function(j, parameter) {
 				propertyName.push(parameter);
+				mainQueryString += ns.handleParameters.getHeader(parameter,window.metaDataTable) +", ";
 			});
 		} else {
 			ns.handleParameters.resetMetadataSelection();
 			propertyName = ns.handleParameters.mainParameters.parameters;
 		}
 
-		// no attributes are currently supported
-		var attr = null;
+		myNamespace.mainQueryString = mainQueryString;
 
 		if (debugc)
 			console.log("control.js: calling ns.query.constructFilterString()"); // TEST
