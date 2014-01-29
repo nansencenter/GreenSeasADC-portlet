@@ -27,14 +27,19 @@ myNamespace.matchup = (function($, ns) {
 	function initiateRasterData() {
 		$("#compareRaster").html("Loading raster, please wait...");
 		var useOpendap = Boolean(document.getElementById('opendapDataURLCheck').checked);
+		var fileOptionEnabled = document.getElementById('fileOptionCheck').checked;
 		if (!useOpendap)
-			if (!document.getElementById('fileOptionCheck').checked) {
+			if (!fileOptionEnabled) {
 				ns.errorMessage.showErrorMessage("Either file or dataset options have to be turned on");
 				return;
 			} else if (!uploadedRaster) {
 				ns.errorMessage.showErrorMessage("A file must be successfully uploaded first.");
 				return;
 			}
+		if (fileOptionEnabled) {
+			ns.errorMessage.showErrorMessage("Both file and dataset options are on. Please choose just one.");
+			return;
+		}
 		var opendapDataURL = $("#opendapDataURL").find(":selected").val();
 		ns.ajax.getLayersFromNetCDFFile(useOpendap, opendapDataURL);
 	}
