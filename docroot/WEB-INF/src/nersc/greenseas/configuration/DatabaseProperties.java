@@ -176,6 +176,12 @@ public class DatabaseProperties {
 			return null;
 		}
 	}
+	
+	public static String[] getAllowedHosts(){
+		String fileName = "greenSeasServer.properties";
+		Properties prop = getProperties(fileName);
+		return prop.getProperty("allowedHostsOnProxy").split(",");
+	}
 
 	public static String getCombinedParameters() {
 		StringBuffer parameters = new StringBuffer();
