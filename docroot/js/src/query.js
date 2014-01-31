@@ -197,24 +197,30 @@ myNamespace.query = (function(OL, $) {
 	function createRequiredParameterFilter(parameter) {
 		if (debugq)
 			console.log("createRequiredParameterFilter starting");// TEST
-		var requiredArray = [];
-		requiredArray.push(new OL.Filter.Comparison({
-			type : OpenLayers.Filter.Comparison.NOT_EQUAL_TO,
-			property : parameter,
-			value : ""
-		}));
-		/*
-		 * requiredArray.push( new OL.Filter.Comparison({ type :
-		 * OpenLayers.Filter.Comparison.NOT_EQUAL_TO, property : parameter,
-		 * value : "null" }));
-		 */
-		requiredArray.push(negateFilter([ new OL.Filter.Comparison({
-			type : OpenLayers.Filter.Comparison.IS_NULL,
-			property : parameter,
-		}) ]));
-		if (debugq)
-			console.log("createRequiredParameterFilter ending");// TEST
-		return combineFilters(requiredArray);
+		if (window.databaseMayContainEmptyStrings) {
+			var requiredArray = [];
+			requiredArray.push(new OL.Filter.Comparison({
+				type : OpenLayers.Filter.Comparison.NOT_EQUAL_TO,
+				property : parameter,
+				value : ""
+			}));
+			/*
+			 * requiredArray.push( new OL.Filter.Comparison({ type :
+			 * OpenLayers.Filter.Comparison.NOT_EQUAL_TO, property : parameter,
+			 * value : "null" }));
+			 */
+			requiredArray.push(negateFilter([ new OL.Filter.Comparison({
+				type : OpenLayers.Filter.Comparison.IS_NULL,
+				property : parameter,
+			}) ]));
+			if (debugq)
+				console.log("createRequiredParameterFilter ending");// TEST
+			return combineFilters(requiredArray);
+		} else
+			return negateFilter([ new OL.Filter.Comparison({
+				type : OpenLayers.Filter.Comparison.IS_NULL,
+				property : parameter,
+			}) ]);
 	}
 
 	// "other attribute" filter
