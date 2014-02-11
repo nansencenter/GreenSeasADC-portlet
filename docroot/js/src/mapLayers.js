@@ -10,7 +10,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		var selectElement = setUpSelectorArray(window.wmsLayers, "mapLayersWMSURL" + activeLayers, activeLayers);
 		var button = "<input type='button' id='toggleLayerButton" + activeLayers + "' name='" + activeLayers
 				+ "' value='Update on map'/>";
-		$("#layerURLSelectorContainer").append("<br>Layer "+activeLayers + "<br>" + button + selectElement);
+		$("#layerURLSelectorContainer").append("<br><h5>Layer " + activeLayers + "</h5>" + button + selectElement);
 		bH.change("#mapLayersWMSURL" + activeLayers, addWMSLayerVariableSelector);
 		bH.callFromControl("#toggleLayerButton" + activeLayers, toggleLayerButton);
 		$("#toggleLayerButton" + activeLayers).prop("disabled", true);
@@ -250,9 +250,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		var url = $('#mapLayersWMSURL' + activeLayer).val();
 		if (url == "NONE")
 			return;
-		var layerAsText = $('#mapLayersWMSURL' + activeLayer).find(":selected").text();
-		var variableAsText = $('#WMSLayerVariable' + activeLayer).find(":selected").text();
-		var name = layerAsText + ":" + variableAsText;
+		var name = "Layer " + activeLayer;
 		var layer = $('#WMSLayerVariable' + activeLayer).find(":selected").val();
 		var min = $('#colorscalerangeMin' + activeLayer).val();
 		var max = $('#colorscalerangeMax' + activeLayer).val();
@@ -281,9 +279,11 @@ myNamespace.mapLayers = (function(jQ, bH) {
 			var scaleOneThird = isLogscale ? Math.exp(minT + third) : minT + third;
 			var scaleTwoThird = isLogscale ? Math.exp(minT + 2 * third) : minT + 2 * third;
 			var minDiv = "<div id='scaleMin'>" + parseFloat(min.toPrecision(3)).toExponential() + "</div>";
-			var oneThirdDiv = "<div id='scaleOneThird'>" + parseFloat(scaleOneThird.toPrecision(3)).toExponential() + "</div>";
-			var nameDiv = "<div id='scaleName'>Layer " + activeLayer + "</div>";
-			var twoThirdDiv = "<div id='scaleTwoThird'>" + parseFloat(scaleTwoThird.toPrecision(3)).toExponential() + "</div>";
+			var oneThirdDiv = "<div id='scaleOneThird'>" + parseFloat(scaleOneThird.toPrecision(3)).toExponential()
+					+ "</div>";
+			var nameDiv = "<div id='scaleName'>" + name + "</div>";
+			var twoThirdDiv = "<div id='scaleTwoThird'>" + parseFloat(scaleTwoThird.toPrecision(3)).toExponential()
+					+ "</div>";
 			var maxDiv = "<div id='scaleMax'>" + parseFloat(max.toPrecision(3)).toExponential() + "</div>";
 			colorScaleLegendDiv.html(legend + maxDiv + twoThirdDiv + nameDiv + oneThirdDiv + minDiv);
 		}
