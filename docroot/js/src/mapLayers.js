@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugMl = false;// debug flag
+var debugMl = true;// debug flag
 
 myNamespace.mapLayers = (function(jQ, bH) {
 	"use strict";
@@ -17,6 +17,13 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		activeLayers++;
 	}
 
+	/* Small function to create a short random string to identify a request */
+	function rand() {
+		return Math.random().toString(36).substr(2); // remove `0.`
+	}
+
+	var whichWMSLayerVariableSelectorQueries = {};
+
 	function addWMSLayerVariableSelector(event) {
 		var activeLayer = event.target.name;
 		if (debugMl) {
@@ -31,12 +38,14 @@ myNamespace.mapLayers = (function(jQ, bH) {
 			$("#layerMetaData" + activeLayer).html("");
 			return;
 		}
+		var identifier = rand();
+		whichWMSLayerVariableSelectorQueries[activeLayer] = identifier;
+		var html = "Loading variables, please wait...";
 
 		var selectedOption = selectedElement.options[selectedElement.selectedIndex].value;
 		if (debugMl) {
 			console.log(selectedOption);
 		}
-		var html = "Loading variables, please wait...";
 		if ($("#" + selectedElement.id + "variable" + activeLayer).length) {
 			$("#" + selectedElement.id + "variable" + activeLayer).html(html);
 		} else {
@@ -47,7 +56,13 @@ myNamespace.mapLayers = (function(jQ, bH) {
 							+ "</div>");
 		}
 		myNamespace.WebMapService.getCapabilities(function(response) {
-			setupVariableSelectorForWMSLayer(response, selectedElement);
+			if (identifier == whichWMSLayerVariableSelectorQueries[activeLayer]) {
+				setupVariableSelectorForWMSLayer(response, selectedElement);
+				if (debugMl)
+					console.log("identifier:" + identifier + " matches stored value for element:" + activeLayer);
+			} else if (debugMl)
+				console.log("identifier:" + identifier + " is not equal to stored:"
+						+ whichWMSLayerVariableSelectorQueries[activeLayer] + " for element:" + activeLayer);
 		}, selectedOption);
 	}
 
