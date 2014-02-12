@@ -245,6 +245,8 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		bH.change("#WMSLayerVariable" + activeLayer, updateMetaDataSelection);
 	}
 
+	var whichupdateMetaDataSelection = {};
+
 	function updateMetaDataSelection(event) {
 		var activeLayer = event.target.name;
 		if (debugMl)
@@ -253,10 +255,14 @@ myNamespace.mapLayers = (function(jQ, bH) {
 			$("#layerMetaData" + activeLayer).html("");
 			return;
 		}
+		var identifier = rand();
+		whichupdateMetaDataSelection[activeLayer] = identifier;
 		if ($('#colorscalerangeAuto' + activeLayer).is(":checked"))
 			updateAutoRange(activeLayer);
 		myNamespace.WebMapService.getMetadata(function(response) {
-			setUpLayerMetaData(response, activeLayer);
+			if (identifier == whichupdateMetaDataSelection[activeLayer]) {
+				setUpLayerMetaData(response, activeLayer);
+			}
 		}, $('#mapLayersWMSURL' + activeLayer).val(), $('#WMSLayerVariable' + activeLayer).find(":selected").val());
 	}
 
