@@ -17,15 +17,6 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		activeLayers++;
 	}
 
-	/*
-	 * Small function to create a short random string to identify a request -
-	 * from
-	 * http://stackoverflow.com/questions/8532406/create-a-random-token-in-javascript-based-on-user-details
-	 */
-	function rand() {
-		return Math.random().toString(36).substr(2); // remove `0.`
-	}
-
 	var whichWMSLayerVariableSelectorQueries = {};
 
 	function addWMSLayerVariableSelector(event) {
@@ -42,7 +33,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 			$("#layerMetaData" + activeLayer).html("");
 			return;
 		}
-		var identifier = rand();
+		var identifier = myNamespace.utilities.rand();
 		whichWMSLayerVariableSelectorQueries[activeLayer] = identifier;
 		var html = "Loading variables, please wait...";
 
@@ -255,7 +246,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 			$("#layerMetaData" + activeLayer).html("");
 			return;
 		}
-		var identifier = rand();
+		var identifier = myNamespace.utilities.rand();
 		whichupdateMetaDataSelection[activeLayer] = identifier;
 		if ($('#colorscalerangeAuto' + activeLayer).is(":checked"))
 			updateAutoRange(activeLayer);
