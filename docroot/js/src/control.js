@@ -3,6 +3,7 @@ var myNamespace = myNamespace || {};
 var debugc = false;// debug flag
 
 myNamespace.mainQueryArray = null;
+myNamespace.mainQueryObject = null;
 myNamespace.parametersQueryString = null;
 
 myNamespace.control = (function($, OL, ns) {
@@ -103,7 +104,9 @@ myNamespace.control = (function($, OL, ns) {
 		$("#longhurstRegionSelected").empty().append(my_options);
 	}
 
+	var queryHasChanged = false;
 	function mainQueryButton() {
+		queryHasChanged = false;
 		// removing the parameterlayers from previous searches
 		ns.mapViewer.removeAllParameterLayers();
 		ns.mapViewer.removeBasicSearchLayer();
@@ -141,20 +144,35 @@ myNamespace.control = (function($, OL, ns) {
 		// no attributes are currently supported
 		var attr = null;
 		var mainQueryArray = [];
-		if (filterBbox)
+		var mainQueryObject = {};
+		if (filterBbox) {
 			mainQueryArray.push("Bounding box:" + filterBbox);
-		if (date)
+			mainQueryObject.filterBbox = filterBbox;
+		}
+		if (date) {
 			mainQueryArray.push("Date:" + date.dateString);
-		if (attr)
+			mainQueryObject.date = date;
+		}
+		if (attr) {
 			mainQueryArray.push("Attributes:" + attr);
-		if (depth)
+			mainQueryObject.attr = attr;
+		}
+		if (depth) {
 			mainQueryArray.push("Depth:" + depth.depthString);
-		if (months)
+			mainQueryObject.depth = depth;
+		}
+		if (months) {
 			mainQueryArray.push("Months:" + months);
-		if (region)
+			mainQueryObject.months = months;
+		}
+		if (region) {
 			mainQueryArray.push("Region:" + $("#longhurstRegionSelected").find(":selected").html());
-		if (cruise)
+			mainQueryObject.region = region;
+		}
+		if (cruise) {
 			mainQueryArray.push("Cruise:" + $("#cruiseSelected").find(":selected").html());
+			mainQueryObject.cruise = cruise;
+		}
 
 		var propertyName = [];
 		// Adding the parameters to the array
@@ -162,8 +180,10 @@ myNamespace.control = (function($, OL, ns) {
 			chosenMetaDataString = "Chosen Metadata:";
 			ns.handleParameters.selectMetadata($("#metadataTree").jstree("get_checked", null, true));
 			propertyName = [ window.geometryParameter ];
+			mainQueryObject.metaData = [];
 			$.each(ns.handleParameters.mainParameters.chosenMetadata, function(j, parameter) {
 				propertyName.push(parameter);
+				mainQueryObject.metaData.push(parameter);
 				chosenMetaDataString += ns.handleParameters.getHeader(parameter, window.metaDataTable) + ", ";
 			});
 			mainQueryArray.push(chosenMetaDataString);
@@ -173,6 +193,7 @@ myNamespace.control = (function($, OL, ns) {
 		}
 
 		myNamespace.mainQueryArray = mainQueryArray;
+		myNamespace.mainQueryObject = mainQueryObject;
 
 		if (debugc)
 			console.log("control.js: calling ns.query.constructFilterString()"); // TEST
@@ -309,7 +330,96 @@ myNamespace.control = (function($, OL, ns) {
 		}
 	}
 
+	function hasMainQueryObjectChanged() {
+		var filterBbox = ns.query.createfilterBoxHashMap();
+		if (filterBbox) {
+			if (myNamespace.mainQueryObject.filterBbox) {
+				if (filterBbox.bottom != myNamespace.mainQueryObject.filterBbox.bottom)
+					return true;
+				if (filterBbox.left != myNamespace.mainQueryObject.filterBbox.left)
+					return true;
+				if (filterBbox.right != myNamespace.mainQueryObject.filterBbox.right)
+					return true;
+				if (filterBbox.top != myNamespace.mainQueryObject.filterBbox.top)
+					return true;
+			} else {
+				return true;
+			}
+		} else if (myNamespace.mainQueryObject.filterBbox)
+			return true;
+
+		var date = ns.query.createDateHashMap();
+		if (date) {
+			if (myNamespace.mainQueryObject.date) {
+				if (date.fromDate != myNamespace.mainQueryObject.date.fromDate)
+					return true;
+				if (date.toDate != myNamespace.mainQueryObject.date.toDate)
+					return true;
+				if (date.time != myNamespace.mainQueryObject.date.time)
+					return true;
+				if (date.fromTime != myNamespace.mainQueryObject.date.fromTime)
+					return true;
+				if (date.toTime != myNamespace.mainQueryObject.date.toTime)
+					return true;
+			} else {
+				return true;
+			}
+		} else if (myNamespace.mainQueryObject.date)
+			return true;
+
+		var depth = ns.query.createDepthHashMap();
+		if (depth) {
+			if (myNamespace.mainQueryObject.depth) {
+				if (depth.max != myNamespace.mainQueryObject.depth.max)
+					return true;
+				if (depth.min != myNamespace.mainQueryObject.depth.min)
+					return true;
+			} else {
+				return true;
+			}
+		} else if (myNamespace.mainQueryObject.depth)
+			return true;
+
+		var region = ns.query.createRegionArray();
+		if (region) {
+			if (myNamespace.mainQueryObject.region) {
+				if (region != myNamespace.mainQueryObject.region)
+					return true;
+			} else
+				return true;
+		} else if (myNamespace.mainQueryObject.region)
+			return true;
+		var cruise = null;
+		if (document.getElementById('cruiseEnabledCheck').checked) {
+			cruise = $("#cruiseSelected").find(":selected").val();
+		}
+		if (cruise) {
+			if (myNamespace.mainQueryObject.cruise) {
+				if (cruise != myNamespace.mainQueryObject.cruise)
+					return true;
+			} else
+				return true;
+		} else if (myNamespace.mainQueryObject.cruise)
+			return true;
+
+		// TODO: does not handle metadata
+
+		var months = ns.query.createMonthArray();
+		if (months)
+			if (myNamespace.mainQueryObject.months) {
+				if (!months.compare(myNamespace.mainQueryObject.months))
+					return true;
+			} else
+				return true;
+		else if (myNamespace.mainQueryObject.months)
+			return true;
+	}
+
 	function queryLayer() {
+		if (hasMainQueryObjectChanged())
+			ns.errorMessage
+					.showErrorMessage("You seem to have changed the main query options since you ran the main query."
+							+ " The filtering will happen with the options as they were when you last ran the main query.");
 		var layer = tablesToQuery.pop();
 		// Array with all parameters for the current layer
 		var propertyName = [];
@@ -326,18 +436,10 @@ myNamespace.control = (function($, OL, ns) {
 				propertyName.push(parameter + qfPostFix);
 			}
 		});
-
-		var depth = ns.query.createDepthHashMap();
-		var region = ns.query.createRegionArray();
-		var filterBbox = ns.query.createfilterBoxHashMap();
-		var date = ns.query.createDateHashMap();
-		var months = ns.query.createMonthArray();
-		var cruise = null;
-		if (document.getElementById('cruiseEnabledCheck').checked) {
-			cruise = $("#cruiseSelected").find(":selected").val();
-		}
-		var filter = ns.query.constructParameterFilterString(propertyNameNeed, depth, filterBbox, date, months, region,
-				cruise);
+		var filter = ns.query.constructParameterFilterString(propertyNameNeed, myNamespace.mainQueryObject.depth,
+				myNamespace.mainQueryObject.filterBbox, myNamespace.mainQueryObject.date,
+				myNamespace.mainQueryObject.months, myNamespace.mainQueryObject.region,
+				myNamespace.mainQueryObject.cruise);
 		// Requesting features from the first layer through an asynchronous
 		// request and sending response to displayParameter
 		ns.WebFeatureService.getFeature({
@@ -566,15 +668,6 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function updateTreeInventoryNumbers() {
-		var filterBbox = ns.query.createfilterBoxHashMap();
-		var date = ns.query.createDateHashMap();
-		var months = ns.query.createMonthArray();
-		var depth = ns.query.createDepthHashMap();
-		var region = ns.query.createRegionArray();
-		var cruise = null;
-		if (document.getElementById('cruiseEnabledCheck').checked) {
-			cruise = $("#cruiseSelected").find(":selected").val();
-		}
 		var myTreeContainer = $.jstree._reference("#parametersTree").get_container();
 		var allChildren = myTreeContainer.find("li");
 		$.each(allChildren, function(i, val) {
@@ -618,8 +711,10 @@ myNamespace.control = (function($, OL, ns) {
 					if ($('#updateParametersList').is(':checked')) {
 						ns.WebFeatureService.getFeature({
 							TYPENAME : layer,
-							FILTER : ns.query.constructParameterFilterString(propertyNames, depth, filterBbox, date,
-									months, region, cruise),
+							FILTER : ns.query.constructParameterFilterString(propertyNames,
+									myNamespace.mainQueryObject.depth, myNamespace.mainQueryObject.filterBbox,
+									myNamespace.mainQueryObject.date, myNamespace.mainQueryObject.months,
+									myNamespace.mainQueryObject.region, myNamespace.mainQueryObject.cruise),
 							RESULTTYPE : "hits"
 						}, function(response) {
 							updateTreeWithInventoryNumbers(response, splitString[0], par);
@@ -841,14 +936,14 @@ myNamespace.control = (function($, OL, ns) {
 		ns.statistics.generatePropertiesPlot(data);
 	}
 
-	function activateBbox(){
-		//first set to false, then trigger to true (to get correct behaviour)
-		$("#bboxEnabledCheck").prop("checked",false);
+	function activateBbox() {
+		// first set to false, then trigger to true (to get correct behaviour)
+		$("#bboxEnabledCheck").prop("checked", false);
 		$("#bboxEnabledCheck").trigger('click');
 	}
 	// public interface
 	return {
-		activateBbox:activateBbox,
+		activateBbox : activateBbox,
 		addLayerButton : addLayerButton,
 		toggleLayerButton : toggleLayerButton,
 		addTimeSeriesVariableButton : addTimeSeriesVariableButton,
