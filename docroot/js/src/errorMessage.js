@@ -13,7 +13,8 @@ myNamespace.errorMessage = (function(jQ) {
 				Ok : function() {
 					jQ(this).dialog("close");
 				}
-			}
+			},
+		position: { my: "center top", at: "center top", of: $("#tabs") }
 		});
 
 		jQ(dialogDiv).html("<p>" + message + "<p>");
