@@ -17,10 +17,9 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		else
 			maxLayers = Math.floor(widthAvailable / 57);
 		if (activeLayers >= maxLayers) {
-			myNamespace.errorMessage
-					.showErrorMessage("Adding more than "
-							+ maxLayers
-							+ " layers to the map might cause a display-problem with the legends. Increase your window-size, zoom out, or use with caution.");
+			myNamespace.errorMessage.showErrorMessage("Adding more than " + maxLayers
+					+ " layers to the map might cause a display-problem with the legends, use with caution."
+					+ " Possible solutions: Increase your window-size or zoom out (in the browser, not on the map).");
 		}
 		var selectElement = setUpSelectorArray(window.wmsLayers, "mapLayersWMSURL" + activeLayers, activeLayers);
 		var button = "<input type='button' id='toggleLayerButton" + activeLayers + "' name='" + activeLayers
