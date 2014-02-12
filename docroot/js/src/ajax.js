@@ -30,12 +30,15 @@ myNamespace.ajax = (function($) {
 		data[portletNameSpace + 'requestType'] = "getLayersFromNetCDFFile";
 		if (useOpendap)
 			data[portletNameSpace + 'opendapDataURL'] = opendapDataURL;
-		var success = function(event, id, obj) {
+		var success = function() {
 			// JSON Data coming back from Server
 			var responseData = this.get('responseData');
 			myNamespace.control.viewParameterNames(responseData);
 		};
-		aui(data, success);
+		var failure = function(){
+			$("#compareRaster").html("An error occured when fetching the data. Please try again or contact the administrators on greenseas-adbc(at)nersc.no.");
+		};
+		aui(data, success, failure);
 	}
 
 	function getDatavaluesFromRaster(dataRequest, data) {
@@ -43,11 +46,11 @@ myNamespace.ajax = (function($) {
 			console.log("Started getDatavaluesFromRaster");
 			console.log(JSON.stringify(dataRequest));
 		}
-		failure = function() {
-			alert("SOMETHING WENT WRONG!");
+		 var failure = function() {
+			myNamespace.errorMessage.showErrorMessage("Something went wrong when fetching the datavalues from the raster");
 		};
 
-		success = function(event, id, obj) {
+		success = function() {
 			var instance = this;
 
 			// JSON Data coming back from Server
@@ -67,11 +70,11 @@ myNamespace.ajax = (function($) {
 		data[portletNameSpace + 'rasterParameter'] = rasterParameter;
 		data[portletNameSpace + 'requestType'] = 'getMetaDimensions';
 
-		failure = function() {
-			alert("SOMETHING WENT WRONG!");
+		var failure = function() {
+			myNamespace.errorMessage.showErrorMessage("Something went wrong when fetching the dimensions from the raster!");
 		};
 
-		success = function(event, id, obj) {
+		success = function() {
 			// JSON Data coming back from Server
 			var responseData = this.get('responseData');
 			myNamespace.matchup.setUpParameterMetaSelector(responseData);
@@ -97,7 +100,7 @@ myNamespace.ajax = (function($) {
 			dataType : 'json',
 			async : false,
 			error : function() {
-				alert("SOMETHING WENT WRONG!");
+				myNamespace.errorMessage.showErrorMessage("Something went wrong when fetching the longhurst region");
 			},
 			success : function(result, status, xhr) {
 				window.polygon[region] = result[region];
