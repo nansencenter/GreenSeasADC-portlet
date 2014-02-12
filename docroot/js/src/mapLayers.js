@@ -7,6 +7,21 @@ myNamespace.mapLayers = (function(jQ, bH) {
 
 	var activeLayers = 0;
 	function addWMSLayerSelector() {
+		var widthAvailable = document.getElementById("mapContainer").offsetWidth
+				- document.getElementById("simple_map").offsetWidth;
+		var maxLayers = 0;
+		// if more than 10 layers, layer from 11th uses 61 pixels, not 57
+		// (add 40 to make up for the first 10 layers using 4 pixels less)
+		if (widthAvailable > 570)
+			maxLayers = Math.floor((widthAvailable + 40) / 61);
+		else
+			maxLayers = Math.floor(widthAvailable / 57);
+		if (activeLayers >= maxLayers) {
+			myNamespace.errorMessage
+					.showErrorMessage("Adding more than "
+							+ maxLayers
+							+ " layers to the map might cause a display-problem with the legends. Increase your window-size, zoom out, or use with caution.");
+		}
 		var selectElement = setUpSelectorArray(window.wmsLayers, "mapLayersWMSURL" + activeLayers, activeLayers);
 		var button = "<input type='button' id='toggleLayerButton" + activeLayers + "' name='" + activeLayers
 				+ "' value='Update on map'/>";
