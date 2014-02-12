@@ -245,9 +245,6 @@
 				<div id="list"></div>
 
 			</div>
-
-			<!-- these divs are popus, don't actually appear -->
-			<div id="errorMessageDialog" title="An error occured"></div>
 		</div>
 
 		<div id="parametersTab">
@@ -362,6 +359,8 @@
 
 	</div>
 
+			<!-- these divs are popus, don't actually appear -->
+			<div id="errorMessageDialog" title="Warning"></div>
 </div>
 
 <aui:script>
