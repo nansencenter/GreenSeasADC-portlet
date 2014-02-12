@@ -35,8 +35,10 @@ myNamespace.ajax = (function($) {
 			var responseData = this.get('responseData');
 			myNamespace.control.viewParameterNames(responseData);
 		};
-		var failure = function(){
-			$("#compareRaster").html("An error occured when fetching the data. Please try again or contact the administrators on greenseas-adbc(at)nersc.no.");
+		var failure = function() {
+			$("#compareRaster")
+					.html(
+							"An error occured when fetching the data. Please try again or contact the administrators on greenseas-adbc(at)nersc.no.");
 		};
 		aui(data, success, failure);
 	}
@@ -46,11 +48,12 @@ myNamespace.ajax = (function($) {
 			console.log("Started getDatavaluesFromRaster");
 			console.log(JSON.stringify(dataRequest));
 		}
-		 var failure = function() {
-			myNamespace.errorMessage.showErrorMessage("Something went wrong when fetching the datavalues from the raster");
+		var failure = function() {
+			myNamespace.errorMessage
+					.showErrorMessage("Something went wrong when fetching the datavalues from the raster");
 		};
 
-		success = function() {
+		var success = function() {
 			var instance = this;
 
 			// JSON Data coming back from Server
@@ -62,7 +65,10 @@ myNamespace.ajax = (function($) {
 
 	}
 
+	var lastGetDimensionCall = null;
 	function getDimension(rasterParameter) {
+		var identifier = myNamespace.utilities.rand();
+		lastGetDimensionCall = identifier;
 		if (debuga) {
 			console.log("Started getDimension");
 		}
@@ -71,13 +77,19 @@ myNamespace.ajax = (function($) {
 		data[portletNameSpace + 'requestType'] = 'getMetaDimensions';
 
 		var failure = function() {
-			myNamespace.errorMessage.showErrorMessage("Something went wrong when fetching the dimensions from the raster!");
+			myNamespace.errorMessage
+					.showErrorMessage("Something went wrong when fetching the dimensions from the raster!");
 		};
 
-		success = function() {
+		var success = function() {
 			// JSON Data coming back from Server
-			var responseData = this.get('responseData');
-			myNamespace.matchup.setUpParameterMetaSelector(responseData);
+			if (identifier == lastGetDimensionCall) {
+				var responseData = this.get('responseData');
+				myNamespace.matchup.setUpParameterMetaSelector(responseData);
+			} else {
+				if (debuga)
+					console.log("DENIED");
+			}
 		};
 		aui(data, success, failure);
 	}
