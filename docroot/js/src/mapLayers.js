@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugMl = true;// debug flag
+var debugMl = false;// debug flag
 
 myNamespace.mapLayers = (function(jQ, bH) {
 	"use strict";
