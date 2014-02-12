@@ -22,7 +22,10 @@ myNamespace.ajax = (function($) {
 			});
 		});
 	}
+	var lastGetLayersFromNetCDFFileCall = null;
 	function getLayersFromNetCDFFile(useOpendap, opendapDataURL) {
+		var identifier = myNamespace.utilities.rand();
+		lastGetLayersFromNetCDFFileCall = identifier;
 		if (debuga) {
 			console.log("Started getLayersFromNetCDFFile");
 		}
@@ -31,9 +34,11 @@ myNamespace.ajax = (function($) {
 		if (useOpendap)
 			data[portletNameSpace + 'opendapDataURL'] = opendapDataURL;
 		var success = function() {
-			// JSON Data coming back from Server
-			var responseData = this.get('responseData');
-			myNamespace.control.viewParameterNames(responseData);
+			if (identifier == lastGetLayersFromNetCDFFileCall) {
+				// JSON Data coming back from Server
+				var responseData = this.get('responseData');
+				myNamespace.control.viewParameterNames(responseData);
+			}
 		};
 		var failure = function() {
 			$("#compareRaster")
@@ -43,23 +48,28 @@ myNamespace.ajax = (function($) {
 		aui(data, success, failure);
 	}
 
+	var lastGetDatavaluesFromRasterCall = null;
 	function getDatavaluesFromRaster(dataRequest, data) {
 		if (debuga) {
 			console.log("Started getDatavaluesFromRaster");
 			console.log(JSON.stringify(dataRequest));
 		}
+		var identifier = myNamespace.utilities.rand();
+		lastGetDatavaluesFromRasterCall = identifier;
 		var failure = function() {
 			myNamespace.errorMessage
 					.showErrorMessage("Something went wrong when fetching the datavalues from the raster");
 		};
 
 		var success = function() {
-			var instance = this;
+			if (identifier == lastGetDatavaluesFromRasterCall) {
+				var instance = this;
 
-			// JSON Data coming back from Server
-			var responseData = instance.get('responseData');
-			myNamespace.matchup.compareData(responseData, data);
+				// JSON Data coming back from Server
+				var responseData = instance.get('responseData');
+				myNamespace.matchup.compareData(responseData, data);
 
+			}
 		};
 		aui(dataRequest, success, failure);
 
@@ -94,7 +104,10 @@ myNamespace.ajax = (function($) {
 		aui(data, success, failure);
 	}
 
+	var lastGetLonghurstPolygonCall = null;
 	function getLonghurstPolygon(region) {
+		var identifier = myNamespace.utilities.rand();
+		lastGetLonghurstPolygonCall = identifier;
 		if (!window.polygon)
 			window.polygon = {};
 		if (debuga) {
@@ -115,7 +128,9 @@ myNamespace.ajax = (function($) {
 				myNamespace.errorMessage.showErrorMessage("Something went wrong when fetching the longhurst region");
 			},
 			success : function(result, status, xhr) {
-				window.polygon[region] = result[region];
+				if (identifier == lastGetLonghurstPolygonCall) {
+					window.polygon[region] = result[region];
+				}
 			}
 		});
 	}
