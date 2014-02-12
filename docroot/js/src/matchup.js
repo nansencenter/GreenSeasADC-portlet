@@ -37,7 +37,7 @@ myNamespace.matchup = (function($, ns) {
 				return;
 			}
 		if (fileOptionEnabled) {
-			ns.errorMessage.showErrorMessage("Both file and dataset options are on. Please choose just one.");
+			ns.errorMessage.showErrorMessage("Both file and dataset options are turned on. Please choose just one.");
 			return;
 		}
 		var opendapDataURL = $("#opendapDataURL").find(":selected").val();
