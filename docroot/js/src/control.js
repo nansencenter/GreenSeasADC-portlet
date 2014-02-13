@@ -84,7 +84,7 @@ myNamespace.control = (function($, OL, ns) {
 
 	function setUpRegions() {
 		var findRegions = "<a href='"
-				+ "http://geonode.iwlearn.org/geoserver/geonode/wms?service=WMS&version=1.1.0&request=GetMap&layers=geonode:Longhurst_world_v4_2010&styles=&bbox=-180.0,-78.5001564788404,180.0,90.0000019073487&width=705&height=330&srs=EPSG:4326&format=application/openlayers'"
+				+ "http://tomcat.nersc.no:8080/geoserver/greensad/wms?service=WMS&version=1.1.0&request=GetMap&layers=greensad:Longhurst_world_v4_2010&styles=&bbox=-180.00000000000003,-78.50015647884042,180.0,90.00000190734869&width=705&height=330&srs=EPSG:4326&format=application/openlayers'"
 				+ " target='_new'>Use this link to find your region</a><br>";
 		$("#regionList").html(
 				findRegions
