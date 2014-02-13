@@ -79,9 +79,9 @@ myNamespace.mapViewer = (function(OL, $) {
 					layers : 'gebco_08_grid',
 					format : window.WMSformat
 				}),
-		longhurst : new OpenLayers.Layer.WMS('Longhurst Regions', 'http://geonode.iwlearn.org/geoserver/geonode/wms?',
+		longhurst : new OpenLayers.Layer.WMS('Longhurst Regions', 'http://tomcat.nersc.no:8080/geoserver/greensad/wms?',
 				{
-					layers : 'geonode:Longhurst_world_v4_2010',
+					layers : 'greensad:Longhurst_world_v4_2010',
 					format : window.WMSformat
 				}),
 	};
