@@ -152,7 +152,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		panel.addControls([ pdfButton ]);
 		map.addControl(panel);
 
-//remove popups
+		// remove popups
 		var popupsButton = new OpenLayers.Control.Button({
 			displayClass : "olPopupsButton",
 			title : "Remove all popups",
@@ -242,7 +242,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		if (customLayers)
 			$.each(customLayers, function(i, val) {
 				if (val.visibility) {
-					activeLayers += delimiter + val.name;
+					activeLayers += delimiter + val.longName;
 					delimiter = ", ";
 				}
 			});
@@ -425,7 +425,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		});
 	}
 
-	function addWMSLayer(url, id, name, layerID, colorscalerange, style, logscale, elevation, time) {
+	function addWMSLayer(url, id, shortName, layerID, colorscalerange, style, logscale, elevation, time,longName) {
 		if (debugmW)
 			console.log("Adding the WMS layer");
 		if (debugmW)
@@ -444,9 +444,10 @@ myNamespace.mapViewer = (function(OL, $) {
 		if (!(typeof time === 'undefined') && time != "") {
 			parameters.time = time;
 		}
-		var layer = new OpenLayers.Layer.WMS(name, url, parameters, {
+		var layer = new OpenLayers.Layer.WMS(shortName, url, parameters, {
 			isBaseLayer : false
 		});
+		layer.longName = longName;
 		if (debugmW)
 			console.log("Created the WMS layer");
 		if (id in customLayers) {
