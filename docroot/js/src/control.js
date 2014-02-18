@@ -2,6 +2,10 @@ var myNamespace = myNamespace || {};
 
 var debugc = false;// debug flag
 
+myNamespace.mainQueryArray = null;
+myNamespace.mainQueryObject = null;
+myNamespace.parametersQueryString = null;
+
 myNamespace.control = (function($, OL, ns) {
 	"use strict";
 
@@ -74,36 +78,13 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function setUpCruiseSelector() {
-		var cruises = {
-			AMT1 : "Atlantic Meridional Transect (AMT) 1",
-			AMT2 : "Atlantic Meridional Transect (AMT) 2",
-			AMT3 : "Atlantic Meridional Transect (AMT) 3",
-			AMT4 : "Atlantic Meridional Transect (AMT) 4",
-			AMT5 : "Atlantic Meridional Transect (AMT) 5",
-			AMT6 : "Atlantic Meridional Transect (AMT) 6",
-			AMT6b : "Atlantic Meridional Transect (AMT) 6b",
-			AMT7 : "Atlantic Meridional Transect (AMT) 7",
-			AMT8 : "Atlantic Meridional Transect (AMT) 8",
-			AMT9 : "Atlantic Meridional Transect (AMT) 9",
-			AMT10 : "Atlantic Meridional Transect (AMT) 10",
-			AMT11 : "Atlantic Meridional Transect (AMT) 11",
-			AMT12 : "Atlantic Meridional Transect (AMT) 12",
-			AMT13 : "Atlantic Meridional Transect (AMT) 13",
-			AMT14 : "Atlantic Meridional Transect (AMT) 14",
-			AMT15 : "Atlantic Meridional Transect (AMT) 15",
-			AMT16 : "Atlantic Meridional Transect (AMT) 16",
-			AMT17 : "Atlantic Meridional Transect (AMT) 17",
-			AMT18 : "Atlantic Meridional Transect (AMT) 18",
-			AMT19 : "Atlantic Meridional Transect (AMT) 19",
-			AMT20 : "Atlantic Meridional Transect (AMT) 20",
-			Polarfront : "Polarfront",
-		};
-		$("#cruiseSelectorDiv").html(ns.mapLayers.setUpSelector(cruises, "cruiseSelected", "cruiseSelected"));
+		$("#cruiseSelectorDiv").html(
+				ns.mapLayers.setUpSelectorArray(window.cruisesList, "cruiseSelected", "cruiseSelected"));
 	}
 
 	function setUpRegions() {
 		var findRegions = "<a href='"
-				+ "http://geonode.iwlearn.org/geoserver/geonode/wms?service=WMS&version=1.1.0&request=GetMap&layers=geonode:Longhurst_world_v4_2010&styles=&bbox=-180.0,-78.5001564788404,180.0,90.0000019073487&width=705&height=330&srs=EPSG:4326&format=application/openlayers'"
+				+ "http://tomcat.nersc.no:8080/geoserver/greensad/wms?service=WMS&version=1.1.0&request=GetMap&layers=greensad:Longhurst_world_v4_2010&styles=&bbox=-180.00000000000003,-78.50015647884042,180.0,90.00000190734869&width=705&height=330&srs=EPSG:4326&format=application/openlayers'"
 				+ " target='_new'>Use this link to find your region</a><br>";
 		$("#regionList").html(
 				findRegions
@@ -123,10 +104,13 @@ myNamespace.control = (function($, OL, ns) {
 		$("#longhurstRegionSelected").empty().append(my_options);
 	}
 
+	var queryHasChanged = false;
 	function mainQueryButton() {
+		queryHasChanged = false;
 		// removing the parameterlayers from previous searches
 		ns.mapViewer.removeAllParameterLayers();
 		ns.mapViewer.removeBasicSearchLayer();
+		myNamespace.parametersQueryString = null;
 		$("#exportParametersDiv").hide();
 		if (debugc)
 			console.log("control.js: start of mainQueryButton()");// TEST
@@ -157,22 +141,59 @@ myNamespace.control = (function($, OL, ns) {
 			if (debugc)
 				console.log("Cruise enabled:" + cruise);
 		}
+		// no attributes are currently supported
+		var attr = null;
+		var mainQueryArray = [];
+		var mainQueryObject = {};
+		if (filterBbox) {
+			mainQueryArray.push("Bounding box:" + filterBbox);
+			mainQueryObject.filterBbox = filterBbox;
+		}
+		if (date) {
+			mainQueryArray.push("Date:" + date.dateString);
+			mainQueryObject.date = date;
+		}
+		if (attr) {
+			mainQueryArray.push("Attributes:" + attr);
+			mainQueryObject.attr = attr;
+		}
+		if (depth) {
+			mainQueryArray.push("Depth:" + depth.depthString);
+			mainQueryObject.depth = depth;
+		}
+		if (months) {
+			mainQueryArray.push("Months:" + months);
+			mainQueryObject.months = months;
+		}
+		if (region) {
+			mainQueryArray.push("Region:" + $("#longhurstRegionSelected").find(":selected").html());
+			mainQueryObject.region = region;
+		}
+		if (cruise) {
+			mainQueryArray.push("Cruise:" + $("#cruiseSelected").find(":selected").html());
+			mainQueryObject.cruise = cruise;
+		}
 
 		var propertyName = [];
 		// Adding the parameters to the array
 		if (document.getElementById('metadataEnabledCheck').checked) {
+			chosenMetaDataString = "Chosen Metadata:";
 			ns.handleParameters.selectMetadata($("#metadataTree").jstree("get_checked", null, true));
 			propertyName = [ window.geometryParameter ];
+			mainQueryObject.metaData = [];
 			$.each(ns.handleParameters.mainParameters.chosenMetadata, function(j, parameter) {
 				propertyName.push(parameter);
+				mainQueryObject.metaData.push(parameter);
+				chosenMetaDataString += ns.handleParameters.getHeader(parameter, window.metaDataTable) + ", ";
 			});
+			mainQueryArray.push(chosenMetaDataString);
 		} else {
 			ns.handleParameters.resetMetadataSelection();
 			propertyName = ns.handleParameters.mainParameters.parameters;
 		}
 
-		// no attributes are currently supported
-		var attr = null;
+		myNamespace.mainQueryArray = mainQueryArray;
+		myNamespace.mainQueryObject = mainQueryObject;
 
 		if (debugc)
 			console.log("control.js: calling ns.query.constructFilterString()"); // TEST
@@ -244,9 +265,15 @@ myNamespace.control = (function($, OL, ns) {
 	function filterParametersButton() {
 		var allSelected = $("#parametersTree").jstree("get_checked", null, true);
 		var selected = [];
+		var parametersQueryString = "Selected parameters:";
+		var delimiter = "";
 		$.each(allSelected, function(i, val) {
-			if (val.getAttribute("rel") != "noBox")
-				selected.push(val.getAttribute("id"));
+			if (val.getAttribute("rel") != "noBox") {
+				var id = val.getAttribute("id");
+				selected.push(id);
+				parametersQueryString += delimiter + ns.handleParameters.getHeaderFromRawData(id) + "";
+				delimiter = ", ";
+			}
 		});
 
 		if (debugc)
@@ -254,6 +281,7 @@ myNamespace.control = (function($, OL, ns) {
 		if (selected.length != 0) {
 			// removing the parameterlayers from previous searches
 			ns.mapViewer.removeAllParameterLayers();
+			myNamespace.parametersQueryString = parametersQueryString;
 			$("#parametersTable").html("Loading parameters, please wait...");
 			$("#statistics").hide();
 			$("#timeSeriesDiv").hide();
@@ -302,7 +330,96 @@ myNamespace.control = (function($, OL, ns) {
 		}
 	}
 
+	function hasMainQueryObjectChanged() {
+		var filterBbox = ns.query.createfilterBoxHashMap();
+		if (filterBbox) {
+			if (myNamespace.mainQueryObject.filterBbox) {
+				if (filterBbox.bottom != myNamespace.mainQueryObject.filterBbox.bottom)
+					return true;
+				if (filterBbox.left != myNamespace.mainQueryObject.filterBbox.left)
+					return true;
+				if (filterBbox.right != myNamespace.mainQueryObject.filterBbox.right)
+					return true;
+				if (filterBbox.top != myNamespace.mainQueryObject.filterBbox.top)
+					return true;
+			} else {
+				return true;
+			}
+		} else if (myNamespace.mainQueryObject.filterBbox)
+			return true;
+
+		var date = ns.query.createDateHashMap();
+		if (date) {
+			if (myNamespace.mainQueryObject.date) {
+				if (date.fromDate != myNamespace.mainQueryObject.date.fromDate)
+					return true;
+				if (date.toDate != myNamespace.mainQueryObject.date.toDate)
+					return true;
+				if (date.time != myNamespace.mainQueryObject.date.time)
+					return true;
+				if (date.fromTime != myNamespace.mainQueryObject.date.fromTime)
+					return true;
+				if (date.toTime != myNamespace.mainQueryObject.date.toTime)
+					return true;
+			} else {
+				return true;
+			}
+		} else if (myNamespace.mainQueryObject.date)
+			return true;
+
+		var depth = ns.query.createDepthHashMap();
+		if (depth) {
+			if (myNamespace.mainQueryObject.depth) {
+				if (depth.max != myNamespace.mainQueryObject.depth.max)
+					return true;
+				if (depth.min != myNamespace.mainQueryObject.depth.min)
+					return true;
+			} else {
+				return true;
+			}
+		} else if (myNamespace.mainQueryObject.depth)
+			return true;
+
+		var region = ns.query.createRegionArray();
+		if (region) {
+			if (myNamespace.mainQueryObject.region) {
+				if (region != myNamespace.mainQueryObject.region)
+					return true;
+			} else
+				return true;
+		} else if (myNamespace.mainQueryObject.region)
+			return true;
+		var cruise = null;
+		if (document.getElementById('cruiseEnabledCheck').checked) {
+			cruise = $("#cruiseSelected").find(":selected").val();
+		}
+		if (cruise) {
+			if (myNamespace.mainQueryObject.cruise) {
+				if (cruise != myNamespace.mainQueryObject.cruise)
+					return true;
+			} else
+				return true;
+		} else if (myNamespace.mainQueryObject.cruise)
+			return true;
+
+		// TODO: does not handle metadata
+
+		var months = ns.query.createMonthArray();
+		if (months)
+			if (myNamespace.mainQueryObject.months) {
+				if (!months.compare(myNamespace.mainQueryObject.months))
+					return true;
+			} else
+				return true;
+		else if (myNamespace.mainQueryObject.months)
+			return true;
+	}
+
 	function queryLayer() {
+		if (hasMainQueryObjectChanged())
+			ns.errorMessage
+					.showErrorMessage("You seem to have changed the main query options since you ran the main query."
+							+ " The filtering will happen with the options as they were when you last ran the main query.");
 		var layer = tablesToQuery.pop();
 		// Array with all parameters for the current layer
 		var propertyName = [];
@@ -319,18 +436,10 @@ myNamespace.control = (function($, OL, ns) {
 				propertyName.push(parameter + qfPostFix);
 			}
 		});
-
-		var depth = ns.query.createDepthHashMap();
-		var region = ns.query.createRegionArray();
-		var filterBbox = ns.query.createfilterBoxHashMap();
-		var date = ns.query.createDateHashMap();
-		var months = ns.query.createMonthArray();
-		var cruise = null;
-		if (document.getElementById('cruiseEnabledCheck').checked) {
-			cruise = $("#cruiseSelected").find(":selected").val();
-		}
-		var filter = ns.query.constructParameterFilterString(propertyNameNeed, depth, filterBbox, date, months, region,
-				cruise);
+		var filter = ns.query.constructParameterFilterString(propertyNameNeed, myNamespace.mainQueryObject.depth,
+				myNamespace.mainQueryObject.filterBbox, myNamespace.mainQueryObject.date,
+				myNamespace.mainQueryObject.months, myNamespace.mainQueryObject.region,
+				myNamespace.mainQueryObject.cruise);
 		// Requesting features from the first layer through an asynchronous
 		// request and sending response to displayParameter
 		ns.WebFeatureService.getFeature({
@@ -559,15 +668,6 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function updateTreeInventoryNumbers() {
-		var filterBbox = ns.query.createfilterBoxHashMap();
-		var date = ns.query.createDateHashMap();
-		var months = ns.query.createMonthArray();
-		var depth = ns.query.createDepthHashMap();
-		var region = ns.query.createRegionArray();
-		var cruise = null;
-		if (document.getElementById('cruiseEnabledCheck').checked) {
-			cruise = $("#cruiseSelected").find(":selected").val();
-		}
 		var myTreeContainer = $.jstree._reference("#parametersTree").get_container();
 		var allChildren = myTreeContainer.find("li");
 		$.each(allChildren, function(i, val) {
@@ -611,8 +711,10 @@ myNamespace.control = (function($, OL, ns) {
 					if ($('#updateParametersList').is(':checked')) {
 						ns.WebFeatureService.getFeature({
 							TYPENAME : layer,
-							FILTER : ns.query.constructParameterFilterString(propertyNames, depth, filterBbox, date,
-									months, region, cruise),
+							FILTER : ns.query.constructParameterFilterString(propertyNames,
+									myNamespace.mainQueryObject.depth, myNamespace.mainQueryObject.filterBbox,
+									myNamespace.mainQueryObject.date, myNamespace.mainQueryObject.months,
+									myNamespace.mainQueryObject.region, myNamespace.mainQueryObject.cruise),
 							RESULTTYPE : "hits"
 						}, function(response) {
 							updateTreeWithInventoryNumbers(response, splitString[0], par);
@@ -834,8 +936,14 @@ myNamespace.control = (function($, OL, ns) {
 		ns.statistics.generatePropertiesPlot(data);
 	}
 
+	function activateBbox() {
+		// first set to false, then trigger to true (to get correct behaviour)
+		$("#bboxEnabledCheck").prop("checked", false);
+		$("#bboxEnabledCheck").trigger('click');
+	}
 	// public interface
 	return {
+		activateBbox : activateBbox,
 		addLayerButton : addLayerButton,
 		toggleLayerButton : toggleLayerButton,
 		addTimeSeriesVariableButton : addTimeSeriesVariableButton,
