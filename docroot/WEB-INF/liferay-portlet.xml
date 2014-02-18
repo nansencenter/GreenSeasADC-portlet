@@ -32,6 +32,7 @@
 		<header-portlet-javascript>/js/lib/geoext/GeoExt.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/lib/geoext/SimplePrint.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/lib/geoext/override-ext-ajax.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/lib/proj4.js</header-portlet-javascript>
 		<!-- testing lib -->
 		<header-portlet-javascript>/js/lib/qunit-1.11.0.js</header-portlet-javascript>
 		<!-- application script files -->
@@ -51,6 +52,7 @@
 		<header-portlet-javascript>/js/src/mapLayers.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/src/matchup.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/src/statistics.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/src/utilities.js</header-portlet-javascript>
 	</portlet>
 	<role-mapper>
 		<role-name>administrator</role-name>

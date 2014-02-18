@@ -9,21 +9,7 @@ myNamespace.matchup = (function($, ns) {
 	var uploadedRaster = false;
 
 	function setUpOPeNDAPSelector() {
-		var URLs = {
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/topaz" : "Topaz",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/cmcc_phosphate" : "CMCC Phosphate",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/cmcc_chla" : "CMCC Chlorophyll-a",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/Model/cmcc_sea_ice" : "CMCC Sea Ice",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/chlor_seawifs_Sep97_Dec10_360x180gt" : "PML Chlorophyll-a",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/fmicro_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Microphytoplankton",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/fnano_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Nanophytoplankton",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/fpico_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Picophytoplankton",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/zeu_seawifs_zmld_soda_Sep97_Dec07_360x180gt" : "PML Ratio euphotic depth to mixed layer depth",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/phenology_seawifs_98_07_360x180g" : "PML Phenology",
-			"http://thredds.nersc.no/thredds/dodsC/greenpath/EO/PML/ssmicon" : "ssmicon",
-		};
-
-		var selectElement = ns.mapLayers.setUpSelector(URLs, "opendapDataURL");
+		var selectElement = ns.mapLayers.setUpSelectorArray(window.openDAPURLs, "opendapDataURL");
 		$("#opendapURLContainer").html(selectElement);
 	}
 
@@ -39,16 +25,21 @@ myNamespace.matchup = (function($, ns) {
 	}
 
 	function initiateRasterData() {
-		$("#compareRaster").html("Loading raster, please wait...");
 		var useOpendap = Boolean(document.getElementById('opendapDataURLCheck').checked);
-		if (!useOpendap)
-			if (!document.getElementById('fileOptionCheck').checked) {
+		var fileOptionEnabled = document.getElementById('fileOptionCheck').checked;
+		if (!useOpendap) {
+			if (!fileOptionEnabled) {
 				ns.errorMessage.showErrorMessage("Either file or dataset options have to be turned on");
 				return;
 			} else if (!uploadedRaster) {
 				ns.errorMessage.showErrorMessage("A file must be successfully uploaded first.");
 				return;
 			}
+		} else if (fileOptionEnabled) {
+			ns.errorMessage.showErrorMessage("Both file and dataset options are turned on. Please choose just one.");
+			return;
+		}
+		$("#compareRaster").html("Loading raster, please wait...");
 		var opendapDataURL = $("#opendapDataURL").find(":selected").val();
 		ns.ajax.getLayersFromNetCDFFile(useOpendap, opendapDataURL);
 	}
@@ -57,7 +48,7 @@ myNamespace.matchup = (function($, ns) {
 		var selectElement = "Raster variable:<select id=\"matchVariable\">";
 		var options = "<option value='NONE'>Select variable</option>";
 		$.each(parameters, function(key, val) {
-			var variable = key;// key.substring(0, key.indexOf("("));
+			var variable = key;
 			var variableName = val.trim();
 			if (variableName == "")
 				variableName = variable;
@@ -85,8 +76,11 @@ myNamespace.matchup = (function($, ns) {
 	}
 
 	function getMetaDimension(event) {
-		$("#matchVariable").after(
-				"<div id='timeElevationText' style='display: inline'>Loading Time/Elevation, please wait...</div>");
+		var loadingText = "Loading Time/Elevation, please wait...";
+		if ($("#timeElevationText").length)
+			$("#timeElevationText").html(loadingText);
+		else
+			$("#matchVariable").after("<div id='timeElevationText' style='display: inline'>" + loadingText + "</div>");
 		$("#timeMatchupVariable").remove();
 		$("#elevationText").remove();
 		var rasterParameter = $("#matchVariable").find(":selected").val();
@@ -262,7 +256,6 @@ myNamespace.matchup = (function($, ns) {
 			});
 			console.log(sd + "]");
 		}
-		// $(function() {
 		$('#highchartsContainer').highcharts(
 				{
 					chart : {
@@ -332,7 +325,6 @@ myNamespace.matchup = (function($, ns) {
 						enableMouseTracking : false
 					} ]
 				});
-		// });
 	}
 
 	// public interface

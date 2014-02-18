@@ -140,7 +140,8 @@ myNamespace.WebFeatureService = (function($, OL) {
 		}
 		var filter = parameters.FILTER || "";
 		// console.log("-------------------filter-------------------");
-		filter = swapPosList(filter);
+		if (myNamespace.projectionCode == "EPSG:4326")
+			filter = swapPosList(filter);
 		// console.log(filter);
 		// console.log("-------------------filter-------------------");
 		var xml = "<GetFeature service=\"WFS\" version=\"1.1.0\" outputFormat=\"" + outputFormat + "\" " + propertyName

@@ -75,6 +75,11 @@ myNamespace.control = (function($, OL, ns) {
 		ns.matchup.setUpUploadRaster();
 		ns.matchup.setUpOPeNDAPSelector();
 		ns.mapLayers.addWMSLayerSelector();
+		changeProjection();
+	}
+
+	function changeProjection() {
+		$("#projectionCodeDiv").html("Using projection " + myNamespace.projectionCode + "<br>");
 	}
 
 	function setUpCruiseSelector() {
@@ -967,6 +972,7 @@ myNamespace.control = (function($, OL, ns) {
 		toggleOrderPlanktonButton : toggleOrderPlanktonButton,
 		clearSelectionButton : clearSelectionButton,
 		addAParameterToData : addAParameterToData,
+		changeProjection : changeProjection,
 	};
 
 }(jQuery, OpenLayers, myNamespace));

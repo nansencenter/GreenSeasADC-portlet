@@ -229,6 +229,12 @@ myNamespace.statistics = (function($, ns) {
 	}
 
 	function generateTimeSeries(allData) {
+		if (myNamespace.mainQueryObject.metaData)
+			if (myNamespace.mainQueryObject.metaData.indexOf("date") < 0) {
+				ns.errorMessage
+						.showErrorMessage("You need to select date amongst the metadata if you want to create a timeseries");
+				return;
+			}
 		var tsData = generateTimeSeriesData(allData);
 		$('#timeSeriesContainer').highcharts(
 				{

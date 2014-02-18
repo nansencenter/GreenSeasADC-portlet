@@ -2,6 +2,8 @@ var myNamespace = myNamespace || {};
 
 var debugmW = false;// debug flag
 
+myNamespace.projectionCode = null;
+
 myNamespace.mapViewer = (function(OL, $) {
 	"use strict";
 	// TODO fix bound
@@ -10,7 +12,7 @@ myNamespace.mapViewer = (function(OL, $) {
 	// -58.2311019897461,-71.0900039672852,80.9666748046875,86.3916702270508
 
 	// map on which layers are drawn
-	var map;
+	// TODO: var map;
 
 	var mapPanel, printProvider;
 
@@ -41,13 +43,14 @@ myNamespace.mapViewer = (function(OL, $) {
 		console.log(10);
 		mapLayers = {
 			datapoints : new OpenLayers.Layer.WMS("Data points", window.WMSServer, {
-				version: "1.1.1",
+				version : "1.1.1",
 				layers : window.metaDataTable,
 				format : window.WMSformat,
 				transparent : true
 			}, {
 				isBaseLayer : false,
-				//projection : 'EPSG:4326',
+			// yx:{"urn:ogc:def:crs:EPSG::4326":false},
+			// projection : 'EPSG:4326',
 			}),
 		};
 	}
@@ -61,18 +64,28 @@ myNamespace.mapViewer = (function(OL, $) {
 		return color;
 	}
 
-	var polarMaxExtent = new OpenLayers.Bounds(-10700000, -10700000, 14700000, 14700000);
+	var polarMaxExtent = new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000);
 	var halfSideLength = (polarMaxExtent.top - polarMaxExtent.bottom) / (4 * 2);
 	var centre = ((polarMaxExtent.top - polarMaxExtent.bottom) / 2) + polarMaxExtent.bottom;
 	var low = centre - halfSideLength;
 	var high = centre + halfSideLength;
-	var polarMaxResolution = (high - low) / 256;
+	var polarMaxResolution = (high - low) / 128;
 	var windowLow = centre - 2 * halfSideLength;
 	var windowHigh = centre + 2 * halfSideLength;
 	var polarWindow = new OpenLayers.Bounds(windowLow, windowLow, windowHigh, windowHigh);
+	console.log(polarWindow);
+
+	proj4.defs["EPSG:3413"] = "+proj=stere +lat_0=90 +lat_ts=70 +lon_0=-45 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs ";
+	proj4.defs["EPSG:3031"] = "+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs ";
+	proj4.defs["EPSG:3408"] = "+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +a=6371228 +b=6371228 +units=m +no_defs ";
 
 	// some background layers, user may select one
 	var backgroundLayers = {
+		generic : new OpenLayers.Layer.WMS("Generic background", "http://tomcat.nersc.no:8080/geoserver/greensad/wms?",
+				{
+					layers : 'greensad:ne_50m_ocean',
+					format : window.WMSformat
+				}),
 		demis : new OpenLayers.Layer.WMS(
 				"Demis WMS",
 				"http://www2.demis.nl/wms/wms.ashx?WMS=WorldMap",
@@ -80,45 +93,109 @@ myNamespace.mapViewer = (function(OL, $) {
 					layers : 'Countries,Bathymetry,Topography,Hillshading,Coastlines,Builtup+areas,Waterbodies,Rivers,Streams,Borders,Cities',
 					format : 'image/png'
 				}),
-		generic : new OpenLayers.Layer.WMS("Generic background", "http://vmap0.tiles.osgeo.org/wms/vmap0", {
-			layers : 'basic',
-			format : window.WMSformat
-		}),
+
 		ocean : new OpenLayers.Layer.WMS('GEBCO Bathymetry',
 				'http://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?', {
 					layers : 'gebco_08_grid',
 					format : window.WMSformat
 				}),
-		longhurst : new OpenLayers.Layer.WMS('Longhurst Regions', 'http://geonode.iwlearn.org/geoserver/geonode/wms?',
-				{
-					layers : 'geonode:Longhurst_world_v4_2010',
+		longhurst : new OpenLayers.Layer.WMS('Longhurst Regions',
+				'http://tomcat.nersc.no:8080/geoserver/greensad/wms?', {
+					layers : 'greensad:Longhurst_world_v4_2010',
 					format : window.WMSformat
 				}),
-		northPoleBaseLayer : new OpenLayers.Layer.WMS("North polar stereographic",
-				"http://wms-basemaps.appspot.com/wms", {
-					layers : 'bluemarble_file',
-					format : 'image/jpeg'
+		northPoleBaseLayer : new OpenLayers.Layer.WMS("NSIDC Sea Ice Polar Stereographic North",
+				"http://tomcat.nersc.no:8080/geoserver/greensad/wms?", {
+					layers : 'greensad:ne_50m_ocean',
+					format : window.WMSformat
 				}, {
-					wrapDateLine : false,
-					projection : 'EPSG:32661',
-					maxExtent : polarWindow,
+					// wrapDateLine : false,
+					projection : 'EPSG:3413',
+					units : "meters",
+					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
 					maxResolution : polarMaxResolution,
-					yx : {"EPSG:32661":true,"EPSG:32761":true}
 				}),
-		southPoleBaseLayer : new OpenLayers.Layer.WMS("South polar stereographic",
-				"http://wms-basemaps.appspot.com/wms", {
-					layers : 'bluemarble_file',
-					format : 'image/jpeg'
+				northPoleBaseLayerNumberTwo : new OpenLayers.Layer.WMS("NSIDC EASE-Grid North",
+						"http://localhost:8090/geoserver/greensad/wms?", {
+							layers : 'greensad:ne_50m_ocean',
+							format : window.WMSformat
+						}, {
+							// wrapDateLine : false,
+							projection : 'EPSG:3408',
+							units : "meters",
+							maxExtent : new OpenLayers.Bounds(-9036842.762, -9036842.762, 9036842.762, 9036842.762),
+							maxResolution : 24218.75,
+						}),
+					/*	northPoleBaseLayerNumberFour : new OpenLayers.Layer.WMS("WGS 84 / NSIDC Polar Stereographic North",
+								"http://localhost:8090/geoserver/greensad/wms?", {
+									layers : 'greensad:ne_50m_ocean',
+									format : window.WMSformat
+								}, {
+									// wrapDateLine : false,
+									projection : 'EPSG:3413',
+									units : "meters",
+									maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
+									maxResolution : polarMaxResolution,
+								}),*/
+	northPoleBaseLayerNumberThree : new OpenLayers.Layer.WMS("UPS North",
+				"http://localhost:8090/geoserver/greensad/wms?", {
+					layers : 'greensad:ne_50m_ocean',
+					format : window.WMSformat
 				}, {
-					wrapDateLine : false,
-					projection : 'EPSG:32761',
-					maxExtent : polarWindow,
+					// wrapDateLine : false,
+					projection : 'EPSG:32661',
+					units : "meters",
+					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
 					maxResolution : polarMaxResolution,
-					yx : {"EPSG:32661":true,"EPSG:32761":true}
-				})
+				}),/*
+		southPoleBaseLayerNumberTwo : new OpenLayers.Layer.WMS("NSIDC EASE-Grid South",
+				"http://localhost:8090/geoserver/greensad/wms?", {
+					layers : 'greensad:ne_50m_ocean',
+					format : window.WMSformat
+				}, {
+					// wrapDateLine : false,
+					projection : 'EPSG:3409',
+					units : "meters",
+					maxExtent : new OpenLayers.Bounds(-9036842.762, -9036842.762, 9036842.762, 9036842.762),
+					maxResolution : 24218.75,
+				}),
+		southPoleBaseLayerNumberThree : new OpenLayers.Layer.WMS("UPS South",
+				"http://tomcat.nersc.no:8080/geoserver/greensad/wms?", {
+					layers : 'greensad:ne_50m_ocean',
+					format : window.WMSformat
+				}, {
+					// wrapDateLine : false,
+					projection : 'EPSG:32761',
+					units : "meters",
+					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
+					maxResolution : polarMaxResolution,
+				}),*/
+				southPoleBaseLayer : new OpenLayers.Layer.WMS("Antarctic Polar Stereographic",
+						"http://localhost:8090/geoserver/greensad/wms?", {
+							layers : 'greensad:ne_50m_ocean',
+							format : window.WMSformat
+						}, {
+							// wrapDateLine : false,
+							projection : 'EPSG:3031',
+							units : "meters",
+							maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
+							maxResolution : polarMaxResolution,
+						/*
+						 * yx : { "EPSG:32661" : true, "EPSG:32761" : true }
+						 */
+						}),
+/*	southPoleBaseLayerFour : new OpenLayers.Layer.WMS("Hughes / NSIDC Polar Stereographic South",
+			"http://localhost:8090/geoserver/greensad/wms?", {
+				layers : 'greensad:ne_50m_ocean',
+				format : window.WMSformat
+			}, {
+				// wrapDateLine : false,
+				projection : 'EPSG:3412',
+				units : "meters",
+				maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
+				maxResolution : polarMaxResolution,
+			})*/
 	};
-
-	var projectionCode = null;
 
 	// Called when the user changes the base layer
 	function baseLayerChanged(event) {
@@ -127,26 +204,64 @@ myNamespace.mapViewer = (function(OL, $) {
 		map.setOptions({
 			// projection: projCode,
 			maxExtent : map.baseLayer.maxExtent,
-			maxResolution : map.baseLayer.maxResolution
+			maxResolution : map.baseLayer.maxResolution,
+			units : map.baseLayer.units
 		});
-		if (projectionCode != map.baseLayer.projection.getCode()) {
+		if (myNamespace.projectionCode != map.baseLayer.projection.getCode()) {
+			$.each(mapLayers, function(i, val) {
+				val.maxExtent = map.baseLayer.maxExtent;
+				val.maxResolution = map.baseLayer.maxResolution;
+				val.minExtent = map.baseLayer.minExtent;
+				val.minResolution = map.baseLayer.minResolution;
+				val.minScale = map.baseLayer.minScale;
+				val.maxScale = map.baseLayer.maxScale;
+			});
+			var newProjection = map.baseLayer.projection.getCode();
+			$.each(parameterLayers, function(i, val) {
+				val.maxExtent = map.baseLayer.maxExtent;
+				val.units = map.baseLayer.units;
+				val.maxResolution = map.baseLayer.maxResolution;
+				val.minExtent = map.baseLayer.minExtent;
+				val.minResolution = map.baseLayer.minResolution;
+				val.minScale = map.baseLayer.minScale;
+				val.maxScale = map.baseLayer.maxScale;
+				if (val instanceof OpenLayers.Layer.Vector) {
+					console.log(val);
+					var sourceProj = proj4.defs[myNamespace.projectionCode];// new
+					// proj4.Proj(projectionCode);
+					var targetProj = proj4.defs[newProjection];// new
+					// proj4.Proj(newProjection);
+					// Seems to be issues transforming between the two polar
+					// stereographics, need to use "EPSG:4326" as intermediate
+					var intermediateProj = null;
+					if (myNamespace.projectionCode != "EPSG:4326" && newProjection != "EPSG:4326") {
+						intermediateProj = proj4.defs["EPSG:4326"];
+					}
+					$.each(val.features, function(i, feature) {
+						transformGeometry(feature.geometry, sourceProj, targetProj, intermediateProj);
+					});
+					val.projection = new OpenLayers.Projection(newProjection);
+					val.redraw();
+					console.log(val);
+				}
+			});
 			// We've changed the projection of the base layer
-			projectionCode = map.baseLayer.projection.getCode();
+			myNamespace.projectionCode = newProjection;
+			myNamespace.control.changeProjection();
 			map.zoomToMaxExtent();
+			console.log(map);
 		}
-		/*
-		 * if (ncwms != null) { ncwms_tiled.maxExtent = map.baseLayer.maxExtent;
-		 * ncwms_tiled.maxResolution = map.baseLayer.maxResolution;
-		 * ncwms_tiled.minResolution = map.baseLayer.minResolution;
-		 * ncwms_tiled.resolutions = map.baseLayer.resolutions; // We only wrap
-		 * the datelinein EPSG:4326 ncwms_tiled.wrapDateLine =
-		 * map.baseLayer.projection == 'EPSG:4326'; ncwms_untiled.maxExtent =
-		 * map.baseLayer.maxExtent; ncwms_untiled.maxResolution =
-		 * map.baseLayer.maxResolution; ncwms_untiled.minResolution =
-		 * map.baseLayer.minResolution; ncwms_untiled.resolutions =
-		 * map.baseLayer.resolutions; ncwms_untiled.wrapDateLine =
-		 * map.baseLayer.projection == 'EPSG:4326'; updateMap(); }
-		 */
+	}
+
+	function transformGeometry(geometry, sourceProj, targetProj, intermediateProj) {
+		var coords = [ geometry.x, geometry.y ];
+		if (intermediateProj) {
+			coords = proj4(sourceProj, intermediateProj, coords);
+			coords = proj4(intermediateProj, targetProj, coords);
+		} else
+			coords = proj4(sourceProj, targetProj, coords);
+		geometry.x = coords[0];
+		geometry.y = coords[1];
 	}
 
 	function initMap() {
@@ -169,8 +284,7 @@ myNamespace.mapViewer = (function(OL, $) {
 			// 5000000, 2500000, 1000000, 500000 ],
 			maxExtent : maxExtent,
 			maxResolution : 'auto',
-		// units : 'degrees',
-
+			units : 'degrees',
 		// actively excluding the standard zoom control, which is there by
 		// default
 		// map.addControls([ new OpenLayers.Control.Navigation(), new
@@ -186,20 +300,13 @@ myNamespace.mapViewer = (function(OL, $) {
 		 * center: [0,0], zoom: 1,
 		 */
 		});
+		var url = window.mapfishPrintServer;
+		printProvider = new GeoExt.data.PrintProvider({
+			method : "POST",
+			url : url,
+		});
+		printProvider.loadCapabilities();
 
-		// url = "http://localhost:8090/geoserver/pdf";
-		/*
-		 * var url = "http://localhost:8081/print-servlet-1.2.0/pdf";
-		 * printProvider = new GeoExt.data.PrintProvider({ // using get for
-		 * remote service access without same origin restriction. // For
-		 * asynchronous requests, we would set method to "POST". // method:
-		 * "GET", method: "POST", // capabilities from script tag in
-		 * Printing.html. For asynchonous // loading, we would configure url
-		 * instead of capabilities. // capabilities: printCapabilities url: url,
-		 * }); printProvider.loadCapabilities();
-		 */
-
-		// renderTo: "simple_map"
 		new Ext.Panel({
 			renderTo : "simple_map",
 			layout : "fit",
@@ -213,20 +320,32 @@ myNamespace.mapViewer = (function(OL, $) {
 		map.addControl(new OpenLayers.Control.MousePosition());
 		map.addControl(new OpenLayers.Control.OverviewMap());
 		// map.addControl(new OpenLayers.Control.PanZoomBar());
+		var pdfButton = new OpenLayers.Control.Button({
+			displayClass : "olPDFButton",
+			title : "Create PDF",
+			id : 'PDFButton',
+			trigger : createPDF,
+		});
+		var panel = new OpenLayers.Control.Panel({
+			defaultControl : pdfButton
+		});
+		panel.addControls([ pdfButton ]);
+		map.addControl(panel);
 
-		// createPDF
-		/*
-		 * var pdfButton = new OpenLayers.Control.Button({ displayClass :
-		 * "olPDFButton", title: "Create PDF", id: 'PDFButton', trigger :
-		 * createPDF, }); var panel = new
-		 * OpenLayers.Control.Panel({defaultControl: pdfButton});
-		 * panel.addControls([pdfButton]); map.addControl(panel);
-		 */
+		// remove popups
+		var popupsButton = new OpenLayers.Control.Button({
+			displayClass : "olPopupsButton",
+			title : "Remove all popups",
+			id : 'PopupsButton',
+			trigger : removePopups,
+		});
+		var popupsPanel = new OpenLayers.Control.Panel({
+			defaultControl : popupsButton,
+			displayClass : "olPopupsPanel"
+		});
+		popupsPanel.addControls([ popupsButton ]);
+		map.addControl(popupsPanel);
 
-		// TODO: does not work with the Ext
-		// var graticule = new OpenLayers.Control.Graticule();
-		// graticule.displayInLayerSwitcher = true;
-		// map.addControl(graticule);
 		// Adding the layers to the map
 		var bg = backgroundLayers, fg = mapLayers;
 		layers = [];
@@ -263,6 +382,7 @@ myNamespace.mapViewer = (function(OL, $) {
 				// left bottom top right
 				myNamespace.control.setLonLatInput(ll.lon.toFixed(4), ll.lat.toFixed(4), ur.lat.toFixed(4), ur.lon
 						.toFixed(4));
+				myNamespace.control.activateBbox();
 			}
 		});
 
@@ -273,17 +393,49 @@ myNamespace.mapViewer = (function(OL, $) {
 	}
 
 	function createPDF() {
+		var comment = "Map printed from: " + document.URL;
+		if (myNamespace.mainQueryArray)
+			$.each(myNamespace.mainQueryArray, function(i, val) {
+				comment += "\n" + val;
+			});
+		if (myNamespace.parametersQueryString)
+			comment += "\n" + myNamespace.parametersQueryString;
+		var activeLayers = "";
+		var delimiter = "";
+		$.each(mapLayers, function(i, val) {
+			if (val.visibility) {
+				activeLayers += delimiter + val.name;
+				delimiter = ", ";
+			}
+		});
+		if (parameterLayers)
+			$.each(parameterLayers, function(i, val) {
+				if (val.visibility) {
+					activeLayers += delimiter + val.name;
+					delimiter = ", ";
+				}
+			});
+		if (customLayers)
+			$.each(customLayers, function(i, val) {
+				if (val.visibility) {
+					activeLayers += delimiter + val.longName;
+					delimiter = ", ";
+				}
+			});
+		if (activeLayers.length > 0)
+			comment += "\nActive layers:" + activeLayers;
 		var printPage = new GeoExt.data.PrintPage({
 			printProvider : printProvider,
 			customParams : {
 				mapTitle : "Greenseas Analytical Database Client",
-				comment : "Map printed from: " + document.URL
+				comment : comment
 			}
 		});
 		printPage.fit(mapPanel);
 		printProvider.print(mapPanel, printPage);
 	}
 
+	var popups = [];
 	function registerClickBehaviour() {
 
 		// clicking feature opens popup with basic info
@@ -295,16 +447,22 @@ myNamespace.mapViewer = (function(OL, $) {
 			/* infoFormat : "text/xml", */
 			eventListeners : {
 				getfeatureinfo : function(event) {
-					// TODO: do something useful
-					// Check
-					// http://openlayers.org/dev/examples/getfeatureinfo-control.html
-					map.addPopup(new OpenLayers.Popup.FramedCloud("chicken", map.getLonLatFromPixel(event.xy), null,
-							event.text, null, true));
+					var popup = new OpenLayers.Popup.FramedCloud("chicken", map.getLonLatFromPixel(event.xy), null,
+							event.text, null, true);
+					map.addPopup(popup);
+					popups.push(popup);
 				}
 			}
 		});
 		map.addControl(info);
 		info.activate();
+	}
+
+	function removePopups() {
+		$.each(popups, function(i, val) {
+			map.removePopup(val);
+		});
+		popups = [];
 	}
 
 	function removeAllParameterLayers() {
@@ -324,20 +482,39 @@ myNamespace.mapViewer = (function(OL, $) {
 		if (debugmW)
 			console.log("addFeaturesFromData started");
 		var pointLayer = new OL.Layer.Vector(name, {
-			projection : "EPSG:4326"
+			projection : "EPSG:4326"// myNamespace.projectionCode
 		});
 		var pointFeatures = [];
 		for (id in data) {
 			var lonLat = new OL.LonLat(data[id].geometry.coordinates[0], data[id].geometry.coordinates[1]);
 			var pointGeometry = new OL.Geometry.Point(lonLat.lat, lonLat.lon);
+
 			var pointFeature = new OL.Feature.Vector(pointGeometry);
 			pointFeatures.push(pointFeature);
 		}
 		pointLayer.addFeatures(pointFeatures);
+		if (myNamespace.projectionCode != "EPSG:4326") {
+			pointLayer.maxExtent = map.baseLayer.maxExtent;
+			pointLayer.units = map.baseLayer.units;
+			pointLayer.maxResolution = map.baseLayer.maxResolution;
+			pointLayer.minExtent = map.baseLayer.minExtent;
+			pointLayer.minResolution = map.baseLayer.minResolution;
+			pointLayer.minScale = map.baseLayer.minScale;
+			pointLayer.maxScale = map.baseLayer.maxScale;
+			var sourceProj = proj4.defs["EPSG:4326"];// new
+			// proj4.Proj(projectionCode);
+			var targetProj = proj4.defs[myNamespace.projectionCode];// new
+			// proj4.Proj(newProjection);
+			// Seems to be issues transforming between the two polar
+			// stereographics, need to use "EPSG:4326" as intermediate
+			$.each(pointLayer.features, function(i, feature) {
+				transformGeometry(feature.geometry, sourceProj, targetProj);
+			});
+			pointLayer.projection = new OpenLayers.Projection(myNamespace.projectionCode);
+		}
 		map.addLayer(pointLayer);
 		map.setLayerIndex(pointLayer, 10);
 		parameterLayers[name] = pointLayer;
-
 		if (debugmW)
 			console.log("addFeaturesFromData ended");
 	}
@@ -347,7 +524,8 @@ myNamespace.mapViewer = (function(OL, $) {
 	// - The WMS 1.3 specification mandates that the axis ordering for
 	// geographic coordinate systems defined in the EPSG database be
 	// latitude/longitude, or y/x. This is contrary to the fact that most
-	// spatial data is usually in longitude/latitude, or x/y.
+	// spatial data is usually in longitude/latitude, or x/y. This only applies
+	// for EPSG: 4326 which is "swapped" in openlayers
 	function swapLonLatInFilteR(filter) {
 		if (debugmW)
 			console.log("swapLonLatInFilteR started with filter:" + filter);
@@ -443,7 +621,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		});
 	}
 
-	function addWMSLayer(url, id, name, layerID, colorscalerange, style, logscale, elevation, time) {
+	function addWMSLayer(url, id, shortName, layerID, colorscalerange, style, logscale, elevation, time, longName) {
 		if (debugmW)
 			console.log("Adding the WMS layer");
 		if (debugmW)
@@ -462,9 +640,10 @@ myNamespace.mapViewer = (function(OL, $) {
 		if (!(typeof time === 'undefined') && time != "") {
 			parameters.time = time;
 		}
-		var layer = new OpenLayers.Layer.WMS(name, url, parameters, {
+		var layer = new OpenLayers.Layer.WMS(shortName, url, parameters, {
 			isBaseLayer : false
 		});
+		layer.longName = longName;
 		if (debugmW)
 			console.log("Created the WMS layer");
 		if (id in customLayers) {
@@ -499,6 +678,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		initMap : initMap,
 		getExtent : getExtent,
 		zoomToExtent : zoomToExtent,
+		removePopups : removePopups,
 	};
 
 }(OpenLayers, jQuery));

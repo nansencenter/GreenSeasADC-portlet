@@ -63,8 +63,9 @@
 								</div>
 
 								<div title='If checked, map will move to this area when query is run'>
-									<input type="checkbox" name="updatemapcheck">
-									Update map focus when query is run
+									<div id='projectionCodeDiv'></div>
+								<!-- 	<input type="checkbox" name="updatemapcheck">
+									Update map focus when query is run -->
 								</div>
 							</form>
 						</div>
@@ -168,7 +169,7 @@
 							metadata will be selected.</em>
 						<div id="metadataTree"></div>
 					</div>
-					
+
 					<h3>
 						<span id='cruiseHeaderText'>Cruise/Station <em>(off)</em></span>
 					</h3>
@@ -359,8 +360,8 @@
 
 	</div>
 
-			<!-- these divs are popus, don't actually appear -->
-			<div id="errorMessageDialog" title="Warning"></div>
+	<!-- these divs are popus, don't actually appear -->
+	<div id="errorMessageDialog" title="Warning"></div>
 </div>
 
 <aui:script>
