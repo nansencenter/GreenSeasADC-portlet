@@ -176,14 +176,20 @@ myNamespace.mapViewer = (function(OL, $) {
 				 * yx : { "EPSG:32661" : true, "EPSG:32761" : true }
 				 */
 				}),
-	/*
-	 * southPoleBaseLayerFour : new OpenLayers.Layer.WMS("Hughes / NSIDC Polar
-	 * Stereographic South", "http://localhost:8090/geoserver/greensad/wms?", {
-	 * layers : 'greensad:ne_50m_ocean', format : window.WMSformat }, { //
-	 * wrapDateLine : false, projection : 'EPSG:3412', units : "meters",
-	 * maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000,
-	 * 12400000), maxResolution : polarMaxResolution, })
-	 */
+
+			
+	  southPoleBaseLayerFour : new OpenLayers.Layer.WMS("Hughes / NSIDC Polar Stereographic South",
+				"http://localhost:8090/geoserver/greensad/wms?", {
+					layers : 'greensad:ne_50m_ocean',
+					format : window.WMSformat
+				}, { //
+					wrapDateLine : false,
+					projection : 'EPSG:3412',
+					units : "meters",
+					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
+					maxResolution : polarMaxResolution,
+				})
+	 
 	};
 
 	// Called when the user changes the base layer
