@@ -240,9 +240,6 @@
 				<div id="list"></div>
 
 			</div>
-
-			<!-- these divs are popus, don't actually appear -->
-			<div id="errorMessageDialog" title="An error occured"></div>
 		</div>
 
 		<div id="parametersTab">
@@ -372,22 +369,30 @@
 
 	</div>
 
+			<!-- these divs are popus, don't actually appear -->
+			<div id="errorMessageDialog" title="Warning"></div>
 </div>
 
 <aui:script>
 	$(document).ready(function() {
-		<!-- Initiating context path for images -->
-		window.contextPath = "<%=request.getContextPath()%>";
-		<!-- Initiating all properties from the properties files -->
-		<%=renderRequest.getAttribute("allProperties")%>
-		<!-- Initiating window.allParametersHeader -->
-		<%=renderRequest.getAttribute("allParametersHeader")%>
-		<!-- Initiating window.combinedParamaters -->
-		<%=renderRequest.getAttribute("combinedParameters")%>
-		<!-- Initiating window.longhurstRegions -->
-		<%=renderRequest.getAttribute("longhurstRegions")%>
-		<!-- Initiating window.allLayersHeader and window.allLayers -->
-		<%=renderRequest.getAttribute("allLayers")%>
+	<!-- Initiating context path for images -->
+	window.contextPath = "<%=request.getContextPath()%>";
+	<!-- Initiating all properties from the main properties file -->
+	<%=renderRequest.getAttribute("allProperties")%>
+	<!-- Initiating window.allParametersHeader -->
+	<%=renderRequest.getAttribute("allParametersHeader")%>
+	<!-- Initiating window.wmsLayers -->
+	<%=renderRequest.getAttribute("wmsLayers")%>
+	<!-- Initiating window.openDAPURLs -->
+	<%=renderRequest.getAttribute("openDAPURLs")%>
+	<!-- Initiating window.cruisesList -->
+	<%=renderRequest.getAttribute("cruisesList")%>
+	<!-- Initiating window.combinedParamaters -->
+	<%=renderRequest.getAttribute("combinedParameters")%>
+	<!-- Initiating window.longhurstRegions -->
+	<%=renderRequest.getAttribute("longhurstRegions")%>
+	<!-- Initiating window.allLayersHeader and window.allLayers -->
+	<%=renderRequest.getAttribute("allLayers")%>
 		window.portletNameSpace = '<portlet:namespace />';
 		window.ajaxCallResourceURL = '<%=ajaxCallResourceURL.toString()%>';
 		myNamespace.control.init();

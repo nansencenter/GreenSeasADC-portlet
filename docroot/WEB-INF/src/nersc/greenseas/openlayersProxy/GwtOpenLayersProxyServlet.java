@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import nersc.greenseas.configuration.DatabaseProperties;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -36,10 +38,9 @@ import org.apache.log4j.Logger;
 @SuppressWarnings("serial")
 public class GwtOpenLayersProxyServlet extends HttpServlet {
 
-	
 	Logger logger = Logger.getLogger(GwtOpenLayersProxyServlet.class);
 
-	static private String[] allowedHosts = { "localhost", "tomcat.nersc.no","thredds.nersc.no","10.47.10.39" };
+	static private String[] allowedHosts = DatabaseProperties.getAllowedHosts();
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		processRequest(request, response);
@@ -212,6 +213,11 @@ public class GwtOpenLayersProxyServlet extends HttpServlet {
 		if (Arrays.asList(allowedHosts).contains(remoteHost))
 			return true;
 		else {
+//			System.out.println("NOT ALLOWED:" + remoteHost);
+//			System.out.println("allowedHosts:");
+//			for (String s: allowedHosts)
+//				System.out.println(s);
+//			System.out.println("-----------");
 			return false;
 		}
 	}

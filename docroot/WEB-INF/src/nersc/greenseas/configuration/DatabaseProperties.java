@@ -1,10 +1,14 @@
 package nersc.greenseas.configuration;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Enumeration;
+import java.util.Vector;
 
 public class DatabaseProperties {
 
@@ -98,6 +102,46 @@ public class DatabaseProperties {
 		return properties.toString();
 	}
 
+	public static String getWmsLayers() {
+		StringBuffer properties = new StringBuffer();
+		properties.append("window.wmsLayers = [{ value:'NONE', name:'Select layer'},");
+		String fileName = "wmsLayers.properties";
+		Properties prop = getProperties(fileName);
+		for (Enumeration<?> e = prop.propertyNames(); e.hasMoreElements();) {
+			String propName = (String) e.nextElement();
+			properties.append("{value:'" + prop.getProperty(propName) + "',name:'" + propName + "'},");
+		}
+		properties.append("];");
+		return properties.toString();
+	}
+
+	public static String getOpenDAPURLs() {
+		StringBuffer properties = new StringBuffer();
+		properties.append("window.openDAPURLs = [");
+		String fileName = "openDAPURLs.properties";
+		Properties prop = getProperties(fileName);
+		for (Enumeration<?> e = prop.propertyNames(); e.hasMoreElements();) {
+			String propName = (String) e.nextElement();
+			properties.append("{value:'" + prop.getProperty(propName) + "',name:'" + propName + "'},");
+		}
+		properties.append("];");
+		return properties.toString();
+	}
+	
+
+	public static String getCruisesList() {
+		StringBuffer properties = new StringBuffer();
+		properties.append("window.cruisesList = [");
+		String fileName = "cruisesList.properties";
+		Properties prop = getProperties(fileName);
+		for (Enumeration<?> e = prop.propertyNames(); e.hasMoreElements();) {
+			String propName = (String) e.nextElement();
+			properties.append("{value:'" + propName + "',name:'" + prop.getProperty(propName) + "'},");
+		}
+		properties.append("];");
+		return properties.toString();
+	}
+
 	public static String getLonghurstPolygon(String region) {
 		String polygon = null;
 		String fileName = "Longhurst_regions_polygons.properties";
@@ -119,12 +163,24 @@ public class DatabaseProperties {
 
 	private static Properties getProperties(String fileName) {
 		try {
-			Properties prop = new Properties();
-			prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream(fileName));
+			Properties prop = new OrderedProperties();
+			String propertiesFolder = System.getProperty("user.home") + "\\.gsadbc\\properties\\";
+			File file = new File(propertiesFolder + fileName);
+			if (file.exists())
+				prop.load(new FileInputStream(file));
+			else
+				prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream(fileName));
 			return prop;
 		} catch (Exception e) {
+			System.out.println("Error reading the property file:" + fileName);
 			return null;
 		}
+	}
+	
+	public static String[] getAllowedHosts(){
+		String fileName = "greenSeasServer.properties";
+		Properties prop = getProperties(fileName);
+		return prop.getProperty("allowedHostsOnProxy").split(",");
 	}
 
 	public static String getCombinedParameters() {
@@ -150,4 +206,46 @@ public class DatabaseProperties {
 		parameters.append("};");
 		return parameters.toString();
 	}
+}
+
+/**
+ * <a href="OrderedProperties.java.html"><b><i>View Source</i></b></a>
+ * 
+ * @author Brian Wing Shun Chan
+ * 
+ */
+class OrderedProperties extends Properties {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public OrderedProperties() {
+		super();
+		_names = new Vector();
+	}
+
+	public Enumeration propertyNames() {
+		return _names.elements();
+	}
+
+	public Object put(Object key, Object value) {
+		if (_names.contains(key)) {
+			_names.remove(key);
+		}
+
+		_names.add(key);
+
+		return super.put(key, value);
+	}
+
+	public Object remove(Object key) {
+		_names.remove(key);
+
+		return super.remove(key);
+	}
+
+	private Vector _names;
+
 }

@@ -44,6 +44,7 @@
 }
 .colorScaleLegend {
 	height: 400px;
+	margin-left:5px;
 }
 #legend {
 	height: 400px;
@@ -52,27 +53,29 @@
 #scaleMax {
 	position: relative;
 	top: -405px;
-	left: 50px;
+	left: 0px;
+	color: white;
 }
 #scaleTwoThird {
 	position: relative;
-	top: -300px;
-	left: 50px;
+	top: -303px;
+	left: 0px;
 }
 #scaleName {
 	position: relative;
-	top: -260px;
-	left: 50px;
+	top: -253px;
+	left: 0px;
 }
 #scaleOneThird {
 	position: relative;
-	top: -221px;
-	left: 50px;
+	top: -201px;
+	left: 0px;
 }
 #scaleMin {
 	position: relative;
-	top: -114px;
-	left: 50px;
+	top: -100px;
+	left: 0px;
+	color: white;
 }
 
 .olPDFButtonItemActive {
@@ -81,8 +84,22 @@
 	width: 20px;
 	background: url('pdf_icon.png');
 }
-.olControlPanel {
+.olPopupsButtonItemActive {
+	position: absolute;
+	width: 17px;
+	height: 17px;
+	background: url('images/close.gif');
+}
+.olPopupsPanel {
 	top: 93%;
+	left: 2%;
+	height: 20px;
+	width: 20px;
+	/*    border: 1px solid black;*/
+	cursor: pointer;
+}
+.olControlPanel {
+	top: 87%;
 	left: 2%;
 	height: 20px;
 	width: 20px;

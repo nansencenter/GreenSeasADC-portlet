@@ -7,30 +7,31 @@ myNamespace.mapLayers = (function(jQ, bH) {
 
 	var activeLayers = 0;
 	function addWMSLayerSelector() {
-		var URLs = {
-			"NONE" : "Select layer",
-			"http://thredds.nersc.no/thredds/wms/greenpath/Model/topaz" : "Topaz",
-			"http://thredds.nersc.no/thredds/wms/greenpath/Model/cmcc_phosphate" : "CMCC Phosphate",
-			"http://thredds.nersc.no/thredds/wms/greenpath/Model/cmcc_chla" : "CMCC Chlorophyll-a",
-			"http://thredds.nersc.no/thredds/wms/greenpath/Model/cmcc_sea_ice" : "CMCC Sea Ice",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/chlor_seawifs_Sep97_Dec10_360x180gt" : "PML Chlorophyll-a",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/fmicro_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Microphytoplankton",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/fnano_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Nanophytoplankton",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/fpico_seawifs_Sep97_Dec10_360x180gt" : "PML Fraction of Picophytoplankton",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/zeu_seawifs_zmld_soda_Sep97_Dec07_360x180gt" : "PML Ratio euphotic depth to mixed layer depth",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/phenology_seawifs_98_07_360x180g" : "PML Phenology",
-			"http://thredds.nersc.no/thredds/wms/greenpath/EO/PML/ssmicon" : "NERSC Arctic ice concentration maps from SSMI data based on the NORSEX algorithm",
-		};
-
-		var selectElement = setUpSelector(URLs, "mapLayersWMSURL" + activeLayers, activeLayers);
+		var widthAvailable = document.getElementById("mapContainer").offsetWidth
+				- document.getElementById("simple_map").offsetWidth;
+		var maxLayers = 0;
+		// if more than 10 layers, layer from 11th uses 61 pixels, not 57
+		// (add 40 to make up for the first 10 layers using 4 pixels less)
+		if (widthAvailable > 570)
+			maxLayers = Math.floor((widthAvailable + 40) / 61);
+		else
+			maxLayers = Math.floor(widthAvailable / 57);
+		if (activeLayers >= maxLayers) {
+			myNamespace.errorMessage.showErrorMessage("Adding more than " + maxLayers
+					+ " layers to the map might cause a display-problem with the legends, use with caution."
+					+ " Possible solutions: Increase your window-size or zoom out (in the browser, not on the map).");
+		}
+		var selectElement = setUpSelectorArray(window.wmsLayers, "mapLayersWMSURL" + activeLayers, activeLayers);
 		var button = "<input type='button' id='toggleLayerButton" + activeLayers + "' name='" + activeLayers
 				+ "' value='Update on map'/>";
-		$("#layerURLSelectorContainer").append(button + selectElement);
+		$("#layerURLSelectorContainer").append("<br><h5>Layer " + activeLayers + "</h5>" + button + selectElement);
 		bH.change("#mapLayersWMSURL" + activeLayers, addWMSLayerVariableSelector);
 		bH.callFromControl("#toggleLayerButton" + activeLayers, toggleLayerButton);
 		$("#toggleLayerButton" + activeLayers).prop("disabled", true);
 		activeLayers++;
 	}
+
+	var whichWMSLayerVariableSelectorQueries = {};
 
 	function addWMSLayerVariableSelector(event) {
 		var activeLayer = event.target.name;
@@ -46,12 +47,14 @@ myNamespace.mapLayers = (function(jQ, bH) {
 			$("#layerMetaData" + activeLayer).html("");
 			return;
 		}
+		var identifier = myNamespace.utilities.rand();
+		whichWMSLayerVariableSelectorQueries[activeLayer] = identifier;
+		var html = "Loading variables, please wait...";
 
 		var selectedOption = selectedElement.options[selectedElement.selectedIndex].value;
 		if (debugMl) {
 			console.log(selectedOption);
 		}
-		var html = "Loading variables, please wait...";
 		if ($("#" + selectedElement.id + "variable" + activeLayer).length) {
 			$("#" + selectedElement.id + "variable" + activeLayer).html(html);
 		} else {
@@ -62,8 +65,25 @@ myNamespace.mapLayers = (function(jQ, bH) {
 							+ "</div>");
 		}
 		myNamespace.WebMapService.getCapabilities(function(response) {
-			setupVariableSelectorForWMSLayer(response, selectedElement);
+			if (identifier == whichWMSLayerVariableSelectorQueries[activeLayer]) {
+				setupVariableSelectorForWMSLayer(response, selectedElement);
+				if (debugMl)
+					console.log("identifier:" + identifier + " matches stored value for element:" + activeLayer);
+			} else if (debugMl)
+				console.log("identifier:" + identifier + " is not equal to stored:"
+						+ whichWMSLayerVariableSelectorQueries[activeLayer] + " for element:" + activeLayer);
 		}, selectedOption);
+	}
+
+	function setUpSelectorArray(array, id, name) {
+		name = "name='" + name + "'";
+		var selectElement = "<select id='" + id + "' " + name + ">";
+		var options = "";
+		$.each(array, function(i, val) {
+			options += "<option value=\"" + val.value + "\">" + val.name + "</option>";
+		});
+		selectElement += options + "</select>";
+		return selectElement;
 	}
 
 	function setUpSelector(hashMap, id, name) {
@@ -230,6 +250,8 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		bH.change("#WMSLayerVariable" + activeLayer, updateMetaDataSelection);
 	}
 
+	var whichupdateMetaDataSelection = {};
+
 	function updateMetaDataSelection(event) {
 		var activeLayer = event.target.name;
 		if (debugMl)
@@ -238,10 +260,14 @@ myNamespace.mapLayers = (function(jQ, bH) {
 			$("#layerMetaData" + activeLayer).html("");
 			return;
 		}
+		var identifier = myNamespace.utilities.rand();
+		whichupdateMetaDataSelection[activeLayer] = identifier;
 		if ($('#colorscalerangeAuto' + activeLayer).is(":checked"))
 			updateAutoRange(activeLayer);
 		myNamespace.WebMapService.getMetadata(function(response) {
-			setUpLayerMetaData(response, activeLayer);
+			if (identifier == whichupdateMetaDataSelection[activeLayer]) {
+				setUpLayerMetaData(response, activeLayer);
+			}
 		}, $('#mapLayersWMSURL' + activeLayer).val(), $('#WMSLayerVariable' + activeLayer).find(":selected").val());
 	}
 
@@ -254,9 +280,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		var url = $('#mapLayersWMSURL' + activeLayer).val();
 		if (url == "NONE")
 			return;
-		var layerAsText = $('#mapLayersWMSURL' + activeLayer).find(":selected").text();
-		var variableAsText = $('#WMSLayerVariable' + activeLayer).find(":selected").text();
-		var name = layerAsText + ":" + variableAsText;
+		var name = "Layer " + activeLayer;
 		var layer = $('#WMSLayerVariable' + activeLayer).find(":selected").val();
 		var min = $('#colorscalerangeMin' + activeLayer).val();
 		var max = $('#colorscalerangeMax' + activeLayer).val();
@@ -272,6 +296,11 @@ myNamespace.mapLayers = (function(jQ, bH) {
 			$("#legend").append("<div id='colorScaleLegend" + activeLayer + "' class='colorScaleLegend'></div>");
 		}
 		var colorScaleLegendDiv = $('#colorScaleLegend' + activeLayer);
+		
+		var layerAsText = $('#mapLayersWMSURL' + activeLayer).find(":selected").text();
+		var variableAsText = $('#WMSLayerVariable' + activeLayer).find(":selected").text();
+		var longName = layerAsText + ":" + variableAsText;
+		
 		// if not countour, then add logscale
 		if (style == "contour")
 			colorScaleLegendDiv.html("");
@@ -284,24 +313,26 @@ myNamespace.mapLayers = (function(jQ, bH) {
 			var third = (maxT - minT) / 3;
 			var scaleOneThird = isLogscale ? Math.exp(minT + third) : minT + third;
 			var scaleTwoThird = isLogscale ? Math.exp(minT + 2 * third) : minT + 2 * third;
-			var minDiv = "<div id='scaleMin'>" + min.toPrecision(4) + "</div>";
-			var oneThirdDiv = "<div id='scaleOneThird'>" + scaleOneThird.toPrecision(4) + "</div>";
-			var nameDiv = "<div id='scaleName'>" + layerAsText + "<br>" + variableAsText + "</div>";
-			var twoThirdDiv = "<div id='scaleTwoThird'>" + scaleTwoThird.toPrecision(4) + "</div>";
-			var maxDiv = "<div id='scaleMax'>" + max.toPrecision(4) + "</div>";
+			var minDiv = "<div id='scaleMin'>" + parseFloat(min.toPrecision(3)).toExponential() + "</div>";
+			var oneThirdDiv = "<div id='scaleOneThird'>" + parseFloat(scaleOneThird.toPrecision(3)).toExponential()
+					+ "</div>";
+			var nameDiv = "<div id='scaleName'>" + name + "</div>";
+			var twoThirdDiv = "<div id='scaleTwoThird'>" + parseFloat(scaleTwoThird.toPrecision(3)).toExponential()
+					+ "</div>";
+			var maxDiv = "<div id='scaleMax'>" + parseFloat(max.toPrecision(3)).toExponential() + "</div>";
 			colorScaleLegendDiv.html(legend + maxDiv + twoThirdDiv + nameDiv + oneThirdDiv + minDiv);
 		}
 		var elevation = $('#zAxisVariable' + activeLayer).find(":selected").val();
 		var time = $('#timeVariable' + activeLayer).find(":selected").val();
 		myNamespace.mapViewer.addWMSLayer(url, activeLayer, name, layer, colorscalerange, style, logscale, elevation,
-				date + "T" + time);
+				date + "T" + time,longName);
 		if (debugMl)
 			console.log("Toggled layer");
 	}
 
 	function setUpStyleForLegend() {
 		var browser = myNamespace.XMLParser.findBrowser();
-		//console.log("Browser:" + browser);
+		// console.log("Browser:" + browser);
 		var legend = $("#legend");
 		if (browser == "Trident") {
 			legend.css("display", [ "-ms-inline-flexbox" ]);
@@ -315,6 +346,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 	// public interface
 	return {
 		setUpSelector : setUpSelector,
+		setUpSelectorArray : setUpSelectorArray,
 		setUpStyleForLegend : setUpStyleForLegend,
 		addWMSLayerSelector : addWMSLayerSelector,
 		toggleLayerButton : toggleLayerButton,

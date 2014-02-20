@@ -5,112 +5,111 @@ var debuga = false;// debug flag
 myNamespace.ajax = (function($) {
 	"use strict";
 
+	function aui(data, success, failure) {
+		if (typeof failure === 'undefined')
+			failure = function() {
+			};
+		AUI().use('aui-io-request', function(A) {
+			A.io.request(ajaxCallResourceURL, {
+				// data to be sent to server
+				data : data,
+				dataType : 'json',
+
+				on : {
+					failure : failure,
+					success : success
+				}
+			});
+		});
+	}
+	var lastGetLayersFromNetCDFFileCall = null;
 	function getLayersFromNetCDFFile(useOpendap, opendapDataURL) {
-		AUI().use('aui-io-request', function(A) {
-			if (debuga) {
-				console.log("Started getLayersFromNetCDFFile");
+		var identifier = myNamespace.utilities.rand();
+		lastGetLayersFromNetCDFFileCall = identifier;
+		if (debuga) {
+			console.log("Started getLayersFromNetCDFFile");
+		}
+		var data = {};
+		data[portletNameSpace + 'requestType'] = "getLayersFromNetCDFFile";
+		if (useOpendap)
+			data[portletNameSpace + 'opendapDataURL'] = opendapDataURL;
+		var success = function() {
+			if (identifier == lastGetLayersFromNetCDFFileCall) {
+				// JSON Data coming back from Server
+				var responseData = this.get('responseData');
+				myNamespace.control.viewParameterNames(responseData);
 			}
-			var url = ajaxCallResourceURL;
-			var data = {};
-			data[portletNameSpace + 'requestType'] = "getLayersFromNetCDFFile";
-			if (useOpendap)
-				data[portletNameSpace + 'opendapDataURL'] = opendapDataURL;
-
-			A.io.request(url, {
-				// data to be sent to server
-				data : data,
-				dataType : 'json',
-
-				on : {
-					failure : function() {
-					},
-
-					success : function(event, id, obj) {
-						var instance = this;
-
-						// JSON Data coming back from Server
-						var responseData = instance.get('responseData');
-						myNamespace.control.viewParameterNames(responseData);
-					}
-				}
-			});
-		});
+		};
+		var failure = function() {
+			$("#compareRaster")
+					.html(
+							"An error occured when fetching the data. Please try again or contact the administrators on greenseas-adbc(at)nersc.no.");
+		};
+		aui(data, success, failure);
 	}
 
+	var lastGetDatavaluesFromRasterCall = null;
 	function getDatavaluesFromRaster(dataRequest, data) {
-		AUI().use('aui-io-request', function(A) {
-			if (debuga) {
-				console.log("Started getDatavaluesFromRaster");
-				console.log(JSON.stringify(dataRequest));
+		if (debuga) {
+			console.log("Started getDatavaluesFromRaster");
+			console.log(JSON.stringify(dataRequest));
+		}
+		var identifier = myNamespace.utilities.rand();
+		lastGetDatavaluesFromRasterCall = identifier;
+		var failure = function() {
+			myNamespace.errorMessage
+					.showErrorMessage("Something went wrong when fetching the datavalues from the raster");
+		};
+
+		var success = function() {
+			if (identifier == lastGetDatavaluesFromRasterCall) {
+				var instance = this;
+
+				// JSON Data coming back from Server
+				var responseData = instance.get('responseData');
+				myNamespace.matchup.compareData(responseData, data);
+
 			}
-			var url = ajaxCallResourceURL;
-			// var data = {};
-			// data[portletNameSpace + 'param1'] = 'hello1';
-			// dataRequest[portletNameSpace + 'requestType'] =
-			// 'getDatavaluesFromRaster';
+		};
+		aui(dataRequest, success, failure);
 
-			A.io.request(url, {
-				// data to be sent to server
-				data : dataRequest,
-				dataType : 'json',
-
-				on : {
-					failure : function() {
-						alert("SOMETHING WENT WRONG!");
-					},
-
-					success : function(event, id, obj) {
-						var instance = this;
-
-						// JSON Data coming back from Server
-						var responseData = instance.get('responseData');
-						myNamespace.matchup.compareData(responseData, data);
-
-					}
-
-				}
-			});
-		});
 	}
 
+	var lastGetDimensionCall = null;
 	function getDimension(rasterParameter) {
-		AUI().use('aui-io-request', function(A) {
-			if (debuga) {
-				console.log("Started getDimension");
+		var identifier = myNamespace.utilities.rand();
+		lastGetDimensionCall = identifier;
+		if (debuga) {
+			console.log("Started getDimension");
+		}
+		var data = {};
+		data[portletNameSpace + 'rasterParameter'] = rasterParameter;
+		data[portletNameSpace + 'requestType'] = 'getMetaDimensions';
+
+		var failure = function() {
+			myNamespace.errorMessage
+					.showErrorMessage("Something went wrong when fetching the dimensions from the raster!");
+		};
+
+		var success = function() {
+			// JSON Data coming back from Server
+			if (identifier == lastGetDimensionCall) {
+				var responseData = this.get('responseData');
+				myNamespace.matchup.setUpParameterMetaSelector(responseData);
+			} else {
+				if (debuga)
+					console.log("DENIED");
 			}
-			var url = ajaxCallResourceURL;
-			var data = {};
-			data[portletNameSpace + 'rasterParameter'] = rasterParameter;
-			data[portletNameSpace + 'requestType'] = 'getMetaDimensions';
-
-			A.io.request(url, {
-				// data to be sent to server
-				data : data,
-				dataType : 'json',
-
-				on : {
-					failure : function() {
-						alert("SOMETHING WENT WRONG!");
-					},
-
-					success : function(event, id, obj) {
-						var instance = this;
-
-						// JSON Data coming back from Server
-						var responseData = instance.get('responseData');
-						myNamespace.matchup.setUpParameterMetaSelector(responseData);
-
-					}
-
-				}
-			});
-		});
+		};
+		aui(data, success, failure);
 	}
 
+	var lastGetLonghurstPolygonCall = null;
 	function getLonghurstPolygon(region) {
+		var identifier = myNamespace.utilities.rand();
+		lastGetLonghurstPolygonCall = identifier;
 		if (!window.polygon)
 			window.polygon = {};
-		// AUI().use('aui-io-request', function(A) {
 		if (debuga) {
 			console.log("Started getDimension");
 		}
@@ -119,31 +118,21 @@ myNamespace.ajax = (function($) {
 		data[portletNameSpace + 'longhurstRegion'] = region;
 		data[portletNameSpace + 'requestType'] = 'getLonghurstPolygon';
 
-		// A.io.request(url, {
 		$.ajax({
 			url : url,
 			// data to be sent to server
 			data : data,
 			dataType : 'json',
 			async : false,
-
-			// on : {
 			error : function() {
-				alert("SOMETHING WENT WRONG!");
+				myNamespace.errorMessage.showErrorMessage("Something went wrong when fetching the longhurst region");
 			},
-
 			success : function(result, status, xhr) {
-				// var instance = this;
-
-				// var responseData = instance.get('responseData');
-				// console.log("result:");
-				// console.log(result[region]);
-				window.polygon[region] = result[region];// .slice(1,result[region].length-1);
+				if (identifier == lastGetLonghurstPolygonCall) {
+					window.polygon[region] = result[region];
+				}
 			}
-
-		// }
 		});
-		// });
 	}
 
 	function createNetCDF(features,timeResolution) {

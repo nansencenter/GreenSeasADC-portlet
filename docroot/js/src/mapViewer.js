@@ -11,7 +11,7 @@ myNamespace.mapViewer = (function(OL, $) {
 
 	// map on which layers are drawn
 	var map;
-	
+
 	var mapPanel, printProvider;
 
 	// Object that stores the layers for the parameters
@@ -79,9 +79,9 @@ myNamespace.mapViewer = (function(OL, $) {
 					layers : 'gebco_08_grid',
 					format : window.WMSformat
 				}),
-		longhurst : new OpenLayers.Layer.WMS('Longhurst Regions', 'http://geonode.iwlearn.org/geoserver/geonode/wms?',
+		longhurst : new OpenLayers.Layer.WMS('Longhurst Regions', 'http://tomcat.nersc.no:8080/geoserver/greensad/wms?',
 				{
-					layers : 'geonode:Longhurst_world_v4_2010',
+					layers : 'greensad:Longhurst_world_v4_2010',
 					format : window.WMSformat
 				}),
 	};
@@ -100,75 +100,76 @@ myNamespace.mapViewer = (function(OL, $) {
 		OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
 
 		map = new OpenLayers.Map();
-//				'simple_map', 
+		// 'simple_map',
 		map.setOptions({
 			scales : [ 150000000, 80000000, 50000000, 30000000, 10000000, 5000000, 2500000, 1000000, 500000 ],
 			maxExtent : maxExtent,
 			maxResolution : 'auto',
 			units : 'degrees',
-			
-			// actively excluding the standard zoom control, which is there by
-			// default
-//			map.addControls([ new OpenLayers.Control.Navigation(), new OpenLayers.Control.ArgParser(),
-//					new OpenLayers.Control.Attribution() ]);
+
+		// actively excluding the standard zoom control, which is there by
+		// default
+		// map.addControls([ new OpenLayers.Control.Navigation(), new
+		// OpenLayers.Control.ArgParser(),
+		// new OpenLayers.Control.Attribution() ]);
 		});
 
 		mapPanel = new GeoExt.MapPanel({
-	        //region: "center",
-			map: map,
-			/*center: [0,0],
-	        zoom: 1,*/
+			map : map,
 		});
-		
 
-		//url = "http://localhost:8090/geoserver/pdf";
-		/*var url = "http://localhost:8081/print-servlet-1.2.0/pdf";
-		 printProvider = new GeoExt.data.PrintProvider({
-		        // using get for remote service access without same origin restriction.
-		        // For asynchronous requests, we would set method to "POST".
-//		        method: "GET",
-		        method: "POST",
-		        
-		        // capabilities from script tag in Printing.html. For asynchonous
-		        // loading, we would configure url instead of capabilities.
-//		        capabilities: printCapabilities
-		        url: url,
-		    });
-		 printProvider.loadCapabilities();*/
-		 
-//		renderTo: "simple_map"
+		var url = window.mapfishPrintServer;
+		printProvider = new GeoExt.data.PrintProvider({
+			method : "POST",
+			url : url,
+		});
+		printProvider.loadCapabilities();
+
 		new Ext.Panel({
 			renderTo : "simple_map",
-			layout: "fit",
+			layout : "fit",
 			width : 800,
 			height : 400,
 			items : [ mapPanel ]
 		});
-		
-		
+
 		// Adding the controls to the map
 		map.addControl(new OpenLayers.Control.LayerSwitcher());
 		map.addControl(new OpenLayers.Control.MousePosition());
 		map.addControl(new OpenLayers.Control.OverviewMap());
-//		map.addControl(new OpenLayers.Control.PanZoomBar());
+		// map.addControl(new OpenLayers.Control.PanZoomBar());
 
 		// createPDF
-		/*var pdfButton = new OpenLayers.Control.Button({
+		var pdfButton = new OpenLayers.Control.Button({
 			displayClass : "olPDFButton",
-			title: "Create PDF",
-	        id: 'PDFButton',
+			title : "Create PDF",
+			id : 'PDFButton',
 			trigger : createPDF,
 		});
-		var panel = new OpenLayers.Control.Panel({defaultControl: pdfButton});
-		panel.addControls([pdfButton]);
-		map.addControl(panel);*/
+		var panel = new OpenLayers.Control.Panel({
+			defaultControl : pdfButton
+		});
+		panel.addControls([ pdfButton ]);
+		map.addControl(panel);
 
-		
-		//TODO: does not work with the Ext
-//		var graticule = new OpenLayers.Control.Graticule();
-//		graticule.displayInLayerSwitcher = true;
-//		map.addControl(graticule);
-		
+		// remove popups
+		var popupsButton = new OpenLayers.Control.Button({
+			displayClass : "olPopupsButton",
+			title : "Remove all popups",
+			id : 'PopupsButton',
+			trigger : removePopups,
+		});
+		var popupsPanel = new OpenLayers.Control.Panel({
+			defaultControl : popupsButton,
+			displayClass : "olPopupsPanel"
+		});
+		popupsPanel.addControls([ popupsButton ]);
+		map.addControl(popupsPanel);
+		// TODO: does not work with the Ext
+		// var graticule = new OpenLayers.Control.Graticule();
+		// graticule.displayInLayerSwitcher = true;
+		// map.addControl(graticule);
+
 		// Adding the layers to the map
 		var bg = backgroundLayers, fg = mapLayers;
 		layers = [];
@@ -205,45 +206,87 @@ myNamespace.mapViewer = (function(OL, $) {
 				// left bottom top right
 				myNamespace.control.setLonLatInput(ll.lon.toFixed(4), ll.lat.toFixed(4), ur.lat.toFixed(4), ur.lon
 						.toFixed(4));
+				myNamespace.control.activateBbox();
 			}
 		});
 
 		map.addControl(control);
-		// registerClickBehaviour(fg.ncWMSTEST);
+		registerClickBehaviour();
 		if (debugmW)
 			console.log("Finished initMap");
 	}
 
 	function createPDF() {
-		 var printPage = new GeoExt.data.PrintPage({
-			    printProvider: printProvider,
-			    customParams: {
-			        mapTitle: "Greenseas Analytical Database Client",
-			        comment: "Map printed from: "+ document.URL
-			    }
+		var comment = "Map printed from: " + document.URL;
+		if (myNamespace.mainQueryArray)
+			$.each(myNamespace.mainQueryArray, function(i, val) {
+				comment += "\n" + val;
 			});
-		 printPage.fit(mapPanel);
-		 printProvider.print(mapPanel, printPage);
+		if (myNamespace.parametersQueryString)
+			comment += "\n" + myNamespace.parametersQueryString;
+		var activeLayers = "";
+		var delimiter = "";
+		$.each(mapLayers, function(i, val) {
+			if (val.visibility) {
+				activeLayers += delimiter + val.name;
+				delimiter = ", ";
+			}
+		});
+		if (parameterLayers)
+			$.each(parameterLayers, function(i, val) {
+				if (val.visibility) {
+					activeLayers += delimiter + val.name;
+					delimiter = ", ";
+				}
+			});
+		if (customLayers)
+			$.each(customLayers, function(i, val) {
+				if (val.visibility) {
+					activeLayers += delimiter + val.longName;
+					delimiter = ", ";
+				}
+			});
+		if (activeLayers.length > 0)
+			comment += "\nActive layers:" + activeLayers;
+		var printPage = new GeoExt.data.PrintPage({
+			printProvider : printProvider,
+			customParams : {
+				mapTitle : "Greenseas Analytical Database Client",
+				comment : comment
+			}
+		});
+		printPage.fit(mapPanel);
+		printProvider.print(mapPanel, printPage);
 	}
 
-	function registerClickBehaviour(layer) {
+	var popups = [];
+	function registerClickBehaviour() {
 
 		// clicking feature opens popup with basic info
 		var info = new OpenLayers.Control.WMSGetFeatureInfo({
-			url : "http://localhost:8081/ncWMS-1.1.1/wms",
+			url : myNamespace.WMSserver,
 			title : 'Identify features by clicking',
 			queryVisible : true,
-			maxFeatures : 1,
-			infoFormat : "text/xml",
+			maxFeatures : 20,
+			/* infoFormat : "text/xml", */
 			eventListeners : {
 				getfeatureinfo : function(event) {
-					map.addPopup(new OpenLayers.Popup.FramedCloud("chicken", map.getLonLatFromPixel(event.xy), null,
-							event.text, null, true));
+					var popup = new OpenLayers.Popup.FramedCloud("chicken", map.getLonLatFromPixel(event.xy), null,
+							event.text, null, true);
+					map.addPopup(popup);
+					popups.push(popup);
 				}
 			}
 		});
 		map.addControl(info);
 		info.activate();
+	}
+
+	function removePopups() {
+		$.each(popups, function(i, val) {
+			map.removePopup(val);
+		});
+		popups = [];
 	}
 
 	function removeAllParameterLayers() {
@@ -382,7 +425,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		});
 	}
 
-	function addWMSLayer(url, id, name, layerID, colorscalerange, style, logscale, elevation, time) {
+	function addWMSLayer(url, id, shortName, layerID, colorscalerange, style, logscale, elevation, time,longName) {
 		if (debugmW)
 			console.log("Adding the WMS layer");
 		if (debugmW)
@@ -401,9 +444,10 @@ myNamespace.mapViewer = (function(OL, $) {
 		if (!(typeof time === 'undefined') && time != "") {
 			parameters.time = time;
 		}
-		var layer = new OpenLayers.Layer.WMS(name, url, parameters, {
+		var layer = new OpenLayers.Layer.WMS(shortName, url, parameters, {
 			isBaseLayer : false
 		});
+		layer.longName = longName;
 		if (debugmW)
 			console.log("Created the WMS layer");
 		if (id in customLayers) {
@@ -438,6 +482,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		initMap : initMap,
 		getExtent : getExtent,
 		zoomToExtent : zoomToExtent,
+		removePopups : removePopups,
 	};
 
 }(OpenLayers, jQuery));
