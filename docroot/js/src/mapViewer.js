@@ -104,17 +104,6 @@ myNamespace.mapViewer = (function(OL, $) {
 					layers : 'greensad:Longhurst_world_v4_2010',
 					format : window.WMSformat
 				}),
-		northPoleBaseLayer : new OpenLayers.Layer.WMS("NSIDC Sea Ice Polar Stereographic North",
-				"http://tomcat.nersc.no:8080/geoserver/greensad/wms?", {
-					layers : 'greensad:ne_50m_ocean',
-					format : window.WMSformat
-				}, {
-					// wrapDateLine : false,
-					projection : 'EPSG:3413',
-					units : "Meter",
-					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
-					maxResolution : polarMaxResolution,
-				}),
 		northPoleBaseLayerNumberTwo : new OpenLayers.Layer.WMS("NSIDC EASE-Grid North",
 				"http://localhost:8090/geoserver/greensad/wms?", {
 					layers : 'greensad:ne_50m_ocean',
@@ -126,15 +115,17 @@ myNamespace.mapViewer = (function(OL, $) {
 					maxExtent : new OpenLayers.Bounds(-9036842.762, -9036842.762, 9036842.762, 9036842.762),
 					maxResolution : 24218.75,
 				}),
-		/*
-		 * northPoleBaseLayerNumberFour : new OpenLayers.Layer.WMS("WGS 84 /
-		 * NSIDC Polar Stereographic North",
-		 * "http://localhost:8090/geoserver/greensad/wms?", { layers :
-		 * 'greensad:ne_50m_ocean', format : window.WMSformat }, { //
-		 * wrapDateLine : false, projection : 'EPSG:3413', units : "Meter",
-		 * maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000,
-		 * 12400000), maxResolution : polarMaxResolution, }),
-		 */
+
+		northPoleBaseLayerNumberFour : new OpenLayers.Layer.WMS("WGS 84 / NSIDC Polar Stereographic North",
+				"http://localhost:8090/geoserver/greensad/wms?", {
+					layers : 'greensad:ne_50m_ocean',
+					format : window.WMSformat
+				}, { // wrapDateLine : false,
+					projection : 'EPSG:3413',
+					units : "Meter",
+					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
+					maxResolution : polarMaxResolution,
+				}),
 		northPoleBaseLayerNumberThree : new OpenLayers.Layer.WMS("UPS North",
 				"http://localhost:8090/geoserver/greensad/wms?", {
 					layers : 'greensad:ne_50m_ocean',
@@ -145,23 +136,28 @@ myNamespace.mapViewer = (function(OL, $) {
 					units : "Meter",
 					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
 					maxResolution : polarMaxResolution,
-				}),/*
-					 * southPoleBaseLayerNumberTwo : new
-					 * OpenLayers.Layer.WMS("NSIDC EASE-Grid South",
-					 * "http://localhost:8090/geoserver/greensad/wms?", { layers :
-					 * 'greensad:ne_50m_ocean', format : window.WMSformat }, { //
-					 * wrapDateLine : false, projection : 'EPSG:3409', units :
-					 * "Meter", maxExtent : new OpenLayers.Bounds(-9036842.762,
-					 * -9036842.762, 9036842.762, 9036842.762), maxResolution :
-					 * 24218.75, }), southPoleBaseLayerNumberThree : new
-					 * OpenLayers.Layer.WMS("UPS South",
-					 * "http://tomcat.nersc.no:8080/geoserver/greensad/wms?", {
-					 * layers : 'greensad:ne_50m_ocean', format :
-					 * window.WMSformat }, { // wrapDateLine : false, projection :
-					 * 'EPSG:32761', units : "Meter", maxExtent : new
-					 * OpenLayers.Bounds(-12400000, -12400000, 12400000,
-					 * 12400000), maxResolution : polarMaxResolution, }),
-					 */
+				}),
+		southPoleBaseLayerNumberTwo : new OpenLayers.Layer.WMS("NSIDC EASE-Grid South",
+				"http://localhost:8090/geoserver/greensad/wms?", {
+					layers : 'greensad:ne_50m_ocean',
+					format : window.WMSformat
+				}, { // wrapDateLine : false,
+					projection : 'EPSG:3409',
+					units : "Meter",
+					maxExtent : new OpenLayers.Bounds(-9036842.762, -9036842.762, 9036842.762, 9036842.762),
+					maxResolution : 24218.75,
+				}),
+		southPoleBaseLayerNumberThree : new OpenLayers.Layer.WMS("UPS South",
+				"http://tomcat.nersc.no:8080/geoserver/greensad/wms?", {
+					layers : 'greensad:ne_50m_ocean',
+					format : window.WMSformat
+				}, { // wrapDateLine : false,
+					projection : 'EPSG:32761',
+					units : "Meter",
+					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
+					maxResolution : polarMaxResolution,
+				}),
+
 		southPoleBaseLayer : new OpenLayers.Layer.WMS("Antarctic Polar Stereographic",
 				"http://localhost:8090/geoserver/greensad/wms?", {
 					layers : 'greensad:ne_50m_ocean',
@@ -177,8 +173,7 @@ myNamespace.mapViewer = (function(OL, $) {
 				 */
 				}),
 
-			
-	  southPoleBaseLayerFour : new OpenLayers.Layer.WMS("Hughes / NSIDC Polar Stereographic South",
+		southPoleBaseLayerFour : new OpenLayers.Layer.WMS("Hughes / NSIDC Polar Stereographic South",
 				"http://localhost:8090/geoserver/greensad/wms?", {
 					layers : 'greensad:ne_50m_ocean',
 					format : window.WMSformat
@@ -189,7 +184,7 @@ myNamespace.mapViewer = (function(OL, $) {
 					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
 					maxResolution : polarMaxResolution,
 				})
-	 
+
 	};
 
 	// Called when the user changes the base layer
