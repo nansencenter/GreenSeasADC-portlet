@@ -30,7 +30,7 @@
 			<li><a href="#statsTab">Statistics, plots and charts</a></li>
 			<li><a href="#matchUpTab">Model/data matchup</a></li>
 			<li><a href="#layersTab">Configure Map layers</a></li>
-			<li><a href="#createNetCDFTab">NetCDF</a></li>
+			<li><a href="#griddingTab">Gridding</a></li>
 
 		</ul>
 		<div id="queryTab">
@@ -351,20 +351,17 @@
 			<div id="layerURLSelectorContainer"></div>
 			<input type='button' id='addLayerButton' value="Add new layer" />
 		</div>
-		<div id="createNetCDFTab">
+		<div id="griddingTab">
 			Also need some "method" of how to combine/interpolate values - especially points that maps to the same
 			depth/lat/long/time
 			<br>
-			<input type='number' id='timeResolution' value="10080" />
-			timeResolution - make day/week/month/year/decade dropbox
-			<br>
-			<input type='number' id='latLonResolution' value="1" />
-			latLonResolution
-			<br>
+			<div id='gridSelectorDiv'></div>
 			<input type='text' id='depthInterpolation' size="10" />
+			<input type='text' id='griddingParameter' value="combined:salinity" />
 			depthInterpolation
 			<br>
-			<input type='button' id='createNetCDFButton' value="Create NetCDF" />
+			<input type='button' id='gridButton' value="Grid!" />
+			<canvas id="mycanvas" height="1087" width="1572"></canvas>
 		</div>
 
 	</div>

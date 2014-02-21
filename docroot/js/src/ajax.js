@@ -135,7 +135,7 @@ myNamespace.ajax = (function($) {
 		});
 	}
 
-	function createNetCDF(features,timeResolution) {
+	function createNetCDF(features,timeResolution,latLonResolution) {
 		// TODO: QF
 		var url = ajaxCallResourceURL;
 		var data = {};

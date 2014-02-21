@@ -75,11 +75,12 @@ myNamespace.control = (function($, OL, ns) {
 		ns.matchup.setUpUploadRaster();
 		ns.matchup.setUpOPeNDAPSelector();
 		ns.mapLayers.addWMSLayerSelector();
+		ns.gridding.setUpGridSelector();
 	}
 
 	function setUpCruiseSelector() {
 		$("#cruiseSelectorDiv").html(
-				ns.mapLayers.setUpSelectorArray(window.cruisesList, "cruiseSelected", "cruiseSelected"));
+				ns.utilities.setUpSelectorArray(window.cruisesList, "cruiseSelected", "cruiseSelected"));
 	}
 
 	function setUpRegions() {
@@ -88,7 +89,7 @@ myNamespace.control = (function($, OL, ns) {
 				+ " target='_new'>Use this link to find your region</a><br>";
 		$("#regionList").html(
 				findRegions
-						+ ns.mapLayers.setUpSelector(window.longhurstRegions, "longhurstRegionSelected",
+						+ ns.utilities.setUpSelector(window.longhurstRegions, "longhurstRegionSelected",
 								"longhurstRegionSelected"));
 		var my_options = $("#longhurstRegionSelected option");
 
@@ -936,8 +937,8 @@ myNamespace.control = (function($, OL, ns) {
 		ns.statistics.generatePropertiesPlot(data);
 	}
 	
-	function createNetCDFButton(){
-		ns.ajax.createNetCDF(data,$('#timeResolution').val());
+	function gridButton(){
+		ns.gridding.createGrid(data,$('#griddingParameter').val(),$('#timeResolution').val());
 	}
 
 	function activateBbox() {
@@ -971,7 +972,7 @@ myNamespace.control = (function($, OL, ns) {
 		toggleOrderPlanktonButton : toggleOrderPlanktonButton,
 		clearSelectionButton : clearSelectionButton,
 		addAParameterToData : addAParameterToData,
-		createNetCDFButton : createNetCDFButton,
+		gridButton : gridButton,
 	};
 
 }(jQuery, OpenLayers, myNamespace));

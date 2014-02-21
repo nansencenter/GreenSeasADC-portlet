@@ -21,7 +21,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 					+ " layers to the map might cause a display-problem with the legends, use with caution."
 					+ " Possible solutions: Increase your window-size or zoom out (in the browser, not on the map).");
 		}
-		var selectElement = setUpSelectorArray(window.wmsLayers, "mapLayersWMSURL" + activeLayers, activeLayers);
+		var selectElement = myNamespace.utilities.setUpSelectorArray(window.wmsLayers, "mapLayersWMSURL" + activeLayers, activeLayers);
 		var button = "<input type='button' id='toggleLayerButton" + activeLayers + "' name='" + activeLayers
 				+ "' value='Update on map'/>";
 		$("#layerURLSelectorContainer").append("<br><h5>Layer " + activeLayers + "</h5>" + button + selectElement);
@@ -75,28 +75,6 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		}, selectedOption);
 	}
 
-	function setUpSelectorArray(array, id, name) {
-		name = "name='" + name + "'";
-		var selectElement = "<select id='" + id + "' " + name + ">";
-		var options = "";
-		$.each(array, function(i, val) {
-			options += "<option value=\"" + val.value + "\">" + val.name + "</option>";
-		});
-		selectElement += options + "</select>";
-		return selectElement;
-	}
-
-	function setUpSelector(hashMap, id, name) {
-		name = "name='" + name + "'";
-		var selectElement = "<select id='" + id + "' " + name + ">";
-		var options = "";
-		$.each(hashMap, function(i, val) {
-			options += "<option value=\"" + i + "\">" + val + "</option>";
-		});
-		selectElement += options + "</select>";
-		return selectElement;
-	}
-
 	function setUpLayerMetaData(response, activeLayer) {
 		if (debugMl)
 			console.log("Setting up setUpLayerMetaData for:" + activeLayer + ":"
@@ -125,7 +103,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 					zAxisMap[val] = val;
 				});
 			}
-			zAxis += setUpSelector(zAxisMap, "zAxisVariable" + activeLayer, activeLayer);
+			zAxis += myNamespace.utilities.setUpSelector(zAxisMap, "zAxisVariable" + activeLayer, activeLayer);
 		}
 		var tAxis = "";
 		// time = "T00:00:00.000Z";
@@ -142,7 +120,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 					});
 				});
 			});
-			tAxis = setUpSelector(tAxisMap, "dateVariable" + activeLayer, activeLayer);
+			tAxis = myNamespace.utilities.setUpSelector(tAxisMap, "dateVariable" + activeLayer, activeLayer);
 		}
 		var colorscaleMin = 0;
 		var colorscaleMax = 1;
@@ -165,8 +143,8 @@ myNamespace.mapLayers = (function(jQ, bH) {
 			"true" : "Logarithmic Scale",
 		};
 		// TOOD: disable logscale for colorscalerange with values <= 0
-		var styleSelector = setUpSelector(styles, "styleVariable" + activeLayer, activeLayer);
-		var logscaleSelector = setUpSelector(logscales, "logscaleVariable" + activeLayer, activeLayer);
+		var styleSelector = myNamespace.utilities.setUpSelector(styles, "styleVariable" + activeLayer, activeLayer);
+		var logscaleSelector = myNamespace.utilities.setUpSelector(logscales, "logscaleVariable" + activeLayer, activeLayer);
 
 		var html = colorscalerange + styleSelector + logscaleSelector + zAxis + tAxis;
 		$("#layerMetaData" + activeLayer).html(html);
@@ -221,7 +199,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		$.each(obj.timesteps, function(i, time) {
 			timeMap[time] = time;
 		});
-		var selectElement = setUpSelector(timeMap, "timeVariable" + activeLayer);
+		var selectElement = myNamespace.utilities.setUpSelector(timeMap, "timeVariable" + activeLayer);
 		$("#timeVariable" + activeLayer).remove();
 		$("#dateVariable" + activeLayer).after(selectElement);
 		if ($('#colorscalerangeAuto' + activeLayer).is(":checked"))
@@ -243,7 +221,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		$.each(variables, function(i, val) {
 			hashMap[i] = val;
 		});
-		var selectElement = setUpSelector(hashMap, "WMSLayerVariable" + activeLayer, activeLayer);
+		var selectElement = myNamespace.utilities.setUpSelector(hashMap, "WMSLayerVariable" + activeLayer, activeLayer);
 
 		var html = selectElement + "<div id='layerMetaData" + activeLayer + "'></div>";
 		$("#" + selectedElement.id + "variable" + activeLayer).html(html);
@@ -345,8 +323,6 @@ myNamespace.mapLayers = (function(jQ, bH) {
 
 	// public interface
 	return {
-		setUpSelector : setUpSelector,
-		setUpSelectorArray : setUpSelectorArray,
 		setUpStyleForLegend : setUpStyleForLegend,
 		addWMSLayerSelector : addWMSLayerSelector,
 		toggleLayerButton : toggleLayerButton,

@@ -95,7 +95,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		callFromControl("#anywhereButton", c.lonLatAnywhere);
 		callFromControl("#initiateRasterDataButton", c.initiateRasterDataButton);
 		callFromControl("#calculateStatisticsButton", c.calculateStatisticsButton);
-		callFromControl("#createNetCDFButton", c.createNetCDFButton);
+		callFromControl("#gridButton", c.gridButton);
 
 		// on change events
 		jQ("#exportParametersFormats").change(function() {

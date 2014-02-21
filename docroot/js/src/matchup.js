@@ -9,7 +9,7 @@ myNamespace.matchup = (function($, ns) {
 	var uploadedRaster = false;
 
 	function setUpOPeNDAPSelector() {
-		var selectElement = ns.mapLayers.setUpSelectorArray(window.openDAPURLs, "opendapDataURL");
+		var selectElement = ns.utilities.setUpSelectorArray(window.openDAPURLs, "opendapDataURL");
 		$("#opendapURLContainer").html(selectElement);
 	}
 
