@@ -42,16 +42,17 @@ myNamespace.mapViewer = (function(OL, $) {
 	function initMapLayers() {
 		console.log(10);
 		mapLayers = {
-			datapoints : new OpenLayers.Layer.WMS("Data points", window.WMSServer, {
-				version : "1.1.1",
-				layers : window.metaDataTable,
-				format : window.WMSformat,
-				transparent : true
-			}, {
-				isBaseLayer : false,
-			// yx:{"urn:ogc:def:crs:EPSG::4326":false},
-			// projection : 'EPSG:4326',
-			}),
+			datapoints : new OpenLayers.Layer.WMS("Data points",
+					"http://localhost/cgi-bin/mapserv.exe?map=C:\\ms4w\\data\\greensad.map" /* window.WMSServer */, {
+						version : "1.1.1",
+						layers : window.metaDataTable,
+						format : window.WMSformat,
+						transparent : true
+					}, {
+						isBaseLayer : false,
+					// yx:{"urn:ogc:def:crs:EPSG::4326":false},
+					// projection : 'EPSG:4326',
+					}),
 		};
 	}
 
@@ -81,8 +82,8 @@ myNamespace.mapViewer = (function(OL, $) {
 
 	// some background layers, user may select one
 	var backgroundLayers = {
-		generic : new OpenLayers.Layer.WMS("Generic background", "http://tomcat.nersc.no:8080/geoserver/greensad/wms?",
-				{
+		generic : new OpenLayers.Layer.WMS("Generic background",
+				"http://localhost/cgi-bin/mapserv.exe?map=C:\\ms4w\\data\\world_map.map&", {
 					layers : 'greensad:ne_50m_ocean',
 					format : window.WMSformat
 				}),
@@ -109,7 +110,6 @@ myNamespace.mapViewer = (function(OL, $) {
 					layers : 'greensad:ne_50m_ocean',
 					format : window.WMSformat
 				}, {
-					// wrapDateLine : false,
 					projection : 'EPSG:3408',
 					units : "Meter",
 					maxExtent : new OpenLayers.Bounds(-9036842.762, -9036842.762, 9036842.762, 9036842.762),
@@ -120,19 +120,68 @@ myNamespace.mapViewer = (function(OL, $) {
 				"http://localhost:8090/geoserver/greensad/wms?", {
 					layers : 'greensad:ne_50m_ocean',
 					format : window.WMSformat
-				}, { // wrapDateLine : false,
+				}, {
 					projection : 'EPSG:3413',
 					units : "Meter",
 					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
 					maxResolution : polarMaxResolution,
 				}),
-		northPoleBaseLayerNumberThree : new OpenLayers.Layer.WMS("UPS North",
-				"http://localhost:8090/geoserver/greensad/wms?", {
+		poly0 : new OpenLayers.Layer.WMS("EPSG:5472",
+				"http://localhost/cgi-bin/mapserv.exe?map=C:\\ms4w\\data\\world_map.map&", {
 					layers : 'greensad:ne_50m_ocean',
 					format : window.WMSformat
 				}, {
-					// wrapDateLine : false,
+					projection : 'EPSG:5472',
+					units : "Meter",
+					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
+					maxResolution : polarMaxResolution,
+				}),
+		poly1 : new OpenLayers.Layer.WMS("EPSG:5939",
+				"http://localhost/cgi-bin/mapserv.exe?map=C:\\ms4w\\data\\world_map.map&", {
+					layers : 'greensad:ne_50m_ocean',
+					format : window.WMSformat
+				}, {
+					projection : 'EPSG:5939',
+					units : "Meter",
+					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
+					maxResolution : polarMaxResolution,
+				}),
+		poly2 : new OpenLayers.Layer.WMS("EPSG:29101",
+				"http://localhost/cgi-bin/mapserv.exe?map=C:\\ms4w\\data\\world_map.map", {
+					layers : 'greensad:ne_50m_ocean',
+					format : window.WMSformat
+				}, {
+					projection : 'EPSG:29101',
+					units : "Meter",
+					maxExtent : new OpenLayers.Bounds(-4000000, 0, 13000000, 13000000),
+					maxResolution : 24218.75,
+				}),
+		poly3 : new OpenLayers.Layer.WMS("EPSG:5880",
+				"http://localhost/cgi-bin/mapserv.exe?map=C:\\ms4w\\data\\world_map.map&", {
+					layers : 'greensad:ne_50m_ocean',
+					format : window.WMSformat
+				}, {
+					projection : 'EPSG:5880',
+					units : "Meter",
+					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
+					maxResolution : polarMaxResolution,
+				}),
+		northPoleBaseLayerNumberThree : new OpenLayers.Layer.WMS("UPS North",
+				"http://localhost/cgi-bin/mapserv.exe?map=C:\\ms4w\\data\\world_map.map&", {
+					layers : 'greensad:ne_50m_ocean',
+					format : window.WMSformat
+				}, {
 					projection : 'EPSG:32661',
+					units : "Meter",
+					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
+					maxResolution : polarMaxResolution,
+				}),
+		testing : new OpenLayers.Layer.WMS("ESRI:53018",
+				"http://localhost/cgi-bin/mapserv.exe?map=C:\\ms4w\\data\\world_map.map&", {
+					layers : 'greensad:ne_50m_ocean',
+					format : window.WMSformat
+				}, {
+					projection : 'ESRI:53018',
 					units : "Meter",
 					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
 					maxResolution : polarMaxResolution,
@@ -141,7 +190,7 @@ myNamespace.mapViewer = (function(OL, $) {
 				"http://localhost:8090/geoserver/greensad/wms?", {
 					layers : 'greensad:ne_50m_ocean',
 					format : window.WMSformat
-				}, { // wrapDateLine : false,
+				}, {
 					projection : 'EPSG:3409',
 					units : "Meter",
 					maxExtent : new OpenLayers.Bounds(-9036842.762, -9036842.762, 9036842.762, 9036842.762),
@@ -151,7 +200,7 @@ myNamespace.mapViewer = (function(OL, $) {
 				"http://tomcat.nersc.no:8080/geoserver/greensad/wms?", {
 					layers : 'greensad:ne_50m_ocean',
 					format : window.WMSformat
-				}, { // wrapDateLine : false,
+				}, {
 					projection : 'EPSG:32761',
 					units : "Meter",
 					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
@@ -163,7 +212,6 @@ myNamespace.mapViewer = (function(OL, $) {
 					layers : 'greensad:ne_50m_ocean',
 					format : window.WMSformat
 				}, {
-					// wrapDateLine : false,
 					projection : 'EPSG:3031',
 					units : "Meter",
 					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
@@ -183,7 +231,47 @@ myNamespace.mapViewer = (function(OL, $) {
 					units : "meters",
 					maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
 					maxResolution : polarMaxResolution,
-				})
+				}),
+		test0 : new OpenLayers.Layer.WMS("EPSG:9835", "http://localhost:8090/geoserver/greensad/wms?", {
+			layers : 'greensad:ne_50m_ocean',
+			format : window.WMSformat
+		}, { //
+			wrapDateLine : false,
+			projection : 'EPSG:9835',
+			units : "meters",
+			maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
+			maxResolution : polarMaxResolution,
+		}),
+		test1 : new OpenLayers.Layer.WMS("EPSG:9834", "http://localhost:8090/geoserver/greensad/wms?", {
+			layers : 'greensad:ne_50m_ocean',
+			format : window.WMSformat
+		}, { //
+			wrapDateLine : false,
+			projection : 'EPSG:9834',
+			units : "meters",
+			maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
+			maxResolution : polarMaxResolution,
+		}),
+		test2 : new OpenLayers.Layer.WMS("ESRI:53018", "http://localhost:8090/geoserver/greensad/wms?", {
+			layers : 'greensad:ne_50m_ocean',
+			format : window.WMSformat
+		}, { //
+			wrapDateLine : false,
+			projection : 'ESRI:53018',
+			units : "meters",
+			maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
+			maxResolution : polarMaxResolution,
+		}),
+		test3 : new OpenLayers.Layer.WMS("ESRI:53019", "http://localhost:8090/geoserver/greensad/wms?", {
+			layers : 'greensad:ne_50m_ocean',
+			format : window.WMSformat
+		}, { //
+			wrapDateLine : false,
+			projection : 'ESRI:53019',
+			units : "meters",
+			maxExtent : new OpenLayers.Bounds(-12400000, -12400000, 12400000, 12400000),
+			maxResolution : polarMaxResolution,
+		}),
 
 	};
 
