@@ -43,7 +43,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		console.log(10);
 		mapLayers = {
 			datapoints : new OpenLayers.Layer.WMS("Data points",
-					"http://localhost/cgi-bin/mapserv.exe?map=C:\\ms4w\\data\\greensad.map" /* window.WMSServer */, {
+					window.WMSServer , {
 						version : "1.1.1",
 						layers : window.metaDataTable,
 						format : window.WMSformat,
@@ -83,7 +83,7 @@ myNamespace.mapViewer = (function(OL, $) {
 	// some background layers, user may select one
 	var backgroundLayers = {
 		generic : new OpenLayers.Layer.WMS("Generic background",
-				"http://localhost/cgi-bin/mapserv.exe?map=C:\\ms4w\\data\\world_map.map&", {
+				"http://localhost:8090/geoserver/greensad/wms?", {
 					layers : 'greensad:ne_50m_ocean',
 					format : window.WMSformat
 				}),
@@ -193,8 +193,8 @@ myNamespace.mapViewer = (function(OL, $) {
 				}, {
 					projection : 'EPSG:3409',
 					units : "Meter",
-					maxExtent : new OpenLayers.Bounds(-9036842.762, -9036842.762, 9036842.762, 9036842.762),
-					maxResolution : 24218.75,
+					maxExtent : new OpenLayers.Bounds(-0, -8010277, 0, -0),
+					maxResolution : 242180.75,
 				}),
 		southPoleBaseLayerNumberThree : new OpenLayers.Layer.WMS("UPS South",
 				"http://tomcat.nersc.no:8080/geoserver/greensad/wms?", {
