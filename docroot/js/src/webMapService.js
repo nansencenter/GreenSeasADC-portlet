@@ -2,7 +2,7 @@ var myNamespace = myNamespace || {};
 
 var debugwms = false;// debug flag
 
-myNamespace.WebMapService = (function(jQ, OL) {
+myNamespace.WebMapService = (function(OL) {
 	"use strict";
 
 	// fires an asyn. HTTP GET request to server
@@ -85,4 +85,4 @@ myNamespace.WebMapService = (function(jQ, OL) {
 		getMinMax : getMinMax,
 	};
 
-}(jQuery, OpenLayers));
+}(OpenLayers));

@@ -2,7 +2,7 @@ var myNamespace = myNamespace || {};
 
 var debugMl = false;// debug flag
 
-myNamespace.mapLayers = (function(jQ, bH) {
+myNamespace.mapLayers = (function($, bH) {
 	"use strict";
 
 	var activeLayers = 0;
@@ -24,7 +24,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		var selectElement = setUpSelectorArray(window.wmsLayers, "mapLayersWMSURL" + activeLayers, activeLayers);
 		var button = "<input type='button' id='toggleLayerButton" + activeLayers + "' name='" + activeLayers
 				+ "' value='Update on map'/>";
-		$("#layerURLSelectorContainer").append("<br><h5>Layer " + activeLayers + "</h5>" + button + selectElement);
+		$("#layerURLSelectorContainer").append("<br><h5>Raster " + activeLayers + "</h5>" + button + selectElement);
 		bH.change("#mapLayersWMSURL" + activeLayers, addWMSLayerVariableSelector);
 		bH.callFromControl("#toggleLayerButton" + activeLayers, toggleLayerButton);
 		$("#toggleLayerButton" + activeLayers).prop("disabled", true);
@@ -103,7 +103,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 					+ $('#WMSLayerVariable' + activeLayer).find(":selected").val());
 		if (debugMl)
 			console.log(response);
-		var obj = jQuery.parseJSON(response.responseText);
+		var obj = $.parseJSON(response.responseText);
 		if (debugMl)
 			console.log(obj);
 		var units = "";
@@ -208,7 +208,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 	function setUpAutoRange(response, activeLayer) {
 		if (debugMl)
 			console.log("setUpAutoRange activeLayer:" + activeLayer);
-		var obj = jQuery.parseJSON(response.responseText);
+		var obj = $.parseJSON(response.responseText);
 		if (debugMl)
 			console.log(obj);
 		$("#colorscalerangeMin" + activeLayer).val(obj.min);
@@ -216,7 +216,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 	}
 
 	function setUpTimeSelector(response, activeLayer) {
-		var obj = jQuery.parseJSON(response.responseText);
+		var obj = $.parseJSON(response.responseText);
 		var timeMap = {};
 		$.each(obj.timesteps, function(i, time) {
 			timeMap[time] = time;
@@ -280,7 +280,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		var url = $('#mapLayersWMSURL' + activeLayer).val();
 		if (url == "NONE")
 			return;
-		var name = "Layer " + activeLayer;
+		var name = "Raster " + activeLayer;
 		var layer = $('#WMSLayerVariable' + activeLayer).find(":selected").val();
 		var min = $('#colorscalerangeMin' + activeLayer).val();
 		var max = $('#colorscalerangeMax' + activeLayer).val();

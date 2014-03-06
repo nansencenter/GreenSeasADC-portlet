@@ -1,10 +1,10 @@
 var myNamespace = myNamespace || {};
 
-myNamespace.buttonEventHandlers = (function(jQ) {
+myNamespace.buttonEventHandlers = (function($) {
 	"use strict";
 
 	function add(element, eventFunction) {
-		jQ(element).click(eventFunction);
+		$(element).click(eventFunction);
 	}
 
 	function setThisOfFunction(functionValue, thisValue, additionalArguments) {
@@ -19,14 +19,14 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 
 	function toggleButton(buttonId, buttonName, div) {
 		return function() {
-			jQ(div).toggle("blind");
+			$(div).toggle("blind");
 
-			var shownName = "Hide " + buttonName, hiddenName = "Show " + buttonName, isShown = jQ(buttonId).val() === hiddenName;
+			var shownName = "Hide " + buttonName, hiddenName = "Show " + buttonName, isShown = $(buttonId).val() === hiddenName;
 
 			if (isShown) {
-				jQ(buttonId).val(shownName);
+				$(buttonId).val(shownName);
 			} else {
-				jQ(buttonId).val(hiddenName);
+				$(buttonId).val(hiddenName);
 			}
 		};
 	}
@@ -34,9 +34,9 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 	function checkParameter(checkBoxId, divName, divId) {
 		return function() {
 			if (document.getElementById(checkBoxId).checked) {
-				jQ(divId).html(divName + " <em>(on)</em>");
+				$(divId).html(divName + " <em>(on)</em>");
 			} else {
-				jQ(divId).html(divName + " <em>(off)</em>");
+				$(divId).html(divName + " <em>(off)</em>");
 			}
 		};
 	}
@@ -47,9 +47,9 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 				if (document.getElementById(checkBoxIds[i]).checked)
 					checked = true;
 			if (checked) {
-				jQ(divId).html(divName + " <em>(on)</em>");
+				$(divId).html(divName + " <em>(on)</em>");
 			} else {
-				jQ(divId).html(divName + " <em>(off)</em>");
+				$(divId).html(divName + " <em>(off)</em>");
 			}
 		};
 	}
@@ -95,16 +95,17 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		callFromControl("#anywhereButton", c.lonLatAnywhere);
 		callFromControl("#initiateRasterDataButton", c.initiateRasterDataButton);
 		callFromControl("#calculateStatisticsButton", c.calculateStatisticsButton);
+		callFromControl("#addParametersLayerButton", c.addParametersLayerButton);
 
 		// on change events
-		jQ("#exportParametersFormats").change(function() {
+		$("#exportParametersFormats").change(function() {
 			var s = document.getElementById('exportParametersFormats');
 			// should so something here when we get more formats
 		});
 	}
 
 	function linkParametersExportButton(callback, data, type, name) {
-		jQ("#exportParameter").unbind("click");
+		$("#exportParameter").unbind("click");
 		add(
 				"#exportParameter",
 				function() {
@@ -137,7 +138,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 	}
 
 	function change(element, eventFunction) {
-		jQ(element).change(eventFunction);
+		$(element).change(eventFunction);
 	}
 
 	// public interface

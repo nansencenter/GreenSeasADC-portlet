@@ -63,6 +63,11 @@ myNamespace.control = (function($, OL, ns) {
 			active : false,
 			heightStyle : "content"
 		});
+		$("#rasterLayersDiv").accordion({
+			collapsible : true,
+			active : false,
+			heightStyle : "content"
+		});
 
 		// Make the tabs jquery-tabs
 		$("#tabs").tabs();
@@ -486,6 +491,7 @@ myNamespace.control = (function($, OL, ns) {
 							+ constructedTable + "</div>");
 			$("#statistics").show();
 			ns.statistics.setUpTimeSeriesVariables();
+			setUpParameterLayerVariables();
 			$("#timeSeriesDiv").show();
 			ns.statistics.setUpPropertiesPlotVariables();
 			$("#propertiesPlotDiv").show();
@@ -941,6 +947,19 @@ myNamespace.control = (function($, OL, ns) {
 		$("#bboxEnabledCheck").prop("checked", false);
 		$("#bboxEnabledCheck").trigger('click');
 	}
+	
+	function setUpParameterLayerVariables() {
+		var selectElement = "<select id=\"parameterLayerVariable\">";
+		var selectedParameters = myNamespace.handleParameters.chosenParameters.allSelected;
+		var options = myNamespace.matchup.generateOptionsFromAllSelectedParameters();
+		selectElement += options + "</select>";
+		$("#parameterLayerVariableDiv").html(selectElement);
+	}
+	
+	function addParametersLayerButton(){
+		var parameter = $("#parameterLayerVariable").find(":selected").val();
+		ns.mapViewer.addFeaturesFromDataWithColor(data,parameter);
+	}
 	// public interface
 	return {
 		activateBbox : activateBbox,
@@ -967,6 +986,7 @@ myNamespace.control = (function($, OL, ns) {
 		toggleOrderPlanktonButton : toggleOrderPlanktonButton,
 		clearSelectionButton : clearSelectionButton,
 		addAParameterToData : addAParameterToData,
+		addParametersLayerButton:addParametersLayerButton,
 	};
 
 }(jQuery, OpenLayers, myNamespace));

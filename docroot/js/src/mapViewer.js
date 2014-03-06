@@ -51,8 +51,57 @@ myNamespace.mapViewer = (function(OL, $) {
 			}),
 		};
 	}
+	
+	function addFeaturesFromDataWithColor(data, parameter) {
+		name = myNamespace.handleParameters.getHeaderFromRawData(parameter);
+		var pointLayer = new OL.Layer.Vector(name, {
+			projection : "EPSG:4326"
+		});
+		var pointFeatures = [];
+		var min = null, max = null;
+		for (id in data) {
+			var value = data[id].properties[parameter];
+			if (typeof value != 'undefined' && value != -999 && value != '-999') {
+				value = parseFloat(value);
+				if (min == null || min > value)
+					min = value;
+				if (max == null || max < value)
+					max = value;
+			}
+		}
+		var range = max - min;
+		console.log([min,max,range]);
+		for (id in data) {
+			var value = data[id].properties[parameter];
+			if (typeof value != 'undefined' && value != -999 && value != '-999') {
+				value = parseFloat(value);
+				var lonLat = new OL.LonLat(data[id].geometry.coordinates[0], data[id].geometry.coordinates[1]);
+				var pointGeometry = new OL.Geometry.Point(lonLat.lat, lonLat.lon);
 
-	function getRandomColor() {
+				value = parseInt(((value - min) / range) * 62);
+				var color = legendPallete[value];;
+				var style = {
+					'graphicName' : 'square',
+					'pointRadius' : 2,
+					'strokeColor' : color,
+					'fillColor' : color,
+					'fillOpacity' : 1
+				};
+				var pointFeature = new OL.Feature.Vector(pointGeometry, null, style);
+				pointFeatures.push(pointFeature);
+				//console.log("added:");
+				//console.log(pointFeature);
+			} else {
+				//console.log("Not in:");
+				//console.log(data[id]);
+			}
+		}
+		pointLayer.addFeatures(pointFeatures);
+		map.addLayer(pointLayer);
+		map.setLayerIndex(pointLayer, 9);
+		parameterLayers[name] = pointLayer;
+	}
+	var legendPallete=["#00008f","#00009f","#0000af","#0000bf","#0000cf","#0000df","#0000ef","#0000ff","#000bff","#001bff","#002bff","#003bff","#004bff","#005bff","#006bff","#007bff","#008bff","#009bff","#00abff","#00bbff","#00cbff","#00dbff","#00ebff","#00fbff","#07fff7","#17ffe7","#27ffd7","#37ffc7","#47ffb7","#57ffa7","#67ff97","#77ff87","#87ff77","#97ff67","#a7ff57","#b7ff47","#c7ff37","#d7ff27","#e7ff17","#f7ff07","#fff700","#ffe700","#ffd700","#ffc700","#ffb700","#ffa700","#ff9700","#ff8700","#ff7700","#ff6700","#ff5700","#ff4700","#ff3700","#ff2700","#ff1700","#ff0700","#f60000","#e40000","#d30000","#c10000","#af0000","#9e0000","#8c0000"];	function getRandomColor() {
 		var letters = '0123456789ABCDEF'.split('');
 		var color = '#';
 		for ( var i = 0; i < 6; i++) {
@@ -483,6 +532,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		getExtent : getExtent,
 		zoomToExtent : zoomToExtent,
 		removePopups : removePopups,
+		addFeaturesFromDataWithColor:addFeaturesFromDataWithColor,
 	};
 
 }(OpenLayers, jQuery));

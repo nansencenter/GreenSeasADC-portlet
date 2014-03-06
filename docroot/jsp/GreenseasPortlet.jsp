@@ -168,7 +168,7 @@
 							metadata will be selected.</em>
 						<div id="metadataTree"></div>
 					</div>
-					
+
 					<h3>
 						<span id='cruiseHeaderText'>Cruise/Station <em>(off)</em></span>
 					</h3>
@@ -351,16 +351,31 @@
 
 		<div id="layersTab">
 			<p>Select/configure Layers:</p>
-			Dataset/Variable/Colorscale(min/max/auto)/Layertype(boxfill/contour/etc)/Scale(linear/logarithmic)/Elevation/Date/Time
-			<br>
-			<div id="layerURLSelectorContainer"></div>
-			<input type='button' id='addLayerButton' value="Add new layer" />
+			<div id='rasterLayersDiv'>
+				<h3>
+					<span id='rasterLayersDivHeaderText'>Raster Layers <em>(off)</em></span>
+				</h3>
+				<div id='mapLayersDiv'>
+					Dataset/Variable/Colorscale(min/max/auto)/Layertype(boxfill/contour/etc)/Scale(linear/logarithmic)/Elevation/Date/Time
+					<br>
+					<div id="layerURLSelectorContainer"></div>
+					<input type='button' id='addLayerButton' value="Add new layer" />
+				</div>
+				<h3>
+					<span id='parametersLayerDivHeaderText'>Parameter Layers <em>(off)</em></span>
+				</h3>
+				<div id='parameterLayerVariableAccordionDiv'>
+					<div id='parameterLayerVariableDiv'></div>
+					<input type='button' id='addParametersLayerButton' value="Add Layer" />
+					<div id='parametersLayerDiv'></div>
+				</div>
+			</div>
 		</div>
 
 	</div>
 
-			<!-- these divs are popus, don't actually appear -->
-			<div id="errorMessageDialog" title="Warning"></div>
+	<!-- these divs are popus, don't actually appear -->
+	<div id="errorMessageDialog" title="Warning"></div>
 </div>
 
 <aui:script>
