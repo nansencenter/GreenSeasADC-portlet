@@ -79,8 +79,8 @@ myNamespace.mapViewer = (function(OL, $) {
 					layers : 'gebco_08_grid',
 					format : window.WMSformat
 				}),
-		longhurst : new OpenLayers.Layer.WMS('Longhurst Regions', 'http://tomcat.nersc.no:8080/geoserver/greensad/wms?',
-				{
+		longhurst : new OpenLayers.Layer.WMS('Longhurst Regions',
+				'http://tomcat.nersc.no:8080/geoserver/greensad/wms?', {
 					layers : 'greensad:Longhurst_world_v4_2010',
 					format : window.WMSformat
 				}),
@@ -324,6 +324,74 @@ myNamespace.mapViewer = (function(OL, $) {
 			console.log("addFeaturesFromData ended");
 	}
 
+	function addFeaturesFromDataWithColor(data, parameter) {
+		name = myNamespace.handleParameters.getHeaderFromRawData(parameter);
+		var pointLayer = new OL.Layer.Vector(name, {
+			projection : "EPSG:4326"
+		});
+		var pointFeatures = [];
+		var min = null, max = null;
+		for (id in data) {
+			var value = data[id].properties[parameter];
+			if (typeof value != 'undefined' && value != -999 && value != '-999') {
+				value = parseFloat(value);
+				if (min == null || min > value)
+					min = value;
+				if (max == null || max < value)
+					max = value;
+			}
+		}
+		var range = max - min;
+		for (id in data) {
+			var value = data[id].properties[parameter];
+			if (typeof value != 'undefined' && value != -999 && value != '-999') {
+				value = parseFloat(value);
+				var lonLat = new OL.LonLat(data[id].geometry.coordinates[0], data[id].geometry.coordinates[1]);
+				var pointGeometry = new OL.Geometry.Point(lonLat.lat, lonLat.lon);
+
+				value = parseInt(((value - min) / range) * 62);
+				console.log([min,max,range,data[id].properties[parameter],value]);
+				var color = '#';
+				for ( var i = 0; i < 3; i++) {
+					if (legendPallete[value][i] < 16)
+						color += '0' + legendPallete[value][i].toString(16);
+					else
+						color += legendPallete[value][i].toString(16);
+				}
+				var style = {
+					'graphicName' : 'square',
+					'pointRadius' : 2,
+					'strokeColor' : color,
+					'fillColor' : color,
+					'fillOpacity' : 1
+				};
+				var pointFeature = new OL.Feature.Vector(pointGeometry, null, style);
+				pointFeatures.push(pointFeature);
+				console.log("added:");
+				console.log(pointFeature);
+			} else {
+				console.log("Not in:");
+				console.log(data[id]);
+			}
+		}
+		pointLayer.addFeatures(pointFeatures);
+		map.addLayer(pointLayer);
+		map.setLayerIndex(pointLayer, 9);
+		parameterLayers[name] = pointLayer;
+	}
+
+	var legendPallete = [ [ 0, 0, 143 ], [ 0, 0, 159 ], [ 0, 0, 175 ], [ 0, 0, 191 ], [ 0, 0, 207 ], [ 0, 0, 223 ],
+			[ 0, 0, 239 ], [ 0, 0, 255 ], [ 0, 11, 255 ], [ 0, 27, 255 ], [ 0, 43, 255 ], [ 0, 59, 255 ],
+			[ 0, 75, 255 ], [ 0, 91, 255 ], [ 0, 107, 255 ], [ 0, 123, 255 ], [ 0, 139, 255 ], [ 0, 155, 255 ],
+			[ 0, 171, 255 ], [ 0, 187, 255 ], [ 0, 203, 255 ], [ 0, 219, 255 ], [ 0, 235, 255 ], [ 0, 251, 255 ],
+			[ 7, 255, 247 ], [ 23, 255, 231 ], [ 39, 255, 215 ], [ 55, 255, 199 ], [ 71, 255, 183 ], [ 87, 255, 167 ],
+			[ 103, 255, 151 ], [ 119, 255, 135 ], [ 135, 255, 119 ], [ 151, 255, 103 ], [ 167, 255, 87 ],
+			[ 183, 255, 71 ], [ 199, 255, 55 ], [ 215, 255, 39 ], [ 231, 255, 23 ], [ 247, 255, 7 ], [ 255, 247, 0 ],
+			[ 255, 231, 0 ], [ 255, 215, 0 ], [ 255, 199, 0 ], [ 255, 183, 0 ], [ 255, 167, 0 ], [ 255, 151, 0 ],
+			[ 255, 135, 0 ], [ 255, 119, 0 ], [ 255, 103, 0 ], [ 255, 87, 0 ], [ 255, 71, 0 ], [ 255, 55, 0 ],
+			[ 255, 39, 0 ], [ 255, 23, 0 ], [ 255, 7, 0 ], [ 246, 0, 0 ], [ 228, 0, 0 ], [ 211, 0, 0 ], [ 193, 0, 0 ],
+			[ 175, 0, 0 ], [ 158, 0, 0 ], [ 140, 0, 0 ] ];
+
 	// From
 	// http://docs.geoserver.org/stable/en/user/services/wms/basics.html#axis-ordering
 	// - The WMS 1.3 specification mandates that the axis ordering for
@@ -425,7 +493,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		});
 	}
 
-	function addWMSLayer(url, id, shortName, layerID, colorscalerange, style, logscale, elevation, time,longName) {
+	function addWMSLayer(url, id, shortName, layerID, colorscalerange, style, logscale, elevation, time, longName) {
 		if (debugmW)
 			console.log("Adding the WMS layer");
 		if (debugmW)
@@ -483,6 +551,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		getExtent : getExtent,
 		zoomToExtent : zoomToExtent,
 		removePopups : removePopups,
+		addFeaturesFromDataWithColor : addFeaturesFromDataWithColor,
 	};
 
 }(OpenLayers, jQuery));

@@ -143,11 +143,11 @@
 						<div>
 							<form name="depthform">
 								<div class='left'>
-									<input type='text' id='depthMin' size="3" value="0" />
+									<input type='text' id='depthMin' size="3" value="5" />
 									Minimum depth
 								</div>
 								<div class='left'>
-									<input type='text' id='depthMax' size="3" value="10" />
+									<input type='text' id='depthMax' size="3" value="5" />
 									Maximum depth
 								</div>
 
@@ -357,10 +357,15 @@
 			<br>
 			<div id='gridSelectorDiv'></div>
 			<input type='text' id='depthInterpolation' size="10" />
-			<input type='text' id='griddingParameter' value="combined:salinity" />
+			<div id="griddingVariableDiv"></div>
+			Model:<input type='text' id='krigingModel' value="gaussian" />
+			Sigma:<input type='text' id='krigingSigma' value="0" />
+			Alpha:<input type='text' id='krigingAlpha' value="100" />
 			depthInterpolation
 			<br>
 			<input type='button' id='gridButton' value="Grid!" />
+			<input type='button' id='addVariableColorsOnMap' value="Colorsss!" />
+			<div id="krigingDiv"></div>
 			<canvas id="mycanvas" height="1087" width="1572"></canvas>
 		</div>
 

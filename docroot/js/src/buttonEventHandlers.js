@@ -96,6 +96,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		callFromControl("#initiateRasterDataButton", c.initiateRasterDataButton);
 		callFromControl("#calculateStatisticsButton", c.calculateStatisticsButton);
 		callFromControl("#gridButton", c.gridButton);
+		callFromControl("#addVariableColorsOnMap", c.addVariableColorsOnMap);
 
 		// on change events
 		jQ("#exportParametersFormats").change(function() {

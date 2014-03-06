@@ -487,6 +487,7 @@ myNamespace.control = (function($, OL, ns) {
 							+ constructedTable + "</div>");
 			$("#statistics").show();
 			ns.statistics.setUpTimeSeriesVariables();
+			ns.gridding.setUpGriddingVariables();
 			$("#timeSeriesDiv").show();
 			ns.statistics.setUpPropertiesPlotVariables();
 			$("#propertiesPlotDiv").show();
@@ -855,14 +856,15 @@ myNamespace.control = (function($, OL, ns) {
 			data[id].properties["Model lat for " + parameter] = lat;
 			data[id].properties["Model lon for " + parameter] = lon;
 		});
-		// console.log(data);
+		updateSearchResults();
+	}
+
+	function updateSearchResults() {
 		var constructedTable = ns.tableConstructor.parameterTable(data);
-		// console.log(constructedTable);
 		$("#parametersTable").html(
 				"Entries where the selected parameters are available<br>" + "<div class='scrollArea'>"
 						+ constructedTable + "</div>");
 		$("#parametersResultTable").dataTable();
-		// console.log("addAParameterToData DONE");
 	}
 
 	function initiateRasterDataButton() {
@@ -936,9 +938,18 @@ myNamespace.control = (function($, OL, ns) {
 	function propertiesPlotButton() {
 		ns.statistics.generatePropertiesPlot(data);
 	}
+
+	function gridButton() {
+		//ns.gridding.createGrid(data, $('#griddingParameter').val(), $('#timeResolution').val(), $('#latLonResolution')
+		//		.val());
+		ns.gridding.kriging(data, $('#griddingParameter').find(":selected").val(), $('#krigingModel').val(), $('#krigingSigma').val(), $('#krigingAlpha').val());
+		//updateSearchResults();
+		//ns.mapViewer.addFeaturesFromData(data, "All parameters");
+	}
 	
-	function gridButton(){
-		ns.gridding.createGrid(data,$('#griddingParameter').val(),$('#timeResolution').val());
+	function addVariableColorsOnMap(){
+		var parameter = $('#griddingParameter').find(":selected").val();
+		ns.mapViewer.addFeaturesFromDataWithColor(data,parameter);
 	}
 
 	function activateBbox() {
@@ -973,6 +984,7 @@ myNamespace.control = (function($, OL, ns) {
 		clearSelectionButton : clearSelectionButton,
 		addAParameterToData : addAParameterToData,
 		gridButton : gridButton,
+		addVariableColorsOnMap:addVariableColorsOnMap,
 	};
 
 }(jQuery, OpenLayers, myNamespace));
