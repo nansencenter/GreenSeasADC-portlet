@@ -35,7 +35,7 @@ myNamespace.WebFeatureService = (function($, OL) {
 			console.log("swapPosList START");
 		var newFilter = "";
 		var xmlDoc;
-		if (myNamespace.XMLParser.findBrowser() != "Firefox") {
+		if (myNamespace.utilities.findBrowser() != "Firefox") {
 			try {
 				if (window.DOMParser) {
 					parser = new DOMParser();

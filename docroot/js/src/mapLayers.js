@@ -331,7 +331,7 @@ myNamespace.mapLayers = (function($, bH) {
 	}
 
 	function setUpStyleForLegend() {
-		var browser = myNamespace.XMLParser.findBrowser();
+		var browser = myNamespace.utilities.findBrowser();
 		// console.log("Browser:" + browser);
 		var legend = $("#legend");
 		if (browser == "Trident") {
