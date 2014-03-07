@@ -24,14 +24,8 @@ myNamespace.control = (function($, OL, ns) {
 		tablesToQuery = [];
 		data = null;
 		basicData = null;
-
-		// hide export option until we have something to export
-		$("#exportParametersDiv").hide();
-		$("#filterParameters").hide();
-		$("#statistics").hide();
-		$("#timeSeriesDiv").hide();
-		$("#propertiesPlotDiv").hide();
-		$("#compareRasterButton").hide();
+		
+		setHTMLInit();
 
 		// initialize map viewer
 		ns.mapViewer.initMap();
@@ -47,30 +41,6 @@ myNamespace.control = (function($, OL, ns) {
 		ns.buttonEventHandlers.initHandlers();
 
 		setBboxInputToCurrentMapExtent();
-
-		$("#queryOptions").accordion({
-			collapsible : true,
-			active : false,
-			heightStyle : "content"
-		});
-		$("#statsOptions").accordion({
-			collapsible : true,
-			active : false,
-			heightStyle : "content"
-		});
-		$("#modelOptions").accordion({
-			collapsible : true,
-			active : false,
-			heightStyle : "content"
-		});
-		$("#rasterLayersDiv").accordion({
-			collapsible : true,
-			active : false,
-			heightStyle : "content"
-		});
-
-		// Make the tabs jquery-tabs
-		$("#tabs").tabs();
 
 		// Set up legend inline (special display case for ie and firefox)
 		ns.mapLayers.setUpStyleForLegend();
@@ -116,25 +86,8 @@ myNamespace.control = (function($, OL, ns) {
 		ns.mapViewer.removeAllParameterLayers();
 		ns.mapViewer.removeBasicSearchLayer();
 		myNamespace.parametersQueryString = null;
-		$("#exportParametersDiv").hide();
-		if (debugc)
-			console.log("control.js: start of mainQueryButton()");// TEST
-		// set loading text and empty parameter HTML
-		$("#featuresAndParams").hide();
-		$("#loadingText").html("Loading data, please wait...");
-		$("#list").html("");
-		$("#parametersTable").html("");
-		$("#statistics").hide();
-		$("#timeSeriesDiv").hide();
-		$("#propertiesPlotDiv").hide();
-		$("#statisticsContainer").html("");
-		$("#timeSeriesContainer").html("");
-		$("#propertiesPlotContainer").html("");
-		$("#matchVariable2").html("");
-		$("#compareRasterButton").hide();
-		$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
-		$("#highchartsContainer").html("");
-
+		setHTMLLoadingMainQuery();
+		
 		var filterBbox = ns.query.createfilterBoxHashMap();
 		var date = ns.query.createDateHashMap();
 		var months = ns.query.createMonthArray();
@@ -287,18 +240,7 @@ myNamespace.control = (function($, OL, ns) {
 			// removing the parameterlayers from previous searches
 			ns.mapViewer.removeAllParameterLayers();
 			myNamespace.parametersQueryString = parametersQueryString;
-			$("#parametersTable").html("Loading parameters, please wait...");
-			$("#statistics").hide();
-			$("#timeSeriesDiv").hide();
-			$("#propertiesPlotDiv").hide();
-			$("#statisticsContainer").html("");
-			$("#timeSeriesContainer").html("");
-			$("#propertiesPlotContainer").html("");
-			$("#matchVariable2").html("");
-			$("#compareRasterButton").hide();
-			$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
-			$("#highchartsContainer").html("");
-
+			setHTMLLoadingParameters();
 			ns.handleParameters.selectParameters(selected);
 
 			// Resetting tablesToQuery between filters
@@ -333,6 +275,99 @@ myNamespace.control = (function($, OL, ns) {
 		} else {
 			ns.errorMessage.showErrorMessage("You need to select at least one parameter before filtering");
 		}
+	}
+	
+
+	function setHTMLLoadingMainQuery(){
+		// set loading text and empty parameter HTML
+		$("#exportParametersDiv").hide();
+		$("#featuresAndParams").hide();
+		$("#loadingText").html("Loading data, please wait...");
+		$("#list").html("");
+		$("#parametersTable").html("");
+		$("#statistics").hide();
+		$("#parameterLayerVariableContainer").hide();
+		$("#timeSeriesDiv").hide();
+		$("#propertiesPlotDiv").hide();
+		$("#statisticsContainer").html("");
+		$("#timeSeriesContainer").html("");
+		$("#propertiesPlotContainer").html("");
+		$("#matchVariable2").html("");
+		$("#compareRasterButton").hide();
+		$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
+		$("#highchartsContainer").html("");
+	}
+	
+	function setHTMLInit(){
+
+		// hide export option until we have something to export
+		$("#exportParametersDiv").hide();
+		$("#filterParameters").hide();
+		$("#statistics").hide();
+		$("#parameterLayerVariableContainer").hide();
+		$("#timeSeriesDiv").hide();
+		$("#propertiesPlotDiv").hide();
+		$("#compareRasterButton").hide();
+		
+		$("#queryOptions").accordion({
+			collapsible : true,
+			active : false,
+			heightStyle : "content"
+		});
+		$("#statsOptions").accordion({
+			collapsible : true,
+			active : false,
+			heightStyle : "content"
+		});
+		$("#modelOptions").accordion({
+			collapsible : true,
+			active : false,
+			heightStyle : "content"
+		});
+		$("#rasterLayersDiv").accordion({
+			collapsible : true,
+			active : false,
+			heightStyle : "content"
+		});
+
+		// Make the tabs jquery-tabs
+		$("#tabs").tabs();
+	}
+	
+	function setHTMLParametersLoaded(){
+		var constructedTable = ns.tableConstructor.parameterTable(data);
+
+		$("#parametersTable").html(
+				"Entries where the selected parameters are available<br>" + "<div class='scrollArea'>"
+						+ constructedTable + "</div>");
+		ns.statistics.setUpTimeSeriesVariables();
+		setUpParameterLayerVariables();
+		ns.statistics.setUpPropertiesPlotVariables();
+
+		$("#parametersResultTable").dataTable();
+		linkParametersExportButton();
+		document.getElementById('exportParameter').disabled = false;
+		$("#statistics").show();
+		$("#parameterLayerVariableContainer").show();
+		$("#timeSeriesDiv").show();
+		$("#propertiesPlotDiv").show();
+		$("#exportParametersDiv").show();
+		myNamespace.matchup.updateMatchupParameter();
+	}
+	
+	function setHTMLLoadingParameters(){
+		$("#parametersTable").html("Loading parameters, please wait...");
+		$("#statistics").hide();
+		$("#parameterLayerVariableContainer").hide();
+		$("#timeSeriesDiv").hide();
+		$("#propertiesPlotDiv").hide();
+		$("#statisticsContainer").html("");
+		$("#timeSeriesContainer").html("");
+		$("#propertiesPlotContainer").html("");
+		$("#matchVariable2").html("");
+		$("#compareRasterButton").hide();
+		$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
+		$("#highchartsContainer").html("");
 	}
 
 	function hasMainQueryObjectChanged() {
@@ -484,28 +519,13 @@ myNamespace.control = (function($, OL, ns) {
 		if (tablesToQuery.length == 0) {
 			if (debugc)
 				console.log("tablesToQuery.length == 0");
-			var constructedTable = ns.tableConstructor.parameterTable(data);
-
-			$("#parametersTable").html(
-					"Entries where the selected parameters are available<br>" + "<div class='scrollArea'>"
-							+ constructedTable + "</div>");
-			$("#statistics").show();
-			ns.statistics.setUpTimeSeriesVariables();
-			setUpParameterLayerVariables();
-			$("#timeSeriesDiv").show();
-			ns.statistics.setUpPropertiesPlotVariables();
-			$("#propertiesPlotDiv").show();
-
-			$("#parametersResultTable").dataTable();
-			linkParametersExportButton();
 			ns.mapViewer.addFeaturesFromData(data, "All parameters");
-			document.getElementById('exportParameter').disabled = false;
-			$("#exportParametersDiv").show();
-			myNamespace.matchup.updateMatchupParameter();
+			setHTMLParametersLoaded();
 		} else {
 			queryLayer();
 		}
 	}
+	
 
 	// non-public
 	function replaceId(features) {
