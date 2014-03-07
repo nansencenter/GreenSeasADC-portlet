@@ -365,6 +365,7 @@
 					<span id='parametersLayerDivHeaderText'>Parameter Layers <em>(off)</em></span>
 				</h3>
 				<div id='parameterLayerVariableAccordionDiv'>
+					Run a query and filter selected parameters to view options here.
 					<div id='parameterLayerVariableDiv'></div>
 					<input type='button' id='addParametersLayerButton' value="Add Layer" />
 					<div id='parametersLayerDiv'></div>
