@@ -91,8 +91,8 @@ public class GreenseasPortlet extends MVCPortlet {
 				if (values == null)
 					return;
 				JSONObject jsonObject = new JSONObject(values);
-				System.out.println("Returning with jsonObject:");
-				System.out.println(jsonObject.toJSONString());
+				//System.out.println("Returning with jsonObject:");
+				//System.out.println(jsonObject.toJSONString());
 
 				PrintWriter writer = resourceResponse.getWriter();
 				writer.write(jsonObject.toString());
