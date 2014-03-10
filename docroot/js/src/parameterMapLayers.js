@@ -8,7 +8,7 @@ myNamespace.mapLayers = (function($, bH) {
 	var activeLayers = 0;
 	function addWMSLayerSelector() {
 		var widthAvailable = document.getElementById("mapContainer").offsetWidth
-				- document.getElementById("simple_map").offsetWidth -1;
+				- document.getElementById("simple_map").offsetWidth;
 		var maxLayers = 0;
 		// if more than 10 layers, layer from 11th uses 61 pixels, not 57
 		// (add 40 to make up for the first 10 layers using 4 pixels less)
@@ -29,17 +29,6 @@ myNamespace.mapLayers = (function($, bH) {
 		bH.callFromControl("#toggleLayerButton" + activeLayers, toggleLayerButton);
 		$("#toggleLayerButton" + activeLayers).prop("disabled", true);
 		activeLayers++;
-//		$('#legend').perfectScrollbar({
-//			suppressScrollY : true,
-//			suppressScrollX : true
-//		});
-//		$('#legend').width(widthAvailable).height(400);
-		// $('.ps-scrollbar-x-rail').css("left",820);
-	}
-
-	function updateScrollbar() {
-		// $('.ps-scrollbar-x-rail').css("bottom",($("#portlet").height()-400));
-//		$('#legend').perfectScrollbar('update');
 	}
 
 	var whichWMSLayerVariableSelectorQueries = {};
@@ -304,14 +293,14 @@ myNamespace.mapLayers = (function($, bH) {
 			console.log("logscale:" + logscale);
 		// Adding the colorscaleLegend
 		if ($('#colorScaleLegend' + activeLayer).length == 0) {
-			$("#innerLegend").append("<div id='colorScaleLegend" + activeLayer + "' class='colorScaleLegend'></div>");
+			$("#legend").append("<div id='colorScaleLegend" + activeLayer + "' class='colorScaleLegend'></div>");
 		}
 		var colorScaleLegendDiv = $('#colorScaleLegend' + activeLayer);
-
+		
 		var layerAsText = $('#mapLayersWMSURL' + activeLayer).find(":selected").text();
 		var variableAsText = $('#WMSLayerVariable' + activeLayer).find(":selected").text();
 		var longName = layerAsText + ":" + variableAsText;
-
+		
 		// if not countour, then add logscale
 		if (style == "contour")
 			colorScaleLegendDiv.html("");
@@ -333,11 +322,10 @@ myNamespace.mapLayers = (function($, bH) {
 			var maxDiv = "<div id='scaleMax'>" + parseFloat(max.toPrecision(3)).toExponential() + "</div>";
 			colorScaleLegendDiv.html(legend + maxDiv + twoThirdDiv + nameDiv + oneThirdDiv + minDiv);
 		}
-		updateScrollbar();
 		var elevation = $('#zAxisVariable' + activeLayer).find(":selected").val();
 		var time = $('#timeVariable' + activeLayer).find(":selected").val();
 		myNamespace.mapViewer.addWMSLayer(url, activeLayer, name, layer, colorscalerange, style, logscale, elevation,
-				date + "T" + time, longName);
+				date + "T" + time,longName);
 		if (debugMl)
 			console.log("Toggled layer");
 	}
@@ -345,7 +333,7 @@ myNamespace.mapLayers = (function($, bH) {
 	function setUpStyleForLegend() {
 		var browser = myNamespace.utilities.findBrowser();
 		// console.log("Browser:" + browser);
-		var legend = $("#innerLegend");
+		var legend = $("#legend");
 		if (browser == "Trident") {
 			legend.css("display", [ "-ms-inline-flexbox" ]);
 		} else if (browser == "Firefox") {

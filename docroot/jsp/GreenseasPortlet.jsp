@@ -19,7 +19,7 @@
 	<div id="mapContainer">
 		<div id="simple_map"></div>
 		<div id="rightOfMap">
-			<div id="legend"></div>
+			<div id="legend"><div id="innerLegend"></div></div>
 		</div>
 	</div>
 
@@ -366,9 +366,11 @@
 				</h3>
 				<div id='parameterLayerVariableAccordionDiv'>
 					Run a query and filter selected parameters to view options here.
-					<div id='parameterLayerVariableDiv'></div>
-					<input type='button' id='addParametersLayerButton' value="Add Layer" />
-					<div id='parametersLayerDiv'></div>
+					<div id='parameterLayerVariableContainer'>
+						<div id='parameterLayerVariableDiv'></div>
+						<input type='button' id='addParametersLayerButton' value="Add Layer" />
+						<div id='parametersLayerDiv'></div>
+					</div>
 				</div>
 			</div>
 		</div>
