@@ -276,28 +276,7 @@ myNamespace.control = (function($, OL, ns) {
 			ns.errorMessage.showErrorMessage("You need to select at least one parameter before filtering");
 		}
 	}
-	
 
-	function setHTMLLoadingMainQuery(){
-		// set loading text and empty parameter HTML
-		$("#exportParametersDiv").hide();
-		$("#featuresAndParams").hide();
-		$("#loadingText").html("Loading data, please wait...");
-		$("#list").html("");
-		$("#parametersTable").html("");
-		$("#statistics").hide();
-		$("#parameterLayerVariableContainer").hide();
-		$("#timeSeriesDiv").hide();
-		$("#propertiesPlotDiv").hide();
-		$("#statisticsContainer").html("");
-		$("#timeSeriesContainer").html("");
-		$("#propertiesPlotContainer").html("");
-		$("#matchVariable2").html("");
-		$("#compareRasterButton").hide();
-		$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
-		$("#highchartsContainer").html("");
-	}
-	
 	function setHTMLInit(){
 
 		// hide export option until we have something to export
@@ -333,6 +312,27 @@ myNamespace.control = (function($, OL, ns) {
 		// Make the tabs jquery-tabs
 		$("#tabs").tabs();
 	}
+
+	function setHTMLLoadingMainQuery(){
+		// set loading text and empty parameter HTML
+		$("#exportParametersDiv").hide();
+		$("#featuresAndParams").hide();
+		$("#loadingText").html("Loading data, please wait...");
+		$("#list").html("");
+		$("#parametersTable").html("");
+		$("#statistics").hide();
+		$("#parameterLayerVariableContainer").hide();
+		$("#timeSeriesDiv").hide();
+		$("#propertiesPlotDiv").hide();
+		$("#statisticsContainer").html("");
+		$("#timeSeriesContainer").html("");
+		$("#propertiesPlotContainer").html("");
+		$("#matchVariable2").html("");
+		$("#compareRasterButton").hide();
+		$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
+		$("#highchartsContainer").html("");
+	}
+	
 	
 	function setHTMLParametersLoaded(){
 		var constructedTable = ns.tableConstructor.parameterTable(data);
