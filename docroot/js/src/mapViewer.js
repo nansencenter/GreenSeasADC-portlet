@@ -49,6 +49,17 @@ myNamespace.mapViewer = (function(OL, $) {
 			}, {
 				isBaseLayer : false
 			}),
+			barnes : new OpenLayers.Layer.WMS("Barnes tempcu01", window.WMSServer, {
+				layers : "v7_temperature",
+				format : window.WMSformat,
+				filter : '<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc"><ogc:And><ogc:PropertyIsBetween><ogc:PropertyName>depth_of_sample</ogc:PropertyName><ogc:LowerBoundary><ogc:Literal>0</ogc:Literal></ogc:LowerBoundary><ogc:UpperBoundary><ogc:Literal>10</ogc:Literal></ogc:UpperBoundary></ogc:PropertyIsBetween><ogc:Or><ogc:Not><ogc:PropertyIsNull><ogc:PropertyName>tempcu01</ogc:PropertyName></ogc:PropertyIsNull></ogc:Not></ogc:Or></ogc:And></ogc:Filter>',
+
+				styles: "BarnesTest",
+				
+				transparent : true
+			}, {
+				isBaseLayer : false
+			})
 		};
 	}
 	
