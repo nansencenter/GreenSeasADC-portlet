@@ -29,17 +29,6 @@ myNamespace.mapLayers = (function($, bH) {
 		bH.callFromControl("#toggleLayerButton" + activeLayers, toggleLayerButton);
 		$("#toggleLayerButton" + activeLayers).prop("disabled", true);
 		activeLayers++;
-//		$('#legend').perfectScrollbar({
-//			suppressScrollY : true,
-//			suppressScrollX : true
-//		});
-//		$('#legend').width(widthAvailable).height(400);
-		// $('.ps-scrollbar-x-rail').css("left",820);
-	}
-
-	function updateScrollbar() {
-		// $('.ps-scrollbar-x-rail').css("bottom",($("#portlet").height()-400));
-//		$('#legend').perfectScrollbar('update');
 	}
 
 	var whichWMSLayerVariableSelectorQueries = {};
@@ -333,7 +322,6 @@ myNamespace.mapLayers = (function($, bH) {
 			var maxDiv = "<div id='scaleMax'>" + parseFloat(max.toPrecision(3)).toExponential() + "</div>";
 			colorScaleLegendDiv.html(legend + maxDiv + twoThirdDiv + nameDiv + oneThirdDiv + minDiv);
 		}
-		updateScrollbar();
 		var elevation = $('#zAxisVariable' + activeLayer).find(":selected").val();
 		var time = $('#timeVariable' + activeLayer).find(":selected").val();
 		myNamespace.mapViewer.addWMSLayer(url, activeLayer, name, layer, colorscalerange, style, logscale, elevation,
