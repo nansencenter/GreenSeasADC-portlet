@@ -72,11 +72,11 @@ myNamespace.mapViewer = (function(OL, $) {
 		var min = null, max = null;
 		for (id in data) {
 			var value = data[id].properties[parameter];
-			if (typeof value != 'undefined' && value != -999 && value != '-999') {
+			if (typeof value !== 'undefined' && value !== -999 && value !== '-999') {
 				value = parseFloat(value);
-				if (min == null || min > value)
+				if (min === null || min > value)
 					min = value;
-				if (max == null || max < value)
+				if (max === null || max < value)
 					max = value;
 			}
 		}
@@ -84,7 +84,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		console.log([min,max,range]);
 		for (id in data) {
 			var value = data[id].properties[parameter];
-			if (typeof value != 'undefined' && value != -999 && value != '-999') {
+			if (typeof value !== 'undefined' && value !== -999 && value !== '-999') {
 				value = parseFloat(value);
 				var lonLat = new OL.LonLat(data[id].geometry.coordinates[0], data[id].geometry.coordinates[1]);
 				var pointGeometry = new OL.Geometry.Point(lonLat.lat, lonLat.lon);
@@ -397,7 +397,7 @@ myNamespace.mapViewer = (function(OL, $) {
 			var newFilter = "";
 			var startSub = filter.indexOf("<gml:lowerCorner>") + 17;
 			// Check if there actually is a bbox
-			if (startSub == 16)
+			if (startSub === 16)
 				return filter;
 			var endSub = filter.indexOf("</gml:lowerCorner>");
 			newFilter += filter.substring(0, startSub);
@@ -407,7 +407,7 @@ myNamespace.mapViewer = (function(OL, $) {
 			newFilter += lonLat[1] + " " + lonLat[0];
 			var startSub = filter.indexOf("<gml:upperCorner>") + 17;
 			// Check if there actually is a bbox again
-			if (startSub == 16)
+			if (startSub === 16)
 				return filter;
 			newFilter += filter.substring(endSub, startSub);
 			endSub = filter.indexOf("</gml:upperCorner>");
@@ -435,7 +435,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		var index = 999;
 		var color = window[layer + "Color"] || "#610B0B";
 		var newLayer;
-		if (layer == window.metaDataTable) {
+		if (layer === window.metaDataTable) {
 			index = 998;
 			layers = mapLayers;
 		} else {
@@ -498,10 +498,10 @@ myNamespace.mapViewer = (function(OL, $) {
 			colorscalerange : colorscalerange,
 			logscale : logscale,
 		};
-		if (!(typeof elevation === 'undefined') && elevation != "") {
+		if (!(typeof elevation === 'undefined') && elevation !== "") {
 			parameters.elevation = elevation;
 		}
-		if (!(typeof time === 'undefined') && time != "") {
+		if (!(typeof time === 'undefined') && time !== "") {
 			parameters.time = time;
 		}
 		var layer = new OpenLayers.Layer.WMS(shortName, url, parameters, {

@@ -180,7 +180,7 @@ myNamespace.control = (function($, OL, ns) {
 		if (debugc)
 			console.log("DisplayFeatures");
 		// did an error occur?
-		if (response.status != 200) {
+		if (response.status !== 200) {
 			// print error message and terminate
 			ns.errorMessage.showErrorMessage(response.responseText);
 			return;
@@ -226,7 +226,7 @@ myNamespace.control = (function($, OL, ns) {
 		var parametersQueryString = "Selected parameters:";
 		var delimiter = "";
 		$.each(allSelected, function(i, val) {
-			if (val.getAttribute("rel") != "noBox") {
+			if (val.getAttribute("rel") !== "noBox") {
 				var id = val.getAttribute("id");
 				selected.push(id);
 				parametersQueryString += delimiter + ns.handleParameters.getHeaderFromRawData(id) + "";
@@ -236,7 +236,7 @@ myNamespace.control = (function($, OL, ns) {
 
 		if (debugc)
 			console.log(selected);
-		if (selected.length != 0) {
+		if (selected.length !== 0) {
 			// removing the parameterlayers from previous searches
 			ns.mapViewer.removeAllParameterLayers();
 			myNamespace.parametersQueryString = parametersQueryString;
@@ -254,7 +254,7 @@ myNamespace.control = (function($, OL, ns) {
 			// var foundCombine = false;
 			// Adding all selected layers to tablesToQuery
 			$.each(ns.handleParameters.chosenParameters.tablesSelected, function(i, table) {
-				// if (table != "combined")
+				// if (table !== "combined")
 				tablesToQuery.push(table);
 				// else
 				// foundCombine = true;
@@ -374,13 +374,13 @@ myNamespace.control = (function($, OL, ns) {
 		var filterBbox = ns.query.createfilterBoxHashMap();
 		if (filterBbox) {
 			if (myNamespace.mainQueryObject.filterBbox) {
-				if (filterBbox.bottom != myNamespace.mainQueryObject.filterBbox.bottom)
+				if (filterBbox.bottom !== myNamespace.mainQueryObject.filterBbox.bottom)
 					return true;
-				if (filterBbox.left != myNamespace.mainQueryObject.filterBbox.left)
+				if (filterBbox.left !== myNamespace.mainQueryObject.filterBbox.left)
 					return true;
-				if (filterBbox.right != myNamespace.mainQueryObject.filterBbox.right)
+				if (filterBbox.right !== myNamespace.mainQueryObject.filterBbox.right)
 					return true;
-				if (filterBbox.top != myNamespace.mainQueryObject.filterBbox.top)
+				if (filterBbox.top !== myNamespace.mainQueryObject.filterBbox.top)
 					return true;
 			} else {
 				return true;
@@ -391,15 +391,15 @@ myNamespace.control = (function($, OL, ns) {
 		var date = ns.query.createDateHashMap();
 		if (date) {
 			if (myNamespace.mainQueryObject.date) {
-				if (date.fromDate != myNamespace.mainQueryObject.date.fromDate)
+				if (date.fromDate !== myNamespace.mainQueryObject.date.fromDate)
 					return true;
-				if (date.toDate != myNamespace.mainQueryObject.date.toDate)
+				if (date.toDate !== myNamespace.mainQueryObject.date.toDate)
 					return true;
-				if (date.time != myNamespace.mainQueryObject.date.time)
+				if (date.time !== myNamespace.mainQueryObject.date.time)
 					return true;
-				if (date.fromTime != myNamespace.mainQueryObject.date.fromTime)
+				if (date.fromTime !== myNamespace.mainQueryObject.date.fromTime)
 					return true;
-				if (date.toTime != myNamespace.mainQueryObject.date.toTime)
+				if (date.toTime !== myNamespace.mainQueryObject.date.toTime)
 					return true;
 			} else {
 				return true;
@@ -410,9 +410,9 @@ myNamespace.control = (function($, OL, ns) {
 		var depth = ns.query.createDepthHashMap();
 		if (depth) {
 			if (myNamespace.mainQueryObject.depth) {
-				if (depth.max != myNamespace.mainQueryObject.depth.max)
+				if (depth.max !== myNamespace.mainQueryObject.depth.max)
 					return true;
-				if (depth.min != myNamespace.mainQueryObject.depth.min)
+				if (depth.min !== myNamespace.mainQueryObject.depth.min)
 					return true;
 			} else {
 				return true;
@@ -423,7 +423,7 @@ myNamespace.control = (function($, OL, ns) {
 		var region = ns.query.createRegionArray();
 		if (region) {
 			if (myNamespace.mainQueryObject.region) {
-				if (region != myNamespace.mainQueryObject.region)
+				if (region !== myNamespace.mainQueryObject.region)
 					return true;
 			} else
 				return true;
@@ -435,7 +435,7 @@ myNamespace.control = (function($, OL, ns) {
 		}
 		if (cruise) {
 			if (myNamespace.mainQueryObject.cruise) {
-				if (cruise != myNamespace.mainQueryObject.cruise)
+				if (cruise !== myNamespace.mainQueryObject.cruise)
 					return true;
 			} else
 				return true;
@@ -516,9 +516,9 @@ myNamespace.control = (function($, OL, ns) {
 			return;
 		}
 		addData(responseAsJSON);
-		if (tablesToQuery.length == 0) {
+		if (tablesToQuery.length === 0) {
 			if (debugc)
-				console.log("tablesToQuery.length == 0");
+				console.log("tablesToQuery.length === 0");
 			ns.mapViewer.addFeaturesFromData(data, "All parameters");
 			setHTMLParametersLoaded();
 		} else {
@@ -538,7 +538,7 @@ myNamespace.control = (function($, OL, ns) {
 		});
 		if (debugc)
 			console.log("Replaced ID's");
-		return (featureArray == null) ? null : featureArray[0];
+		return (featureArray === null) ? null : featureArray[0];
 	}
 
 	// non-public
@@ -547,7 +547,7 @@ myNamespace.control = (function($, OL, ns) {
 			console.log("convertArrayToHashMap");
 		var output = {};
 		$.each(inputArray, function(k, dataValue) {
-			if ((typeof dataValue) != 'function') {
+			if ((typeof dataValue) !== 'function') {
 				output[dataValue.id] = dataValue;
 			}
 		});
@@ -565,7 +565,7 @@ myNamespace.control = (function($, OL, ns) {
 		var layer = replaceId(features);
 		var newData = {};
 
-		if (layer == null) {
+		if (layer === null) {
 			data = {};
 			return;
 		}
@@ -574,7 +574,7 @@ myNamespace.control = (function($, OL, ns) {
 		// Add all combine filters for this layer to combined (val could be
 		// "combined:temperature")
 		$.each(ns.handleParameters.chosenParameters.combined, function(i, val) {
-			if (window.combinedParameters[val].layer == layer) {
+			if (window.combinedParameters[val].layer === layer) {
 				combined.push(val);
 			}
 		});
@@ -607,12 +607,12 @@ myNamespace.control = (function($, OL, ns) {
 				// if (debugc) {
 				// console.log("Checking:" + comb);
 				// }
-				if (window.combinedParameters[comb].method == "prioritized") {
+				if (window.combinedParameters[comb].method === "prioritized") {
 					var val = null;
 					var qfString = "";
 					for ( var k = 0; k < window.combinedParameters[comb].parameters.length; k++) {
-						if (feature.properties[window.combinedParameters[comb].parameters[k]] != null
-								&& feature.properties[window.combinedParameters[comb].parameters[k]].trim() != "") {
+						if (feature.properties[window.combinedParameters[comb].parameters[k]] !== null
+								&& feature.properties[window.combinedParameters[comb].parameters[k]].trim() !== "") {
 							val = feature.properties[window.combinedParameters[comb].parameters[k]];
 							if (qf)
 								qfString = feature.properties[window.combinedParameters[comb].parameters[k]
@@ -657,7 +657,7 @@ myNamespace.control = (function($, OL, ns) {
 
 	function updateTreeWithInventoryNumbers(response, layer, par) {
 		var id;
-		if (par == null) {
+		if (par === null) {
 			id = layer;
 		} else {
 			id = layer + ":" + par;
@@ -673,10 +673,10 @@ myNamespace.control = (function($, OL, ns) {
 			console.log("getParametersFromMulti:" + comb);
 		var properties = [];
 		var layer = null;
-		if (window.combinedParameters[comb].method.indexOf("multi") == 0) {
+		if (window.combinedParameters[comb].method.indexOf("multi") === 0) {
 			$.each(window.combinedParameters[comb].parameters, function(i, val) {
 				var splitString = val.split(":");
-				if (splitString[0] == "combined") {
+				if (splitString[0] === "combined") {
 					var tempProp = getParametersFromMulti(val);
 					layer = tempProp.pop();
 					properties = properties.concat(tempProp);
@@ -698,13 +698,13 @@ myNamespace.control = (function($, OL, ns) {
 		var allChildren = myTreeContainer.find("li");
 		$.each(allChildren, function(i, val) {
 			if ((typeof window.combinedParameters[val.id] === "undefined")
-					|| (window.combinedParameters[val.id].method != "groupLayers")) {
+					|| (window.combinedParameters[val.id].method !== "groupLayers")) {
 				var splitString = val.id.split(":");
 				var layer, propertyNames, par;
-				if (splitString.length == 2) {
+				if (splitString.length === 2) {
 					par = splitString[1];
-					if (splitString[0] == "combined") {
-						if (window.combinedParameters[val.id].method.indexOf("multi") == 0) {
+					if (splitString[0] === "combined") {
+						if (window.combinedParameters[val.id].method.indexOf("multi") === 0) {
 							propertyNames = getParametersFromMulti(val.id);
 							layer = propertyNames.pop();
 						} else {
@@ -722,13 +722,13 @@ myNamespace.control = (function($, OL, ns) {
 					var mySubChildren = $(val).children().find("li");
 					$.each(mySubChildren, function(j, val2) {
 						var splitString2 = val2.id.split(":");
-						if (splitString2.length == 2) {
-							if (splitString2[0] != "combined")
+						if (splitString2.length === 2) {
+							if (splitString2[0] !== "combined")
 								propertyNames.push(splitString2[1]);
 						}
 					});
 				}
-				if (layer != null) {
+				if (layer !== null) {
 					var element = $(document.getElementById(val.id));
 					var newText = element.data("baseheader");
 					$("#parametersTree").jstree("set_text", element, newText);
@@ -828,7 +828,7 @@ myNamespace.control = (function($, OL, ns) {
 			"sort" : function(a, b) {
 				var indexA = parseInt($(a).data("index"));
 				var indexB = parseInt($(b).data("index"));
-				if (indexA != indexB)
+				if (indexA !== indexB)
 					return indexA > indexB ? 1 : -1;
 				else
 					return this.get_text(a) > this.get_text(b) ? 1 : -1;
@@ -852,7 +852,7 @@ myNamespace.control = (function($, OL, ns) {
 		});
 		$('#treeSearchParameter').on('keypress', function(e) {
 			var code = (e.keyCode ? e.keyCode : e.which);
-			if (code == 13) {
+			if (code === 13) {
 				e.preventDefault();
 				filterParametersTreeButton();
 			}
@@ -913,7 +913,7 @@ myNamespace.control = (function($, OL, ns) {
 	var lastSearchString = null;
 	function filterParametersTreeButton() {
 		var searchString = $("#treeSearchParameter").val();
-		if (searchString != lastSearchString) {
+		if (searchString !== lastSearchString) {
 			console.log("filterParametersTreeButton");
 			$("#parametersTree").jstree("clear_search");
 			$("#parametersTree").jstree("search", searchString);
@@ -931,7 +931,7 @@ myNamespace.control = (function($, OL, ns) {
 	function toggleOrderPlanktonButton() {
 		lastSearchString = null;
 		var multi = [ 0 ];
-		if ($('#toggleOrderPlanktonButton').val() == "Sort plankton by type") {
+		if ($('#toggleOrderPlanktonButton').val() === "Sort plankton by type") {
 			multi = [ 1 ];
 			// $('#toggleOrderPlanktonButton').val("Sort plankton by element");
 			// } else

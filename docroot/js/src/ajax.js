@@ -34,7 +34,7 @@ myNamespace.ajax = (function($) {
 		if (useOpendap)
 			data[portletNameSpace + 'opendapDataURL'] = opendapDataURL;
 		var success = function() {
-			if (identifier == lastGetLayersFromNetCDFFileCall) {
+			if (identifier === lastGetLayersFromNetCDFFileCall) {
 				// JSON Data coming back from Server
 				var responseData = this.get('responseData');
 				myNamespace.control.viewParameterNames(responseData);
@@ -62,7 +62,7 @@ myNamespace.ajax = (function($) {
 		};
 
 		var success = function() {
-			if (identifier == lastGetDatavaluesFromRasterCall) {
+			if (identifier === lastGetDatavaluesFromRasterCall) {
 				var instance = this;
 
 				// JSON Data coming back from Server
@@ -93,7 +93,7 @@ myNamespace.ajax = (function($) {
 
 		var success = function() {
 			// JSON Data coming back from Server
-			if (identifier == lastGetDimensionCall) {
+			if (identifier === lastGetDimensionCall) {
 				var responseData = this.get('responseData');
 				myNamespace.matchup.setUpParameterMetaSelector(responseData);
 			} else {
@@ -128,7 +128,7 @@ myNamespace.ajax = (function($) {
 				myNamespace.errorMessage.showErrorMessage("Something went wrong when fetching the longhurst region");
 			},
 			success : function(result, status, xhr) {
-				if (identifier == lastGetLonghurstPolygonCall) {
+				if (identifier === lastGetLonghurstPolygonCall) {
 					window.polygon[region] = result[region];
 				}
 			}

@@ -40,7 +40,7 @@ myNamespace.mapLayers = (function($, bH) {
 			console.log(event);
 		}
 		var selectedElement = event.target;
-		if (selectedElement.options[selectedElement.selectedIndex].value == "NONE") {
+		if (selectedElement.options[selectedElement.selectedIndex].value === "NONE") {
 			if (debugMl)
 				console.log("No layer selected");
 			$("#WMSLayerVariable" + activeLayer).html("");
@@ -65,7 +65,7 @@ myNamespace.mapLayers = (function($, bH) {
 							+ "</div>");
 		}
 		myNamespace.WebMapService.getCapabilities(function(response) {
-			if (identifier == whichWMSLayerVariableSelectorQueries[activeLayer]) {
+			if (identifier === whichWMSLayerVariableSelectorQueries[activeLayer]) {
 				setupVariableSelectorForWMSLayer(response, selectedElement);
 				if (debugMl)
 					console.log("identifier:" + identifier + " matches stored value for element:" + activeLayer);
@@ -147,7 +147,7 @@ myNamespace.mapLayers = (function($, bH) {
 		var colorscaleMin = 0;
 		var colorscaleMax = 1;
 		if (!(typeof obj.scaleRange === 'undefined')) {
-			if (obj.scaleRange.length == 2) {
+			if (obj.scaleRange.length === 2) {
 				colorscaleMin = obj.scaleRange[0];
 				colorscaleMax = obj.scaleRange[1];
 			}
@@ -197,7 +197,7 @@ myNamespace.mapLayers = (function($, bH) {
 		var date = $('#dateVariable' + activeLayer).find(":selected").val();
 		var time = $('#timeVariable' + activeLayer).find(":selected").val();
 		var dateTime = null;
-		if ((!(typeof date === 'undefined')) && (!(typeof time === 'undefined')) && date != "" && time != "") {
+		if ((!(typeof date === 'undefined')) && (!(typeof time === 'undefined')) && date !== "" && time !== "") {
 			dateTime = date + "T" + time;
 			myNamespace.WebMapService.getMinMax(function(response) {
 				setUpAutoRange(response, activeLayer);
@@ -256,7 +256,7 @@ myNamespace.mapLayers = (function($, bH) {
 		var activeLayer = event.target.name;
 		if (debugMl)
 			console.log("updateMetaDataSelection");
-		if (event.target.options[event.target.selectedIndex].value == "NONE") {
+		if (event.target.options[event.target.selectedIndex].value === "NONE") {
 			$("#layerMetaData" + activeLayer).html("");
 			return;
 		}
@@ -265,7 +265,7 @@ myNamespace.mapLayers = (function($, bH) {
 		if ($('#colorscalerangeAuto' + activeLayer).is(":checked"))
 			updateAutoRange(activeLayer);
 		myNamespace.WebMapService.getMetadata(function(response) {
-			if (identifier == whichupdateMetaDataSelection[activeLayer]) {
+			if (identifier === whichupdateMetaDataSelection[activeLayer]) {
 				setUpLayerMetaData(response, activeLayer);
 			}
 		}, $('#mapLayersWMSURL' + activeLayer).val(), $('#WMSLayerVariable' + activeLayer).find(":selected").val());
@@ -278,7 +278,7 @@ myNamespace.mapLayers = (function($, bH) {
 			console.log("Toggleing layer #" + activeLayer);
 		var date = $('#dateVariable' + activeLayer).find(":selected").val();
 		var url = $('#mapLayersWMSURL' + activeLayer).val();
-		if (url == "NONE")
+		if (url === "NONE")
 			return;
 		var name = "Raster " + activeLayer;
 		var layer = $('#WMSLayerVariable' + activeLayer).find(":selected").val();
@@ -292,7 +292,7 @@ myNamespace.mapLayers = (function($, bH) {
 		if (debugMl)
 			console.log("logscale:" + logscale);
 		// Adding the colorscaleLegend
-		if ($('#colorScaleLegend' + activeLayer).length == 0) {
+		if ($('#colorScaleLegend' + activeLayer).length === 0) {
 			$("#innerLegend").append("<div id='colorScaleLegend" + activeLayer + "' class='colorScaleLegend'></div>");
 		}
 		var colorScaleLegendDiv = $('#colorScaleLegend' + activeLayer);
@@ -302,11 +302,11 @@ myNamespace.mapLayers = (function($, bH) {
 		var longName = layerAsText + ":" + variableAsText;
 
 		// if not countour, then add logscale
-		if (style == "contour")
+		if (style === "contour")
 			colorScaleLegendDiv.html("");
 		else {
 			var legend = "<img src='" + window.contextPath + "/images/legendGraphicV.png' alt='Color Scale'>";
-			var isLogscale = (logscale == "true");
+			var isLogscale = (logscale === "true");
 			// console.log(isLogscale);
 			var minT = isLogscale ? Math.log(min) : min;
 			var maxT = isLogscale ? Math.log(max) : max;
@@ -334,9 +334,9 @@ myNamespace.mapLayers = (function($, bH) {
 		var browser = myNamespace.utilities.findBrowser();
 		// console.log("Browser:" + browser);
 		var legend = $("#innerLegend");
-		if (browser == "Trident") {
+		if (browser === "Trident") {
 			legend.css("display", [ "-ms-inline-flexbox" ]);
-		} else if (browser == "Firefox") {
+		} else if (browser === "Firefox") {
 			legend.css("display", [ "inline-flex" ]);
 		} else {
 			legend.css("display", [ "-webkit-inline-box" ]);

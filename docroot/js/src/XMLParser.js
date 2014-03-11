@@ -17,9 +17,9 @@ myNamespace.XMLParser = (function($) {
 
 	function getXmlDoc(xmlSchema) {
 		var xmlDoc;
-		//var browser = myNamespace.utilities.findBrowser();
+		// var browser = myNamespace.utilities.findBrowser();
 		/*
-		 * if (browser == "Chrome" || browser == "Firefox") { xmlDoc =
+		 * if (browser === "Chrome" || browser === "Firefox") { xmlDoc =
 		 * xmlSchema.responseXML; } else {
 		 */
 		// if (xmlSchema._object) {

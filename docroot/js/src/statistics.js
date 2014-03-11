@@ -15,9 +15,9 @@ myNamespace.statistics = (function($, ns) {
 				var value = parseFloat(val.properties[variable]);
 				// if (debugc)
 				// console.log(value);
-				if (value != -999 && val.properties.date) {
+				if (value !== -999 && val.properties.date) {
 					var dateArr = val.properties.date.split("-");
-					if (dateArr.length == 3) {
+					if (dateArr.length === 3) {
 						var year = parseInt(dateArr[0]);
 						// Note that in JavaScript, months start at 0 for
 						// January, 1 for February etc.
@@ -28,7 +28,7 @@ myNamespace.statistics = (function($, ns) {
 						var time = false;
 						if (val.properties.time) {
 							var timeSplit = val.properties.time.split(":");
-							if (timeSplit.length == 3) {
+							if (timeSplit.length === 3) {
 								hours = parseInt(timeSplit[0]);
 								minutes = parseInt(timeSplit[1]);
 								seconds = parseInt(timeSplit[2].substring(0, timeSplit[2].length));
@@ -181,10 +181,10 @@ myNamespace.statistics = (function($, ns) {
 				var x = parseFloat(val.properties[horizontalPar]);
 				// if (debugc)
 				// console.log(value);
-				if (x != -999 && val.properties[verticalPar]) {
+				if (x !== -999 && val.properties[verticalPar]) {
 					if (val.properties[verticalPar]) {
 						var y = parseFloat(val.properties[verticalPar]);
-						if (y != -999) {
+						if (y !== -999) {
 							var properties = {
 								// TODO: add time
 								x : x,
@@ -196,7 +196,7 @@ myNamespace.statistics = (function($, ns) {
 							};
 							if (val.properties.date) {
 								var dateArr = val.properties.date.split("-");
-								if (dateArr.length == 3) {
+								if (dateArr.length === 3) {
 									var year = parseInt(dateArr[0]);
 									// Note that in JavaScript, months start at
 									// 0 for
@@ -208,7 +208,7 @@ myNamespace.statistics = (function($, ns) {
 									var time = false;
 									if (val.properties.time) {
 										var timeSplit = val.properties.time.split(":");
-										if (timeSplit.length == 3) {
+										if (timeSplit.length === 3) {
 											hours = parseInt(timeSplit[0]);
 											minutes = parseInt(timeSplit[1]);
 											seconds = parseInt(timeSplit[2].substring(0, timeSplit[2].length));

@@ -117,11 +117,11 @@ myNamespace.buttonEventHandlers = (function($) {
 					} catch (e) {
 						window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder
 								|| window.MSBlobBuilder || window.webkitURL;
-						if (e.name == 'TypeError' && window.BlobBuilder) {
+						if (e.name === 'TypeError' && window.BlobBuilder) {
 							var bb = new BlobBuilder();
 							bb.append([ csvContent ]);
 							saveAs(bb.getBlob(type), name);
-						} else if (e.name == "InvalidStateError") {
+						} else if (e.name === "InvalidStateError") {
 							// InvalidStateError (tested on FF13 WinXP)
 							saveAs(new Blob([ csvContent ], {
 								type : type

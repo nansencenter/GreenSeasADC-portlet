@@ -26,7 +26,7 @@ myNamespace.tableConstructor = (function($, hP) {
 			var properties = val.properties;
 			for (prop in properties) {
 				var value = properties[prop];
-				if (value == null)
+				if (value === null)
 					value = "";
 				row += data(value);
 			}
@@ -59,7 +59,7 @@ myNamespace.tableConstructor = (function($, hP) {
 			var properties = feature.properties;
 			$.each(selectedParameters, function(j, parameter) {
 				var parVal = properties[parameter];
-				if (parVal != "" && parVal != null && !isNaN(parVal) && parVal != "-999") {
+				if (parVal !== "" && parVal !== null && !isNaN(parVal) && parVal !== "-999") {
 					parVal = parseFloat(parVal);
 					statistics[parameter].quantity += 1;
 					statistics[parameter].sum += parVal;
@@ -88,7 +88,7 @@ myNamespace.tableConstructor = (function($, hP) {
 			var properties = feature.properties;
 			$.each(selectedParameters, function(j, parameter) {
 				var parVal = properties[parameter];
-				if (parVal != "" && parVal != null && !isNaN(parVal)) {
+				if (parVal !== "" && parVal !== null && !isNaN(parVal)) {
 					parVal = parseFloat(parVal);
 					statistics[parameter].sdSum += Math.pow(statistics[parameter].average - parVal, 2);
 				}
@@ -117,7 +117,7 @@ myNamespace.tableConstructor = (function($, hP) {
 			row += data(quantity);
 			row += data(min);
 			row += data(max);
-			//row += data(sum);
+			// row += data(sum);
 			row += data(average.toFixed(3));
 			row += data(sd.toFixed(3));
 			row += data(variance.toFixed(3));
@@ -148,7 +148,7 @@ myNamespace.tableConstructor = (function($, hP) {
 
 			// add all properties to row
 			for (prop in val.properties) {
-				if (val.properties[prop] != null)
+				if (val.properties[prop] !== null)
 					row += data(val.properties[prop]);
 				else
 					row += data("");
@@ -180,7 +180,7 @@ myNamespace.tableConstructor = (function($, hP) {
 
 	function listItem(value, table, header) {
 		displayed.push(table + ":" + value);
-		if (typeof header == "undefined")
+		if (typeof header === "undefined")
 			header = hP.getHeader(value, table);
 		return "<li id='" + table + ":" + value + "' data-baseheader='" + header + "' data-index='0'><a>" + header
 				+ "</a></li>";
@@ -190,7 +190,7 @@ myNamespace.tableConstructor = (function($, hP) {
 		var str = "<ul><li id=\"" + window.metaDataTable + "\"><a>Available metadata</a>";
 		str += "<ul>";
 		$.each(hP.mainParameters.parameters, function(i, val) {
-			if (val != window.geometryParameter)
+			if (val !== window.geometryParameter)
 				str += listItem(val, window.metaDataTable);
 		});
 		str += "</ul></li>";
@@ -209,7 +209,7 @@ myNamespace.tableConstructor = (function($, hP) {
 		var str = "<ul>";
 		var groupLayers = [];
 		$.each(window.combinedParameters, function(i, val) {
-			if (window.combinedParameters[i].method == "groupLayers") {
+			if (window.combinedParameters[i].method === "groupLayers") {
 				groupLayers.push(i);
 			}
 		});
@@ -244,7 +244,7 @@ myNamespace.tableConstructor = (function($, hP) {
 				console.log("tablesDone[table] where table= " + table);
 			// If the paramters from the table has been initiated (through
 			// ns.hP.initiateParameters())
-			if (tablesDoneInGroup.indexOf(table) == -1)
+			if (tablesDoneInGroup.indexOf(table) === -1)
 				str += generateListElementOfTable(table, multi);
 		}
 		str += "</ul>";
@@ -262,10 +262,10 @@ myNamespace.tableConstructor = (function($, hP) {
 			var combinations = [];
 			var multiCombinations = [];
 			$.each(window.combinedParameters, function(i, val) {
-				if (window.combinedParameters[i].layer == table) {
+				if (window.combinedParameters[i].layer === table) {
 					var found = false;
 					for ( var j = 0; !found && j < multi.length; j++) {
-						if (window.combinedParameters[i].method == ("multi" + multi[j])) {
+						if (window.combinedParameters[i].method === ("multi" + multi[j])) {
 							found = true;
 						}
 					}
@@ -286,19 +286,19 @@ myNamespace.tableConstructor = (function($, hP) {
 			});
 			$.each(hP.availableParameters[table], function(i, val) {
 				// Check if the parameter is already written
-				if (displayed.indexOf(table + ":" + val) == -1) {
+				if (displayed.indexOf(table + ":" + val) === -1) {
 					// Check if the parameter is not to be combined:
 					var found = false;
 					for ( var j = 0; !found && j < combinations.length; j++) {
 						var parArr = window.combinedParameters[combinations[j]].parameters;
 						for ( var k = 0; !found && k < parArr.length; k++)
-							if (val == parArr[k])
+							if (val === parArr[k])
 								found = true;
 					}
 					// Check if the parameter is not inherited from the
 					// metadatatable
-					if (!found && hP.mainParameters.parameters.indexOf(val) == -1) {
-						if (val.substring(val.length - qfPostFix.length) != qfPostFix)
+					if (!found && hP.mainParameters.parameters.indexOf(val) === -1) {
+						if (val.substring(val.length - qfPostFix.length) !== qfPostFix)
 							str += listItem(val, table);
 					}
 				}
@@ -310,21 +310,21 @@ myNamespace.tableConstructor = (function($, hP) {
 	}
 
 	function setupCombination(comb, multiArr) {
-//		console.log("setupCombination for:" + comb);
+		// console.log("setupCombination for:" + comb);
 		// console.log(displayed);
 		var str = "";
-		if (displayed.indexOf(comb) == -1) {
+		if (displayed.indexOf(comb) === -1) {
 			var table = window.combinedParameters[comb].layer;
 			var rel = "";
 			var group = false;
 			var multi = false;
 			var wrongmulti = false;
-			if (window.combinedParameters[comb].method == "group") {
+			if (window.combinedParameters[comb].method === "group") {
 				rel = " rel='noBox'";
 				group = true;
 			} else {
 				var method = window.combinedParameters[comb].method;
-				if (method.indexOf("multi") == 0) {
+				if (method.indexOf("multi") === 0) {
 					var multiInt = parseInt(method.substring(5));
 					if (multiArr.indexOf(multiInt) > -1) {
 						rel = " rel='noBox'";
@@ -343,7 +343,7 @@ myNamespace.tableConstructor = (function($, hP) {
 				$.each(window.combinedParameters[comb].parameters, function(i, val) {
 					if (multi) {
 						var splitString = val.split(":");
-						if (splitString[0] == "combined") {
+						if (splitString[0] === "combined") {
 							str += setupCombination(val, multiArr);
 						} else if (allLayers[splitString[0]]) {
 							str += listItem(splitString[1], splitString[0]);

@@ -38,31 +38,32 @@ myNamespace.WebMapService = (function(OL) {
 		asyncGetRequest(parameters, callback, url);
 	}
 
-	function getMinMax(callback, url, layer,elevation,time,bbox,srs) {
+	function getMinMax(callback, url, layer, elevation, time, bbox, srs) {
 		var parameters = {
-				REQUEST : "GetMetadata",
-				SERVICE : "WMS",
-				VERSION : "1.3.0",
-				layers : layer,
-				item : "minmax",
-				srs:"EPSG:4326",
-				bbox:"-180,-90,180,90",
-				width: 50, // Request only a small box to save extracting lots of data
-	            height: 50,
-			};
-		if (!(typeof bbox === 'undefined') && bbox != "") {
+			REQUEST : "GetMetadata",
+			SERVICE : "WMS",
+			VERSION : "1.3.0",
+			layers : layer,
+			item : "minmax",
+			srs : "EPSG:4326",
+			bbox : "-180,-90,180,90",
+			width : 50, // Request only a small box to save extracting lots of
+						// data
+			height : 50,
+		};
+		if (!(typeof bbox === 'undefined') && bbox !== "") {
 			parameters.bbox = bbox;
 		}
-		if (!(typeof srs === 'undefined') && srs != "") {
+		if (!(typeof srs === 'undefined') && srs !== "") {
 			parameters.srs = srs;
 		}
-		if (!(typeof elevation === 'undefined') && elevation != "") {
+		if (!(typeof elevation === 'undefined') && elevation !== "") {
 			parameters.elevation = elevation;
 		}
-		if (!(typeof time === 'undefined') && time != "") {
+		if (!(typeof time === 'undefined') && time !== "") {
 			parameters.time = time;
 		}
-			asyncGetRequest(parameters, callback, url);
+		asyncGetRequest(parameters, callback, url);
 	}
 
 	function getTimesteps(callback, url, layer, day) {

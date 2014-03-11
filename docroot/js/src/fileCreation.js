@@ -30,7 +30,7 @@ myNamespace.fileCreation = (function($) {
 			for (prop in properties) {
 
 				var value = properties[prop];
-				if (value == null)
+				if (value === null)
 					value = "";
 				csvContent += csvDelimiter + value;
 			}

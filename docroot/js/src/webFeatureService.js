@@ -35,7 +35,7 @@ myNamespace.WebFeatureService = (function($, OL) {
 			console.log("swapPosList START");
 		var newFilter = "";
 		var xmlDoc;
-		if (myNamespace.utilities.findBrowser() != "Firefox") {
+		if (myNamespace.utilities.findBrowser() !== "Firefox") {
 			try {
 				if (window.DOMParser) {
 					parser = new DOMParser();
@@ -74,7 +74,7 @@ myNamespace.WebFeatureService = (function($, OL) {
 					}
 					val.childNodes[0].nodeValue = output;
 					if (debugwfs)
-						console.log("Set nodeValue correctly:" + (val.childNodes[0].nodeValue == output));
+						console.log("Set nodeValue correctly:" + (val.childNodes[0].nodeValue === output));
 				});
 			} catch (err) {
 				if (debugwfs)
@@ -88,13 +88,13 @@ myNamespace.WebFeatureService = (function($, OL) {
 			var endIndex = 0;
 			while (true) {
 				var startIndex = filter.indexOf("<gml:posList>", endIndex) + 13;
-				if (startIndex == 12)
+				if (startIndex === 12)
 					break;
 				if (debugwfs)
 					console.log("Adding to filter:" + filter.slice(endIndex, startIndex));
 				newFilter += filter.slice(endIndex, startIndex);
 				endIndex = filter.indexOf("</gml:posList>", startIndex);
-				if (endIndex == -1) {
+				if (endIndex === -1) {
 					console.log("Malformed fitler");
 					return "";
 				}
