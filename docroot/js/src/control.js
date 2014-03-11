@@ -212,6 +212,7 @@ myNamespace.control = (function($, OL, ns) {
 			$("#loadingText").html("");
 
 			document.getElementById('list').innerHTML = "<div>" + constructedTable + "</div><br>";
+			//TODO: performance! this is extremely slow!
 			$('#filterTable').dataTable({
 				'aaSorting' : []
 			});
@@ -343,6 +344,7 @@ myNamespace.control = (function($, OL, ns) {
 		setUpParameterLayerVariables();
 		ns.statistics.setUpPropertiesPlotVariables();
 
+		//TODO: performance! this is extremely slow!
 		$("#parametersResultTable").dataTable();
 		linkParametersExportButton();
 		document.getElementById('exportParameter').disabled = false;
@@ -883,6 +885,7 @@ myNamespace.control = (function($, OL, ns) {
 		$("#parametersTable").html(
 				"Entries where the selected parameters are available<br>" + "<div class='scrollArea'>"
 						+ constructedTable + "</div>");
+		//TODO: performance! this is extremely slow!
 		$("#parametersResultTable").dataTable();
 		// console.log("addAParameterToData DONE");
 	}
