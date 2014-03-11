@@ -43,9 +43,12 @@ myNamespace.buttonEventHandlers = (function($) {
 	function checkParameters(checkBoxIds, divName, divId) {
 		return function() {
 			var checked = false;
-			for ( var i = 0; !checked && i < checkBoxIds.length; i++)
+			for ( var i = 0, l = checkBoxIds.length; !checked && i < l; i++) {
+				// TODO: possible optimization by not traversing the dom for
+				// all? (atm only used for a few parameters though)
 				if (document.getElementById(checkBoxIds[i]).checked)
 					checked = true;
+			}
 			if (checked) {
 				$(divId).html(divName + " <em>(on)</em>");
 			} else {

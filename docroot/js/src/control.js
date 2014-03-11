@@ -24,7 +24,7 @@ myNamespace.control = (function($, OL, ns) {
 		tablesToQuery = [];
 		data = null;
 		basicData = null;
-		
+
 		setHTMLInit();
 
 		// initialize map viewer
@@ -87,7 +87,7 @@ myNamespace.control = (function($, OL, ns) {
 		ns.mapViewer.removeBasicSearchLayer();
 		myNamespace.parametersQueryString = null;
 		setHTMLLoadingMainQuery();
-		
+
 		var filterBbox = ns.query.createfilterBoxHashMap();
 		var date = ns.query.createDateHashMap();
 		var months = ns.query.createMonthArray();
@@ -277,7 +277,7 @@ myNamespace.control = (function($, OL, ns) {
 		}
 	}
 
-	function setHTMLInit(){
+	function setHTMLInit() {
 
 		// hide export option until we have something to export
 		$("#exportParametersDiv").hide();
@@ -287,7 +287,7 @@ myNamespace.control = (function($, OL, ns) {
 		$("#timeSeriesDiv").hide();
 		$("#propertiesPlotDiv").hide();
 		$("#compareRasterButton").hide();
-		
+
 		$("#queryOptions").accordion({
 			collapsible : true,
 			active : false,
@@ -313,7 +313,7 @@ myNamespace.control = (function($, OL, ns) {
 		$("#tabs").tabs();
 	}
 
-	function setHTMLLoadingMainQuery(){
+	function setHTMLLoadingMainQuery() {
 		// set loading text and empty parameter HTML
 		$("#exportParametersDiv").hide();
 		$("#featuresAndParams").hide();
@@ -332,9 +332,8 @@ myNamespace.control = (function($, OL, ns) {
 		$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
 		$("#highchartsContainer").html("");
 	}
-	
-	
-	function setHTMLParametersLoaded(){
+
+	function setHTMLParametersLoaded() {
 		var constructedTable = ns.tableConstructor.parameterTable(data);
 
 		$("#parametersTable").html(
@@ -354,8 +353,8 @@ myNamespace.control = (function($, OL, ns) {
 		$("#exportParametersDiv").show();
 		myNamespace.matchup.updateMatchupParameter();
 	}
-	
-	function setHTMLLoadingParameters(){
+
+	function setHTMLLoadingParameters() {
 		$("#parametersTable").html("Loading parameters, please wait...");
 		$("#statistics").hide();
 		$("#parameterLayerVariableContainer").hide();
@@ -525,7 +524,6 @@ myNamespace.control = (function($, OL, ns) {
 			queryLayer();
 		}
 	}
-	
 
 	// non-public
 	function replaceId(features) {
@@ -610,7 +608,7 @@ myNamespace.control = (function($, OL, ns) {
 				if (window.combinedParameters[comb].method === "prioritized") {
 					var val = null;
 					var qfString = "";
-					for ( var k = 0; k < window.combinedParameters[comb].parameters.length; k++) {
+					for ( var k = 0, l = window.combinedParameters[comb].parameters.length; k < l; k++) {
 						if (feature.properties[window.combinedParameters[comb].parameters[k]] !== null
 								&& feature.properties[window.combinedParameters[comb].parameters[k]].trim() !== "") {
 							val = feature.properties[window.combinedParameters[comb].parameters[k]];
@@ -625,9 +623,6 @@ myNamespace.control = (function($, OL, ns) {
 						newData[feature.id].properties[comb] = val;
 						if (qf)
 							newData[feature.id].properties[comb + window.qfPostFix] = qfString;
-						// if (debugc) {
-						// console.log("Found and added:" + val);
-						// }
 					}
 				}
 			});
@@ -753,11 +748,13 @@ myNamespace.control = (function($, OL, ns) {
 
 	function initiateMetadata(input) {
 		for ( var table in allLayers) {
-			ns.WebFeatureService.describeFeatureType({
-				TYPENAME : table,
-			}, function(response) {
-				initiateParameters(response);
-			});
+			if (allLayers.hasOwnProperty(table)) {
+				ns.WebFeatureService.describeFeatureType({
+					TYPENAME : table,
+				}, function(response) {
+					initiateParameters(response);
+				});
+			}
 		}
 		ns.handleParameters.initiateParameters(input);
 		$("#metadataTree").html(ns.tableConstructor.metadataList());
@@ -967,7 +964,7 @@ myNamespace.control = (function($, OL, ns) {
 		$("#bboxEnabledCheck").prop("checked", false);
 		$("#bboxEnabledCheck").trigger('click');
 	}
-	
+
 	function setUpParameterLayerVariables() {
 		var selectElement = "<select id=\"parameterLayerVariable\">";
 		var selectedParameters = myNamespace.handleParameters.chosenParameters.allSelected;
@@ -975,10 +972,10 @@ myNamespace.control = (function($, OL, ns) {
 		selectElement += options + "</select>";
 		$("#parameterLayerVariableDiv").html(selectElement);
 	}
-	
-	function addParametersLayerButton(){
+
+	function addParametersLayerButton() {
 		var parameter = $("#parameterLayerVariable").find(":selected").val();
-		ns.mapViewer.addFeaturesFromDataWithColor(data,parameter);
+		ns.mapViewer.addFeaturesFromDataWithColor(data, parameter);
 	}
 	// public interface
 	return {
@@ -1006,7 +1003,7 @@ myNamespace.control = (function($, OL, ns) {
 		toggleOrderPlanktonButton : toggleOrderPlanktonButton,
 		clearSelectionButton : clearSelectionButton,
 		addAParameterToData : addAParameterToData,
-		addParametersLayerButton:addParametersLayerButton,
+		addParametersLayerButton : addParametersLayerButton,
 	};
 
 }(jQuery, OpenLayers, myNamespace));

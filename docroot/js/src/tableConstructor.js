@@ -25,10 +25,12 @@ myNamespace.tableConstructor = (function($, hP) {
 			// adding the data
 			var properties = val.properties;
 			for (prop in properties) {
-				var value = properties[prop];
-				if (value === null)
-					value = "";
-				row += data(value);
+				if (properties.hasOwnProperty(prop)) {
+					var value = properties[prop];
+					if (value === null)
+						value = "";
+					row += data(value);
+				}
 			}
 
 			rows += row + "</tr>\n";
@@ -148,10 +150,12 @@ myNamespace.tableConstructor = (function($, hP) {
 
 			// add all properties to row
 			for (prop in val.properties) {
-				if (val.properties[prop] !== null)
-					row += data(val.properties[prop]);
-				else
-					row += data("");
+				if (val.properties.hasOwnProperty(prop)) {
+					if (val.properties[prop] !== null)
+						row += data(val.properties[prop]);
+					else
+						row += data("");
+				}
 			}
 			rows += row + "</tr>";
 		});
@@ -240,12 +244,14 @@ myNamespace.tableConstructor = (function($, hP) {
 			str += "</ul></li>";
 		});
 		for ( var table in allLayers) {
-			if (debugtC)
-				console.log("tablesDone[table] where table= " + table);
-			// If the paramters from the table has been initiated (through
-			// ns.hP.initiateParameters())
-			if (tablesDoneInGroup.indexOf(table) === -1)
-				str += generateListElementOfTable(table, multi);
+			if (allLayers.hasOwnProperty(table)) {
+				if (debugtC)
+					console.log("tablesDone[table] where table= " + table);
+				// If the paramters from the table has been initiated (through
+				// ns.hP.initiateParameters())
+				if (tablesDoneInGroup.indexOf(table) === -1)
+					str += generateListElementOfTable(table, multi);
+			}
 		}
 		str += "</ul>";
 		if (debugtC)
@@ -264,7 +270,7 @@ myNamespace.tableConstructor = (function($, hP) {
 			$.each(window.combinedParameters, function(i, val) {
 				if (window.combinedParameters[i].layer === table) {
 					var found = false;
-					for ( var j = 0; !found && j < multi.length; j++) {
+					for ( var j = 0, l = multi.length; !found && j < l; j++) {
 						if (window.combinedParameters[i].method === ("multi" + multi[j])) {
 							found = true;
 						}
@@ -289,9 +295,9 @@ myNamespace.tableConstructor = (function($, hP) {
 				if (displayed.indexOf(table + ":" + val) === -1) {
 					// Check if the parameter is not to be combined:
 					var found = false;
-					for ( var j = 0; !found && j < combinations.length; j++) {
+					for ( var j = 0, l = combinations.length; !found && j < l; j++) {
 						var parArr = window.combinedParameters[combinations[j]].parameters;
-						for ( var k = 0; !found && k < parArr.length; k++)
+						for ( var k = 0, l2 = parArr.length; !found && k < l2; k++)
 							if (val === parArr[k])
 								found = true;
 					}

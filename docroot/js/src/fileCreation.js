@@ -17,7 +17,7 @@ myNamespace.fileCreation = (function($) {
 	}
 	function createCSV(dataIn) {
 		var csvContent = createCSVHeader(myNamespace.handleParameters.getHeadersFromFeatures(dataIn));
-		csvContent += csvDelimiter+"Query:"+myNamespace.mainQueryArray+"\n";
+		csvContent += csvDelimiter + "Query:" + myNamespace.mainQueryArray + "\n";
 		if (debugfC)
 			console.log("Added headers: " + csvContent);
 		$.each(dataIn, function(i, val) {
@@ -28,11 +28,12 @@ myNamespace.fileCreation = (function($) {
 			csvContent += pos[1] + "";
 
 			for (prop in properties) {
-
-				var value = properties[prop];
-				if (value === null)
-					value = "";
-				csvContent += csvDelimiter + value;
+				if (properties.hasOwnProperty(prop)) {
+					var value = properties[prop];
+					if (value === null)
+						value = "";
+					csvContent += csvDelimiter + value;
+				}
 			}
 
 			csvContent += "\n";
