@@ -5,39 +5,6 @@ var debugtC = false;// debug flag
 myNamespace.tableConstructor = (function($, hP) {
 	"use strict";
 
-	function parameterTable(features) {
-		if (debugtC)
-			console.log("tableConstructor.js: parameterTable: features=" + JSON.stringify(features));// TEST
-
-		var header = "<table id='parametersResultTable' class='table'>", footer = "</tbody></table>", rows = "";
-
-		var parameterHeaders = hP.getHeadersFromFeatures(features);
-		var tableHeader = headerFrom(parameterHeaders) + "\n<tbody>";
-
-		// iterate through all features, generate table row for each
-		$.each(features, function(i, val) {
-			var row = "<tr>";
-			row += data(val.id);
-			var pos = val.geometry.coordinates;
-			row += data(pos[0]);
-			row += data(pos[1]);
-
-			// adding the data
-			var properties = val.properties;
-			for (prop in properties) {
-				if (properties.hasOwnProperty(prop)) {
-					var value = properties[prop];
-					if (value === null)
-						value = "";
-					row += data(value);
-				}
-			}
-
-			rows += row + "</tr>\n";
-		});
-		return concatTable(header, tableHeader, rows, footer);
-	}
-
 	function generateStatistics(features) {
 		var header = "<table id='generalStatisticsTable' class='table'>", footer = "</tbody></table>", rows = "";
 		var headers = [ "Parameter", "Quantity", "Min", "Max",/* "Sum", */"Average", "Sample Standard Deviation",
@@ -132,37 +99,6 @@ myNamespace.tableConstructor = (function($, hP) {
 		// return output;
 	}
 
-	function featureTable(tableId, features) {
-
-		var header = "<table id='" + tableId + "'class='table'>", tableHeader, footer = "</tbody></table>", rows = "", row = "";
-		tableHeader = headerFrom(hP.getHeadersFromFeatures(features)) + "<tbody>";
-
-		$.each(features, function(i, val) {
-			var id = i;
-
-			row = data(id);
-
-			// extract position of data point (lat,long)
-			var pos = val.geometry.coordinates[0];
-			row += data(pos);
-			pos = val.geometry.coordinates[1];
-			row += data(pos);
-
-			// add all properties to row
-			for (prop in val.properties) {
-				if (val.properties.hasOwnProperty(prop)) {
-					if (val.properties[prop] !== null)
-						row += data(val.properties[prop]);
-					else
-						row += data("");
-				}
-			}
-			rows += row + "</tr>";
-		});
-
-		return concatTable(header, tableHeader, rows, footer);
-	}
-
 	function concatTable(header, tableHeader, rows, footer) {
 		return header + "\n" + tableHeader + "\n" + rows + footer;
 	}
@@ -217,23 +153,9 @@ myNamespace.tableConstructor = (function($, hP) {
 				groupLayers.push(i);
 			}
 		});
-		// if (debugtC)
-		// console.log("groupLayers:");
-		// if (debugtC)
-		// console.log(groupLayers);
-		// if (debugtC)
-		// console.log(window.combinedParameters);
 		var tablesDoneInGroup = [];
 		$.each(groupLayers, function(i, groupLayer) {
-			// if (debugtC)
-			// console.log("groupLayer:");
-			// if (debugtC)
-			// console.log(groupLayer);
 			var group = window.combinedParameters[groupLayer];
-			// if (debugtC)
-			// console.log("group:");
-			// if (debugtC)
-			// console.log(group);
 			str += "<li id=\"" + groupLayer + "\" rel='noBox' data-baseheader='" + group.header + "' data-index='"
 					+ window.combinedParameters[groupLayer].index + "'><a>" + group.header + "</a>";
 			str += "<ul>";
@@ -260,8 +182,6 @@ myNamespace.tableConstructor = (function($, hP) {
 	}
 
 	function generateListElementOfTable(table, multi) {
-		// if (debugtC)
-		// console.log("generateListElementOfTable for:" + table);
 		var str = "";
 		if (allLayers[table]) {
 			// Find combinations:
@@ -316,8 +236,6 @@ myNamespace.tableConstructor = (function($, hP) {
 	}
 
 	function setupCombination(comb, multiArr) {
-		// console.log("setupCombination for:" + comb);
-		// console.log(displayed);
 		var str = "";
 		if (displayed.indexOf(comb) === -1) {
 			var table = window.combinedParameters[comb].layer;
@@ -362,18 +280,46 @@ myNamespace.tableConstructor = (function($, hP) {
 				});
 				str += "</ul></li>";
 			}
-		} else {
-			// console.log("comb was done already");
 		}
 		return str;
+	}
+
+	function generateAoColumns(data) {
+		var aoColumns = [];
+		$.each(hP.getHeadersFromFeatures(data), function(i, val) {
+			aoColumns.push({
+				"sTitle" : val
+			});
+		});
+		return aoColumns;
+	}
+
+	function generateTableData(data) {
+		var tableData = [];
+		$.each(data, function(i, val) {
+			var row = [];
+			row.push(i);
+			row.push(val.geometry.coordinates[0]);
+			row.push(val.geometry.coordinates[1]);
+			tableData.push(row);
+			for (prop in val.properties) {
+				if (val.properties.hasOwnProperty(prop)) {
+					if (val.properties[prop] !== null)
+						row.push(val.properties[prop]);
+					else
+						row.push("");
+				}
+			}
+		});
+		return tableData;
 	}
 
 	return {
 		metadataList : metadataList,
 		generateStatistics : generateStatistics,
-		parameterTable : parameterTable,
-		featureTable : featureTable,
-		parametersList : parametersList
+		parametersList : parametersList,
+		generateAoColumns : generateAoColumns,
+		generateTableData : generateTableData
 	};
 
 }(jQuery, myNamespace.handleParameters));

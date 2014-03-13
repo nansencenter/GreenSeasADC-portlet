@@ -49,39 +49,45 @@ myNamespace.mapViewer = (function(OL, $) {
 			}, {
 				isBaseLayer : false
 			}),
-			barnes : new OpenLayers.Layer.WMS(
-					"Barnes tempcu01",
-					window.WMSServer,
-					{
-						layers : "v7_temperature",
-						format : window.WMSformat,
-						filter : '<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc"><ogc:And><ogc:PropertyIsBetween><ogc:PropertyName>depth_of_sample</ogc:PropertyName><ogc:LowerBoundary><ogc:Literal>0</ogc:Literal></ogc:LowerBoundary><ogc:UpperBoundary><ogc:Literal>10</ogc:Literal></ogc:UpperBoundary></ogc:PropertyIsBetween><ogc:Or><ogc:Not><ogc:PropertyIsNull><ogc:PropertyName>tempcu01</ogc:PropertyName></ogc:PropertyIsNull></ogc:Not></ogc:Or></ogc:And></ogc:Filter>',
-
-						styles : "BarnesTest",
-
-						transparent : true
-					}, {
-						isBaseLayer : false
-					})
+		/*
+		 * barnes : new OpenLayers.Layer.WMS( "Barnes tempcu01",
+		 * window.WMSServer, { layers : "v7_temperature", format :
+		 * window.WMSformat, filter : '<ogc:Filter
+		 * xmlns:ogc="http://www.opengis.net/ogc"><ogc:And><ogc:PropertyIsBetween><ogc:PropertyName>depth_of_sample</ogc:PropertyName><ogc:LowerBoundary><ogc:Literal>0</ogc:Literal></ogc:LowerBoundary><ogc:UpperBoundary><ogc:Literal>10</ogc:Literal></ogc:UpperBoundary></ogc:PropertyIsBetween><ogc:Or><ogc:Not><ogc:PropertyIsNull><ogc:PropertyName>tempcu01</ogc:PropertyName></ogc:PropertyIsNull></ogc:Not></ogc:Or></ogc:And></ogc:Filter>',
+		 * 
+		 * styles : "BarnesTest",
+		 * 
+		 * transparent : true }, { isBaseLayer : false }) //
+		 */
 		};
 	}
 
-	function addFeaturesFromDataWithColor(data, parameter) {
-		name = myNamespace.handleParameters.getHeaderFromRawData(parameter);
+	function removeCustomLayer(name) {
+		if (typeof customLayers[name] !== 'undefined') {
+			map.removeLayer(customLayers[name]);
+			delete customLayers[name];
+		}
+	}
+
+	function addFeaturesFromDataWithColor(data, parameter, name, min, max) {
+		if (typeof customLayers[name] !== 'undefined')
+			map.removeLayer(customLayers[name]);
 		var pointLayer = new OL.Layer.Vector(name, {
 			projection : "EPSG:4326"
 		});
 		var pointFeatures = [];
-		var min = null, max = null;
-		for (id in data) {
-			if (data.hasOwnProperty(id)) {
-				var value = data[id].properties[parameter];
-				if (typeof value !== 'undefined' && value !== -999 && value !== '-999') {
-					value = parseFloat(value);
-					if (min === null || min > value)
-						min = value;
-					if (max === null || max < value)
-						max = value;
+		if (typeof min === 'undefined' || typeof max === 'undefined') {
+			min = null, max = null;
+			for (id in data) {
+				if (data.hasOwnProperty(id)) {
+					var value = data[id].properties[parameter];
+					if (typeof value !== 'undefined' && value !== -999 && value !== '-999') {
+						value = parseFloat(value);
+						if (min === null || min > value)
+							min = value;
+						if (max === null || max < value)
+							max = value;
+					}
 				}
 			}
 		}
@@ -118,7 +124,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		pointLayer.addFeatures(pointFeatures);
 		map.addLayer(pointLayer);
 		map.setLayerIndex(pointLayer, 9);
-		parameterLayers[name] = pointLayer;
+		customLayers[name] = pointLayer;
 	}
 	var legendPallete = [ "#00008f", "#00009f", "#0000af", "#0000bf", "#0000cf", "#0000df", "#0000ef", "#0000ff",
 			"#000bff", "#001bff", "#002bff", "#003bff", "#004bff", "#005bff", "#006bff", "#007bff", "#008bff",
@@ -506,7 +512,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		});
 	}
 
-	function addWMSLayer(url, id, shortName, layerID, colorscalerange, style, logscale, elevation, time, longName) {
+	function addWMSLayer(url, shortName, layerID, colorscalerange, style, logscale, elevation, time, longName) {
 		if (debugmW)
 			console.log("Adding the WMS layer");
 		if (debugmW)
@@ -531,12 +537,12 @@ myNamespace.mapViewer = (function(OL, $) {
 		layer.longName = longName;
 		if (debugmW)
 			console.log("Created the WMS layer");
-		if (id in customLayers) {
-			map.removeLayer(customLayers[id]);
+		if (shortName in customLayers) {
+			map.removeLayer(customLayers[shortName]);
 			if (debugmW)
 				console.log("Removed the existing WMS layer");
 		}
-		customLayers[id] = layer;
+		customLayers[shortName] = layer;
 		map.addLayer(layer);
 		map.setLayerIndex(layer, 500);
 		updateIndices();
@@ -565,6 +571,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		zoomToExtent : zoomToExtent,
 		removePopups : removePopups,
 		addFeaturesFromDataWithColor : addFeaturesFromDataWithColor,
+		removeCustomLayer : removeCustomLayer,
 	};
 
 }(OpenLayers, jQuery));

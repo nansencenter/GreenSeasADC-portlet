@@ -49,7 +49,6 @@ myNamespace.control = (function($, OL, ns) {
 		setUpCruiseSelector();
 		ns.matchup.setUpUploadRaster();
 		ns.matchup.setUpOPeNDAPSelector();
-		ns.mapLayers.addWMSLayerSelector();
 	}
 
 	function setUpCruiseSelector() {
@@ -206,15 +205,22 @@ myNamespace.control = (function($, OL, ns) {
 		} else {
 			highLightFeaturesWMS(filter, metaDataTable, window.basicSearchName);
 			updateTreeInventoryNumbers();
-			var constructedTable = ns.tableConstructor.featureTable("filterTable", data);
+			var constructedTable = "<table id='mainQueryTable' class='table'></table>";
 
 			// remove "loading..." text
 			$("#loadingText").html("");
 
-			document.getElementById('list').innerHTML = "<div>" + constructedTable + "</div><br>";
-			//TODO: performance! this is extremely slow!
-			$('#filterTable').dataTable({
-				'aaSorting' : []
+			$('#list').html(constructedTable);
+			var aoColumns = ns.tableConstructor.generateAoColumns(data);
+			var tableData = ns.tableConstructor.generateTableData(data);
+			// TODO: could it be even more efficient now? This is the slow part
+			// of the software
+			$('#mainQueryTable').dataTable({
+				"bDeferRender" : true,
+				'aaSorting' : [],
+				// "bProcessing" : true,
+				"aaData" : tableData,
+				"aoColumns" : aoColumns
 			});
 			$("#filterParameters").show();
 		}
@@ -281,10 +287,10 @@ myNamespace.control = (function($, OL, ns) {
 	function setHTMLInit() {
 
 		// hide export option until we have something to export
+		ns.mapLayers.updateHTML('init');
 		$("#exportParametersDiv").hide();
 		$("#filterParameters").hide();
 		$("#statistics").hide();
-		$("#parameterLayerVariableContainer").hide();
 		$("#timeSeriesDiv").hide();
 		$("#propertiesPlotDiv").hide();
 		$("#compareRasterButton").hide();
@@ -316,13 +322,28 @@ myNamespace.control = (function($, OL, ns) {
 
 	function setHTMLLoadingMainQuery() {
 		// set loading text and empty parameter HTML
+		ns.mapLayers.updateHTML('mainSearch');
 		$("#exportParametersDiv").hide();
 		$("#featuresAndParams").hide();
 		$("#loadingText").html("Loading data, please wait...");
 		$("#list").html("");
 		$("#parametersTable").html("");
 		$("#statistics").hide();
-		$("#parameterLayerVariableContainer").hide();
+		$("#timeSeriesDiv").hide();
+		$("#propertiesPlotDiv").hide();
+		$("#statisticsContainer").html("");
+		$("#timeSeriesContainer").html("");
+		$("#propertiesPlotContainer").html("");
+		$("#matchVariable2").html("");
+		$("#compareRasterButton").hide();
+		$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
+		$("#highchartsContainer").html("");
+	}
+
+	function setHTMLLoadingParameters() {
+		ns.mapLayers.updateHTML('loadingParameters');
+		$("#parametersTable").html("Loading parameters, please wait...");
+		$("#statistics").hide();
 		$("#timeSeriesDiv").hide();
 		$("#propertiesPlotDiv").hide();
 		$("#statisticsContainer").html("");
@@ -335,40 +356,31 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function setHTMLParametersLoaded() {
-		var constructedTable = ns.tableConstructor.parameterTable(data);
+		ns.mapLayers.updateHTML('loadedParameters');
 
 		$("#parametersTable").html(
-				"Entries where the selected parameters are available<br>" + "<div class='scrollArea'>"
-						+ constructedTable + "</div>");
-		ns.statistics.setUpTimeSeriesVariables();
-		setUpParameterLayerVariables();
-		ns.statistics.setUpPropertiesPlotVariables();
+				"Entries where the selected parameters are available<br>"
+						+ "<table id='parametersResultTable' class='table'></table>");
 
-		//TODO: performance! this is extremely slow!
-		$("#parametersResultTable").dataTable();
+		var aoColumns = ns.tableConstructor.generateAoColumns(data);
+		var tableData = ns.tableConstructor.generateTableData(data);
+		// TODO: performance! this is extremely slow!
+		$("#parametersResultTable").dataTable({
+			"bDeferRender" : true,
+			'aaSorting' : [],
+			"aaData" : tableData,
+			"aoColumns" : aoColumns
+		});
+
+		ns.statistics.setUpTimeSeriesVariables();
+		ns.statistics.setUpPropertiesPlotVariables();
 		linkParametersExportButton();
 		document.getElementById('exportParameter').disabled = false;
 		$("#statistics").show();
-		$("#parameterLayerVariableContainer").show();
 		$("#timeSeriesDiv").show();
 		$("#propertiesPlotDiv").show();
 		$("#exportParametersDiv").show();
 		myNamespace.matchup.updateMatchupParameter();
-	}
-
-	function setHTMLLoadingParameters() {
-		$("#parametersTable").html("Loading parameters, please wait...");
-		$("#statistics").hide();
-		$("#parameterLayerVariableContainer").hide();
-		$("#timeSeriesDiv").hide();
-		$("#propertiesPlotDiv").hide();
-		$("#statisticsContainer").html("");
-		$("#timeSeriesContainer").html("");
-		$("#propertiesPlotContainer").html("");
-		$("#matchVariable2").html("");
-		$("#compareRasterButton").hide();
-		$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
-		$("#highchartsContainer").html("");
 	}
 
 	function hasMainQueryObjectChanged() {
@@ -611,6 +623,8 @@ myNamespace.control = (function($, OL, ns) {
 					var val = null;
 					var qfString = "";
 					for ( var k = 0, l = window.combinedParameters[comb].parameters.length; k < l; k++) {
+						// TODO: this is not always a string (should usually be
+						// a number if the database is "correct"
 						if (feature.properties[window.combinedParameters[comb].parameters[k]] !== null
 								&& feature.properties[window.combinedParameters[comb].parameters[k]].trim() !== "") {
 							val = feature.properties[window.combinedParameters[comb].parameters[k]];
@@ -885,8 +899,11 @@ myNamespace.control = (function($, OL, ns) {
 		$("#parametersTable").html(
 				"Entries where the selected parameters are available<br>" + "<div class='scrollArea'>"
 						+ constructedTable + "</div>");
-		//TODO: performance! this is extremely slow!
-		$("#parametersResultTable").dataTable();
+		// TODO: performance! this is extremely slow!
+		$("#parametersResultTable").dataTable({
+			"bDeferRender" : true,
+			'aaSorting' : []
+		});
 		// console.log("addAParameterToData DONE");
 	}
 
@@ -968,17 +985,8 @@ myNamespace.control = (function($, OL, ns) {
 		$("#bboxEnabledCheck").trigger('click');
 	}
 
-	function setUpParameterLayerVariables() {
-		var selectElement = "<select id=\"parameterLayerVariable\">";
-		var selectedParameters = myNamespace.handleParameters.chosenParameters.allSelected;
-		var options = myNamespace.matchup.generateOptionsFromAllSelectedParameters();
-		selectElement += options + "</select>";
-		$("#parameterLayerVariableDiv").html(selectElement);
-	}
-
-	function addParametersLayerButton() {
-		var parameter = $("#parameterLayerVariable").find(":selected").val();
-		ns.mapViewer.addFeaturesFromDataWithColor(data, parameter);
+	function getData() {
+		return data;
 	}
 	// public interface
 	return {
@@ -1006,7 +1014,7 @@ myNamespace.control = (function($, OL, ns) {
 		toggleOrderPlanktonButton : toggleOrderPlanktonButton,
 		clearSelectionButton : clearSelectionButton,
 		addAParameterToData : addAParameterToData,
-		addParametersLayerButton : addParametersLayerButton,
+		getData : getData,
 	};
 
 }(jQuery, OpenLayers, myNamespace));
