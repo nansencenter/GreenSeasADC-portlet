@@ -19,19 +19,16 @@
  */
 package nersc.greenseas.portlet;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -45,8 +42,6 @@ import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -170,14 +165,82 @@ public class GreenseasPortlet extends MVCPortlet {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			Map<String,String> responseMap = new HashMap<String, String>();
 			String charset = "UTF-8";
+			int numberOfThreadds = 4;
+			Set<?> entrySet = jsonO.keySet();
+			ArrayList<Map<String, String>> responseMaps = new ArrayList<Map<String, String>>();
+			ArrayList<Map<String, String>> requestMaps = new ArrayList<Map<String, String>>();
+			for (int i = 0; i < numberOfThreadds; i++) {
+				responseMaps.add(new HashMap<String, String>());
+				requestMaps.add(new HashMap<String, String>());
+			}
+
+			int thredd = 0;
+			for (Object o : entrySet) {
+				String key = (String) o;
+				String request = (String) jsonO.get(key);
+				requestMaps.get(thredd).put(key, request);
+				thredd = (thredd + 1) % numberOfThreadds;
+			}
+			ArrayList<GetNumberOfFeatures> threadds = new ArrayList<GetNumberOfFeatures>();
+			for (int i = 0; i < numberOfThreadds; i++) {
+				GetNumberOfFeatures runnable = new GetNumberOfFeatures(responseMaps.get(i), requestMaps.get(i),
+						charset, urlS, i);
+				Thread thread = new Thread(runnable);
+				thread.start();
+				threadds.add(runnable);
+			}
+			while (true) {
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				boolean done = true;
+				for (int i = 0; i < numberOfThreadds; i++) {
+					if (!threadds.get(i).done) {
+						done = false;
+						break;
+					}
+				}
+				if (done)
+					break;
+			}
+			Map<String, String> responseMap = new HashMap<String, String>();
+
+			for (int i = 0; i < numberOfThreadds; i++) {
+				responseMap.putAll(responseMaps.get(i));
+			}
+			JSONObject jsonObject = new JSONObject(responseMap);
+			PrintWriter writer = resourceResponse.getWriter();
+			writer.write(jsonObject.toString());
+			return;
+		}
+	}
+
+	class GetNumberOfFeatures implements Runnable {
+
+		public GetNumberOfFeatures(Map<String, String> responseMap, Map<String, String> requestMap, String charset,
+				String url, int number) {
+			super();
+			this.responseMap = responseMap;
+			this.requestMap = requestMap;
+			this.charset = charset;
+			this.urlS = url;
+			this.number = number;
+		}
+
+		Map<String, String> responseMap, requestMap;
+		String charset, urlS;
+		boolean done = false;
+		int number;
+
+		@Override
+		public void run() {
 			try {
-				Set entrySet = jsonO.keySet();
-				for (Object o : entrySet) {
+				for (String key : requestMap.keySet()) {
 					URL url = new URL(urlS);
-					String key = (String) o;
-					byte[] request = ((String) jsonO.get(key)).getBytes(charset);
+					byte[] request = ((String) requestMap.get(key)).getBytes(charset);
 					URLConnection connection = url.openConnection();
 					// POST REQUEST!
 					connection.setDoOutput(true);
@@ -196,18 +259,14 @@ public class GreenseasPortlet extends MVCPortlet {
 					String numberOfFeatures = getNumberOfFeatures(response);
 					if (numberOfFeatures == null)
 						numberOfFeatures = "An error occured";
-					responseMap.put(key,numberOfFeatures);
+					responseMap.put(key, numberOfFeatures);
 				}
-
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			JSONObject jsonObject = new JSONObject(responseMap);
-
-			PrintWriter writer = resourceResponse.getWriter();
-			writer.write(jsonObject.toString());
-			return;
+			done = true;
 		}
+
 	}
 
 	public String getNumberOfFeatures(InputStream in) {
@@ -223,7 +282,7 @@ public class GreenseasPortlet extends MVCPortlet {
 					return null;
 				char next = (char) nextI;
 				if (found) {
-					if (next == '"'){
+					if (next == '"') {
 						break;
 					} else {
 						result += next;
