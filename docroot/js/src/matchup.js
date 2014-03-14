@@ -194,7 +194,7 @@ myNamespace.matchup = (function($, ns) {
 					id : data[i].id,
 					depth : data[i].properties[depthParameterName],
 					lat : data[i].geometry.coordinates[0],
-					long : data[i].geometry.coordinates[1],
+					lon : data[i].geometry.coordinates[1],
 					rasterLat : val.lat,
 					rasterLong : val.lon,
 					x : val.value,
@@ -293,7 +293,7 @@ myNamespace.matchup = (function($, ns) {
 							if (!(typeof this.point.depth === "undefined"))
 								depth = " Depth:" + this.point.depth;
 							return 'ID:' + this.point.id + time + '<br>Lat:' + this.point.lat + ' Long:'
-									+ this.point.long + depth + '<br>' + 'Database value:' + ':' + this.y
+									+ this.point.lon + depth + '<br>' + 'Database value:' + ':' + this.y
 									+ '<br>Raster Lat:' + this.point.rasterLat + ' Raster Long:'
 									+ this.point.rasterLong + '</b><br/>' + 'Raster value:' + ':' + this.x;
 						}

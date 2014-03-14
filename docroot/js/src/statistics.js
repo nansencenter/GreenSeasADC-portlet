@@ -42,7 +42,7 @@ myNamespace.statistics = (function($, ns) {
 							time : time,
 							depth : val.properties[depthParameterName],
 							lat : val.geometry.coordinates[0],
-							long : val.geometry.coordinates[1]
+							lon : val.geometry.coordinates[1]
 						});
 					}
 				}
@@ -157,7 +157,7 @@ myNamespace.statistics = (function($, ns) {
 							if (!(typeof this.point.depth === "undefined"))
 								depth = " Depth:" + this.point.depth;
 							return 'ID:' + this.point.id + time + '<br>Lat:' + this.point.lat + ' Long:'
-									+ this.point.long + depth + '</b><br/>'
+									+ this.point.lon + depth + '</b><br/>'
 									+ ns.handleParameters.getHeaderFromRawData(horizontalPar) + ':' + this.x + '<br>'
 									+ ns.handleParameters.getHeaderFromRawData(verticalPar) + ':' + this.y;
 						}
@@ -192,7 +192,7 @@ myNamespace.statistics = (function($, ns) {
 								id : val.id,
 								depth : val.properties[depthParameterName],
 								lat : val.geometry.coordinates[0],
-								long : val.geometry.coordinates[1]
+								lon : val.geometry.coordinates[1]
 							};
 							if (val.properties.date) {
 								var dateArr = val.properties.date.split("-");
@@ -262,7 +262,7 @@ myNamespace.statistics = (function($, ns) {
 							if (!(typeof this.point.depth === "undefined"))
 								depth = " Depth:" + this.point.depth;
 							return '<b> ' + this.series.name + ' <br>ID:' + this.point.id + '<br>Lat:' + this.point.lat
-									+ ' Long:' + this.point.long + depth + '</b><br/>'
+									+ ' Long:' + this.point.lon + depth + '</b><br/>'
 									+ Highcharts.dateFormat('%Y-%m-%d', this.x) + clock + '<br>Value:' + this.y;
 						}
 					},
