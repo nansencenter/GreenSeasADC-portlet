@@ -666,17 +666,15 @@ myNamespace.control = (function($, OL, ns) {
 		$("#right").val(right);
 	}
 
-	function updateTreeWithInventoryNumbers(response, layer, par) {
-		var id;
-		if (par === null) {
-			id = layer;
-		} else {
-			id = layer + ":" + par;
+	function updateTreeWithInventoryNumbers(response){
+		for ( var key in response) {
+			if (response.hasOwnProperty(key)) {
+				var element = $(document.getElementById(key));
+				var numberOfFeatures = response[key];
+				var newText = element.data("baseheader") + " [" + numberOfFeatures + "]";
+				$("#parametersTree").jstree("set_text", element, newText);
+			}
 		}
-		var element = $(document.getElementById(id));
-		var numberOfFeatures = ns.XMLParser.getNumberOfFeatures(response);
-		var newText = element.data("baseheader") + " [" + numberOfFeatures + "]";
-		$("#parametersTree").jstree("set_text", element, newText);
 	}
 
 	function getParametersFromMulti(comb) {
@@ -707,6 +705,7 @@ myNamespace.control = (function($, OL, ns) {
 	function updateTreeInventoryNumbers() {
 		var myTreeContainer = $.jstree._reference("#parametersTree").get_container();
 		var allChildren = myTreeContainer.find("li");
+		var requestData = [];
 		$.each(allChildren, function(i, val) {
 			if ((typeof window.combinedParameters[val.id] === "undefined")
 					|| (window.combinedParameters[val.id].method !== "groupLayers")) {
@@ -746,20 +745,39 @@ myNamespace.control = (function($, OL, ns) {
 					// Should optimize this, most of the above is not needed if
 					// this is the case
 					if ($('#updateParametersList').is(':checked')) {
-						ns.WebFeatureService.getFeature({
-							TYPENAME : layer,
-							FILTER : ns.query.constructParameterFilterString(propertyNames,
-									myNamespace.mainQueryObject.depth, myNamespace.mainQueryObject.filterBbox,
-									myNamespace.mainQueryObject.date, myNamespace.mainQueryObject.months,
-									myNamespace.mainQueryObject.region, myNamespace.mainQueryObject.cruise),
-							RESULTTYPE : "hits"
-						}, function(response) {
-							updateTreeWithInventoryNumbers(response, splitString[0], par);
-						});
+						var id;
+						if (par === null) {
+							id = splitString[0];
+						} else {
+							id = splitString[0] + ":" + par;
+						}
+						requestData.push([
+								layer,
+								id,
+								ns.query.constructParameterFilterString(propertyNames,
+										myNamespace.mainQueryObject.depth, myNamespace.mainQueryObject.filterBbox,
+										myNamespace.mainQueryObject.date, myNamespace.mainQueryObject.months,
+										myNamespace.mainQueryObject.region, myNamespace.mainQueryObject.cruise) ]);
+						/*
+						 * ns.WebFeatureService.getFeature({ TYPENAME : layer,
+						 * FILTER :
+						 * ns.query.constructParameterFilterString(propertyNames,
+						 * myNamespace.mainQueryObject.depth,
+						 * myNamespace.mainQueryObject.filterBbox,
+						 * myNamespace.mainQueryObject.date,
+						 * myNamespace.mainQueryObject.months,
+						 * myNamespace.mainQueryObject.region,
+						 * myNamespace.mainQueryObject.cruise), RESULTTYPE :
+						 * "hits" }, function(response) {
+						 * updateTreeWithInventoryNumbers(response,
+						 * splitString[0], par); });
+						 */
 					}
 				}
 			}
 		});
+		if (requestData.length !== 0)
+			ns.WebFeatureService.getUpdatedParameters(requestData);
 	}
 
 	function initiateMetadata(input) {
@@ -1015,6 +1033,7 @@ myNamespace.control = (function($, OL, ns) {
 		clearSelectionButton : clearSelectionButton,
 		addAParameterToData : addAParameterToData,
 		getData : getData,
+		updateTreeWithInventoryNumbers : updateTreeWithInventoryNumbers,
 	};
 
 }(jQuery, OpenLayers, myNamespace));

@@ -180,10 +180,25 @@ myNamespace.WebFeatureService = (function($, OL) {
 		asyncGetRequest($.extend(parameters, extraParameters), callback);
 	}
 
+	function getUpdatedParameters(requestData) {
+		var modifiedRequestData = {};
+		for ( var i = 0, l = requestData.length; i < l; i++) {
+			var extraPar = {
+				TYPENAME : requestData[i][0],
+				FILTER : requestData[i][2],
+				RESULTTYPE : "hits"
+			};
+			//TODO: swappos should only be needed once for this, a lot of duplicated data
+			modifiedRequestData[requestData[i][1]] = convertParametersToGetFeatureXML(extraPar);
+		}
+		myNamespace.ajax.getUpdateParametersDataFromServer(modifiedRequestData);
+	}
+
 	// public interface
 	return {
 		getFeature : getFeature,
 		describeFeatureType : describeFeatureType,
+		getUpdatedParameters : getUpdatedParameters,
 	};
 
 }(jQuery, OpenLayers));

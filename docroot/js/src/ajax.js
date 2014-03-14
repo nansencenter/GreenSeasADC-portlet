@@ -22,6 +22,28 @@ myNamespace.ajax = (function($) {
 			});
 		});
 	}
+	//TODO: add identifier to check for uniqeness
+	var getUpdateParametersDataFromServerCall = null;
+	function getUpdateParametersDataFromServer(dataRequest) {
+		var identifier = myNamespace.utilities.rand();
+		getUpdateParametersDataFromServerCall = identifier;
+		var data = {};
+		data[portletNameSpace + 'requestType'] = "updateTreeWithInventoryNumbers";
+		data[portletNameSpace + 'data'] = JSON.stringify(dataRequest);
+		data[portletNameSpace + 'url'] = window.WFSServer;
+		var success = function() {
+			if (identifier === getUpdateParametersDataFromServerCall) {
+				// JSON Data coming back from Server
+				var responseData = this.get('responseData');
+				myNamespace.control.updateTreeWithInventoryNumbers(responseData);
+			}
+		};
+		var failure = function() {
+			console.log("BIG BAD BOOM BOOM");
+		};
+		aui(data, success, failure);
+	}
+	
 	var lastGetLayersFromNetCDFFileCall = null;
 	function getLayersFromNetCDFFile(useOpendap, opendapDataURL) {
 		var identifier = myNamespace.utilities.rand();
@@ -139,7 +161,8 @@ myNamespace.ajax = (function($) {
 		getLonghurstPolygon : getLonghurstPolygon,
 		getDimension : getDimension,
 		getLayersFromNetCDFFile : getLayersFromNetCDFFile,
-		getDatavaluesFromRaster : getDatavaluesFromRaster
+		getDatavaluesFromRaster : getDatavaluesFromRaster,
+		getUpdateParametersDataFromServer : getUpdateParametersDataFromServer
 	};
 
 }(jQuery));
