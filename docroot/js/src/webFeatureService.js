@@ -181,7 +181,10 @@ myNamespace.WebFeatureService = (function($, OL) {
 	}
 
 	function getUpdatedParameters(requestData) {
-		var modifiedRequestData = {};
+		var modifiedRequestData = [{}];
+		var index = 0;
+		var currentSize = 0;
+		var number = 0;
 		for ( var i = 0, l = requestData.length; i < l; i++) {
 			var extraPar = {
 				TYPENAME : requestData[i][0],
@@ -189,9 +192,19 @@ myNamespace.WebFeatureService = (function($, OL) {
 				RESULTTYPE : "hits"
 			};
 			//TODO: swappos should only be needed once for this, a lot of duplicated data
-			modifiedRequestData[requestData[i][1]] = convertParametersToGetFeatureXML(extraPar);
+			var xml = convertParametersToGetFeatureXML(extraPar);
+			var currentLength = xml.length;
+			currentSize += currentLength;
+			if (number > 75 || (number !== 0 && currentSize > 1600000)){
+				index++;
+				currentSize = currentLength;
+				number =0;
+				modifiedRequestData.push({});
+			}
+			modifiedRequestData[index][requestData[i][1]] = xml;
+			number++;
 		}
-		myNamespace.ajax.getUpdateParametersDataFromServer(modifiedRequestData);
+		myNamespace.ajax.getUpdateParametersDataFromServer(modifiedRequestData.reverse(),(index+1));
 	}
 
 	// public interface

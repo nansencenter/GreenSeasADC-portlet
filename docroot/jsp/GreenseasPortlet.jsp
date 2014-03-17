@@ -224,6 +224,7 @@
 						<input type="button" id="collapseAllButton" value="Collapse All">
 						<input type="button" id="expandAllButton" value="Expand All">
 						<input type="button" id="toggleOrderPlanktonButton" value="Sort plankton by type">
+						<div id='loadTreeNumbersDiv'></div>
 						<div id="parametersTree"></div>
 						<br>
 						<br>

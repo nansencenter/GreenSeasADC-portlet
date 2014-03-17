@@ -84,6 +84,7 @@ myNamespace.control = (function($, OL, ns) {
 		// removing the parameterlayers from previous searches
 		ns.mapViewer.removeAllParameterLayers();
 		ns.mapViewer.removeBasicSearchLayer();
+		ns.ajax.resetParameterDataSearch();
 		myNamespace.parametersQueryString = null;
 		setHTMLLoadingMainQuery();
 
@@ -203,8 +204,8 @@ myNamespace.control = (function($, OL, ns) {
 			$("#loadingText").html("");
 			$("#list").html("No results found");
 		} else {
-			highLightFeaturesWMS(filter, metaDataTable, window.basicSearchName);
 			updateTreeInventoryNumbers();
+			highLightFeaturesWMS(filter, metaDataTable, window.basicSearchName);
 			var constructedTable = "<table id='mainQueryTable' class='table'></table>";
 
 			// remove "loading..." text
@@ -666,7 +667,9 @@ myNamespace.control = (function($, OL, ns) {
 		$("#right").val(right);
 	}
 
-	function updateTreeWithInventoryNumbers(response){
+	var incomingRequests = 0;
+	function updateTreeWithInventoryNumbers(response, length) {
+		incomingRequests++;
 		for ( var key in response) {
 			if (response.hasOwnProperty(key)) {
 				var element = $(document.getElementById(key));
@@ -674,6 +677,13 @@ myNamespace.control = (function($, OL, ns) {
 				var newText = element.data("baseheader") + " [" + numberOfFeatures + "]";
 				$("#parametersTree").jstree("set_text", element, newText);
 			}
+		}
+		if (incomingRequests === length) {
+			$("#loadTreeNumbersDiv").html("Loading of inventory numbers is complete");
+		} else {
+			var percentage = Math.round(incomingRequests * 100 / length);
+			$("#loadTreeNumbersDiv").html(
+					"<b><i>Loaded " + percentage + "% of the parameters.</i></b>");
 		}
 	}
 
@@ -758,26 +768,15 @@ myNamespace.control = (function($, OL, ns) {
 										myNamespace.mainQueryObject.depth, myNamespace.mainQueryObject.filterBbox,
 										myNamespace.mainQueryObject.date, myNamespace.mainQueryObject.months,
 										myNamespace.mainQueryObject.region, myNamespace.mainQueryObject.cruise) ]);
-						/*
-						 * ns.WebFeatureService.getFeature({ TYPENAME : layer,
-						 * FILTER :
-						 * ns.query.constructParameterFilterString(propertyNames,
-						 * myNamespace.mainQueryObject.depth,
-						 * myNamespace.mainQueryObject.filterBbox,
-						 * myNamespace.mainQueryObject.date,
-						 * myNamespace.mainQueryObject.months,
-						 * myNamespace.mainQueryObject.region,
-						 * myNamespace.mainQueryObject.cruise), RESULTTYPE :
-						 * "hits" }, function(response) {
-						 * updateTreeWithInventoryNumbers(response,
-						 * splitString[0], par); });
-						 */
 					}
 				}
 			}
 		});
-		if (requestData.length !== 0)
+		if (requestData.length !== 0) {
+			incomingRequests = 0;
 			ns.WebFeatureService.getUpdatedParameters(requestData);
+			$("#loadTreeNumbersDiv").html("<b><i>Loading inventory numbers, please wait...</i></b>");
+		}
 	}
 
 	function initiateMetadata(input) {

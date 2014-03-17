@@ -22,28 +22,62 @@ myNamespace.ajax = (function($) {
 			});
 		});
 	}
-	//TODO: add identifier to check for uniqeness
-	var getUpdateParametersDataFromServerCall = null;
-	function getUpdateParametersDataFromServer(dataRequest) {
-		var identifier = myNamespace.utilities.rand();
-		getUpdateParametersDataFromServerCall = identifier;
-		var data = {};
-		data[portletNameSpace + 'requestType'] = "updateTreeWithInventoryNumbers";
-		data[portletNameSpace + 'data'] = JSON.stringify(dataRequest);
-		data[portletNameSpace + 'url'] = window.WFSServer;
-		var success = function() {
-			if (identifier === getUpdateParametersDataFromServerCall) {
-				// JSON Data coming back from Server
-				var responseData = this.get('responseData');
-				myNamespace.control.updateTreeWithInventoryNumbers(responseData);
-			}
-		};
-		var failure = function() {
-			console.log("BIG BAD BOOM BOOM");
-		};
-		aui(data, success, failure);
+
+	function resetParameterDataSearch() {
+		getUpdateParametersDataFromServerCall = null;
+		$("#loadTreeNumbersDiv").html("");
 	}
-	
+	// TODO: add identifier to check for uniqeness
+	var getUpdateParametersDataFromServerCall = null;
+	function getUpdateParametersDataFromServer(dataRequests, length, identifier) {
+		if (dataRequests.length !== 0) {
+			var splittingRequests = false;
+			if (typeof identifier === 'undefined') {
+				identifier = myNamespace.utilities.rand();
+				var requestsEach = 6;
+				if (length > requestsEach) {
+					splittingRequests = true;
+					var simultaneousRequests = Math.round(length / requestsEach);
+					var newDataRequests = [];
+					for ( var i = 0; i < simultaneousRequests; i++) {
+						newDataRequests.push([]);
+					}
+					while (dataRequests.length !== 0) {
+						for ( var i = 0; i < simultaneousRequests && dataRequests.length !== 0; i++) {
+							newDataRequests[i].push(dataRequests.pop());
+						}
+					}
+
+					for ( var i = 0; i < simultaneousRequests; i++) {
+						getUpdateParametersDataFromServer(newDataRequests[i].reverse(), length, identifier);
+					}
+				}
+			}
+			if (!splittingRequests) {
+				var dataRequest = dataRequests.pop();
+				getUpdateParametersDataFromServerCall = identifier;
+				var data = {};
+				data[portletNameSpace + 'requestType'] = "updateTreeWithInventoryNumbers";
+				data[portletNameSpace + 'data'] = JSON.stringify(dataRequest);
+				data[portletNameSpace + 'url'] = window.WFSServer;
+				var success = function() {
+					if (identifier === getUpdateParametersDataFromServerCall) {
+						// Call next request
+						getUpdateParametersDataFromServer(dataRequests, length, identifier);
+						// JSON Data coming back from Server
+						var responseData = this.get('responseData');
+						myNamespace.control.updateTreeWithInventoryNumbers(responseData, length);
+					}
+				};
+				var failure = function() {
+					$("#loadTreeNumbersDiv").html(
+							"<b><i>An error occured while updating the inventory numbers.</i></b>");
+				};
+				aui(data, success, failure);
+			}
+		}
+	}
+
 	var lastGetLayersFromNetCDFFileCall = null;
 	function getLayersFromNetCDFFile(useOpendap, opendapDataURL) {
 		var identifier = myNamespace.utilities.rand();
@@ -162,7 +196,8 @@ myNamespace.ajax = (function($) {
 		getDimension : getDimension,
 		getLayersFromNetCDFFile : getLayersFromNetCDFFile,
 		getDatavaluesFromRaster : getDatavaluesFromRaster,
-		getUpdateParametersDataFromServer : getUpdateParametersDataFromServer
+		getUpdateParametersDataFromServer : getUpdateParametersDataFromServer,
+		resetParameterDataSearch : resetParameterDataSearch
 	};
 
 }(jQuery));
