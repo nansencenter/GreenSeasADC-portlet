@@ -166,7 +166,7 @@ public class GreenseasPortlet extends MVCPortlet {
 				e.printStackTrace();
 			}
 			String charset = "UTF-8";
-			int numberOfThreadds = 4;
+			int numberOfThreadds = 2;
 			Set<?> entrySet = jsonO.keySet();
 			ArrayList<Map<String, String>> responseMaps = new ArrayList<Map<String, String>>();
 			ArrayList<Map<String, String>> requestMaps = new ArrayList<Map<String, String>>();
