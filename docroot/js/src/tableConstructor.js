@@ -5,37 +5,6 @@ var debugtC = false;// debug flag
 myNamespace.tableConstructor = (function($, hP) {
 	"use strict";
 
-	function parameterTable(features) {
-		if (debugtC)
-			console.log("tableConstructor.js: parameterTable: features=" + JSON.stringify(features));// TEST
-
-		var header = "<table id='parametersResultTable' class='table'>", footer = "</tbody></table>", rows = "";
-
-		var parameterHeaders = hP.getHeadersFromFeatures(features);
-		var tableHeader = headerFrom(parameterHeaders) + "\n<tbody>";
-
-		// iterate through all features, generate table row for each
-		$.each(features, function(i, val) {
-			var row = "<tr>";
-			row += data(val.id);
-			var pos = val.geometry.coordinates;
-			row += data(pos[0]);
-			row += data(pos[1]);
-
-			// adding the data
-			var properties = val.properties;
-			for (prop in properties) {
-				var value = properties[prop];
-				if (value == null)
-					value = "";
-				row += data(value);
-			}
-
-			rows += row + "</tr>\n";
-		});
-		return concatTable(header, tableHeader, rows, footer);
-	}
-
 	function generateStatistics(features) {
 		var header = "<table id='generalStatisticsTable' class='table'>", footer = "</tbody></table>", rows = "";
 		var headers = [ "Parameter", "Quantity", "Min", "Max",/* "Sum", */"Average", "Sample Standard Deviation",
@@ -59,7 +28,7 @@ myNamespace.tableConstructor = (function($, hP) {
 			var properties = feature.properties;
 			$.each(selectedParameters, function(j, parameter) {
 				var parVal = properties[parameter];
-				if (parVal != "" && parVal != null && !isNaN(parVal) && parVal != "-999") {
+				if (parVal !== "" && parVal !== null && !isNaN(parVal) && parVal !== "-999") {
 					parVal = parseFloat(parVal);
 					statistics[parameter].quantity += 1;
 					statistics[parameter].sum += parVal;
@@ -88,7 +57,7 @@ myNamespace.tableConstructor = (function($, hP) {
 			var properties = feature.properties;
 			$.each(selectedParameters, function(j, parameter) {
 				var parVal = properties[parameter];
-				if (parVal != "" && parVal != null && !isNaN(parVal)) {
+				if (parVal !== "" && parVal !== null && !isNaN(parVal)) {
 					parVal = parseFloat(parVal);
 					statistics[parameter].sdSum += Math.pow(statistics[parameter].average - parVal, 2);
 				}
@@ -130,35 +99,6 @@ myNamespace.tableConstructor = (function($, hP) {
 		// return output;
 	}
 
-	function featureTable(tableId, features) {
-
-		var header = "<table id='" + tableId + "'class='table'>", tableHeader, footer = "</tbody></table>", rows = "", row = "";
-		tableHeader = headerFrom(hP.getHeadersFromFeatures(features)) + "<tbody>";
-
-		$.each(features, function(i, val) {
-			var id = i;
-
-			row = data(id);
-
-			// extract position of data point (lat,long)
-			var pos = val.geometry.coordinates[0];
-			row += data(pos);
-			pos = val.geometry.coordinates[1];
-			row += data(pos);
-
-			// add all properties to row
-			for (prop in val.properties) {
-				if (val.properties[prop] != null)
-					row += data(val.properties[prop]);
-				else
-					row += data("");
-			}
-			rows += row + "</tr>";
-		});
-
-		return concatTable(header, tableHeader, rows, footer);
-	}
-
 	function concatTable(header, tableHeader, rows, footer) {
 		return header + "\n" + tableHeader + "\n" + rows + footer;
 	}
@@ -180,7 +120,7 @@ myNamespace.tableConstructor = (function($, hP) {
 
 	function listItem(value, table, header) {
 		displayed.push(table + ":" + value);
-		if (typeof header == "undefined")
+		if (typeof header === "undefined")
 			header = hP.getHeader(value, table);
 		return "<li id='" + table + ":" + value + "' data-baseheader='" + header + "' data-index='0'><a>" + header
 				+ "</a></li>";
@@ -190,7 +130,7 @@ myNamespace.tableConstructor = (function($, hP) {
 		var str = "<ul><li id=\"" + window.metaDataTable + "\"><a>Available metadata</a>";
 		str += "<ul>";
 		$.each(hP.mainParameters.parameters, function(i, val) {
-			if (val != window.geometryParameter)
+			if (val !== window.geometryParameter)
 				str += listItem(val, window.metaDataTable);
 		});
 		str += "</ul></li>";
@@ -209,27 +149,13 @@ myNamespace.tableConstructor = (function($, hP) {
 		var str = "<ul>";
 		var groupLayers = [];
 		$.each(window.combinedParameters, function(i, val) {
-			if (window.combinedParameters[i].method == "groupLayers") {
+			if (window.combinedParameters[i].method === "groupLayers") {
 				groupLayers.push(i);
 			}
 		});
-		// if (debugtC)
-		// console.log("groupLayers:");
-		// if (debugtC)
-		// console.log(groupLayers);
-		// if (debugtC)
-		// console.log(window.combinedParameters);
 		var tablesDoneInGroup = [];
 		$.each(groupLayers, function(i, groupLayer) {
-			// if (debugtC)
-			// console.log("groupLayer:");
-			// if (debugtC)
-			// console.log(groupLayer);
 			var group = window.combinedParameters[groupLayer];
-			// if (debugtC)
-			// console.log("group:");
-			// if (debugtC)
-			// console.log(group);
 			str += "<li id=\"" + groupLayer + "\" rel='noBox' data-baseheader='" + group.header + "' data-index='"
 					+ window.combinedParameters[groupLayer].index + "'><a>" + group.header + "</a>";
 			str += "<ul>";
@@ -240,12 +166,14 @@ myNamespace.tableConstructor = (function($, hP) {
 			str += "</ul></li>";
 		});
 		for ( var table in allLayers) {
-			if (debugtC)
-				console.log("tablesDone[table] where table= " + table);
-			// If the paramters from the table has been initiated (through
-			// ns.hP.initiateParameters())
-			if (tablesDoneInGroup.indexOf(table) == -1)
-				str += generateListElementOfTable(table, multi);
+			if (allLayers.hasOwnProperty(table)) {
+				if (debugtC)
+					console.log("tablesDone[table] where table= " + table);
+				// If the paramters from the table has been initiated (through
+				// ns.hP.initiateParameters())
+				if (tablesDoneInGroup.indexOf(table) === -1)
+					str += generateListElementOfTable(table, multi);
+			}
 		}
 		str += "</ul>";
 		if (debugtC)
@@ -254,18 +182,16 @@ myNamespace.tableConstructor = (function($, hP) {
 	}
 
 	function generateListElementOfTable(table, multi) {
-		// if (debugtC)
-		// console.log("generateListElementOfTable for:" + table);
 		var str = "";
 		if (allLayers[table]) {
 			// Find combinations:
 			var combinations = [];
 			var multiCombinations = [];
 			$.each(window.combinedParameters, function(i, val) {
-				if (window.combinedParameters[i].layer == table) {
+				if (window.combinedParameters[i].layer === table) {
 					var found = false;
-					for (var j = 0; !found && j < multi.length; j++) {
-						if (window.combinedParameters[i].method == ("multi" + multi[j])) {
+					for (var j = 0, l = multi.length; !found && j < l; j++) {
+						if (window.combinedParameters[i].method === ("multi" + multi[j])) {
 							found = true;
 						}
 					}
@@ -286,19 +212,19 @@ myNamespace.tableConstructor = (function($, hP) {
 			});
 			$.each(hP.availableParameters[table], function(i, val) {
 				// Check if the parameter is already written
-				if (displayed.indexOf(table + ":" + val) == -1) {
+				if (displayed.indexOf(table + ":" + val) === -1) {
 					// Check if the parameter is not to be combined:
 					var found = false;
-					for (var j = 0; !found && j < combinations.length; j++) {
+					for (var j = 0, l = combinations.length; !found && j < l; j++) {
 						var parArr = window.combinedParameters[combinations[j]].parameters;
-						for (var k = 0; !found && k < parArr.length; k++)
-							if (val == parArr[k])
+						for (var k = 0, l2 = parArr.length; !found && k < l2; k++)
+							if (val === parArr[k])
 								found = true;
 					}
 					// Check if the parameter is not inherited from the
 					// metadatatable
-					if (!found && hP.mainParameters.parameters.indexOf(val) == -1) {
-						if (val.substring(val.length - qfPostFix.length) != qfPostFix)
+					if (!found && hP.mainParameters.parameters.indexOf(val) === -1) {
+						if (val.substring(val.length - qfPostFix.length) !== qfPostFix)
 							str += listItem(val, table);
 					}
 				}
@@ -310,21 +236,19 @@ myNamespace.tableConstructor = (function($, hP) {
 	}
 
 	function setupCombination(comb, multiArr) {
-		// console.log("setupCombination for:" + comb);
-		// console.log(displayed);
 		var str = "";
-		if (displayed.indexOf(comb) == -1) {
+		if (displayed.indexOf(comb) === -1) {
 			var table = window.combinedParameters[comb].layer;
 			var rel = "";
 			var group = false;
 			var multi = false;
 			var wrongmulti = false;
-			if (window.combinedParameters[comb].method == "group") {
+			if (window.combinedParameters[comb].method === "group") {
 				rel = " rel='noBox'";
 				group = true;
 			} else {
 				var method = window.combinedParameters[comb].method;
-				if (method.indexOf("multi") == 0) {
+				if (method.indexOf("multi") === 0) {
 					var multiInt = parseInt(method.substring(5));
 					if (multiArr.indexOf(multiInt) > -1) {
 						rel = " rel='noBox'";
@@ -343,7 +267,7 @@ myNamespace.tableConstructor = (function($, hP) {
 				$.each(window.combinedParameters[comb].parameters, function(i, val) {
 					if (multi) {
 						var splitString = val.split(":");
-						if (splitString[0] == "combined") {
+						if (splitString[0] === "combined") {
 							str += setupCombination(val, multiArr);
 						} else if (allLayers[splitString[0]]) {
 							str += listItem(splitString[1], splitString[0]);
@@ -356,18 +280,46 @@ myNamespace.tableConstructor = (function($, hP) {
 				});
 				str += "</ul></li>";
 			}
-		} else {
-			// console.log("comb was done already");
 		}
 		return str;
+	}
+
+	function generateAoColumns(data) {
+		var aoColumns = [];
+		$.each(hP.getHeadersFromFeatures(data), function(i, val) {
+			aoColumns.push({
+				"sTitle" : val
+			});
+		});
+		return aoColumns;
+	}
+
+	function generateTableData(data) {
+		var tableData = [];
+		$.each(data, function(i, val) {
+			var row = [];
+			row.push(i);
+			row.push(val.geometry.coordinates[0]);
+			row.push(val.geometry.coordinates[1]);
+			tableData.push(row);
+			for (prop in val.properties) {
+				if (val.properties.hasOwnProperty(prop)) {
+					if (val.properties[prop] !== null)
+						row.push(val.properties[prop]);
+					else
+						row.push("");
+				}
+			}
+		});
+		return tableData;
 	}
 
 	return {
 		metadataList : metadataList,
 		generateStatistics : generateStatistics,
-		parameterTable : parameterTable,
-		featureTable : featureTable,
-		parametersList : parametersList
+		parametersList : parametersList,
+		generateAoColumns : generateAoColumns,
+		generateTableData : generateTableData
 	};
 
 }(jQuery, myNamespace.handleParameters));

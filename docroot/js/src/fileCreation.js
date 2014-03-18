@@ -28,11 +28,12 @@ myNamespace.fileCreation = (function($) {
 			csvContent += pos[1] + "";
 
 			for (prop in properties) {
-
-				var value = properties[prop];
-				if (value == null)
-					value = "";
-				csvContent += csvDelimiter + value;
+				if (properties.hasOwnProperty(prop)) {
+					var value = properties[prop];
+					if (value === null)
+						value = "";
+					csvContent += csvDelimiter + value;
+				}
 			}
 
 			csvContent += "\n";

@@ -4,18 +4,8 @@ var debugXML = false;// debug flag
 
 myNamespace.XMLParser = (function($) {
 
-	function findBrowser() {
-		var ua = navigator.userAgent, N = navigator.appName, tem, M = ua
-				.match(/(opera|chrome|safari|firefox|msie|trident)\/?\s*([\d\.]+)/i)
-				|| [];
-		M = M[2] ? [ M[1], M[2] ] : [ N, navigator.appVersion, '-?' ];
-		if (M && (tem = ua.match(/version\/([\.\d]+)/i)) != null)
-			M[2] = tem[1];
-		return M[0];// M.join(' ');
-	}
-
 	function getNumberOfFeatures(response) {
-		var xmlDoc = getXmlDoc(response);
+		var xmlDoc = response._object.responseXML;
 		if (debugXML) {
 			console.log("xmlDoc");
 			console.log(xmlDoc);
@@ -25,28 +15,13 @@ myNamespace.XMLParser = (function($) {
 		return xmlDoc.documentElement.getAttribute("numberOfFeatures");
 	}
 
-	function getXmlDoc(xmlSchema) {
-		var xmlDoc;
-		// var browser = findBrowser();
-		/*
-		 * if (browser == "Chrome" || browser == "Firefox") { xmlDoc =
-		 * xmlSchema.responseXML; } else {
-		 */
-		// if (xmlSchema._object) {
-		xmlDoc = xmlSchema._object.responseXML;
-		/*
-		 * } else { xmlDoc = xmlSchema.responseXML; }
-		 */
-		return xmlDoc;
-	}
-
 	function extractWMSParameters(xmlSchema) {
 		if (debugXML)
 			console.log("extractWMSParameters:");
 		if (debugXML)
 			console.log(xmlSchema);
 		var parameters = {};
-		var xmlDoc = getXmlDoc(xmlSchema);
+		var xmlDoc = xmlSchema._object.responseXML;
 		// if (debugXML)
 		if (debugXML)
 			console.log(xmlDoc);
@@ -67,7 +42,7 @@ myNamespace.XMLParser = (function($) {
 		if (debugXML)
 			console.log(xmlSchema);
 		var parameters = [];
-		var xmlDoc = getXmlDoc(xmlSchema);
+		var xmlDoc = xmlSchema._object.responseXML;
 		if (debugXML)
 			console.log(xmlDoc);
 
@@ -98,7 +73,6 @@ myNamespace.XMLParser = (function($) {
 		extractWMSParameters : extractWMSParameters,
 		getNumberOfFeatures : getNumberOfFeatures,
 		extractParameters : extractParameters,
-		findBrowser : findBrowser
 	};
 
 }(jQuery));

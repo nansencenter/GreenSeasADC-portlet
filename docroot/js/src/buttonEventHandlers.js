@@ -1,10 +1,10 @@
 var myNamespace = myNamespace || {};
 
-myNamespace.buttonEventHandlers = (function(jQ) {
+myNamespace.buttonEventHandlers = (function($) {
 	"use strict";
 
 	function add(element, eventFunction) {
-		jQ(element).click(eventFunction);
+		$(element).click(eventFunction);
 	}
 
 	function setThisOfFunction(functionValue, thisValue, additionalArguments) {
@@ -19,14 +19,14 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 
 	function toggleButton(buttonId, buttonName, div) {
 		return function() {
-			jQ(div).toggle("blind");
+			$(div).toggle("blind");
 
-			var shownName = "Hide " + buttonName, hiddenName = "Show " + buttonName, isShown = jQ(buttonId).val() === hiddenName;
+			var shownName = "Hide " + buttonName, hiddenName = "Show " + buttonName, isShown = $(buttonId).val() === hiddenName;
 
 			if (isShown) {
-				jQ(buttonId).val(shownName);
+				$(buttonId).val(shownName);
 			} else {
-				jQ(buttonId).val(hiddenName);
+				$(buttonId).val(hiddenName);
 			}
 		};
 	}
@@ -34,22 +34,25 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 	function checkParameter(checkBoxId, divName, divId) {
 		return function() {
 			if (document.getElementById(checkBoxId).checked) {
-				jQ(divId).html(divName + " <em>(on)</em>");
+				$(divId).html(divName + " <em>(on)</em>");
 			} else {
-				jQ(divId).html(divName + " <em>(off)</em>");
+				$(divId).html(divName + " <em>(off)</em>");
 			}
 		};
 	}
 	function checkParameters(checkBoxIds, divName, divId) {
 		return function() {
 			var checked = false;
-			for (var i = 0; !checked && i < checkBoxIds.length; i++)
+			for (var i = 0, l = checkBoxIds.length; !checked && i < l; i++) {
+				// TODO: possible optimization by not traversing the dom for
+				// all? (atm only used for a few parameters though)
 				if (document.getElementById(checkBoxIds[i]).checked)
 					checked = true;
+			}
 			if (checked) {
-				jQ(divId).html(divName + " <em>(on)</em>");
+				$(divId).html(divName + " <em>(on)</em>");
 			} else {
-				jQ(divId).html(divName + " <em>(off)</em>");
+				$(divId).html(divName + " <em>(off)</em>");
 			}
 		};
 	}
@@ -99,14 +102,14 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 		callFromControl("#addVariableColorsOnMap", c.addVariableColorsOnMap);
 
 		// on change events
-		jQ("#exportParametersFormats").change(function() {
+		$("#exportParametersFormats").change(function() {
 			var s = document.getElementById('exportParametersFormats');
 			// should so something here when we get more formats
 		});
 	}
 
 	function linkParametersExportButton(callback, data, type, name) {
-		jQ("#exportParameter").unbind("click");
+		$("#exportParameter").unbind("click");
 		add(
 				"#exportParameter",
 				function() {
@@ -118,11 +121,11 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 					} catch (e) {
 						window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder
 								|| window.MSBlobBuilder || window.webkitURL;
-						if (e.name == 'TypeError' && window.BlobBuilder) {
+						if (e.name === 'TypeError' && window.BlobBuilder) {
 							var bb = new BlobBuilder();
 							bb.append([ csvContent ]);
 							saveAs(bb.getBlob(type), name);
-						} else if (e.name == "InvalidStateError") {
+						} else if (e.name === "InvalidStateError") {
 							// InvalidStateError (tested on FF13 WinXP)
 							saveAs(new Blob([ csvContent ], {
 								type : type
@@ -139,7 +142,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 	}
 
 	function change(element, eventFunction) {
-		jQ(element).change(eventFunction);
+		$(element).change(eventFunction);
 	}
 
 	// public interface

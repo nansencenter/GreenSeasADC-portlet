@@ -2,7 +2,7 @@ var myNamespace = myNamespace || {};
 
 var debugwms = false;// debug flag
 
-myNamespace.WebMapService = (function(jQ, OL) {
+myNamespace.WebMapService = (function(OL) {
 	"use strict";
 
 	// fires an asyn. HTTP GET request to server
@@ -48,19 +48,19 @@ myNamespace.WebMapService = (function(jQ, OL) {
 			srs : "EPSG:4326",
 			bbox : "-180,-90,180,90",
 			width : 50, // Request only a small box to save extracting lots of
-						// data
+			// data
 			height : 50,
 		};
-		if (!(typeof bbox === 'undefined') && bbox != "") {
+		if (!(typeof bbox === 'undefined') && bbox !== "") {
 			parameters.bbox = bbox;
 		}
-		if (!(typeof srs === 'undefined') && srs != "") {
+		if (!(typeof srs === 'undefined') && srs !== "") {
 			parameters.srs = srs;
 		}
-		if (!(typeof elevation === 'undefined') && elevation != "") {
+		if (!(typeof elevation === 'undefined') && elevation !== "") {
 			parameters.elevation = elevation;
 		}
-		if (!(typeof time === 'undefined') && time != "") {
+		if (!(typeof time === 'undefined') && time !== "") {
 			parameters.time = time;
 		}
 		asyncGetRequest(parameters, callback, url);
@@ -86,4 +86,4 @@ myNamespace.WebMapService = (function(jQ, OL) {
 		getMinMax : getMinMax,
 	};
 
-}(jQuery, OpenLayers));
+}(OpenLayers));

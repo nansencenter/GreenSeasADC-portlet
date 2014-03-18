@@ -31,7 +31,7 @@ myNamespace.handleParameters = (function($) {
 			});
 		} else
 			$.each(mainParameters.parameters, function(i, val) {
-				if (val != window.geometryParameter)
+				if (val !== window.geometryParameter)
 					metaHeader.push(getHeader(val, window.metaDataTable));
 			});
 		if (debughP) {
@@ -48,7 +48,7 @@ myNamespace.handleParameters = (function($) {
 		$.each(par, function(i, val) {
 			var id = val;
 			if ((typeof window.combinedParameters[id] === "undefined")
-					|| (window.combinedParameters[id].method != "groupLayers")) {
+					|| (window.combinedParameters[id].method !== "groupLayers")) {
 				var parArr = id.split(":");
 				if (debughP)
 					console.log("Checking val: " + parArr[0] + ":" + parArr[1]);
@@ -56,11 +56,11 @@ myNamespace.handleParameters = (function($) {
 				// table
 				// (minor check for error) TODO: remove?
 				chosenParameters.allSelected.push(id);
-				if (parArr[0] == "combined") {
+				if (parArr[0] === "combined") {
 					chosenParameters.combined.push(id);
 				} else {
 					// if its the first registered parameter from that table
-					if (chosenParameters.tablesSelected.indexOf(parArr[0]) == -1) {
+					if (chosenParameters.tablesSelected.indexOf(parArr[0]) === -1) {
 						chosenParameters.tablesSelected.push(parArr[0]);
 						chosenParameters.parametersByTable[parArr[0]] = [ parArr[1] ];
 					} else {
@@ -76,13 +76,13 @@ myNamespace.handleParameters = (function($) {
 		// Adding the extra parameters from combine.
 		$.each(chosenParameters.combined, function(i, val) {
 			var combine = window.combinedParameters[val];
-			if (chosenParameters.tablesSelected.indexOf(combine.layer) == -1) {
+			if (chosenParameters.tablesSelected.indexOf(combine.layer) === -1) {
 				chosenParameters.tablesSelected[combine.layer] = [];
 				chosenParameters.tablesSelected.push(combine.layer);
 				chosenParameters.parametersByTable[combine.layer] = [];
 			}
 			$.each(combine.parameters, function(j, par) {
-				if (chosenParameters.parametersByTable[combine.layer].indexOf(par) == -1)
+				if (chosenParameters.parametersByTable[combine.layer].indexOf(par) === -1)
 					chosenParameters.parametersByTable[combine.layer].push(par);
 			});
 		});
@@ -113,7 +113,7 @@ myNamespace.handleParameters = (function($) {
 	function getHeader(parameter, table) {
 		var header;
 		try {
-			if (table == "combined")
+			if (table === "combined")
 				header = window.combinedParameters["combined:" + parameter].header;
 			else
 				header = allParametersHeader[table][parameter];
@@ -124,7 +124,7 @@ myNamespace.handleParameters = (function($) {
 	}
 
 	function getTableHeader(table) {
-		if (table.indexOf("combined") == 0) {
+		if (table.indexOf("combined") === 0) {
 			return window.combinedParameters[table].header;
 		}
 		return allLayersHeader[table] ? allLayersHeader[table] : table;
@@ -135,7 +135,7 @@ myNamespace.handleParameters = (function($) {
 			console.log("Initiating Parameters");
 		var parameters = myNamespace.XMLParser.extractParameters(input);
 		var table = parameters.pop();
-		if (table == window.metaDataTable) {
+		if (table === window.metaDataTable) {
 			mainParameters.parameters = parameters;
 			if (debughP)
 				console.log("Initialized metadata:" + table + " to:" + parameters);
@@ -160,7 +160,7 @@ myNamespace.handleParameters = (function($) {
 				var split = key.split(":");
 				var table = "";
 				var parameter = "";
-				if (split.length == 2) {
+				if (split.length === 2) {
 					table = split[0];
 					parameter = split[1];
 				} else {
@@ -170,7 +170,7 @@ myNamespace.handleParameters = (function($) {
 				if (debughP)
 					console.log("Parameter:" + parameter);
 				// test if it is a qf
-				if (parameter.substring(parameter.length - window.qfPostFix.length) == window.qfPostFix) {
+				if (parameter.substring(parameter.length - window.qfPostFix.length) === window.qfPostFix) {
 					parameterHeaders.push(window.qfHeader);
 					if (debughP)
 						console.log("Found QF");

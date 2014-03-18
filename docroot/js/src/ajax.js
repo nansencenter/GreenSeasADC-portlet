@@ -22,6 +22,62 @@ myNamespace.ajax = (function($) {
 			});
 		});
 	}
+
+	function resetParameterDataSearch() {
+		getUpdateParametersDataFromServerCall = null;
+		$("#loadTreeNumbersDiv").html("");
+	}
+	// TODO: add identifier to check for uniqeness
+	var getUpdateParametersDataFromServerCall = null;
+	function getUpdateParametersDataFromServer(dataRequests, length, identifier) {
+		if (dataRequests.length !== 0) {
+			var splittingRequests = false;
+			if (typeof identifier === 'undefined') {
+				identifier = myNamespace.utilities.rand();
+				var requestsEach = 6;
+				if (length > requestsEach) {
+					splittingRequests = true;
+					var simultaneousRequests = Math.round(length / requestsEach);
+					var newDataRequests = [];
+					for (var i = 0; i < simultaneousRequests; i++) {
+						newDataRequests.push([]);
+					}
+					while (dataRequests.length !== 0) {
+						for (var i = 0; i < simultaneousRequests && dataRequests.length !== 0; i++) {
+							newDataRequests[i].push(dataRequests.pop());
+						}
+					}
+
+					for (var i = 0; i < simultaneousRequests; i++) {
+						getUpdateParametersDataFromServer(newDataRequests[i].reverse(), length, identifier);
+					}
+				}
+			}
+			if (!splittingRequests) {
+				var dataRequest = dataRequests.pop();
+				getUpdateParametersDataFromServerCall = identifier;
+				var data = {};
+				data[portletNameSpace + 'requestType'] = "updateTreeWithInventoryNumbers";
+				data[portletNameSpace + 'data'] = JSON.stringify(dataRequest);
+				data[portletNameSpace + 'url'] = window.WFSServer;
+				var success = function() {
+					if (identifier === getUpdateParametersDataFromServerCall) {
+						// Call next request
+						getUpdateParametersDataFromServer(dataRequests, length, identifier);
+						// JSON Data coming back from Server
+						var responseData = this.get('responseData');
+						myNamespace.control.updateTreeWithInventoryNumbers(responseData, length);
+					}
+				};
+				var failure = function() {
+					$("#loadTreeNumbersDiv").html(
+							"<b><i>An error occured while updating the inventory numbers.</i></b>");
+				};
+				aui(data, success, failure);
+			}
+		}
+	}
+
 	var lastGetLayersFromNetCDFFileCall = null;
 	function getLayersFromNetCDFFile(useOpendap, opendapDataURL) {
 		var identifier = myNamespace.utilities.rand();
@@ -34,7 +90,7 @@ myNamespace.ajax = (function($) {
 		if (useOpendap)
 			data[portletNameSpace + 'opendapDataURL'] = opendapDataURL;
 		var success = function() {
-			if (identifier == lastGetLayersFromNetCDFFileCall) {
+			if (identifier === lastGetLayersFromNetCDFFileCall) {
 				// JSON Data coming back from Server
 				var responseData = this.get('responseData');
 				myNamespace.control.viewParameterNames(responseData);
@@ -62,7 +118,7 @@ myNamespace.ajax = (function($) {
 		};
 
 		var success = function() {
-			if (identifier == lastGetDatavaluesFromRasterCall) {
+			if (identifier === lastGetDatavaluesFromRasterCall) {
 				var instance = this;
 
 				// JSON Data coming back from Server
@@ -93,7 +149,7 @@ myNamespace.ajax = (function($) {
 
 		var success = function() {
 			// JSON Data coming back from Server
-			if (identifier == lastGetDimensionCall) {
+			if (identifier === lastGetDimensionCall) {
 				var responseData = this.get('responseData');
 				myNamespace.matchup.setUpParameterMetaSelector(responseData);
 			} else {
@@ -128,7 +184,7 @@ myNamespace.ajax = (function($) {
 				myNamespace.errorMessage.showErrorMessage("Something went wrong when fetching the longhurst region");
 			},
 			success : function(result, status, xhr) {
-				if (identifier == lastGetLonghurstPolygonCall) {
+				if (identifier === lastGetLonghurstPolygonCall) {
 					window.polygon[region] = result[region];
 				}
 			}
@@ -338,6 +394,8 @@ myNamespace.ajax = (function($) {
 		getLayersFromNetCDFFile : getLayersFromNetCDFFile,
 		getDatavaluesFromRaster : getDatavaluesFromRaster,
 		createNetCDF : createNetCDF,
+		getUpdateParametersDataFromServer : getUpdateParametersDataFromServer,
+		resetParameterDataSearch : resetParameterDataSearch
 	};
 
 }(jQuery));

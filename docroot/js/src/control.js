@@ -25,13 +25,7 @@ myNamespace.control = (function($, OL, ns) {
 		data = null;
 		basicData = null;
 
-		// hide export option until we have something to export
-		$("#exportParametersDiv").hide();
-		$("#filterParameters").hide();
-		$("#statistics").hide();
-		$("#timeSeriesDiv").hide();
-		$("#propertiesPlotDiv").hide();
-		$("#compareRasterButton").hide();
+		setHTMLInit();
 
 		// initialize map viewer
 		ns.mapViewer.initMap();
@@ -48,25 +42,6 @@ myNamespace.control = (function($, OL, ns) {
 
 		setBboxInputToCurrentMapExtent();
 
-		$("#queryOptions").accordion({
-			collapsible : true,
-			active : false,
-			heightStyle : "content"
-		});
-		$("#statsOptions").accordion({
-			collapsible : true,
-			active : false,
-			heightStyle : "content"
-		});
-		$("#modelOptions").accordion({
-			collapsible : true,
-			active : false,
-			heightStyle : "content"
-		});
-
-		// Make the tabs jquery-tabs
-		$("#tabs").tabs();
-
 		// Set up legend inline (special display case for ie and firefox)
 		ns.mapLayers.setUpStyleForLegend();
 
@@ -74,7 +49,7 @@ myNamespace.control = (function($, OL, ns) {
 		setUpCruiseSelector();
 		ns.matchup.setUpUploadRaster();
 		ns.matchup.setUpOPeNDAPSelector();
-		ns.mapLayers.addWMSLayerSelector();
+
 		ns.gridding.setUpGridSelector();
 	}
 
@@ -111,25 +86,9 @@ myNamespace.control = (function($, OL, ns) {
 		// removing the parameterlayers from previous searches
 		ns.mapViewer.removeAllParameterLayers();
 		ns.mapViewer.removeBasicSearchLayer();
+		ns.ajax.resetParameterDataSearch();
 		myNamespace.parametersQueryString = null;
-		$("#exportParametersDiv").hide();
-		if (debugc)
-			console.log("control.js: start of mainQueryButton()");// TEST
-		// set loading text and empty parameter HTML
-		$("#featuresAndParams").hide();
-		$("#loadingText").html("Loading data, please wait...");
-		$("#list").html("");
-		$("#parametersTable").html("");
-		$("#statistics").hide();
-		$("#timeSeriesDiv").hide();
-		$("#propertiesPlotDiv").hide();
-		$("#statisticsContainer").html("");
-		$("#timeSeriesContainer").html("");
-		$("#propertiesPlotContainer").html("");
-		$("#matchVariable2").html("");
-		$("#compareRasterButton").hide();
-		$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
-		$("#highchartsContainer").html("");
+		setHTMLLoadingMainQuery();
 
 		var filterBbox = ns.query.createfilterBoxHashMap();
 		var date = ns.query.createDateHashMap();
@@ -223,7 +182,7 @@ myNamespace.control = (function($, OL, ns) {
 		if (debugc)
 			console.log("DisplayFeatures");
 		// did an error occur?
-		if (response.status != 200) {
+		if (response.status !== 200) {
 			// print error message and terminate
 			ns.errorMessage.showErrorMessage(response.responseText);
 			return;
@@ -247,16 +206,24 @@ myNamespace.control = (function($, OL, ns) {
 			$("#loadingText").html("");
 			$("#list").html("No results found");
 		} else {
-			highLightFeaturesWMS(filter, metaDataTable, window.basicSearchName);
 			updateTreeInventoryNumbers();
-			var constructedTable = ns.tableConstructor.featureTable("filterTable", data);
+			highLightFeaturesWMS(filter, metaDataTable, window.basicSearchName);
+			var constructedTable = "<table id='mainQueryTable' class='table'></table>";
 
 			// remove "loading..." text
 			$("#loadingText").html("");
 
-			document.getElementById('list').innerHTML = "<div>" + constructedTable + "</div><br>";
-			$('#filterTable').dataTable({
-				'aaSorting' : []
+			$('#list').html(constructedTable);
+			var aoColumns = ns.tableConstructor.generateAoColumns(data);
+			var tableData = ns.tableConstructor.generateTableData(data);
+			// TODO: could it be even more efficient now? This is the slow part
+			// of the software
+			$('#mainQueryTable').dataTable({
+				"bDeferRender" : true,
+				'aaSorting' : [],
+				// "bProcessing" : true,
+				"aaData" : tableData,
+				"aoColumns" : aoColumns
 			});
 			$("#filterParameters").show();
 		}
@@ -269,7 +236,7 @@ myNamespace.control = (function($, OL, ns) {
 		var parametersQueryString = "Selected parameters:";
 		var delimiter = "";
 		$.each(allSelected, function(i, val) {
-			if (val.getAttribute("rel") != "noBox") {
+			if (val.getAttribute("rel") !== "noBox") {
 				var id = val.getAttribute("id");
 				selected.push(id);
 				parametersQueryString += delimiter + ns.handleParameters.getHeaderFromRawData(id) + "";
@@ -279,22 +246,11 @@ myNamespace.control = (function($, OL, ns) {
 
 		if (debugc)
 			console.log(selected);
-		if (selected.length != 0) {
+		if (selected.length !== 0) {
 			// removing the parameterlayers from previous searches
 			ns.mapViewer.removeAllParameterLayers();
 			myNamespace.parametersQueryString = parametersQueryString;
-			$("#parametersTable").html("Loading parameters, please wait...");
-			$("#statistics").hide();
-			$("#timeSeriesDiv").hide();
-			$("#propertiesPlotDiv").hide();
-			$("#statisticsContainer").html("");
-			$("#timeSeriesContainer").html("");
-			$("#propertiesPlotContainer").html("");
-			$("#matchVariable2").html("");
-			$("#compareRasterButton").hide();
-			$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
-			$("#highchartsContainer").html("");
-
+			setHTMLLoadingParameters();
 			ns.handleParameters.selectParameters(selected);
 
 			// Resetting tablesToQuery between filters
@@ -308,7 +264,7 @@ myNamespace.control = (function($, OL, ns) {
 			// var foundCombine = false;
 			// Adding all selected layers to tablesToQuery
 			$.each(ns.handleParameters.chosenParameters.tablesSelected, function(i, table) {
-				// if (table != "combined")
+				// if (table !== "combined")
 				tablesToQuery.push(table);
 				// else
 				// foundCombine = true;
@@ -331,17 +287,116 @@ myNamespace.control = (function($, OL, ns) {
 		}
 	}
 
+	function setHTMLInit() {
+
+		// hide export option until we have something to export
+		ns.mapLayers.updateHTML('init');
+		$("#exportParametersDiv").hide();
+		$("#filterParameters").hide();
+		$("#statistics").hide();
+		$("#timeSeriesDiv").hide();
+		$("#propertiesPlotDiv").hide();
+		$("#compareRasterButton").hide();
+
+		$("#queryOptions").accordion({
+			collapsible : true,
+			active : false,
+			heightStyle : "content"
+		});
+		$("#statsOptions").accordion({
+			collapsible : true,
+			active : false,
+			heightStyle : "content"
+		});
+		$("#modelOptions").accordion({
+			collapsible : true,
+			active : false,
+			heightStyle : "content"
+		});
+		$("#rasterLayersDiv").accordion({
+			collapsible : true,
+			active : false,
+			heightStyle : "content"
+		});
+
+		// Make the tabs jquery-tabs
+		$("#tabs").tabs();
+	}
+
+	function setHTMLLoadingMainQuery() {
+		// set loading text and empty parameter HTML
+		ns.mapLayers.updateHTML('mainSearch');
+		$("#exportParametersDiv").hide();
+		$("#featuresAndParams").hide();
+		$("#loadingText").html("Loading data, please wait...");
+		$("#list").html("");
+		$("#parametersTable").html("");
+		$("#statistics").hide();
+		$("#timeSeriesDiv").hide();
+		$("#propertiesPlotDiv").hide();
+		$("#statisticsContainer").html("");
+		$("#timeSeriesContainer").html("");
+		$("#propertiesPlotContainer").html("");
+		$("#matchVariable2").html("");
+		$("#compareRasterButton").hide();
+		$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
+		$("#highchartsContainer").html("");
+	}
+
+	function setHTMLLoadingParameters() {
+		ns.mapLayers.updateHTML('loadingParameters');
+		$("#parametersTable").html("Loading parameters, please wait...");
+		$("#statistics").hide();
+		$("#timeSeriesDiv").hide();
+		$("#propertiesPlotDiv").hide();
+		$("#statisticsContainer").html("");
+		$("#timeSeriesContainer").html("");
+		$("#propertiesPlotContainer").html("");
+		$("#matchVariable2").html("");
+		$("#compareRasterButton").hide();
+		$("#searchBeforeMatchup").html("You need to search for data in order to be able to do a matchup");
+		$("#highchartsContainer").html("");
+	}
+
+	function setHTMLParametersLoaded() {
+		ns.mapLayers.updateHTML('loadedParameters');
+
+		$("#parametersTable").html(
+				"Entries where the selected parameters are available<br>"
+						+ "<table id='parametersResultTable' class='table'></table>");
+
+		var aoColumns = ns.tableConstructor.generateAoColumns(data);
+		var tableData = ns.tableConstructor.generateTableData(data);
+		// TODO: performance! this is extremely slow!
+		$("#parametersResultTable").dataTable({
+			"bDeferRender" : true,
+			'aaSorting' : [],
+			"aaData" : tableData,
+			"aoColumns" : aoColumns
+		});
+
+		ns.statistics.setUpTimeSeriesVariables();
+		ns.statistics.setUpPropertiesPlotVariables();
+		linkParametersExportButton();
+		document.getElementById('exportParameter').disabled = false;
+		$("#statistics").show();
+		$("#timeSeriesDiv").show();
+		$("#propertiesPlotDiv").show();
+		$("#exportParametersDiv").show();
+		myNamespace.matchup.updateMatchupParameter();
+	}
+
 	function hasMainQueryObjectChanged() {
 		var filterBbox = ns.query.createfilterBoxHashMap();
 		if (filterBbox) {
 			if (myNamespace.mainQueryObject.filterBbox) {
-				if (filterBbox.bottom != myNamespace.mainQueryObject.filterBbox.bottom)
+				if (filterBbox.bottom !== myNamespace.mainQueryObject.filterBbox.bottom)
 					return true;
-				if (filterBbox.left != myNamespace.mainQueryObject.filterBbox.left)
+				if (filterBbox.left !== myNamespace.mainQueryObject.filterBbox.left)
 					return true;
-				if (filterBbox.right != myNamespace.mainQueryObject.filterBbox.right)
+				if (filterBbox.right !== myNamespace.mainQueryObject.filterBbox.right)
 					return true;
-				if (filterBbox.top != myNamespace.mainQueryObject.filterBbox.top)
+				if (filterBbox.top !== myNamespace.mainQueryObject.filterBbox.top)
 					return true;
 			} else {
 				return true;
@@ -352,15 +407,15 @@ myNamespace.control = (function($, OL, ns) {
 		var date = ns.query.createDateHashMap();
 		if (date) {
 			if (myNamespace.mainQueryObject.date) {
-				if (date.fromDate != myNamespace.mainQueryObject.date.fromDate)
+				if (date.fromDate !== myNamespace.mainQueryObject.date.fromDate)
 					return true;
-				if (date.toDate != myNamespace.mainQueryObject.date.toDate)
+				if (date.toDate !== myNamespace.mainQueryObject.date.toDate)
 					return true;
-				if (date.time != myNamespace.mainQueryObject.date.time)
+				if (date.time !== myNamespace.mainQueryObject.date.time)
 					return true;
-				if (date.fromTime != myNamespace.mainQueryObject.date.fromTime)
+				if (date.fromTime !== myNamespace.mainQueryObject.date.fromTime)
 					return true;
-				if (date.toTime != myNamespace.mainQueryObject.date.toTime)
+				if (date.toTime !== myNamespace.mainQueryObject.date.toTime)
 					return true;
 			} else {
 				return true;
@@ -371,9 +426,9 @@ myNamespace.control = (function($, OL, ns) {
 		var depth = ns.query.createDepthHashMap();
 		if (depth) {
 			if (myNamespace.mainQueryObject.depth) {
-				if (depth.max != myNamespace.mainQueryObject.depth.max)
+				if (depth.max !== myNamespace.mainQueryObject.depth.max)
 					return true;
-				if (depth.min != myNamespace.mainQueryObject.depth.min)
+				if (depth.min !== myNamespace.mainQueryObject.depth.min)
 					return true;
 			} else {
 				return true;
@@ -384,7 +439,7 @@ myNamespace.control = (function($, OL, ns) {
 		var region = ns.query.createRegionArray();
 		if (region) {
 			if (myNamespace.mainQueryObject.region) {
-				if (region != myNamespace.mainQueryObject.region)
+				if (region !== myNamespace.mainQueryObject.region)
 					return true;
 			} else
 				return true;
@@ -396,7 +451,7 @@ myNamespace.control = (function($, OL, ns) {
 		}
 		if (cruise) {
 			if (myNamespace.mainQueryObject.cruise) {
-				if (cruise != myNamespace.mainQueryObject.cruise)
+				if (cruise !== myNamespace.mainQueryObject.cruise)
 					return true;
 			} else
 				return true;
@@ -477,27 +532,9 @@ myNamespace.control = (function($, OL, ns) {
 			return;
 		}
 		addData(responseAsJSON);
-		if (tablesToQuery.length == 0) {
-			if (debugc)
-				console.log("tablesToQuery.length == 0");
-			var constructedTable = ns.tableConstructor.parameterTable(data);
-
-			$("#parametersTable").html(
-					"Entries where the selected parameters are available<br>" + "<div class='scrollArea'>"
-							+ constructedTable + "</div>");
-			$("#statistics").show();
-			ns.statistics.setUpTimeSeriesVariables();
-			ns.gridding.setUpGriddingVariables();
-			$("#timeSeriesDiv").show();
-			ns.statistics.setUpPropertiesPlotVariables();
-			$("#propertiesPlotDiv").show();
-
-			$("#parametersResultTable").dataTable();
-			linkParametersExportButton();
+		if (tablesToQuery.length === 0) {
 			ns.mapViewer.addFeaturesFromData(data, "All parameters");
-			document.getElementById('exportParameter').disabled = false;
-			$("#exportParametersDiv").show();
-			myNamespace.matchup.updateMatchupParameter();
+			setHTMLParametersLoaded();
 		} else {
 			queryLayer();
 		}
@@ -514,7 +551,7 @@ myNamespace.control = (function($, OL, ns) {
 		});
 		if (debugc)
 			console.log("Replaced ID's");
-		return (featureArray == null) ? null : featureArray[0];
+		return (featureArray === null) ? null : featureArray[0];
 	}
 
 	// non-public
@@ -523,7 +560,7 @@ myNamespace.control = (function($, OL, ns) {
 			console.log("convertArrayToHashMap");
 		var output = {};
 		$.each(inputArray, function(k, dataValue) {
-			if ((typeof dataValue) != 'function') {
+			if ((typeof dataValue) !== 'function') {
 				output[dataValue.id] = dataValue;
 			}
 		});
@@ -541,7 +578,7 @@ myNamespace.control = (function($, OL, ns) {
 		var layer = replaceId(features);
 		var newData = {};
 
-		if (layer == null) {
+		if (layer === null) {
 			data = {};
 			return;
 		}
@@ -550,7 +587,7 @@ myNamespace.control = (function($, OL, ns) {
 		// Add all combine filters for this layer to combined (val could be
 		// "combined:temperature")
 		$.each(ns.handleParameters.chosenParameters.combined, function(i, val) {
-			if (window.combinedParameters[val].layer == layer) {
+			if (window.combinedParameters[val].layer === layer) {
 				combined.push(val);
 			}
 		});
@@ -583,12 +620,14 @@ myNamespace.control = (function($, OL, ns) {
 				// if (debugc) {
 				// console.log("Checking:" + comb);
 				// }
-				if (window.combinedParameters[comb].method == "prioritized") {
+				if (window.combinedParameters[comb].method === "prioritized") {
 					var val = null;
 					var qfString = "";
-					for (var k = 0; k < window.combinedParameters[comb].parameters.length; k++) {
-						if (feature.properties[window.combinedParameters[comb].parameters[k]] != null
-								&& feature.properties[window.combinedParameters[comb].parameters[k]].trim() != "") {
+					for (var k = 0, l = window.combinedParameters[comb].parameters.length; k < l; k++) {
+						// TODO: this is not always a string (should usually be
+						// a number if the database is "correct"
+						if (feature.properties[window.combinedParameters[comb].parameters[k]] !== null
+								&& feature.properties[window.combinedParameters[comb].parameters[k]].trim() !== "") {
 							val = feature.properties[window.combinedParameters[comb].parameters[k]];
 							if (qf)
 								qfString = feature.properties[window.combinedParameters[comb].parameters[k]
@@ -601,9 +640,6 @@ myNamespace.control = (function($, OL, ns) {
 						newData[feature.id].properties[comb] = val;
 						if (qf)
 							newData[feature.id].properties[comb + window.qfPostFix] = qfString;
-						// if (debugc) {
-						// console.log("Found and added:" + val);
-						// }
 					}
 				}
 			});
@@ -631,17 +667,23 @@ myNamespace.control = (function($, OL, ns) {
 		$("#right").val(right);
 	}
 
-	function updateTreeWithInventoryNumbers(response, layer, par) {
-		var id;
-		if (par == null) {
-			id = layer;
-		} else {
-			id = layer + ":" + par;
+	var incomingRequests = 0;
+	function updateTreeWithInventoryNumbers(response, length) {
+		incomingRequests++;
+		for ( var key in response) {
+			if (response.hasOwnProperty(key)) {
+				var element = $(document.getElementById(key));
+				var numberOfFeatures = response[key];
+				var newText = element.data("baseheader") + " [" + numberOfFeatures + "]";
+				$("#parametersTree").jstree("set_text", element, newText);
+			}
 		}
-		var element = $(document.getElementById(id));
-		var numberOfFeatures = ns.XMLParser.getNumberOfFeatures(response);
-		var newText = element.data("baseheader") + " [" + numberOfFeatures + "]";
-		$("#parametersTree").jstree("set_text", element, newText);
+		if (incomingRequests === length) {
+			$("#loadTreeNumbersDiv").html("Loading of inventory numbers is complete");
+		} else {
+			var percentage = Math.round(incomingRequests * 100 / length);
+			$("#loadTreeNumbersDiv").html("<b><i>Loaded " + percentage + "% of the parameters.</i></b>");
+		}
 	}
 
 	function getParametersFromMulti(comb) {
@@ -649,10 +691,10 @@ myNamespace.control = (function($, OL, ns) {
 			console.log("getParametersFromMulti:" + comb);
 		var properties = [];
 		var layer = null;
-		if (window.combinedParameters[comb].method.indexOf("multi") == 0) {
+		if (window.combinedParameters[comb].method.indexOf("multi") === 0) {
 			$.each(window.combinedParameters[comb].parameters, function(i, val) {
 				var splitString = val.split(":");
-				if (splitString[0] == "combined") {
+				if (splitString[0] === "combined") {
 					var tempProp = getParametersFromMulti(val);
 					layer = tempProp.pop();
 					properties = properties.concat(tempProp);
@@ -672,15 +714,16 @@ myNamespace.control = (function($, OL, ns) {
 	function updateTreeInventoryNumbers() {
 		var myTreeContainer = $.jstree._reference("#parametersTree").get_container();
 		var allChildren = myTreeContainer.find("li");
+		var requestData = [];
 		$.each(allChildren, function(i, val) {
 			if ((typeof window.combinedParameters[val.id] === "undefined")
-					|| (window.combinedParameters[val.id].method != "groupLayers")) {
+					|| (window.combinedParameters[val.id].method !== "groupLayers")) {
 				var splitString = val.id.split(":");
 				var layer, propertyNames, par;
-				if (splitString.length == 2) {
+				if (splitString.length === 2) {
 					par = splitString[1];
-					if (splitString[0] == "combined") {
-						if (window.combinedParameters[val.id].method.indexOf("multi") == 0) {
+					if (splitString[0] === "combined") {
+						if (window.combinedParameters[val.id].method.indexOf("multi") === 0) {
 							propertyNames = getParametersFromMulti(val.id);
 							layer = propertyNames.pop();
 						} else {
@@ -698,42 +741,52 @@ myNamespace.control = (function($, OL, ns) {
 					var mySubChildren = $(val).children().find("li");
 					$.each(mySubChildren, function(j, val2) {
 						var splitString2 = val2.id.split(":");
-						if (splitString2.length == 2) {
-							if (splitString2[0] != "combined")
+						if (splitString2.length === 2) {
+							if (splitString2[0] !== "combined")
 								propertyNames.push(splitString2[1]);
 						}
 					});
 				}
-				if (layer != null) {
+				if (layer !== null) {
 					var element = $(document.getElementById(val.id));
 					var newText = element.data("baseheader");
 					$("#parametersTree").jstree("set_text", element, newText);
 					// Should optimize this, most of the above is not needed if
 					// this is the case
 					if ($('#updateParametersList').is(':checked')) {
-						ns.WebFeatureService.getFeature({
-							TYPENAME : layer,
-							FILTER : ns.query.constructParameterFilterString(propertyNames,
-									myNamespace.mainQueryObject.depth, myNamespace.mainQueryObject.filterBbox,
-									myNamespace.mainQueryObject.date, myNamespace.mainQueryObject.months,
-									myNamespace.mainQueryObject.region, myNamespace.mainQueryObject.cruise),
-							RESULTTYPE : "hits"
-						}, function(response) {
-							updateTreeWithInventoryNumbers(response, splitString[0], par);
-						});
+						var id;
+						if (par === null) {
+							id = splitString[0];
+						} else {
+							id = splitString[0] + ":" + par;
+						}
+						requestData.push([
+								layer,
+								id,
+								ns.query.constructParameterFilterString(propertyNames,
+										myNamespace.mainQueryObject.depth, myNamespace.mainQueryObject.filterBbox,
+										myNamespace.mainQueryObject.date, myNamespace.mainQueryObject.months,
+										myNamespace.mainQueryObject.region, myNamespace.mainQueryObject.cruise) ]);
 					}
 				}
 			}
 		});
+		if (requestData.length !== 0) {
+			incomingRequests = 0;
+			ns.WebFeatureService.getUpdatedParameters(requestData);
+			$("#loadTreeNumbersDiv").html("<b><i>Loading inventory numbers, please wait...</i></b>");
+		}
 	}
 
 	function initiateMetadata(input) {
 		for ( var table in allLayers) {
-			ns.WebFeatureService.describeFeatureType({
-				TYPENAME : table,
-			}, function(response) {
-				initiateParameters(response);
-			});
+			if (allLayers.hasOwnProperty(table)) {
+				ns.WebFeatureService.describeFeatureType({
+					TYPENAME : table,
+				}, function(response) {
+					initiateParameters(response);
+				});
+			}
 		}
 		ns.handleParameters.initiateParameters(input);
 		$("#metadataTree").html(ns.tableConstructor.metadataList());
@@ -804,7 +857,7 @@ myNamespace.control = (function($, OL, ns) {
 			"sort" : function(a, b) {
 				var indexA = parseInt($(a).data("index"));
 				var indexB = parseInt($(b).data("index"));
-				if (indexA != indexB)
+				if (indexA !== indexB)
 					return indexA > indexB ? 1 : -1;
 				else
 					return this.get_text(a) > this.get_text(b) ? 1 : -1;
@@ -828,7 +881,7 @@ myNamespace.control = (function($, OL, ns) {
 		});
 		$('#treeSearchParameter').on('keypress', function(e) {
 			var code = (e.keyCode ? e.keyCode : e.which);
-			if (code == 13) {
+			if (code === 13) {
 				e.preventDefault();
 				filterParametersTreeButton();
 			}
@@ -864,7 +917,11 @@ myNamespace.control = (function($, OL, ns) {
 		$("#parametersTable").html(
 				"Entries where the selected parameters are available<br>" + "<div class='scrollArea'>"
 						+ constructedTable + "</div>");
-		$("#parametersResultTable").dataTable();
+		// TODO: performance! this is extremely slow!
+		$("#parametersResultTable").dataTable({
+			"bDeferRender" : true,
+			'aaSorting' : []
+		});
 	}
 
 	function initiateRasterDataButton() {
@@ -890,7 +947,7 @@ myNamespace.control = (function($, OL, ns) {
 	var lastSearchString = null;
 	function filterParametersTreeButton() {
 		var searchString = $("#treeSearchParameter").val();
-		if (searchString != lastSearchString) {
+		if (searchString !== lastSearchString) {
 			console.log("filterParametersTreeButton");
 			$("#parametersTree").jstree("clear_search");
 			$("#parametersTree").jstree("search", searchString);
@@ -908,7 +965,7 @@ myNamespace.control = (function($, OL, ns) {
 	function toggleOrderPlanktonButton() {
 		lastSearchString = null;
 		var multi = [ 0 ];
-		if ($('#toggleOrderPlanktonButton').val() == "Sort plankton by type") {
+		if ($('#toggleOrderPlanktonButton').val() === "Sort plankton by type") {
 			multi = [ 1 ];
 			// $('#toggleOrderPlanktonButton').val("Sort plankton by element");
 			// } else
@@ -959,6 +1016,10 @@ myNamespace.control = (function($, OL, ns) {
 		$("#bboxEnabledCheck").prop("checked", false);
 		$("#bboxEnabledCheck").trigger('click');
 	}
+
+	function getData() {
+		return data;
+	}
 	// public interface
 	return {
 		activateBbox : activateBbox,
@@ -985,8 +1046,12 @@ myNamespace.control = (function($, OL, ns) {
 		toggleOrderPlanktonButton : toggleOrderPlanktonButton,
 		clearSelectionButton : clearSelectionButton,
 		addAParameterToData : addAParameterToData,
+
 		gridButton : gridButton,
 		addVariableColorsOnMap : addVariableColorsOnMap,
+
+		getData : getData,
+		updateTreeWithInventoryNumbers : updateTreeWithInventoryNumbers,
 	};
 
 }(jQuery, OpenLayers, myNamespace));

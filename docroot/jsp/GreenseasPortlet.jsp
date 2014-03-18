@@ -19,7 +19,9 @@
 	<div id="mapContainer">
 		<div id="simple_map"></div>
 		<div id="rightOfMap">
-			<div id="legend"></div>
+			<div id="legend">
+				<div id="innerLegend"></div>
+			</div>
 		</div>
 	</div>
 
@@ -217,6 +219,7 @@
 						<input type="button" id="collapseAllButton" value="Collapse All">
 						<input type="button" id="expandAllButton" value="Expand All">
 						<input type="button" id="toggleOrderPlanktonButton" value="Sort plankton by type">
+						<div id='loadTreeNumbersDiv'></div>
 						<div id="parametersTree"></div>
 						<br>
 						<br>
@@ -346,10 +349,24 @@
 
 		<div id="layersTab">
 			<p>Select/configure Layers:</p>
-			Dataset/Variable/Colorscale(min/max/auto)/Layertype(boxfill/contour/etc)/Scale(linear/logarithmic)/Elevation/Date/Time
-			<br>
-			<div id="layerURLSelectorContainer"></div>
-			<input type='button' id='addLayerButton' value="Add new layer" />
+			<div id='rasterLayersDiv'>
+				<h3>
+					<span id='rasterLayersDivHeaderText'>Raster Layers <em>(off)</em></span>
+				</h3>
+				<div id='mapLayersDiv'>
+					Dataset/Variable/Colorscale(min/max/auto)/Layertype(boxfill/contour/etc)/Scale(linear/logarithmic)/Elevation/Date/Time
+					<br>
+					<div id="layerURLSelectorContainer"></div>
+					<input type='button' id='addLayerButton' value="Add new layer" />
+				</div>
+				<h3>
+					<span id='parametersLayerDivHeaderText'>Parameter Layers <em>(off)</em></span>
+				</h3>
+				<div id='parameterLayerVariableAccordionDiv'>
+					<div id='parameterLayerVariableHelpText'></div>
+					<div id='parameterLayerVariableContainer'></div>
+				</div>
+			</div>
 		</div>
 		<div id="griddingTab">
 			Also need some "method" of how to combine/interpolate values - especially points that maps to the same
@@ -371,8 +388,8 @@
 
 	</div>
 
-			<!-- these divs are popus, don't actually appear -->
-			<div id="errorMessageDialog" title="Warning"></div>
+	<!-- these divs are popus, don't actually appear -->
+	<div id="errorMessageDialog" title="Warning"></div>
 </div>
 
 <aui:script>

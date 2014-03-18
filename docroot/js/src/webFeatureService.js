@@ -35,7 +35,7 @@ myNamespace.WebFeatureService = (function($, OL) {
 			console.log("swapPosList START");
 		var newFilter = "";
 		var xmlDoc;
-		if (myNamespace.XMLParser.findBrowser() != "Firefox") {
+		if (myNamespace.utilities.findBrowser() !== "Firefox") {
 			try {
 				if (window.DOMParser) {
 					parser = new DOMParser();
@@ -67,14 +67,14 @@ myNamespace.WebFeatureService = (function($, OL) {
 					var output = "";
 					if (debugwfs)
 						console.log("SWAPPING, stringArray.length:" + stringArray.length);
-					for (var i = 0; i < stringArray.length; i = i + 2) {
+					for (var i = 0, l = stringArray.length; i < l; i = i + 2) {
 						output += stringArray[i + 1] + " " + stringArray[i] + " ";
 						// if (debugwfs)
 						// console.log(stringArray[i+1]+" "+stringArray[i]+" ");
 					}
 					val.childNodes[0].nodeValue = output;
 					if (debugwfs)
-						console.log("Set nodeValue correctly:" + (val.childNodes[0].nodeValue == output));
+						console.log("Set nodeValue correctly:" + (val.childNodes[0].nodeValue === output));
 				});
 			} catch (err) {
 				if (debugwfs)
@@ -88,19 +88,19 @@ myNamespace.WebFeatureService = (function($, OL) {
 			var endIndex = 0;
 			while (true) {
 				var startIndex = filter.indexOf("<gml:posList>", endIndex) + 13;
-				if (startIndex == 12)
+				if (startIndex === 12)
 					break;
 				if (debugwfs)
 					console.log("Adding to filter:" + filter.slice(endIndex, startIndex));
 				newFilter += filter.slice(endIndex, startIndex);
 				endIndex = filter.indexOf("</gml:posList>", startIndex);
-				if (endIndex == -1) {
+				if (endIndex === -1) {
 					console.log("Malformed fitler");
 					return "";
 				}
 				var stringArray = filter.slice(startIndex, endIndex).split(" ");
 				var output = "";
-				for (var i = 0; i < stringArray.length; i = i + 2) {
+				for (var i = 0, l = stringArray.length; i < l; i = i + 2) {
 					output += stringArray[i + 1] + " " + stringArray[i] + " ";
 				}
 				if (debugwfs)
@@ -180,10 +180,39 @@ myNamespace.WebFeatureService = (function($, OL) {
 		asyncGetRequest($.extend(parameters, extraParameters), callback);
 	}
 
+	function getUpdatedParameters(requestData) {
+		var modifiedRequestData = [ {} ];
+		var index = 0;
+		var currentSize = 0;
+		var number = 0;
+		for (var i = 0, l = requestData.length; i < l; i++) {
+			var extraPar = {
+				TYPENAME : requestData[i][0],
+				FILTER : requestData[i][2],
+				RESULTTYPE : "hits"
+			};
+			// TODO: swappos should only be needed once for this, a lot of
+			// duplicated data
+			var xml = convertParametersToGetFeatureXML(extraPar);
+			var currentLength = xml.length;
+			currentSize += currentLength;
+			if (number > 75 || (number !== 0 && currentSize > 1600000)) {
+				index++;
+				currentSize = currentLength;
+				number = 0;
+				modifiedRequestData.push({});
+			}
+			modifiedRequestData[index][requestData[i][1]] = xml;
+			number++;
+		}
+		myNamespace.ajax.getUpdateParametersDataFromServer(modifiedRequestData.reverse(), (index + 1));
+	}
+
 	// public interface
 	return {
 		getFeature : getFeature,
 		describeFeatureType : describeFeatureType,
+		getUpdatedParameters : getUpdatedParameters,
 	};
 
 }(jQuery, OpenLayers));

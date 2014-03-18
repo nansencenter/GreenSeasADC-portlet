@@ -1,17 +1,17 @@
 var myNamespace = myNamespace || {};
 
-myNamespace.errorMessage = (function(jQ) {
+myNamespace.errorMessage = (function($) {
 	"use strict";
 
 	var dialogDiv = "#errorMessageDialog";
 
 	function showErrorMessage(message) {
 
-		jQ(dialogDiv).dialog({
+		$(dialogDiv).dialog({
 			modal : true,
 			buttons : {
 				Ok : function() {
-					jQ(this).dialog("close");
+					$(this).dialog("close");
 				}
 			},
 			position : {
@@ -21,8 +21,8 @@ myNamespace.errorMessage = (function(jQ) {
 			}
 		});
 
-		jQ(dialogDiv).html("<p>" + message + "<p>");
-		jQ(dialogDiv).dialog('open');
+		$(dialogDiv).html("<p>" + message + "<p>");
+		$(dialogDiv).dialog('open');
 	}
 
 	return {

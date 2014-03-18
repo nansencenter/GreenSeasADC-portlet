@@ -15,9 +15,9 @@ myNamespace.statistics = (function($, ns) {
 				var value = parseFloat(val.properties[variable]);
 				// if (debugc)
 				// console.log(value);
-				if (value != -999 && val.properties.date) {
+				if (value !== -999 && val.properties.date) {
 					var dateArr = val.properties.date.split("-");
-					if (dateArr.length == 3) {
+					if (dateArr.length === 3) {
 						var year = parseInt(dateArr[0]);
 						// Note that in JavaScript, months start at 0 for
 						// January, 1 for February etc.
@@ -28,7 +28,7 @@ myNamespace.statistics = (function($, ns) {
 						var time = false;
 						if (val.properties.time) {
 							var timeSplit = val.properties.time.split(":");
-							if (timeSplit.length == 3) {
+							if (timeSplit.length === 3) {
 								hours = parseInt(timeSplit[0]);
 								minutes = parseInt(timeSplit[1]);
 								seconds = parseInt(timeSplit[2].substring(0, timeSplit[2].length));
@@ -42,7 +42,7 @@ myNamespace.statistics = (function($, ns) {
 							time : time,
 							depth : val.properties[depthParameterName],
 							lat : val.geometry.coordinates[0],
-							long : val.geometry.coordinates[1]
+							lon : val.geometry.coordinates[1]
 						});
 					}
 				}
@@ -72,7 +72,7 @@ myNamespace.statistics = (function($, ns) {
 
 		var tsData = {};
 		var extraColors = [];
-		for (var i = colors.length - 1; i < variables.length; i++) {
+		for (var i = colors.length - 1, l = variables.length; i < l; i++) {
 			extraColors.push(ns.mapViewer.getRandomColor());
 		}
 		tsData.series = [];
@@ -157,7 +157,7 @@ myNamespace.statistics = (function($, ns) {
 							if (!(typeof this.point.depth === "undefined"))
 								depth = " Depth:" + this.point.depth;
 							return 'ID:' + this.point.id + time + '<br>Lat:' + this.point.lat + ' Long:'
-									+ this.point.long + depth + '</b><br/>'
+									+ this.point.lon + depth + '</b><br/>'
 									+ ns.handleParameters.getHeaderFromRawData(horizontalPar) + ':' + this.x + '<br>'
 									+ ns.handleParameters.getHeaderFromRawData(verticalPar) + ':' + this.y;
 						}
@@ -181,10 +181,10 @@ myNamespace.statistics = (function($, ns) {
 				var x = parseFloat(val.properties[horizontalPar]);
 				// if (debugc)
 				// console.log(value);
-				if (x != -999 && val.properties[verticalPar]) {
+				if (x !== -999 && val.properties[verticalPar]) {
 					if (val.properties[verticalPar]) {
 						var y = parseFloat(val.properties[verticalPar]);
-						if (y != -999) {
+						if (y !== -999) {
 							var properties = {
 								// TODO: add time
 								x : x,
@@ -192,11 +192,11 @@ myNamespace.statistics = (function($, ns) {
 								id : val.id,
 								depth : val.properties[depthParameterName],
 								lat : val.geometry.coordinates[0],
-								long : val.geometry.coordinates[1]
+								lon : val.geometry.coordinates[1]
 							};
 							if (val.properties.date) {
 								var dateArr = val.properties.date.split("-");
-								if (dateArr.length == 3) {
+								if (dateArr.length === 3) {
 									var year = parseInt(dateArr[0]);
 									// Note that in JavaScript, months start at
 									// 0 for
@@ -208,7 +208,7 @@ myNamespace.statistics = (function($, ns) {
 									var time = false;
 									if (val.properties.time) {
 										var timeSplit = val.properties.time.split(":");
-										if (timeSplit.length == 3) {
+										if (timeSplit.length === 3) {
 											hours = parseInt(timeSplit[0]);
 											minutes = parseInt(timeSplit[1]);
 											seconds = parseInt(timeSplit[2].substring(0, timeSplit[2].length));
@@ -262,7 +262,7 @@ myNamespace.statistics = (function($, ns) {
 							if (!(typeof this.point.depth === "undefined"))
 								depth = " Depth:" + this.point.depth;
 							return '<b> ' + this.series.name + ' <br>ID:' + this.point.id + '<br>Lat:' + this.point.lat
-									+ ' Long:' + this.point.long + depth + '</b><br/>'
+									+ ' Long:' + this.point.lon + depth + '</b><br/>'
 									+ Highcharts.dateFormat('%Y-%m-%d', this.x) + clock + '<br>Value:' + this.y;
 						}
 					},

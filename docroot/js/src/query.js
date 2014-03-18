@@ -27,7 +27,7 @@ myNamespace.query = (function(OL, $) {
 			// depth filter
 			if (depth) {
 				var depthFilter = createDepthFilter(depth);
-				if (depthFilter != null)
+				if (depthFilter !== null)
 					filterArray.push(depthFilter);
 			}
 
@@ -382,10 +382,10 @@ myNamespace.query = (function(OL, $) {
 			if (debugq)
 				console.log("toMonth:" + toMonth);
 			toMonth = allMonths.indexOf(toMonth);
-			if (fromMonth == -1 || toMonth == -1)
+			if (fromMonth === -1 || toMonth === -1)
 				return months;
 			months = [];
-			for (; fromMonth != toMonth; fromMonth = (fromMonth + 1) % 12) {
+			for (; fromMonth !== toMonth; fromMonth = (fromMonth + 1) % 12) {
 				months.push(allMonths[fromMonth]);
 			}
 			months.push(allMonths[toMonth]);

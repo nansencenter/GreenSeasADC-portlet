@@ -49,9 +49,91 @@ myNamespace.mapViewer = (function(OL, $) {
 			}, {
 				isBaseLayer : false
 			}),
+		/*
+		 * barnes : new OpenLayers.Layer.WMS( "Barnes tempcu01",
+		 * window.WMSServer, { layers : "v7_temperature", format :
+		 * window.WMSformat, filter : '<ogc:Filter
+		 * xmlns:ogc="http://www.opengis.net/ogc"><ogc:And><ogc:PropertyIsBetween><ogc:PropertyName>depth_of_sample</ogc:PropertyName><ogc:LowerBoundary><ogc:Literal>0</ogc:Literal></ogc:LowerBoundary><ogc:UpperBoundary><ogc:Literal>10</ogc:Literal></ogc:UpperBoundary></ogc:PropertyIsBetween><ogc:Or><ogc:Not><ogc:PropertyIsNull><ogc:PropertyName>tempcu01</ogc:PropertyName></ogc:PropertyIsNull></ogc:Not></ogc:Or></ogc:And></ogc:Filter>',
+		 * 
+		 * styles : "BarnesTest",
+		 * 
+		 * transparent : true }, { isBaseLayer : false }) //
+		 */
 		};
 	}
 
+	function removeCustomLayer(name) {
+		if (typeof customLayers[name] !== 'undefined') {
+			map.removeLayer(customLayers[name]);
+			delete customLayers[name];
+		}
+	}
+
+	function addFeaturesFromDataWithColor(data, parameter, name, min, max) {
+		if (typeof customLayers[name] !== 'undefined')
+			map.removeLayer(customLayers[name]);
+		var pointLayer = new OL.Layer.Vector(name, {
+			projection : "EPSG:4326"
+		});
+		var pointFeatures = [];
+		if (typeof min === 'undefined' || typeof max === 'undefined') {
+			min = null, max = null;
+			for (id in data) {
+				if (data.hasOwnProperty(id)) {
+					var value = data[id].properties[parameter];
+					if (typeof value !== 'undefined' && value !== -999 && value !== '-999') {
+						value = parseFloat(value);
+						if (min === null || min > value)
+							min = value;
+						if (max === null || max < value)
+							max = value;
+					}
+				}
+			}
+		}
+		var range = max - min;
+		console.log([ min, max, range ]);
+		for (id in data) {
+			if (data.hasOwnProperty(id)) {
+				var value = data[id].properties[parameter];
+				if (typeof value !== 'undefined' && value !== -999 && value !== '-999') {
+					value = parseFloat(value);
+					var lonLat = new OL.LonLat(data[id].geometry.coordinates[0], data[id].geometry.coordinates[1]);
+					var pointGeometry = new OL.Geometry.Point(lonLat.lat, lonLat.lon);
+
+					value = parseInt(((value - min) / range) * 62);
+					var color = legendPallete[value];
+					;
+					var style = {
+						'graphicName' : 'square',
+						'pointRadius' : 2,
+						'strokeColor' : color,
+						'fillColor' : color,
+						'fillOpacity' : 1
+					};
+					var pointFeature = new OL.Feature.Vector(pointGeometry, null, style);
+					pointFeatures.push(pointFeature);
+					// console.log("added:");
+					// console.log(pointFeature);
+				} else {
+					// console.log("Not in:");
+					// console.log(data[id]);
+				}
+			}
+		}
+		pointLayer.addFeatures(pointFeatures);
+		map.addLayer(pointLayer);
+		map.setLayerIndex(pointLayer, 9);
+		customLayers[name] = pointLayer;
+	}
+	var legendPallete = [ "#00008f", "#00009f", "#0000af", "#0000bf", "#0000cf", "#0000df", "#0000ef", "#0000ff",
+			"#000bff", "#001bff", "#002bff", "#003bff", "#004bff", "#005bff", "#006bff", "#007bff", "#008bff",
+			"#009bff", "#00abff", "#00bbff", "#00cbff", "#00dbff", "#00ebff", "#00fbff", "#07fff7", "#17ffe7",
+			"#27ffd7", "#37ffc7", "#47ffb7", "#57ffa7", "#67ff97", "#77ff87", "#87ff77", "#97ff67", "#a7ff57",
+			"#b7ff47", "#c7ff37", "#d7ff27", "#e7ff17", "#f7ff07", "#fff700", "#ffe700", "#ffd700", "#ffc700",
+			"#ffb700", "#ffa700", "#ff9700", "#ff8700", "#ff7700", "#ff6700", "#ff5700", "#ff4700", "#ff3700",
+			"#ff2700", "#ff1700", "#ff0700", "#f60000", "#e40000", "#d30000", "#c10000", "#af0000", "#9e0000",
+			"#8c0000" ];
 	function getRandomColor() {
 		var letters = '0123456789ABCDEF'.split('');
 		var color = '#';
@@ -98,6 +180,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		OpenLayers.ProxyHost = "/delegate/OpenLayersProxy?targetURL=";
 		OpenLayers.DOTS_PER_INCH = (25.4 / 0.28);
 		OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
+		OpenLayers.Util.onImageLoadErrorColor = "transparent";
 
 		map = new OpenLayers.Map();
 		// 'simple_map',
@@ -290,8 +373,11 @@ myNamespace.mapViewer = (function(OL, $) {
 	}
 
 	function removeAllParameterLayers() {
-		for (layer in parameterLayers)
-			map.removeLayer(parameterLayers[layer]);
+		for (layer in parameterLayers) {
+			if (parameterLayers.hasOwnProperty(layer)) {
+				map.removeLayer(parameterLayers[layer]);
+			}
+		}
 		parameterLayers = {};
 	}
 
@@ -310,10 +396,12 @@ myNamespace.mapViewer = (function(OL, $) {
 		});
 		var pointFeatures = [];
 		for (id in data) {
-			var lonLat = new OL.LonLat(data[id].geometry.coordinates[0], data[id].geometry.coordinates[1]);
-			var pointGeometry = new OL.Geometry.Point(lonLat.lat, lonLat.lon);
-			var pointFeature = new OL.Feature.Vector(pointGeometry);
-			pointFeatures.push(pointFeature);
+			if (data.hasOwnProperty(id)) {
+				var lonLat = new OL.LonLat(data[id].geometry.coordinates[0], data[id].geometry.coordinates[1]);
+				var pointGeometry = new OL.Geometry.Point(lonLat.lat, lonLat.lon);
+				var pointFeature = new OL.Feature.Vector(pointGeometry);
+				pointFeatures.push(pointFeature);
+			}
 		}
 		pointLayer.addFeatures(pointFeatures);
 		map.addLayer(pointLayer);
@@ -405,7 +493,7 @@ myNamespace.mapViewer = (function(OL, $) {
 			var newFilter = "";
 			var startSub = filter.indexOf("<gml:lowerCorner>") + 17;
 			// Check if there actually is a bbox
-			if (startSub == 16)
+			if (startSub === 16)
 				return filter;
 			var endSub = filter.indexOf("</gml:lowerCorner>");
 			newFilter += filter.substring(0, startSub);
@@ -415,7 +503,7 @@ myNamespace.mapViewer = (function(OL, $) {
 			newFilter += lonLat[1] + " " + lonLat[0];
 			var startSub = filter.indexOf("<gml:upperCorner>") + 17;
 			// Check if there actually is a bbox again
-			if (startSub == 16)
+			if (startSub === 16)
 				return filter;
 			newFilter += filter.substring(endSub, startSub);
 			endSub = filter.indexOf("</gml:upperCorner>");
@@ -443,7 +531,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		var index = 999;
 		var color = window[layer + "Color"] || "#610B0B";
 		var newLayer;
-		if (layer == window.metaDataTable) {
+		if (layer === window.metaDataTable) {
 			index = 998;
 			layers = mapLayers;
 		} else {
@@ -493,7 +581,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		});
 	}
 
-	function addWMSLayer(url, id, shortName, layerID, colorscalerange, style, logscale, elevation, time, longName) {
+	function addWMSLayer(url, shortName, layerID, colorscalerange, style, logscale, elevation, time, longName) {
 		if (debugmW)
 			console.log("Adding the WMS layer");
 		if (debugmW)
@@ -506,10 +594,10 @@ myNamespace.mapViewer = (function(OL, $) {
 			colorscalerange : colorscalerange,
 			logscale : logscale,
 		};
-		if (!(typeof elevation === 'undefined') && elevation != "") {
+		if (!(typeof elevation === 'undefined') && elevation !== "") {
 			parameters.elevation = elevation;
 		}
-		if (!(typeof time === 'undefined') && time != "") {
+		if (!(typeof time === 'undefined') && time !== "") {
 			parameters.time = time;
 		}
 		var layer = new OpenLayers.Layer.WMS(shortName, url, parameters, {
@@ -518,12 +606,12 @@ myNamespace.mapViewer = (function(OL, $) {
 		layer.longName = longName;
 		if (debugmW)
 			console.log("Created the WMS layer");
-		if (id in customLayers) {
-			map.removeLayer(customLayers[id]);
+		if (shortName in customLayers) {
+			map.removeLayer(customLayers[shortName]);
 			if (debugmW)
 				console.log("Removed the existing WMS layer");
 		}
-		customLayers[id] = layer;
+		customLayers[shortName] = layer;
 		map.addLayer(layer);
 		map.setLayerIndex(layer, 500);
 		updateIndices();
@@ -552,6 +640,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		zoomToExtent : zoomToExtent,
 		removePopups : removePopups,
 		addFeaturesFromDataWithColor : addFeaturesFromDataWithColor,
+		removeCustomLayer : removeCustomLayer,
 	};
 
 }(OpenLayers, jQuery));

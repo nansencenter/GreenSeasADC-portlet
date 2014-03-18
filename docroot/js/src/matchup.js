@@ -50,7 +50,7 @@ myNamespace.matchup = (function($, ns) {
 		$.each(parameters, function(key, val) {
 			var variable = key;
 			var variableName = val.trim();
-			if (variableName == "")
+			if (variableName === "")
 				variableName = variable;
 			options += "<option value=\"" + variable + "\">" + variableName + "</option>";
 		});
@@ -67,7 +67,7 @@ myNamespace.matchup = (function($, ns) {
 		$("#compareRaster").html(selectElement);
 		ns.buttonEventHandlers.change("#matchVariable", getMetaDimension);
 		var searchBeforeMatchupText = "";
-		if (selectedParameters.length != 0) {
+		if (selectedParameters.length !== 0) {
 			$("#compareRasterButton").show();
 		} else {
 			searchBeforeMatchupText = "You need to search for data to be able to do a matchup";
@@ -140,7 +140,7 @@ myNamespace.matchup = (function($, ns) {
 				percent.html(percentVal);
 			},
 			complete : function(xhr) {
-				if (xhr.status == 200) {
+				if (xhr.status === 200) {
 					status.html("File uploaded succesfully");
 					uploadedRaster = true;
 				} else {
@@ -153,7 +153,7 @@ myNamespace.matchup = (function($, ns) {
 
 	function compareRaster(data) {
 		var rasterParameter = $("#matchVariable").find(":selected").val();
-		if (rasterParameter == "NONE") {
+		if (rasterParameter === "NONE") {
 			ns.errorMessage.showErrorMessage("You must choose a parameter from the raster");
 			return;
 		}
@@ -188,13 +188,13 @@ myNamespace.matchup = (function($, ns) {
 		var minX, minY, maxX, maxY;
 		$.each(responseData, function(i, val) {
 			var databaseValue = parseFloat(data[i].properties[databaseVariable]);
-			if (databaseValue != -999 && val.value != null) {
+			if (databaseValue !== -999 && val.value !== null) {
 				val.value = parseFloat(val.value);
 				var properties = {
 					id : data[i].id,
 					depth : data[i].properties[depthParameterName],
 					lat : data[i].geometry.coordinates[0],
-					long : data[i].geometry.coordinates[1],
+					lon : data[i].geometry.coordinates[1],
 					rasterLat : val.lat,
 					rasterLong : val.lon,
 					x : val.value,
@@ -202,7 +202,7 @@ myNamespace.matchup = (function($, ns) {
 				};
 				if (data[i].properties.date) {
 					var dateArr = data[i].properties.date.split("-");
-					if (dateArr.length == 3) {
+					if (dateArr.length === 3) {
 						var year = parseInt(dateArr[0]);
 						// Note that in JavaScript, months start at
 						// 0 for
@@ -214,7 +214,7 @@ myNamespace.matchup = (function($, ns) {
 						var time = false;
 						if (data[i].properties.time) {
 							var timeSplit = data[i].properties.time.split(":");
-							if (timeSplit.length == 3) {
+							if (timeSplit.length === 3) {
 								hours = parseInt(timeSplit[0]);
 								minutes = parseInt(timeSplit[1]);
 								seconds = parseInt(timeSplit[2].substring(0, timeSplit[2].length));
@@ -293,7 +293,7 @@ myNamespace.matchup = (function($, ns) {
 							if (!(typeof this.point.depth === "undefined"))
 								depth = " Depth:" + this.point.depth;
 							return 'ID:' + this.point.id + time + '<br>Lat:' + this.point.lat + ' Long:'
-									+ this.point.long + depth + '<br>' + 'Database value:' + ':' + this.y
+									+ this.point.lon + depth + '<br>' + 'Database value:' + ':' + this.y
 									+ '<br>Raster Lat:' + this.point.rasterLat + ' Raster Long:'
 									+ this.point.rasterLong + '</b><br/>' + 'Raster value:' + ':' + this.x;
 						}
@@ -337,7 +337,7 @@ myNamespace.matchup = (function($, ns) {
 		setUpOPeNDAPSelector : setUpOPeNDAPSelector,
 		compareRaster : compareRaster,
 		compareData : compareData,
-		generateOptionsFromAllSelectedParameters : generateOptionsFromAllSelectedParameters
+		generateOptionsFromAllSelectedParameters : generateOptionsFromAllSelectedParameters,
 	};
 
 }(jQuery, myNamespace));

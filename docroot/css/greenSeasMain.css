@@ -38,17 +38,20 @@
 #rightOfMap {
 	height: 400px;
 	font-size: 14px;
+	float: left;
 }
 #mapContainer {
 	height: 400px;
 }
 .colorScaleLegend {
 	height: 400px;
-	margin-left:5px;
+	margin-left: 5px;
 }
 #legend {
 	height: 400px;
 	float: left;
+	position: relative;
+	margin-right:-999em;
 }
 #scaleMax {
 	position: relative;
