@@ -391,8 +391,40 @@ myNamespace.mapViewer = (function(OL, $) {
 	function addFeaturesFromData(data, name) {
 		if (debugmW)
 			console.log("addFeaturesFromData started");
+		var style = new OpenLayers.Style({
+			pointRadius : "${radius}",
+			fillColor : "#ffcc66",
+			fillOpacity : 0.8,
+			strokeColor : "#cc6633",
+			strokeWidth : "${width}",
+			strokeOpacity : 0.8
+		}, {
+			context : {
+				width : function(feature) {
+					return (feature.cluster) ? 2 : 1;
+				},
+				radius : function(feature) {
+					var pix = 2;
+					if (feature.cluster) {
+						pix = Math.min(feature.attributes.count, 7) + 3;
+					}
+					return pix;
+				}
+			}
+		});
+		var strategy = new OpenLayers.Strategy.Cluster();
+		strategy.distance = 10;
+		strategy.treshold = 2;
 		var pointLayer = new OL.Layer.Vector(name, {
-			projection : "EPSG:4326"
+			strategies : [ strategy ],
+			styleMap : new OpenLayers.StyleMap({
+				"default" : style,
+				"select" : {
+					fillColor : "#8aeeef",
+					strokeColor : "#32a8a9"
+				}
+			}),
+			projection : "EPSG:4326",
 		});
 		var pointFeatures = [];
 		for (id in data) {
@@ -403,11 +435,12 @@ myNamespace.mapViewer = (function(OL, $) {
 				pointFeatures.push(pointFeature);
 			}
 		}
-		pointLayer.addFeatures(pointFeatures);
 		map.addLayer(pointLayer);
 		map.setLayerIndex(pointLayer, 10);
+		pointLayer.addFeatures(pointFeatures);
 		parameterLayers[name] = pointLayer;
 
+		console.log(strategy);
 		if (debugmW)
 			console.log("addFeaturesFromData ended");
 	}
