@@ -55,7 +55,7 @@ myNamespace.mapViewer = (function(OL, $) {
 	function getRandomColor() {
 		var letters = '0123456789ABCDEF'.split('');
 		var color = '#';
-		for ( var i = 0; i < 6; i++) {
+		for (var i = 0; i < 6; i++) {
 			color += letters[Math.round(Math.random() * 15)];
 		}
 		return color;
@@ -350,9 +350,9 @@ myNamespace.mapViewer = (function(OL, $) {
 				var pointGeometry = new OL.Geometry.Point(lonLat.lat, lonLat.lon);
 
 				value = parseInt(((value - min) / range) * 62);
-				console.log([min,max,range,data[id].properties[parameter],value]);
+				console.log([ min, max, range, data[id].properties[parameter], value ]);
 				var color = '#';
-				for ( var i = 0; i < 3; i++) {
+				for (var i = 0; i < 3; i++) {
 					if (legendPallete[value][i] < 16)
 						color += '0' + legendPallete[value][i].toString(16);
 					else

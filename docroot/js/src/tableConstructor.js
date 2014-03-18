@@ -117,7 +117,7 @@ myNamespace.tableConstructor = (function($, hP) {
 			row += data(quantity);
 			row += data(min);
 			row += data(max);
-			//row += data(sum);
+			// row += data(sum);
 			row += data(average.toFixed(3));
 			row += data(sd.toFixed(3));
 			row += data(variance.toFixed(3));
@@ -264,7 +264,7 @@ myNamespace.tableConstructor = (function($, hP) {
 			$.each(window.combinedParameters, function(i, val) {
 				if (window.combinedParameters[i].layer == table) {
 					var found = false;
-					for ( var j = 0; !found && j < multi.length; j++) {
+					for (var j = 0; !found && j < multi.length; j++) {
 						if (window.combinedParameters[i].method == ("multi" + multi[j])) {
 							found = true;
 						}
@@ -289,9 +289,9 @@ myNamespace.tableConstructor = (function($, hP) {
 				if (displayed.indexOf(table + ":" + val) == -1) {
 					// Check if the parameter is not to be combined:
 					var found = false;
-					for ( var j = 0; !found && j < combinations.length; j++) {
+					for (var j = 0; !found && j < combinations.length; j++) {
 						var parArr = window.combinedParameters[combinations[j]].parameters;
-						for ( var k = 0; !found && k < parArr.length; k++)
+						for (var k = 0; !found && k < parArr.length; k++)
 							if (val == parArr[k])
 								found = true;
 					}
@@ -310,7 +310,7 @@ myNamespace.tableConstructor = (function($, hP) {
 	}
 
 	function setupCombination(comb, multiArr) {
-//		console.log("setupCombination for:" + comb);
+		// console.log("setupCombination for:" + comb);
 		// console.log(displayed);
 		var str = "";
 		if (displayed.indexOf(comb) == -1) {

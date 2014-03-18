@@ -176,7 +176,7 @@ myNamespace.query = (function(OL, $) {
 
 	function createMonthFilter(months) {
 		var monthFilterArray = [];
-		for ( var i = 0, len = months.length; i < len; i++) {
+		for (var i = 0, len = months.length; i < len; i++) {
 			var filter = new OL.Filter.Comparison({
 				type : OpenLayers.Filter.Comparison.EQUAL_TO,
 				property : "month",
@@ -188,7 +188,7 @@ myNamespace.query = (function(OL, $) {
 	}
 	function requiredParameters(parameters) {
 		var requiredParamtersArray = [];
-		for ( var i = 0, len = parameters.length; i < len; i++) {
+		for (var i = 0, len = parameters.length; i < len; i++) {
 			requiredParamtersArray.push(createRequiredParameterFilter(parameters[i]));
 		}
 		return combineFiltersOr(requiredParamtersArray);

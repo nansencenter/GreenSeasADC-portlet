@@ -586,7 +586,7 @@ myNamespace.control = (function($, OL, ns) {
 				if (window.combinedParameters[comb].method == "prioritized") {
 					var val = null;
 					var qfString = "";
-					for ( var k = 0; k < window.combinedParameters[comb].parameters.length; k++) {
+					for (var k = 0; k < window.combinedParameters[comb].parameters.length; k++) {
 						if (feature.properties[window.combinedParameters[comb].parameters[k]] != null
 								&& feature.properties[window.combinedParameters[comb].parameters[k]].trim() != "") {
 							val = feature.properties[window.combinedParameters[comb].parameters[k]];
@@ -940,16 +940,18 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function gridButton() {
-		//ns.gridding.createGrid(data, $('#griddingParameter').val(), $('#timeResolution').val(), $('#latLonResolution')
-		//		.val());
-		ns.gridding.kriging(data, $('#griddingParameter').find(":selected").val(), $('#krigingModel').val(), $('#krigingSigma').val(), $('#krigingAlpha').val());
-		//updateSearchResults();
-		//ns.mapViewer.addFeaturesFromData(data, "All parameters");
+		// ns.gridding.createGrid(data, $('#griddingParameter').val(),
+		// $('#timeResolution').val(), $('#latLonResolution')
+		// .val());
+		ns.gridding.kriging(data, $('#griddingParameter').find(":selected").val(), $('#krigingModel').val(), $(
+				'#krigingSigma').val(), $('#krigingAlpha').val());
+		// updateSearchResults();
+		// ns.mapViewer.addFeaturesFromData(data, "All parameters");
 	}
-	
-	function addVariableColorsOnMap(){
+
+	function addVariableColorsOnMap() {
 		var parameter = $('#griddingParameter').find(":selected").val();
-		ns.mapViewer.addFeaturesFromDataWithColor(data,parameter);
+		ns.mapViewer.addFeaturesFromDataWithColor(data, parameter);
 	}
 
 	function activateBbox() {
@@ -984,7 +986,7 @@ myNamespace.control = (function($, OL, ns) {
 		clearSelectionButton : clearSelectionButton,
 		addAParameterToData : addAParameterToData,
 		gridButton : gridButton,
-		addVariableColorsOnMap:addVariableColorsOnMap,
+		addVariableColorsOnMap : addVariableColorsOnMap,
 	};
 
 }(jQuery, OpenLayers, myNamespace));

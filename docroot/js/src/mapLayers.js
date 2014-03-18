@@ -21,7 +21,8 @@ myNamespace.mapLayers = (function(jQ, bH) {
 					+ " layers to the map might cause a display-problem with the legends, use with caution."
 					+ " Possible solutions: Increase your window-size or zoom out (in the browser, not on the map).");
 		}
-		var selectElement = myNamespace.utilities.setUpSelectorArray(window.wmsLayers, "mapLayersWMSURL" + activeLayers, activeLayers);
+		var selectElement = myNamespace.utilities.setUpSelectorArray(window.wmsLayers,
+				"mapLayersWMSURL" + activeLayers, activeLayers);
 		var button = "<input type='button' id='toggleLayerButton" + activeLayers + "' name='" + activeLayers
 				+ "' value='Update on map'/>";
 		$("#layerURLSelectorContainer").append("<br><h5>Layer " + activeLayers + "</h5>" + button + selectElement);
@@ -144,7 +145,8 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		};
 		// TOOD: disable logscale for colorscalerange with values <= 0
 		var styleSelector = myNamespace.utilities.setUpSelector(styles, "styleVariable" + activeLayer, activeLayer);
-		var logscaleSelector = myNamespace.utilities.setUpSelector(logscales, "logscaleVariable" + activeLayer, activeLayer);
+		var logscaleSelector = myNamespace.utilities.setUpSelector(logscales, "logscaleVariable" + activeLayer,
+				activeLayer);
 
 		var html = colorscalerange + styleSelector + logscaleSelector + zAxis + tAxis;
 		$("#layerMetaData" + activeLayer).html(html);
@@ -274,11 +276,11 @@ myNamespace.mapLayers = (function(jQ, bH) {
 			$("#legend").append("<div id='colorScaleLegend" + activeLayer + "' class='colorScaleLegend'></div>");
 		}
 		var colorScaleLegendDiv = $('#colorScaleLegend' + activeLayer);
-		
+
 		var layerAsText = $('#mapLayersWMSURL' + activeLayer).find(":selected").text();
 		var variableAsText = $('#WMSLayerVariable' + activeLayer).find(":selected").text();
 		var longName = layerAsText + ":" + variableAsText;
-		
+
 		// if not countour, then add logscale
 		if (style == "contour")
 			colorScaleLegendDiv.html("");
@@ -303,7 +305,7 @@ myNamespace.mapLayers = (function(jQ, bH) {
 		var elevation = $('#zAxisVariable' + activeLayer).find(":selected").val();
 		var time = $('#timeVariable' + activeLayer).find(":selected").val();
 		myNamespace.mapViewer.addWMSLayer(url, activeLayer, name, layer, colorscalerange, style, logscale, elevation,
-				date + "T" + time,longName);
+				date + "T" + time, longName);
 		if (debugMl)
 			console.log("Toggled layer");
 	}

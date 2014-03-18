@@ -95,9 +95,9 @@ myNamespace.gridding = (function($) {
 		'\x28\x00\x00\x00' + // number of remaining bytes in header from here
 		// (40 bytes)
 		_asLittleEndianHex(width * scale, 4) + // the width of the bitmap in
-												// pixels*
+		// pixels*
 		_asLittleEndianHex(height * scale, 4) + // the height of the bitmap in
-												// pixels*
+		// pixels*
 		'\x01\x00' + // the number of color planes (1)
 		'\x18\x00' + // 24 bits / pixel
 		'\x00\x00\x00\x00' + // No compression (0)
@@ -155,10 +155,10 @@ myNamespace.gridding = (function($) {
 		}
 		var image = [];
 		var maxv = null, minv = null;
-		for ( var i = 0; i < height; i++) {
+		for (var i = 0; i < height; i++) {
 
 			image.push(newrow = []);
-			for ( var j = 0; j < width; j++) {
+			for (var j = 0; j < width; j++) {
 				var value = kriging.predict(minx + j, miny + i, variogram);
 				image[i][j] = value;
 				if (minv == null || minv > value)
@@ -169,15 +169,15 @@ myNamespace.gridding = (function($) {
 		}
 
 		var range = maxv - minv;
-		for ( var i = 0; i < height; i++) {
-			for ( var k = 0; k < scale; k++) {
-				for ( var j = 0; j < width; j++) {
-					for ( var l = 0; l < scale; l++) {
+		for (var i = 0; i < height; i++) {
+			for (var k = 0; k < scale; k++) {
+				for (var j = 0; j < width; j++) {
+					for (var l = 0; l < scale; l++) {
 						var value = image[i][j];
 						value = parseInt(((value - minv) / range) * 62);
-						result.push(String.fromCharCode(legendPallete[62-value][0])
-								+ String.fromCharCode(legendPallete[62-value][1])
-								+ String.fromCharCode(legendPallete[62-value][2]));
+						result.push(String.fromCharCode(legendPallete[62 - value][0])
+								+ String.fromCharCode(legendPallete[62 - value][1])
+								+ String.fromCharCode(legendPallete[62 - value][2]));
 						/*
 						 * console.log("Added value at "+(minx + j)+","+(miny +
 						 * i)+ " as " + value +"|"+Math.floor(((value - minv) /
@@ -357,11 +357,11 @@ myNamespace.gridding = (function($) {
 			} else
 				maxLon += 3;
 		var allLat = [];
-		for ( var i = minLat; i <= maxLat; i++) {
+		for (var i = minLat; i <= maxLat; i++) {
 			allLat.push(i + ".5");
 		}
 		var allLon = [];
-		for ( var i = minLon; i <= maxLon; i++) {
+		for (var i = minLon; i <= maxLon; i++) {
 			allLon.push(i + ".5");
 		}
 		var jsonData = {};

@@ -43,7 +43,7 @@ myNamespace.buttonEventHandlers = (function(jQ) {
 	function checkParameters(checkBoxIds, divName, divId) {
 		return function() {
 			var checked = false;
-			for ( var i = 0; !checked && i < checkBoxIds.length; i++)
+			for (var i = 0; !checked && i < checkBoxIds.length; i++)
 				if (document.getElementById(checkBoxIds[i]).checked)
 					checked = true;
 			if (checked) {

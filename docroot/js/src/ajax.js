@@ -135,7 +135,7 @@ myNamespace.ajax = (function($) {
 		});
 	}
 
-	function createNetCDF(features,timeResolution,latLonResolution) {
+	function createNetCDF(features, timeResolution, latLonResolution) {
 		// TODO: QF
 		var url = ajaxCallResourceURL;
 		var data = {};
@@ -235,7 +235,7 @@ myNamespace.ajax = (function($) {
 					// 1900-1-1 is eariliest date! This unit is "minutes since
 					// 1900-01-01"
 					time = Math.round((Date.parse(time) / 60000) + 36816480);
-					time = Math.round(time/timeResolution)*timeResolution;
+					time = Math.round(time / timeResolution) * timeResolution;
 					timeArray.push(time);
 					if (typeof allTimesObject[time] === 'undefined')
 						allTimesObject[time] = time;
@@ -285,29 +285,29 @@ myNamespace.ajax = (function($) {
 			} else
 				maxLon += 3;
 		var allLat = [];
-		for ( var i = minLat; i <= maxLat; i++) {
+		for (var i = minLat; i <= maxLat; i++) {
 			allLat.push(i + ".5");
 		}
 		var allLon = [];
-		for ( var i = minLon; i <= maxLon; i++) {
+		for (var i = minLon; i <= maxLon; i++) {
 			allLon.push(i + ".5");
 		}
 		var jsonData = {};
-		jsonData[ 'allDepth'] = allDepth;
-		jsonData[  'allLat'] = allLat;
-		jsonData[  'allLon'] = allLon;
-		jsonData[  'allTimes'] = allTimes;
-		jsonData[ 'latArray'] = latArray;
-		jsonData[ 'lonArray'] = lonArray;
-		jsonData[ 'depthArray'] = depthArray;
-		jsonData[ 'timeArray'] = timeArray;
-		jsonData[ 'variables'] = variables;
-//		$.each(variables, function(i, val) {
-		jsonData[ 'allVariables'] = allVariablesValues;
-		jsonData[ 'allDescriptions'] = descriptions;
-//		});
+		jsonData['allDepth'] = allDepth;
+		jsonData['allLat'] = allLat;
+		jsonData['allLon'] = allLon;
+		jsonData['allTimes'] = allTimes;
+		jsonData['latArray'] = latArray;
+		jsonData['lonArray'] = lonArray;
+		jsonData['depthArray'] = depthArray;
+		jsonData['timeArray'] = timeArray;
+		jsonData['variables'] = variables;
+		// $.each(variables, function(i, val) {
+		jsonData['allVariables'] = allVariablesValues;
+		jsonData['allDescriptions'] = descriptions;
+		// });
 
-		data[portletNameSpace + 'jsonData']=JSON.stringify(jsonData);
+		data[portletNameSpace + 'jsonData'] = JSON.stringify(jsonData);
 		console.log("DATA REQUEST:");
 		console.log(jsonData);
 

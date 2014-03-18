@@ -67,7 +67,7 @@ myNamespace.WebFeatureService = (function($, OL) {
 					var output = "";
 					if (debugwfs)
 						console.log("SWAPPING, stringArray.length:" + stringArray.length);
-					for ( var i = 0; i < stringArray.length; i = i + 2) {
+					for (var i = 0; i < stringArray.length; i = i + 2) {
 						output += stringArray[i + 1] + " " + stringArray[i] + " ";
 						// if (debugwfs)
 						// console.log(stringArray[i+1]+" "+stringArray[i]+" ");
@@ -100,7 +100,7 @@ myNamespace.WebFeatureService = (function($, OL) {
 				}
 				var stringArray = filter.slice(startIndex, endIndex).split(" ");
 				var output = "";
-				for ( var i = 0; i < stringArray.length; i = i + 2) {
+				for (var i = 0; i < stringArray.length; i = i + 2) {
 					output += stringArray[i + 1] + " " + stringArray[i] + " ";
 				}
 				if (debugwfs)
