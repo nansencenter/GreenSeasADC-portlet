@@ -179,7 +179,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		// nersc.greenseas.openlayersProxy.GwtOpenLayersProxyServlet
 		OpenLayers.ProxyHost = "/delegate/OpenLayersProxy?targetURL=";
 		OpenLayers.DOTS_PER_INCH = (25.4 / 0.28);
-		OpenLayers.IMAGE_RELOAD_ATTEMPTS = 5;
+		OpenLayers.IMAGE_RELOAD_ATTEMPTS = 10;
 
 		map = new OpenLayers.Map();
 		// 'simple_map',
