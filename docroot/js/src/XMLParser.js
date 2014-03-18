@@ -69,7 +69,7 @@ myNamespace.XMLParser = (function($) {
 
 		var sequence = xmlDoc.documentElement.childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes;
 		var numberOfParameters = sequence.length;
-		for ( var i = numberOfParameters - 2; i >= 1; i -= 2) {
+		for (var i = numberOfParameters - 2; i >= 1; i -= 2) {
 			if (debugXML) {
 				console.log(sequence.item(i));
 				console.log("extractParameters FOUND PARAMETER: " + sequence.item(i).getAttribute("name"));

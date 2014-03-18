@@ -39,16 +39,16 @@ myNamespace.ajax = (function($) {
 					splittingRequests = true;
 					var simultaneousRequests = Math.round(length / requestsEach);
 					var newDataRequests = [];
-					for ( var i = 0; i < simultaneousRequests; i++) {
+					for (var i = 0; i < simultaneousRequests; i++) {
 						newDataRequests.push([]);
 					}
 					while (dataRequests.length !== 0) {
-						for ( var i = 0; i < simultaneousRequests && dataRequests.length !== 0; i++) {
+						for (var i = 0; i < simultaneousRequests && dataRequests.length !== 0; i++) {
 							newDataRequests[i].push(dataRequests.pop());
 						}
 					}
 
-					for ( var i = 0; i < simultaneousRequests; i++) {
+					for (var i = 0; i < simultaneousRequests; i++) {
 						getUpdateParametersDataFromServer(newDataRequests[i].reverse(), length, identifier);
 					}
 				}

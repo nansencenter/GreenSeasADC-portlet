@@ -26,7 +26,8 @@ myNamespace.mapLayers = (function($, bH) {
 	}
 	function addWMSLayerSelector() {
 		checkWidth();
-		var selectElement = myNamespace.utilities.setUpSelectorArray(window.wmsLayers, "mapLayersWMSURL" + activeLayers, activeLayers);
+		var selectElement = myNamespace.utilities.setUpSelectorArray(window.wmsLayers,
+				"mapLayersWMSURL" + activeLayers, activeLayers);
 		var button = "<input type='button' id='toggleLayerButton" + activeLayers + "' name='" + activeLayers
 				+ "' value='Update on map'/>";
 		$("#layerURLSelectorContainer").append("<br><h5>Raster " + activeLayers + "</h5>" + button + selectElement);
@@ -149,31 +150,38 @@ myNamespace.mapLayers = (function($, bH) {
 		};
 		// TOOD: disable logscale for colorscalerange with values <= 0
 		var styleSelector = myNamespace.utilities.setUpSelector(styles, "styleVariable" + activeLayer, activeLayer);
-		var logscaleSelector = myNamespace.utilities.setUpSelector(logscales, "logscaleVariable" + activeLayer, activeLayer);
+		var logscaleSelector = myNamespace.utilities.setUpSelector(logscales, "logscaleVariable" + activeLayer,
+				activeLayer);
 
 		var html = colorscalerange + styleSelector + logscaleSelector + zAxis + tAxis;
 		$("#layerMetaData" + activeLayer).html(html);
 
-		bH.change("#logscaleVariable" + activeLayer, function(event) {
-			if (event.target.options[event.target.selectedIndex].value === "true") {
-				if ($("#colorscalerangeMin" + activeLayer).val() <= 0) {
-					myNamespace.errorMessage
-							.showErrorMessage("Cannot use a logarithmic scale with negative or zero values. Changing back to linear scale.");
-					$(event.target).val("false");
-				}
-			}
-		});
-		
-		bH.change("#colorscalerangeMin" + activeLayer, function(event) {
-				if ($("#colorscalerangeMin" + activeLayer).val() <= 0) {
-					if ($('#logscaleVariable' + activeLayer).find(":selected").val() === "true") {
-					myNamespace.errorMessage
-							.showErrorMessage("Cannot use a logarithmic scale with negative or zero values. Changing to Linear scale.");
-					$('#logscaleVariable' + activeLayer).val("false");
-				}
-			}
-		});
-		
+		bH
+				.change(
+						"#logscaleVariable" + activeLayer,
+						function(event) {
+							if (event.target.options[event.target.selectedIndex].value === "true") {
+								if ($("#colorscalerangeMin" + activeLayer).val() <= 0) {
+									myNamespace.errorMessage
+											.showErrorMessage("Cannot use a logarithmic scale with negative or zero values. Changing back to linear scale.");
+									$(event.target).val("false");
+								}
+							}
+						});
+
+		bH
+				.change(
+						"#colorscalerangeMin" + activeLayer,
+						function(event) {
+							if ($("#colorscalerangeMin" + activeLayer).val() <= 0) {
+								if ($('#logscaleVariable' + activeLayer).find(":selected").val() === "true") {
+									myNamespace.errorMessage
+											.showErrorMessage("Cannot use a logarithmic scale with negative or zero values. Changing to Linear scale.");
+									$('#logscaleVariable' + activeLayer).val("false");
+								}
+							}
+						});
+
 		bH.change("#colorscalerangeAuto" + activeLayer, function(event) {
 			// console.log(this.checked);
 			if (this.checked) {

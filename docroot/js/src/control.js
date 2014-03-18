@@ -623,7 +623,7 @@ myNamespace.control = (function($, OL, ns) {
 				if (window.combinedParameters[comb].method === "prioritized") {
 					var val = null;
 					var qfString = "";
-					for ( var k = 0, l = window.combinedParameters[comb].parameters.length; k < l; k++) {
+					for (var k = 0, l = window.combinedParameters[comb].parameters.length; k < l; k++) {
 						// TODO: this is not always a string (should usually be
 						// a number if the database is "correct"
 						if (feature.properties[window.combinedParameters[comb].parameters[k]] !== null
@@ -682,8 +682,7 @@ myNamespace.control = (function($, OL, ns) {
 			$("#loadTreeNumbersDiv").html("Loading of inventory numbers is complete");
 		} else {
 			var percentage = Math.round(incomingRequests * 100 / length);
-			$("#loadTreeNumbersDiv").html(
-					"<b><i>Loaded " + percentage + "% of the parameters.</i></b>");
+			$("#loadTreeNumbersDiv").html("<b><i>Loaded " + percentage + "% of the parameters.</i></b>");
 		}
 	}
 

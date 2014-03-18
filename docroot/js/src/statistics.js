@@ -72,7 +72,7 @@ myNamespace.statistics = (function($, ns) {
 
 		var tsData = {};
 		var extraColors = [];
-		for ( var i = colors.length - 1, l = variables.length; i < l; i++) {
+		for (var i = colors.length - 1, l = variables.length; i < l; i++) {
 			extraColors.push(ns.mapViewer.getRandomColor());
 		}
 		tsData.series = [];

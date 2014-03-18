@@ -296,11 +296,11 @@ myNamespace.mapLayers = (function($, bH) {
 			$("#legend").append("<div id='colorScaleLegend" + activeLayer + "' class='colorScaleLegend'></div>");
 		}
 		var colorScaleLegendDiv = $('#colorScaleLegend' + activeLayer);
-		
+
 		var layerAsText = $('#mapLayersWMSURL' + activeLayer).find(":selected").text();
 		var variableAsText = $('#WMSLayerVariable' + activeLayer).find(":selected").text();
 		var longName = layerAsText + ":" + variableAsText;
-		
+
 		// if not countour, then add logscale
 		if (style === "contour")
 			colorScaleLegendDiv.html("");
@@ -325,7 +325,7 @@ myNamespace.mapLayers = (function($, bH) {
 		var elevation = $('#zAxisVariable' + activeLayer).find(":selected").val();
 		var time = $('#timeVariable' + activeLayer).find(":selected").val();
 		myNamespace.mapViewer.addWMSLayer(url, activeLayer, name, layer, colorscalerange, style, logscale, elevation,
-				date + "T" + time,longName);
+				date + "T" + time, longName);
 		if (debugMl)
 			console.log("Toggled layer");
 	}

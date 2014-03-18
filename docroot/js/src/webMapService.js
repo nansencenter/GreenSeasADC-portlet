@@ -48,7 +48,7 @@ myNamespace.WebMapService = (function(OL) {
 			srs : "EPSG:4326",
 			bbox : "-180,-90,180,90",
 			width : 50, // Request only a small box to save extracting lots of
-						// data
+			// data
 			height : 50,
 		};
 		if (!(typeof bbox === 'undefined') && bbox !== "") {

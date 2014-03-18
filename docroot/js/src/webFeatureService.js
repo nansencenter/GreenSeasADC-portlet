@@ -67,7 +67,7 @@ myNamespace.WebFeatureService = (function($, OL) {
 					var output = "";
 					if (debugwfs)
 						console.log("SWAPPING, stringArray.length:" + stringArray.length);
-					for ( var i = 0, l = stringArray.length; i < l; i = i + 2) {
+					for (var i = 0, l = stringArray.length; i < l; i = i + 2) {
 						output += stringArray[i + 1] + " " + stringArray[i] + " ";
 						// if (debugwfs)
 						// console.log(stringArray[i+1]+" "+stringArray[i]+" ");
@@ -100,7 +100,7 @@ myNamespace.WebFeatureService = (function($, OL) {
 				}
 				var stringArray = filter.slice(startIndex, endIndex).split(" ");
 				var output = "";
-				for ( var i = 0, l = stringArray.length; i < l; i = i + 2) {
+				for (var i = 0, l = stringArray.length; i < l; i = i + 2) {
 					output += stringArray[i + 1] + " " + stringArray[i] + " ";
 				}
 				if (debugwfs)
@@ -181,30 +181,31 @@ myNamespace.WebFeatureService = (function($, OL) {
 	}
 
 	function getUpdatedParameters(requestData) {
-		var modifiedRequestData = [{}];
+		var modifiedRequestData = [ {} ];
 		var index = 0;
 		var currentSize = 0;
 		var number = 0;
-		for ( var i = 0, l = requestData.length; i < l; i++) {
+		for (var i = 0, l = requestData.length; i < l; i++) {
 			var extraPar = {
 				TYPENAME : requestData[i][0],
 				FILTER : requestData[i][2],
 				RESULTTYPE : "hits"
 			};
-			//TODO: swappos should only be needed once for this, a lot of duplicated data
+			// TODO: swappos should only be needed once for this, a lot of
+			// duplicated data
 			var xml = convertParametersToGetFeatureXML(extraPar);
 			var currentLength = xml.length;
 			currentSize += currentLength;
-			if (number > 75 || (number !== 0 && currentSize > 1600000)){
+			if (number > 75 || (number !== 0 && currentSize > 1600000)) {
 				index++;
 				currentSize = currentLength;
-				number =0;
+				number = 0;
 				modifiedRequestData.push({});
 			}
 			modifiedRequestData[index][requestData[i][1]] = xml;
 			number++;
 		}
-		myNamespace.ajax.getUpdateParametersDataFromServer(modifiedRequestData.reverse(),(index+1));
+		myNamespace.ajax.getUpdateParametersDataFromServer(modifiedRequestData.reverse(), (index + 1));
 	}
 
 	// public interface

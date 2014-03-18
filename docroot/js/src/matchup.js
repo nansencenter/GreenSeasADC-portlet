@@ -337,7 +337,7 @@ myNamespace.matchup = (function($, ns) {
 		setUpOPeNDAPSelector : setUpOPeNDAPSelector,
 		compareRaster : compareRaster,
 		compareData : compareData,
-		generateOptionsFromAllSelectedParameters:generateOptionsFromAllSelectedParameters,
+		generateOptionsFromAllSelectedParameters : generateOptionsFromAllSelectedParameters,
 	};
 
 }(jQuery, myNamespace));

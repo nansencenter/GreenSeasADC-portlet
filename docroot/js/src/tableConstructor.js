@@ -190,7 +190,7 @@ myNamespace.tableConstructor = (function($, hP) {
 			$.each(window.combinedParameters, function(i, val) {
 				if (window.combinedParameters[i].layer === table) {
 					var found = false;
-					for ( var j = 0, l = multi.length; !found && j < l; j++) {
+					for (var j = 0, l = multi.length; !found && j < l; j++) {
 						if (window.combinedParameters[i].method === ("multi" + multi[j])) {
 							found = true;
 						}
@@ -215,9 +215,9 @@ myNamespace.tableConstructor = (function($, hP) {
 				if (displayed.indexOf(table + ":" + val) === -1) {
 					// Check if the parameter is not to be combined:
 					var found = false;
-					for ( var j = 0, l = combinations.length; !found && j < l; j++) {
+					for (var j = 0, l = combinations.length; !found && j < l; j++) {
 						var parArr = window.combinedParameters[combinations[j]].parameters;
-						for ( var k = 0, l2 = parArr.length; !found && k < l2; k++)
+						for (var k = 0, l2 = parArr.length; !found && k < l2; k++)
 							if (val === parArr[k])
 								found = true;
 					}
