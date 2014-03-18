@@ -175,6 +175,27 @@ myNamespace.mapLayers = (function($, bH) {
 
 		var html = colorscalerange + styleSelector + logscaleSelector + zAxis + tAxis;
 		$("#layerMetaData" + activeLayer).html(html);
+
+		bH.change("#logscaleVariable" + activeLayer, function(event) {
+			if (event.target.options[event.target.selectedIndex].value === "true") {
+				if ($("#colorscalerangeMin" + activeLayer).val() <= 0) {
+					myNamespace.errorMessage
+							.showErrorMessage("Cannot use a logarithmic scale with negative or zero values. Changing back to linear scale.");
+					$(event.target).val("false");
+				}
+			}
+		});
+		
+		bH.change("#colorscalerangeMin" + activeLayer, function(event) {
+				if ($("#colorscalerangeMin" + activeLayer).val() <= 0) {
+					if ($('#logscaleVariable' + activeLayer).find(":selected").val() === "true") {
+					myNamespace.errorMessage
+							.showErrorMessage("Cannot use a logarithmic scale with negative or zero values. Changing to Linear scale.");
+					$('#logscaleVariable' + activeLayer).val("false");
+				}
+			}
+		});
+		
 		bH.change("#colorscalerangeAuto" + activeLayer, function(event) {
 			// console.log(this.checked);
 			if (this.checked) {
