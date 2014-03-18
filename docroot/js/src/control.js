@@ -53,7 +53,7 @@ myNamespace.control = (function($, OL, ns) {
 
 	function setUpCruiseSelector() {
 		$("#cruiseSelectorDiv").html(
-				ns.mapLayers.setUpSelectorArray(window.cruisesList, "cruiseSelected", "cruiseSelected"));
+				ns.utilities.setUpSelectorArray(window.cruisesList, "cruiseSelected", "cruiseSelected"));
 	}
 
 	function setUpRegions() {
@@ -62,7 +62,7 @@ myNamespace.control = (function($, OL, ns) {
 				+ " target='_new'>Use this link to find your region</a><br>";
 		$("#regionList").html(
 				findRegions
-						+ ns.mapLayers.setUpSelector(window.longhurstRegions, "longhurstRegionSelected",
+						+ ns.utilities.setUpSelector(window.longhurstRegions, "longhurstRegionSelected",
 								"longhurstRegionSelected"));
 		var my_options = $("#longhurstRegionSelected option");
 

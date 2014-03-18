@@ -26,7 +26,7 @@ myNamespace.mapLayers = (function($, bH) {
 	}
 	function addWMSLayerSelector() {
 		checkWidth();
-		var selectElement = setUpSelectorArray(window.wmsLayers, "mapLayersWMSURL" + activeLayers, activeLayers);
+		var selectElement = myNamespace.utilities.setUpSelectorArray(window.wmsLayers, "mapLayersWMSURL" + activeLayers, activeLayers);
 		var button = "<input type='button' id='toggleLayerButton" + activeLayers + "' name='" + activeLayers
 				+ "' value='Update on map'/>";
 		$("#layerURLSelectorContainer").append("<br><h5>Raster " + activeLayers + "</h5>" + button + selectElement);
@@ -80,28 +80,6 @@ myNamespace.mapLayers = (function($, bH) {
 		}, selectedOption);
 	}
 
-	function setUpSelectorArray(array, id, name) {
-		name = "name='" + name + "'";
-		var selectElement = "<select id='" + id + "' " + name + ">";
-		var options = "";
-		$.each(array, function(i, val) {
-			options += "<option value=\"" + val.value + "\">" + val.name + "</option>";
-		});
-		selectElement += options + "</select>";
-		return selectElement;
-	}
-
-	function setUpSelector(hashMap, id, name) {
-		name = "name='" + name + "'";
-		var selectElement = "<select id='" + id + "' " + name + ">";
-		var options = "";
-		$.each(hashMap, function(i, val) {
-			options += "<option value=\"" + i + "\">" + val + "</option>";
-		});
-		selectElement += options + "</select>";
-		return selectElement;
-	}
-
 	function setUpLayerMetaData(response, activeLayer) {
 		if (debugMl)
 			console.log("Setting up setUpLayerMetaData for:" + activeLayer + ":"
@@ -130,7 +108,7 @@ myNamespace.mapLayers = (function($, bH) {
 					zAxisMap[val] = val;
 				});
 			}
-			zAxis += setUpSelector(zAxisMap, "zAxisVariable" + activeLayer, activeLayer);
+			zAxis += myNamespace.utilities.setUpSelector(zAxisMap, "zAxisVariable" + activeLayer, activeLayer);
 		}
 		var tAxis = "";
 		// time = "T00:00:00.000Z";
@@ -147,7 +125,7 @@ myNamespace.mapLayers = (function($, bH) {
 					});
 				});
 			});
-			tAxis = setUpSelector(tAxisMap, "dateVariable" + activeLayer, activeLayer);
+			tAxis = myNamespace.utilities.setUpSelector(tAxisMap, "dateVariable" + activeLayer, activeLayer);
 		}
 		var colorscaleMin = 0;
 		var colorscaleMax = 1;
@@ -170,8 +148,8 @@ myNamespace.mapLayers = (function($, bH) {
 			"true" : "Logarithmic Scale",
 		};
 		// TOOD: disable logscale for colorscalerange with values <= 0
-		var styleSelector = setUpSelector(styles, "styleVariable" + activeLayer, activeLayer);
-		var logscaleSelector = setUpSelector(logscales, "logscaleVariable" + activeLayer, activeLayer);
+		var styleSelector = myNamespace.utilities.setUpSelector(styles, "styleVariable" + activeLayer, activeLayer);
+		var logscaleSelector = myNamespace.utilities.setUpSelector(logscales, "logscaleVariable" + activeLayer, activeLayer);
 
 		var html = colorscalerange + styleSelector + logscaleSelector + zAxis + tAxis;
 		$("#layerMetaData" + activeLayer).html(html);
@@ -247,7 +225,7 @@ myNamespace.mapLayers = (function($, bH) {
 		$.each(obj.timesteps, function(i, time) {
 			timeMap[time] = time;
 		});
-		var selectElement = setUpSelector(timeMap, "timeVariable" + activeLayer);
+		var selectElement = myNamespace.utilities.setUpSelector(timeMap, "timeVariable" + activeLayer);
 		$("#timeVariable" + activeLayer).remove();
 		$("#dateVariable" + activeLayer).after(selectElement);
 		if ($('#colorscalerangeAuto' + activeLayer).is(":checked"))
@@ -269,7 +247,7 @@ myNamespace.mapLayers = (function($, bH) {
 		$.each(variables, function(i, val) {
 			hashMap[i] = val;
 		});
-		var selectElement = setUpSelector(hashMap, "WMSLayerVariable" + activeLayer, activeLayer);
+		var selectElement = myNamespace.utilities.setUpSelector(hashMap, "WMSLayerVariable" + activeLayer, activeLayer);
 
 		var html = selectElement + "<div id='layerMetaData" + activeLayer + "'></div>";
 		$("#" + selectedElement.id + "variable" + activeLayer).html(html);
@@ -512,8 +490,6 @@ myNamespace.mapLayers = (function($, bH) {
 	// public interface
 	return {
 		updateHTML : updateHTML,
-		setUpSelector : setUpSelector,
-		setUpSelectorArray : setUpSelectorArray,
 		setUpStyleForLegend : setUpStyleForLegend,
 		addParametersLayerButton : addParametersLayerButton,
 		addWMSLayerSelector : addWMSLayerSelector
