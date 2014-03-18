@@ -166,11 +166,11 @@ public class GreenseasPortlet extends MVCPortlet {
 				e.printStackTrace();
 			}
 			String charset = "UTF-8";
-			int numberOfThreadds = 2;
+			int numberOfThreads = 4;
 			Set<?> entrySet = jsonO.keySet();
 			ArrayList<Map<String, String>> responseMaps = new ArrayList<Map<String, String>>();
 			ArrayList<Map<String, String>> requestMaps = new ArrayList<Map<String, String>>();
-			for (int i = 0; i < numberOfThreadds; i++) {
+			for (int i = 0; i < numberOfThreads; i++) {
 				responseMaps.add(new HashMap<String, String>());
 				requestMaps.add(new HashMap<String, String>());
 			}
@@ -180,10 +180,10 @@ public class GreenseasPortlet extends MVCPortlet {
 				String key = (String) o;
 				String request = (String) jsonO.get(key);
 				requestMaps.get(thredd).put(key, request);
-				thredd = (thredd + 1) % numberOfThreadds;
+				thredd = (thredd + 1) % numberOfThreads;
 			}
 			ArrayList<GetNumberOfFeatures> threadds = new ArrayList<GetNumberOfFeatures>();
-			for (int i = 0; i < numberOfThreadds; i++) {
+			for (int i = 0; i < numberOfThreads; i++) {
 				GetNumberOfFeatures runnable = new GetNumberOfFeatures(responseMaps.get(i), requestMaps.get(i),
 						charset, urlS, i);
 				Thread thread = new Thread(runnable);
@@ -197,7 +197,7 @@ public class GreenseasPortlet extends MVCPortlet {
 					e.printStackTrace();
 				}
 				boolean done = true;
-				for (int i = 0; i < numberOfThreadds; i++) {
+				for (int i = 0; i < numberOfThreads; i++) {
 					if (!threadds.get(i).done) {
 						done = false;
 						break;
@@ -208,7 +208,7 @@ public class GreenseasPortlet extends MVCPortlet {
 			}
 			Map<String, String> responseMap = new HashMap<String, String>();
 
-			for (int i = 0; i < numberOfThreadds; i++) {
+			for (int i = 0; i < numberOfThreads; i++) {
 				responseMap.putAll(responseMaps.get(i));
 			}
 			JSONObject jsonObject = new JSONObject(responseMap);
