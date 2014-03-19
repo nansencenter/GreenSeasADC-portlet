@@ -113,11 +113,6 @@ myNamespace.mapViewer = (function(OL, $) {
 					};
 					var pointFeature = new OL.Feature.Vector(pointGeometry, null, style);
 					pointFeatures.push(pointFeature);
-					// console.log("added:");
-					// console.log(pointFeature);
-				} else {
-					// console.log("Not in:");
-					// console.log(data[id]);
 				}
 			}
 		}
@@ -255,11 +250,8 @@ myNamespace.mapViewer = (function(OL, $) {
 
 		// Adding the layers to the map
 		var bg = backgroundLayers, fg = mapLayers;
-		layers = [];
+		var layers = [];
 		$.each(backgroundLayers, function(i, val) {
-			layers.push(val);
-		});
-		$.each(mapLayers, function(i, val) {
 			layers.push(val);
 		});
 		map.addLayers(layers);
@@ -294,9 +286,27 @@ myNamespace.mapViewer = (function(OL, $) {
 		});
 
 		map.addControl(control);
+
+		addMapLayers();
 		registerClickBehaviour();
 		if (debugmW)
 			console.log("Finished initMap");
+	}
+
+	function addMapLayers() {
+		$.each(mapLayers, function(i, val) {
+			map.addLayer(val);
+			window.setTimeout(function() {
+				checkIfLayerHasLoaded(val);
+			}, 5000);
+		});
+	}
+
+	function checkIfLayerHasLoaded(layer) {
+		if (layer.numLoadingTiles > 0) {
+			map.removeLayer(layer);
+			map.addLayer(layer);
+		}
 	}
 
 	function createPDF() {
