@@ -413,8 +413,8 @@ myNamespace.mapViewer = (function(OL, $) {
 			}
 		});
 		var strategy = new OpenLayers.Strategy.Cluster();
-		strategy.distance = 10;
-		strategy.treshold = 2;
+		strategy.distance = 5;
+		strategy.treshold = 3;
 		var pointLayer = new OL.Layer.Vector(name, {
 			strategies : [ strategy ],
 			styleMap : new OpenLayers.StyleMap({
