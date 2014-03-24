@@ -14,7 +14,7 @@
 <portlet:actionURL var="submitFileAction" name="submitFile">
 </portlet:actionURL>
 
-<div id="portlet">
+<div id="gsadbcPortlet">
 
 	<div id="mapContainer">
 		<div id="simple_map"></div>
@@ -38,7 +38,7 @@
 		</ul>
 		<div id="queryTab">
 			<div id='search'>
-				<p>Search options. Remember: if the search is too big, it may take some time.</p>
+				<p>Search options. If the search is too big, it may take some time, especially in Internet Explorer.</p>
 				<div id='queryOptions'>
 					<h3>
 						<span id='bboxHeaderText'>Bounding box <em>(off)</em></span>
