@@ -16,6 +16,7 @@
 		<!-- application css-->
 		<header-portlet-css>/css/greenSeasMain.css</header-portlet-css>
 		<header-portlet-css>/js/lib/theme/default/style.css</header-portlet-css>
+		<header-portlet-css>/css/jquery.qtip.css</header-portlet-css>
 		<!-- application libs -->
 		<header-portlet-javascript>/js/lib/jquery.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/lib/jquery.form.js</header-portlet-javascript>
@@ -32,6 +33,7 @@
 		<header-portlet-javascript>/js/lib/geoext/GeoExt.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/lib/geoext/SimplePrint.js</header-portlet-javascript>
 		<header-portlet-javascript>/js/lib/geoext/override-ext-ajax.js</header-portlet-javascript>
+		<header-portlet-javascript>/js/lib/jquery.qtip.min.js</header-portlet-javascript>
 		<!-- testing lib -->
 		<header-portlet-javascript>/js/lib/qunit-1.11.0.js</header-portlet-javascript>
 		<!-- application script files -->

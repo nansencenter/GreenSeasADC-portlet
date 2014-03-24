@@ -294,6 +294,7 @@ myNamespace.mapViewer = (function(OL, $) {
 	}
 
 	function addMapLayers() {
+		//TODO: does not work as intended
 		$.each(mapLayers, function(i, val) {
 			map.addLayer(val);
 			window.setTimeout(function() {
@@ -407,7 +408,8 @@ myNamespace.mapViewer = (function(OL, $) {
 			fillOpacity : 0.8,
 			strokeColor : "#cc6633",
 			strokeWidth : "${width}",
-			strokeOpacity : 0.8
+			strokeOpacity : 0.8,
+			title : "${tooltip}"
 		}, {
 			context : {
 				width : function(feature) {
@@ -419,6 +421,11 @@ myNamespace.mapViewer = (function(OL, $) {
 						pix = Math.min(feature.attributes.count, 7) + 3;
 					}
 					return pix;
+				},
+				tooltip : function(feature) {
+					var count = feature.attributes.count;
+					var tip = count + " data point";
+					return count === 1 ? tip : tip + 's';
 				}
 			}
 		});
