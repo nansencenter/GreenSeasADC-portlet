@@ -84,7 +84,7 @@ myNamespace.query = (function(OL, $) {
 		if (debugq)
 			console.log("createRegionFilter");
 		// var format = new OpenLayers.Format.WKT();
-		var geometry = OL.Geometry.fromWKT(region);
+		var geometry = OL.Geometry.fromWKT(window.polygon[region]);
 		if (debugq)
 			console.log(geometry);
 		var regionFilter = new OL.Filter.Spatial({
@@ -360,10 +360,9 @@ myNamespace.query = (function(OL, $) {
 
 		if (document.getElementById('regionEnabledCheck').checked) {
 			var region = $("#longhurstRegionSelected").find(":selected").val();
-			if (!(typeof window.polygon === 'undefined') && !(typeof window.polygon[region] === 'undefined'))
-				return window.polygon[region];
-			myNamespace.ajax.getLonghurstPolygon(region);
-			return window.polygon[region];
+			if (!(!(typeof window.polygon === 'undefined') && !(typeof window.polygon[region] === 'undefined')))
+				myNamespace.ajax.getLonghurstPolygon(region);
+			return region;
 		}
 	}
 

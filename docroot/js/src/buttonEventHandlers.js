@@ -98,6 +98,7 @@ myNamespace.buttonEventHandlers = (function($) {
 		callFromControl("#anywhereButton", c.lonLatAnywhere);
 		callFromControl("#initiateRasterDataButton", c.initiateRasterDataButton);
 		callFromControl("#calculateStatisticsButton", c.calculateStatisticsButton);
+		callFromControl("#saveQueryButton", c.saveQueryButton);
 
 		// on change events
 		$("#exportParametersFormats").change(function() {

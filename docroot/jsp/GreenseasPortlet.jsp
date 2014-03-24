@@ -33,6 +33,7 @@
 			<!-- 			<li><a href="#rasterTab">Configure raster data</a></li> -->
 			<li><a href="#matchUpTab">Model/data matchup</a></li>
 			<li><a href="#layersTab">Configure Map layers</a></li>
+			<li><a href="#saveTab">Save</a></li>
 
 		</ul>
 		<div id="queryTab">
@@ -374,6 +375,20 @@
 			</div>
 		</div>
 
+		<div id="saveTab">
+			<div id='saveAccordionDiv'>
+				<h3>
+					<span id='saveDivHeaderText'>Save Query</span>
+				</h3>
+				<div id='saveDiv'>
+				This is currently in beta and it is possible that the link might not work in future versions, however it would
+				always be possible to interpret the query from the link.
+					<div id="saveContainer"></div>
+					<input type='button' id='saveQueryButton' value="Save Query" />
+				</div>
+			</div>
+		</div>
+
 	</div>
 
 	<!-- these divs are popus, don't actually appear -->
@@ -382,13 +397,14 @@
 
 <aui:script>
 	$(document).ready(function() {
+	myNamespace.parameters = {};
 	<!-- Initiating context path for images -->
 	window.contextPath = "<%=request.getContextPath()%>";
 	<!-- Initiating all properties from the main properties file -->
 	<%=renderRequest.getAttribute("allProperties")%>
 	<!-- Initiating window.allParametersHeader -->
 	<%=renderRequest.getAttribute("allParametersHeader")%>
-	<!-- Initiating window.wmsLayers -->
+	<!-- Initiating window.wmsLayers -->linkedQuery
 	<%=renderRequest.getAttribute("wmsLayers")%>
 	<!-- Initiating window.openDAPURLs -->
 	<%=renderRequest.getAttribute("openDAPURLs")%>
@@ -402,6 +418,8 @@
 	<%=renderRequest.getAttribute("allLayers")%>
 		window.portletNameSpace = '<portlet:namespace />';
 		window.ajaxCallResourceURL = '<%=ajaxCallResourceURL.toString()%>';
+	myNamespace.parameters.linkedQuery="<%=renderRequest.getAttribute("linkedQuery")%>";
+	myNamespace.parameters.portletURL="<%=renderRequest.getAttribute("portletURL")%>";
 		myNamespace.control.init();
 	});
 </aui:script>

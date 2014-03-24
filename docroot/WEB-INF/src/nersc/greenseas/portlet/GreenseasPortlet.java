@@ -37,10 +37,12 @@ import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletException;
 import javax.portlet.PortletSession;
+import javax.portlet.PortletURL;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
+import javax.servlet.http.HttpServletRequest;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -51,6 +53,7 @@ import nersc.greenseas.rasterData.NetCDFReader;
 
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.util.PortalUtil;
+import com.liferay.portlet.PortletURLUtil;
 import com.liferay.util.bridges.mvc.MVCPortlet;
 
 /**
@@ -64,6 +67,7 @@ public class GreenseasPortlet extends MVCPortlet {
 
 	@Override
 	public void doView(RenderRequest renderRequest, RenderResponse renderResponse) throws IOException, PortletException {
+		//TODO: validate/escape to prevent injection
 		renderRequest.setAttribute("allParametersHeader", DatabaseProperties.getAllParametersHeader());
 		renderRequest.setAttribute("allLayers", DatabaseProperties.getAllLayers());
 		renderRequest.setAttribute("allProperties", DatabaseProperties.getAllProperties());
@@ -72,6 +76,11 @@ public class GreenseasPortlet extends MVCPortlet {
 		renderRequest.setAttribute("wmsLayers", DatabaseProperties.getWmsLayers());
 		renderRequest.setAttribute("openDAPURLs", DatabaseProperties.getOpenDAPURLs());
 		renderRequest.setAttribute("cruisesList", DatabaseProperties.getCruisesList());
+		HttpServletRequest request = PortalUtil.getHttpServletRequest(renderRequest);
+		String query = PortalUtil.getOriginalServletRequest(request).getParameter("query");
+		renderRequest.setAttribute("linkedQuery", query);
+		PortletURL url = PortletURLUtil.getCurrent(renderRequest, renderResponse);
+		renderRequest.setAttribute("portletURL", url.toString().split("\\?")[0].split(";")[0]);
 		super.doView(renderRequest, renderResponse);
 	}
 

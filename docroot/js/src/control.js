@@ -5,6 +5,7 @@ var debugc = false;// debug flag
 myNamespace.mainQueryArray = null;
 myNamespace.mainQueryObject = null;
 myNamespace.parametersQueryString = null;
+myNamespace.parameterQueryArray = null;
 
 myNamespace.control = (function($, OL, ns) {
 	"use strict";
@@ -49,6 +50,90 @@ myNamespace.control = (function($, OL, ns) {
 		setUpCruiseSelector();
 		ns.matchup.setUpUploadRaster();
 		ns.matchup.setUpOPeNDAPSelector();
+		regenerateSavedQuery()
+
+		$('[title]').qtip();
+	}
+
+	function regenerateSavedQuery() {
+		if (ns.parameters.linkedQuery !== "null") {
+			// TODO: Set some sort of message that it is loaded
+			var filters = ns.parameters.linkedQuery.split(";");
+			for (var i = 0, l = filters.length; i < l; i++) {
+				var split = filters[i].split("::");
+				switch (split[0]) {
+				case 'filterBbox':
+					$("#bboxEnabledCheck").prop("checked", false);
+					$("#bboxEnabledCheck").trigger('click');
+					var filterBbox = split[1].split(",");
+					$('#top').val(filterBbox[2]);
+					$('#left').val(filterBbox[1]);
+					$('#right').val(filterBbox[3]);
+					$('#bottom').val(filterBbox[0]);
+					break;
+				case 'date':
+					var date = split[1].split(",");
+					$("#dateEnabledCheck").prop("checked", false);
+					$("#dateEnabledCheck").trigger('click');
+					$('#fromDate').val(date[0]);
+					$('#toDate').val(date[1]);
+					if (date.length === 4) {
+						$("#timeEnabledCheck").prop("checked", false);
+						$("#timeEnabledCheck").trigger('click');
+						$('#fromTime').val(date[2]);
+						$('#toTime').val(date[3]);
+					}
+					break;
+				case 'attr':
+					break;
+				case 'depth':
+					var depth = split[1].split(",");
+					$("#depthEnabledCheck").prop("checked", false);
+					$("#depthEnabledCheck").trigger('click');
+					$('#depthMin').val(depth[0]);
+					$('#depthMax').val(depth[1]);
+					break;
+				case 'months':
+					$("#monthEnabledCheck").prop("checked", false);
+					$("#monthEnabledCheck").trigger('click');
+					var months = split[1].split(",");
+					$('#fromMonth').val(months[0]);
+					$('#toMonth').val(months[1]);
+					break;
+				case 'region':
+					// TODO: ensure its loaded!
+					$("#regionEnabledCheck").prop("checked", false);
+					$("#regionEnabledCheck").trigger('click');
+					$("#longhurstRegionSelected").val(split[1]);
+					break;
+				case 'cruise':
+					$("#cruiseEnabledCheck").prop("checked", false);
+					$("#cruiseEnabledCheck").trigger('click');
+					$("#cruiseSelected").val(split[1]);
+					break;
+				case 'metaData':
+					$("#metadataEnabledCheck").prop("checked", false);
+					$("#metadataEnabledCheck").trigger('click');
+					metaDataFromStore = split[1].split(",");
+					if (initatedMetadata) {
+						for (var i = 0, l = metaDataFromStore.length; i < l; i++) {
+							$("#metadataTree").jstree("select_node",
+									"#" + window.metaDataTable + "\\:" + metaDataFromStore[i]);
+						}
+					}
+					break;
+				case 'parameters':
+					parametersFromQuery = split[1].split(",");
+					for (var i = 0, l = parametersFromQuery.length; i < l; i++) {
+						checkNodeInTree(parametersFromQuery[i], "#parametersTree");
+					}
+					break;
+
+				default:
+					break;
+				}
+			}
+		}
 	}
 
 	function setUpCruiseSelector() {
@@ -78,9 +163,7 @@ myNamespace.control = (function($, OL, ns) {
 		$("#longhurstRegionSelected").empty().append(my_options);
 	}
 
-	var queryHasChanged = false;
 	function mainQueryButton() {
-		queryHasChanged = false;
 		// removing the parameterlayers from previous searches
 		ns.mapViewer.removeAllParameterLayers();
 		ns.mapViewer.removeBasicSearchLayer();
@@ -232,11 +315,13 @@ myNamespace.control = (function($, OL, ns) {
 		var allSelected = $("#parametersTree").jstree("get_checked", null, true);
 		var selected = [];
 		var parametersQueryString = "Selected parameters:";
+		var parameterQueryArray = [];
 		var delimiter = "";
 		$.each(allSelected, function(i, val) {
 			if (val.getAttribute("rel") !== "noBox") {
 				var id = val.getAttribute("id");
 				selected.push(id);
+				parameterQueryArray.push(id);
 				parametersQueryString += delimiter + ns.handleParameters.getHeaderFromRawData(id) + "";
 				delimiter = ", ";
 			}
@@ -247,7 +332,8 @@ myNamespace.control = (function($, OL, ns) {
 		if (selected.length !== 0) {
 			// removing the parameterlayers from previous searches
 			ns.mapViewer.removeAllParameterLayers();
-			myNamespace.parametersQueryString = parametersQueryString;
+			ns.parametersQueryString = parametersQueryString;
+			ns.parameterQueryArray = parameterQueryArray;
 			setHTMLLoadingParameters();
 			ns.handleParameters.selectParameters(selected);
 
@@ -312,6 +398,12 @@ myNamespace.control = (function($, OL, ns) {
 			heightStyle : "content"
 		});
 		$("#rasterLayersDiv").accordion({
+			collapsible : true,
+			active : false,
+			heightStyle : "content"
+		});
+
+		$("#saveAccordionDiv").accordion({
 			collapsible : true,
 			active : false,
 			heightStyle : "content"
@@ -385,6 +477,8 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function hasMainQueryObjectChanged() {
+		if (myNamespace.mainQueryObject == null)
+			return true;
 		var filterBbox = ns.query.createfilterBoxHashMap();
 		if (filterBbox) {
 			if (myNamespace.mainQueryObject.filterBbox) {
@@ -431,18 +525,25 @@ myNamespace.control = (function($, OL, ns) {
 			} else {
 				return true;
 			}
-		} else if (myNamespace.mainQueryObject.depth)
+		} else if (myNamespace.mainQueryObject.depth) {
 			return true;
+		}
 
 		var region = ns.query.createRegionArray();
 		if (region) {
 			if (myNamespace.mainQueryObject.region) {
-				if (region !== myNamespace.mainQueryObject.region)
+				if (region !== myNamespace.mainQueryObject.region) {
 					return true;
-			} else
+				}
+			} else {
 				return true;
-		} else if (myNamespace.mainQueryObject.region)
-			return true;
+			}
+		} else {
+			if (myNamespace.mainQueryObject.region) {
+				return true;
+			}
+		}
+
 		var cruise = null;
 		if (document.getElementById('cruiseEnabledCheck').checked) {
 			cruise = $("#cruiseSelected").find(":selected").val();
@@ -467,6 +568,7 @@ myNamespace.control = (function($, OL, ns) {
 				return true;
 		else if (myNamespace.mainQueryObject.months)
 			return true;
+		return false;
 	}
 
 	function queryLayer() {
@@ -617,9 +719,6 @@ myNamespace.control = (function($, OL, ns) {
 				}
 			});
 			$.each(combined, function(j, comb) {
-				// if (debugc) {
-				// console.log("Checking:" + comb);
-				// }
 				if (window.combinedParameters[comb].method === "prioritized") {
 					var val = null;
 					var qfString = "";
@@ -778,6 +877,8 @@ myNamespace.control = (function($, OL, ns) {
 		}
 	}
 
+	var initatedMetadata = false;
+	var metaDataFromStore = null;
 	function initiateMetadata(input) {
 		for ( var table in allLayers) {
 			if (allLayers.hasOwnProperty(table)) {
@@ -801,15 +902,6 @@ myNamespace.control = (function($, OL, ns) {
 				 */
 				"icons" : false
 			},
-		/*
-		 * "types" : { "types" : { "layer" : { // Defining new type 'disabled'
-		 * "check_node" : false, "uncheck_node" : false }, "default" : { //
-		 * Override default functionality "check_node" : function(node) {
-		 * $(node).children('ul').children('li').children('a').children('.jstree-checkbox').click();
-		 * return true; }, "uncheck_node" : function(node) {
-		 * $(node).children('ul').children('li').children('a').children('.jstree-checkbox').click();
-		 * return true; } } } }
-		 */
 		});
 		$("#metadataTree").bind("select_node.jstree", function(event, data) {
 			// `data.rslt.obj` is the jquery extended node that was clicked
@@ -817,12 +909,19 @@ myNamespace.control = (function($, OL, ns) {
 				$("#metadataTree").jstree("uncheck_node", data.rslt.obj);
 			else
 				$("#metadataTree").jstree("check_node", data.rslt.obj);
-			// if ($("#metadataTree").jstree("is_open", data.rslt.obj))
-			// $("#metadataTree").jstree("close_node", data.rslt.obj);
-			// else
-			// $("#metadataTree").jstree("open_node", data.rslt.obj);
 		});
+		if (metaDataFromStore !== null) {
+			for (var i = 0, l = metaDataFromStore.length; i < l; i++) {
+				checkNodeInTree(window.metaDataTable + ":" + metaDataFromStore[i], "#metadataTree");
+			}
+		}
+		initatedMetadata = true;
+	}
 
+	function checkNodeInTree(id, tree) {
+		window.setTimeout(function() {
+			$(tree).jstree("select_node", document.getElementById(id));
+		}, 0);
 	}
 
 	function initiateParameters(input) {
@@ -865,16 +964,10 @@ myNamespace.control = (function($, OL, ns) {
 		});
 		// Toggle node when clicking the text.
 		$("#parametersTree").bind("select_node.jstree", function(event, data) {
-			// `data.rslt.obj` is the jquery extended node that was clicked
-			console.log(data.rslt.obj);
 			if ($("#parametersTree").jstree("is_checked", data.rslt.obj))
 				$("#parametersTree").jstree("uncheck_node", data.rslt.obj);
 			else
 				$("#parametersTree").jstree("check_node", data.rslt.obj);
-			// if ($("#parametersTree").jstree("is_open", data.rslt.obj))
-			// $("#parametersTree").jstree("close_node", data.rslt.obj);
-			// else
-			// $("#parametersTree").jstree("open_node", data.rslt.obj);
 		});
 		$("#parametersTree").bind("loaded.jstree", function(event, data) {
 			$(this).find('li[rel=noBox]').find('.jstree-checkbox:first').hide();
@@ -886,16 +979,33 @@ myNamespace.control = (function($, OL, ns) {
 				filterParametersTreeButton();
 			}
 		});
+
+		var countDown = allLayers.length;
+		for ( var table in allLayers) {
+			if (allLayers.hasOwnProperty(table)) {
+				if (allLayers[table])
+					countDown--;
+				else
+					break;
+			}
+		}
+		if (countDown === 0) {
+			initiatedAllParameters = true;
+		}
+		if (parametersFromQuery != null) {
+			for (var i = 0, l = parametersFromQuery.length; i < l; i++) {
+				checkNodeInTree(parametersFromQuery[i], "#parametersTree");
+			}
+		}
 	}
+	var parametersFromQuery = null;
+	var initiatedAllParameters = false;
 
 	function compareRasterButton() {
 		ns.matchup.compareRaster(data);
 	}
 
 	function addAParameterToData(values, parameter) {
-		// console.log("addAParameterToData:"+values+","+parameter);
-		// console.log(values);
-		// console.log(data);
 		$.each(data, function(id) {
 			val = null;
 			lat = null;
@@ -1004,6 +1114,53 @@ myNamespace.control = (function($, OL, ns) {
 	function getData() {
 		return data;
 	}
+
+	function saveQueryButton() {
+		var query = "";
+		if (myNamespace.mainQueryObject == null) {
+			ns.errorMessage
+					.showErrorMessage("You seem to not have performed a query. Please do so before you can save it.");
+			return;
+		}
+		if (hasMainQueryObjectChanged()) {
+			ns.errorMessage
+					.showErrorMessage("You seem to have changed the main query options since you ran the main query."
+							+ " The last main query which was executed will be saved.");
+		}
+		var delimiter = "";
+		var equalsSign = "::";
+		// TODO: delimiter?
+		for (filter in ns.mainQueryObject) {
+			if (ns.mainQueryObject.hasOwnProperty(filter)) {
+				var object = ns.mainQueryObject[filter];
+				if (filter === 'date') {
+					query += delimiter;
+					query += filter + equalsSign + object.fromDate + ',' + object.toDate;
+					if (object.time) {
+						query += ',' + object.fromTime + ',' + object.toTime;
+					}
+				} else if (filter === 'depth') {
+					query += delimiter + filter + equalsSign + object.min + ',' + object.max;
+				} else if (filter === 'months') {
+					query += delimiter + filter + equalsSign + object[0] + ',' + object[object.length - 1];
+				} else {
+					query += delimiter + filter + equalsSign + object;
+				}
+				delimiter = ';';
+			}
+		}
+		var message = "";
+		if (myNamespace.parameterQueryArray !== null) {
+			query += delimiter + "parameters" + equalsSign + myNamespace.parameterQueryArray;
+		}
+		if (query.length === 0) {
+			message = "<b>The query is empty!</b><br>";
+		}
+		var url = ns.parameters.portletURL;
+		if (query.length !== 0)
+			url += "?query=" + encodeURIComponent(query);
+		$("#saveContainer").html(message + "<a href='" + url + "'>" + url + "</a>");
+	}
 	// public interface
 	return {
 		activateBbox : activateBbox,
@@ -1032,6 +1189,7 @@ myNamespace.control = (function($, OL, ns) {
 		addAParameterToData : addAParameterToData,
 		getData : getData,
 		updateTreeWithInventoryNumbers : updateTreeWithInventoryNumbers,
+		saveQueryButton : saveQueryButton,
 	};
 
 }(jQuery, OpenLayers, myNamespace));
