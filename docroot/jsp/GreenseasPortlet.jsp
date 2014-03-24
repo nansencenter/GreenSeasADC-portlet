@@ -44,31 +44,31 @@
 						<span id='bboxHeaderText'>Bounding box <em>(off)</em></span>
 					</h3>
 					<div id='bbox'>
-						<input type="checkbox" id="bboxEnabledCheck">
+						<input type="checkbox" id="bboxEnabledCheck" title='Enables the bounding box query' />
 						Enable in query
 						<br>
-						<em>Tip: You can hold shift and draw with mouse on map to set bounding box</em>
+						<em>Tip: You can hold shift and draw with mouse on map to set bounding box. This will also automatically
+							enable this query.</em>
 						<br>
 						<input type='button' id='toCurrentExtent' value="From map extent"
 							title='Sets bounding box to the current extent of the map' />
-						<input type='button' id='anywhereButton' value="Anywhere" />
+						<input type='button' id='anywhereButton' value="Anywhere" title='Sets bounding box to the whole globe' />
 						<div>
 							<form name="lonlatform">
 								<div class='centered'>
-									<input type='text' id='top' size="5" />
+									<input type='text' id='top' size="5" title='Maximum latitude' />
 								</div>
 								<div class='offcentered'>
-									<input type='text' id='left' size="5" />
-									<input type='text' id='right' size="5" />
+									<input type='text' id='left' size="5" title='Minimum longitude' />
+									<input type='text' id='right' size="5" title='Maximum longitude' />
 								</div>
 								<div class='centered'>
-									<input type='text' id='bottom' size="5" />
+									<input type='text' id='bottom' size="5" title='Minimum latitude' />
 								</div>
 
-								<div title='If checked, map will move to this area when query is run'>
-									<input type="checkbox" name="updatemapcheck">
-									Update map focus when query is run
-								</div>
+								<br>
+								<input type="checkbox" name="updatemapcheck" title='If checked, map will zoom to this area when query is run'>
+								Update map focus when query is run
 							</form>
 						</div>
 					</div>
@@ -78,27 +78,27 @@
 					</h3>
 					<div id='datetime'>
 
-						<input type="checkbox" id="dateEnabledCheck">
+						<input type="checkbox" id="dateEnabledCheck" title='Enables the Date query' />
 						Search by date
 						<br>
 						<br>
 						<em>Date (Use yyyy-mm-dd format if no date picker appears)</em>
 						<br>
 						Between
-						<input type="date" id="fromDate" value="1913-01-01">
+						<input type="date" id="fromDate" value="1913-01-01" />
 						and
-						<input type="date" id="toDate" value="2012-01-01">
+						<input type="date" id="toDate" value="2012-01-01" />
 						<br>
-						<input type="checkbox" id="timeEnabledCheck">
+						<input type="checkbox" id="timeEnabledCheck" title='Enables the time query within the date-query' />
 						Include time in the date-search (date search must be enabled for this)
 						<br>
 						<br>
 						Between
-						<input type="time" id="fromTime" value="00:00">
+						<input type="time" id="fromTime" value="00:00" />
 						and
-						<input type="time" id="toTime" value="23:59">
+						<input type="time" id="toTime" value="23:59" />
 						<br>
-						<input type="checkbox" id="monthEnabledCheck">
+						<input type="checkbox" id="monthEnabledCheck" title='Enables the search-by-month query' />
 						Search by month
 						<br>
 						<br>
@@ -138,7 +138,7 @@
 					</h3>
 					<div id='depth'>
 
-						<input type="checkbox" id="depthEnabledCheck">
+						<input type="checkbox" id="depthEnabledCheck" title='Enables the depth query'>
 						Enable in query
 						<br>
 						<br>
@@ -164,7 +164,7 @@
 					<div id='metadataSelected'>
 
 						<div>
-							<input type="checkbox" id="metadataEnabledCheck">
+							<input type="checkbox" id="metadataEnabledCheck" title='Enables the metadata query' />
 							Enable in query
 						</div>
 						<em>Select the metadata you want to accompany the data. If this is not enabled, then, by default, all
@@ -178,7 +178,7 @@
 					<div id='cruiseSelectedDiv'>
 
 						<div>
-							<input type="checkbox" id="cruiseEnabledCheck">
+							<input type="checkbox" id="cruiseEnabledCheck" title='Enable the Cruise/Station query' />
 							Enable in query
 						</div>
 						<em>Select a cruise</em>
@@ -190,7 +190,7 @@
 					</h3>
 					<div id='regionSelected'>
 						<div>
-							<input type="checkbox" id="regionEnabledCheck">
+							<input type="checkbox" id="regionEnabledCheck" title='Enables the Longhurst region query' />
 							Enable in query
 						</div>
 						<em>Select the region you want to search by. There is currently no support for the Austral Polar Province and
@@ -220,26 +220,30 @@
 						<br>
 						Search the parameterslist:
 						<input type='text' id='treeSearchParameter' size="10" />
-						<input type='button' id=filterParametersTreeButton value="Search" />
-						<input type="button" id="clearSelectionButton" value="Clear selection">
-						<input type="button" id="collapseAllButton" value="Collapse All">
-						<input type="button" id="expandAllButton" value="Expand All">
-						<input type="button" id="toggleOrderPlanktonButton" value="Sort plankton by type">
+						<input type='button' id=filterParametersTreeButton value="Search"/>
+						<input type="button" id="clearSelectionButton" value="Clear selection" title='Deselect all parameters' />
+						<input type="button" id="collapseAllButton" value="Collapse All" title='Collapse all nodes in the list' />
+						<input type="button" id="expandAllButton" value="Expand All" title='Expand all nodes in the list' />
+						<input type="button" id="toggleOrderPlanktonButton" value="Sort plankton by type" title='Toggle sort by plankton type/size' />
 						<div id='loadTreeNumbersDiv'></div>
 						<div id="parametersTree"></div>
 						<br>
 						<br>
 						<div>
-							<input type="checkbox" id="qualityFlagsEnabledCheck">
+							<input type="checkbox" id="qualityFlagsEnabledCheck" title='Include qualityflags for the variables in the output' />
 							Include qualityflags (This will include an extra collumn for quality flags for each variable in the output).
 						</div>
 					</div>
 				</div>
-				<input type="checkbox" id="updateParametersList" checked />
+				<input type="checkbox" id="updateParametersList"
+					title='If this option is selected when the main query is run, an inventory of all available parameters in the selection will be updated in the parameters list.'
+					checked />
 				Update the list of parameters with inventory numbers when the main query is run.
 				<br>
-				<input type='button' id='filter' value="Run main query" />
-				<input type='button' id='filterParameters' value="Filter selected parameters" />
+				<input type='button' id='filter' value="Run main query"
+					title='Runs the main query based on the enabled queries above. The parameters list does not affect this initial query.' />
+				<input type='button' id='filterParameters' value="Filter selected parameters"
+					title='Filter the results in the main query based on the parameters selected.' />
 
 			</div>
 
@@ -279,7 +283,7 @@
 				</h3>
 				<div id="outerStatistics">
 					<div id="statistics">
-						<input type="button" id="calculateStatisticsButton" value="Calculate statistics" />
+						<input type="button" id="calculateStatisticsButton" value="Calculate statistics" title='Calculate quantity, min, max, average, sample standard deviation and variance of the selected parameters'/>
 						<div id="statisticsContainer"></div>
 						<br>
 					</div>
@@ -291,7 +295,7 @@
 					<div id='timeSeriesDiv'>
 						<div id="timeSeriesVariableDiv"></div>
 						<br>
-						<input type='button' id='addTimeSeriesVariableButton' value="Add another variable" />
+						<input type='button' id='addTimeSeriesVariableButton' value="Add another variable"/>
 						<br>
 						<input type='button' id='timeSeriesButton' value="Generate Timeseries" />
 						<div id="timeSeriesContainer" style="width: 100%; height: 400px;"></div>
@@ -322,12 +326,12 @@
 				</h3>
 				<div id='fileOption'>
 					<div>
-						<input type="checkbox" id="fileOptionCheck" />
+						<input type="checkbox" id="fileOptionCheck" title='Use the uploaded file'/>
 						Use an uploaded file
 					</div>
 					<p>Upload the raster data you want to compare to.</p>
 					<form id="uploadRasterForm" action="<%=submitFileAction%>" method="post" enctype="multipart/form-data">
-						<input type="file" id="file" name='<portlet:namespace />file' size="50" />
+						<input type="file" id="file" name='<portlet:namespace />file' size="50" accept=".nc"/>
 						<input type="submit" value="Upload" />
 					</form>
 					<div id="progress">
@@ -347,7 +351,7 @@
 					<div id="opendapURLContainer"></div>
 				</div>
 			</div>
-			<input type='button' id='initiateRasterDataButton' value="Initiate raster data" />
+			<input type='button' id='initiateRasterDataButton' value="Initiate raster data" title='Initiate a selector from the NetCDF file or OpenDAP URL'/>
 			<div id='compareRaster'></div>
 			<input type='button' id='compareRasterButton' value="Compare" />
 			<div id="highchartsContainer" style="width: 100%; height: 500px;"></div>
@@ -381,8 +385,8 @@
 					<span id='saveDivHeaderText'>Save Query</span>
 				</h3>
 				<div id='saveDiv'>
-				This is currently in beta and it is possible that the link might not work in future versions, however it would
-				always be possible to interpret the query from the link.
+					This is currently in beta and it is possible that the link might not work in future versions, however it would
+					always be possible to interpret the query from the link.
 					<div id="saveContainer"></div>
 					<input type='button' id='saveQueryButton' value="Save Query" />
 				</div>

@@ -29,7 +29,7 @@ myNamespace.mapLayers = (function($, bH) {
 		var selectElement = myNamespace.utilities.setUpSelectorArray(window.wmsLayers,
 				"mapLayersWMSURL" + activeLayers, activeLayers);
 		var button = "<input type='button' id='toggleLayerButton" + activeLayers + "' name='" + activeLayers
-				+ "' value='Update on map'/>";
+				+ "' value='Update on map' title='Add/refresh this layer on the map'/>";
 		$("#layerURLSelectorContainer").append("<br><h5>Raster " + activeLayers + "</h5>" + button + selectElement);
 		bH.change("#mapLayersWMSURL" + activeLayers, addWMSLayerVariableSelector);
 		bH.callFromControl("#toggleLayerButton" + activeLayers, toggleLayerButton);
