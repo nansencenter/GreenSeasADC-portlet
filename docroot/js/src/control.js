@@ -52,7 +52,7 @@ myNamespace.control = (function($, OL, ns) {
 		ns.matchup.setUpOPeNDAPSelector();
 		regenerateSavedQuery()
 
-		$('[title]').qtip();
+		$('#gsadbcPortlet [title]').qtip();
 	}
 
 	function regenerateSavedQuery() {
