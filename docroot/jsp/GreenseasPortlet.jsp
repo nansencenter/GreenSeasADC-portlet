@@ -193,8 +193,9 @@
 							<input type="checkbox" id="regionEnabledCheck" title='Enables the Longhurst region query' />
 							Enable in query
 						</div>
-						<em>Select the region you want to search by. There is currently no support for the Austral Polar Province and
-							the Boreal Polar Province.</em>
+						<em>Select the region you want to search by. All provinces that include data are supported. However, be aware
+							that the Austral Polar Province and the Boreal Polar Province are defined by huge polygons which will severely
+							slow down the application.</em>
 						<div id="regionList"></div>
 					</div>
 
@@ -220,11 +221,12 @@
 						<br>
 						Search the parameterslist:
 						<input type='text' id='treeSearchParameter' size="10" />
-						<input type='button' id=filterParametersTreeButton value="Search"/>
+						<input type='button' id=filterParametersTreeButton value="Search" />
 						<input type="button" id="clearSelectionButton" value="Clear selection" title='Deselect all parameters' />
 						<input type="button" id="collapseAllButton" value="Collapse All" title='Collapse all nodes in the list' />
 						<input type="button" id="expandAllButton" value="Expand All" title='Expand all nodes in the list' />
-						<input type="button" id="toggleOrderPlanktonButton" value="Sort plankton by type" title='Toggle sort by plankton type/size' />
+						<input type="button" id="toggleOrderPlanktonButton" value="Sort plankton by type"
+							title='Toggle sort by plankton type/size' />
 						<div id='loadTreeNumbersDiv'></div>
 						<div id="parametersTree"></div>
 						<br>
@@ -283,7 +285,8 @@
 				</h3>
 				<div id="outerStatistics">
 					<div id="statistics">
-						<input type="button" id="calculateStatisticsButton" value="Calculate statistics" title='Calculate quantity, min, max, average, sample standard deviation and variance of the selected parameters'/>
+						<input type="button" id="calculateStatisticsButton" value="Calculate statistics"
+							title='Calculate quantity, min, max, average, sample standard deviation and variance of the selected parameters' />
 						<div id="statisticsContainer"></div>
 						<br>
 					</div>
@@ -295,7 +298,7 @@
 					<div id='timeSeriesDiv'>
 						<div id="timeSeriesVariableDiv"></div>
 						<br>
-						<input type='button' id='addTimeSeriesVariableButton' value="Add another variable"/>
+						<input type='button' id='addTimeSeriesVariableButton' value="Add another variable" />
 						<br>
 						<input type='button' id='timeSeriesButton' value="Generate Timeseries" />
 						<div id="timeSeriesContainer" style="width: 100%; height: 400px;"></div>
@@ -326,12 +329,12 @@
 				</h3>
 				<div id='fileOption'>
 					<div>
-						<input type="checkbox" id="fileOptionCheck" title='Use the uploaded file'/>
+						<input type="checkbox" id="fileOptionCheck" title='Use the uploaded file' />
 						Use an uploaded file
 					</div>
 					<p>Upload the raster data you want to compare to.</p>
 					<form id="uploadRasterForm" action="<%=submitFileAction%>" method="post" enctype="multipart/form-data">
-						<input type="file" id="file" name='<portlet:namespace />file' size="50" accept=".nc"/>
+						<input type="file" id="file" name='<portlet:namespace />file' size="50" accept=".nc" />
 						<input type="submit" value="Upload" />
 					</form>
 					<div id="progress">
@@ -351,7 +354,8 @@
 					<div id="opendapURLContainer"></div>
 				</div>
 			</div>
-			<input type='button' id='initiateRasterDataButton' value="Initiate raster data" title='Initiate a selector from the NetCDF file or OpenDAP URL'/>
+			<input type='button' id='initiateRasterDataButton' value="Initiate raster data"
+				title='Initiate a selector from the NetCDF file or OpenDAP URL' />
 			<div id='compareRaster'></div>
 			<input type='button' id='compareRasterButton' value="Compare" />
 			<div id="highchartsContainer" style="width: 100%; height: 500px;"></div>
