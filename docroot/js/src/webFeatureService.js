@@ -185,6 +185,8 @@ myNamespace.WebFeatureService = (function($, OL) {
 		var index = 0;
 		var currentSize = 0;
 		var number = 0;
+		//maxStringSize depends on maxPostSize on tomcat server - default is 2 MB which leads to aprox max string 1.6 million
+		var maxStringSize = 8000000;
 		for (var i = 0, l = requestData.length; i < l; i++) {
 			var extraPar = {
 				TYPENAME : requestData[i][0],
@@ -196,7 +198,7 @@ myNamespace.WebFeatureService = (function($, OL) {
 			var xml = convertParametersToGetFeatureXML(extraPar);
 			var currentLength = xml.length;
 			currentSize += currentLength;
-			if (number > 75 || (number !== 0 && currentSize > 1600000)) {
+			if (number > 75 || (number !== 0 && currentSize > maxStringSize)) {
 				index++;
 				currentSize = currentLength;
 				number = 0;

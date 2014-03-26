@@ -98,7 +98,6 @@
 	left: 2%;
 	height: 20px;
 	width: 20px;
-	/*    border: 1px solid black;*/
 	cursor: pointer;
 }
 .olControlPanel {
@@ -106,6 +105,18 @@
 	left: 2%;
 	height: 20px;
 	width: 20px;
-	/*    border: 1px solid black;*/
+	cursor: pointer;
+}
+.olqTip2ButtonItemActive {
+	position: absolute;
+	width: 16px;
+	height: 16px;
+	background: url('throbber.png');
+}
+.olqTip2Panel {
+	top: 81%;
+	left: 2%;
+	height: 16px;
+	width: 16px;
 	cursor: pointer;
 }

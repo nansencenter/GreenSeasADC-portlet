@@ -38,6 +38,9 @@ myNamespace.ajax = (function($) {
 				if (length > requestsEach) {
 					splittingRequests = true;
 					var simultaneousRequests = Math.round(length / requestsEach);
+					if (simultaneousRequests > 3){
+						simultaneousRequests = 3;
+					}
 					var newDataRequests = [];
 					for (var i = 0; i < simultaneousRequests; i++) {
 						newDataRequests.push([]);

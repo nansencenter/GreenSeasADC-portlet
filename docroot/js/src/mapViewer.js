@@ -17,6 +17,31 @@ myNamespace.mapViewer = (function(OL, $) {
 	// Object that stores the layers for the parameters
 	var parameterLayers = {};
 	var customLayers = {};
+	var mapLayers = {};
+	// some background layers, user may select one
+	var backgroundLayers = {
+		demis : new OpenLayers.Layer.WMS(
+				"Demis WMS",
+				"http://www2.demis.nl/wms/wms.ashx?WMS=WorldMap",
+				{
+					layers : 'Countries,Bathymetry,Topography,Hillshading,Coastlines,Builtup+areas,Waterbodies,Rivers,Streams,Borders,Cities',
+					format : 'image/png'
+				}),
+		generic : new OpenLayers.Layer.WMS("Generic background", "http://vmap0.tiles.osgeo.org/wms/vmap0", {
+			layers : 'basic',
+			format : window.WMSformat
+		}),
+		ocean : new OpenLayers.Layer.WMS('GEBCO Bathymetry',
+				'http://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?', {
+					layers : 'gebco_08_grid',
+					format : window.WMSformat
+				}),
+		longhurst : new OpenLayers.Layer.WMS('Longhurst Regions',
+				'http://tomcat.nersc.no:8080/geoserver/greensad/wms?', {
+					layers : 'greensad:Longhurst_world_v4_2010',
+					format : window.WMSformat
+				}),
+	};
 
 	// This SLD is partly taken from
 	// http://docs.geoserver.org/stable/en/user/styling/sld-cookbook/points.html#simple-point
@@ -36,7 +61,6 @@ myNamespace.mapViewer = (function(OL, $) {
 		return sld;
 	}
 	// front layers drawn on the map widget, can be toggled on/off
-	var mapLayers = {};
 	function initMapLayers() {
 		mapLayers = {
 			datapoints : new OpenLayers.Layer.WMS("Data points", window.WMSServer, {
@@ -137,31 +161,6 @@ myNamespace.mapViewer = (function(OL, $) {
 		}
 		return color;
 	}
-
-	// some background layers, user may select one
-	var backgroundLayers = {
-		demis : new OpenLayers.Layer.WMS(
-				"Demis WMS",
-				"http://www2.demis.nl/wms/wms.ashx?WMS=WorldMap",
-				{
-					layers : 'Countries,Bathymetry,Topography,Hillshading,Coastlines,Builtup+areas,Waterbodies,Rivers,Streams,Borders,Cities',
-					format : 'image/png'
-				}),
-		generic : new OpenLayers.Layer.WMS("Generic background", "http://vmap0.tiles.osgeo.org/wms/vmap0", {
-			layers : 'basic',
-			format : window.WMSformat
-		}),
-		ocean : new OpenLayers.Layer.WMS('GEBCO Bathymetry',
-				'http://www.gebco.net/data_and_products/gebco_web_services/web_map_service/mapserv?', {
-					layers : 'gebco_08_grid',
-					format : window.WMSformat
-				}),
-		longhurst : new OpenLayers.Layer.WMS('Longhurst Regions',
-				'http://tomcat.nersc.no:8080/geoserver/greensad/wms?', {
-					layers : 'greensad:Longhurst_world_v4_2010',
-					format : window.WMSformat
-				}),
-	};
 
 	function initMap() {
 		if (debugmW)
@@ -293,13 +292,80 @@ myNamespace.mapViewer = (function(OL, $) {
 			console.log("Finished initMap");
 	}
 
+	function triggerQTip2DoNotShowLoad() {
+		if ($("#qTip2DoNotShowLoad").prop('checked')) {
+			$('#simple_map').qtip('hide');
+			$('#simple_map').qtip('disable');
+		} else {
+			$('#simple_map').qtip('enable');
+			$('#simple_map').qtip('show');
+		}
+	}
+
+	function checkLoadingOfLayers() {
+		// TODO: does not work on updating rasters
+		var mainDivID = "qTip2mapLoading"
+		var mainDiv = $("#" + mainDivID);
+		if (mainDiv.length === 0) {
+			var checkbox = "<input type='checkbox' id='qTip2DoNotShowLoad' title='Check to disable this information. Can be displayed again by clicking the loading icon in the map'/>Disable this information";
+			$('#simple_map').attr("title", "<div id='" + mainDivID + "'>" + checkbox + "</div>");
+			$('#simple_map').qtip({
+				hide : false,
+				show : true,
+				position : {
+					my : 'top left',
+					at : 'top right',
+					target : $('#simple_map')
+				}
+			});
+			mainDiv = $("#" + mainDivID);
+			var qTip2Button = new OpenLayers.Control.Button({
+				displayClass : "olqTip2Button",
+				title : "Trigger information on loading of layers",
+				id : 'qTip2Button',
+				trigger : function(){
+					$("#qTip2DoNotShowLoad").trigger('click');},
+			});
+			var panel = new OpenLayers.Control.Panel({
+				defaultControl : qTip2Button,
+				displayClass : "olqTip2Panel"
+			});
+			panel.addControls([ qTip2Button ]);
+			map.addControl(panel);
+			setTimeout(function() {
+				myNamespace.buttonEventHandlers.change("#qTip2DoNotShowLoad", triggerQTip2DoNotShowLoad);
+				triggerQTip2DoNotShowLoad();
+				$('.olqTip2ButtonItemActive').qtip();
+				$('#qTip2DoNotShowLoad').qtip();
+			}, 1000);
+		}
+		if (!$("#qTip2DoNotShowLoad").prop('checked')) {
+			$.each(map.layers, function(i, layer) {
+				if (typeof layer.visibility === 'undefined' || layer.visibility) {
+					var name = layer.name.replace(/ /g,"_");
+					var div = $("#qTip2" + name);
+					if (div.length === 0) {
+						$(mainDiv).append("<div id='qTip2" + name + "'></div>");
+						div = $("#qTip2" + name);
+					}
+					if (layer.numLoadingTiles > 0) {
+						div.html("Loading " + layer.name + ":" + layer.numLoadingTiles + " tiles left");
+					} else {
+						div.html("Loaded " + layer.name);
+					}
+				}
+			});
+		}
+	}
+
 	function addMapLayers() {
-		//TODO: does not work as intended
+		// TODO: does not work as intended
 		$.each(mapLayers, function(i, val) {
 			map.addLayer(val);
-			window.setTimeout(function() {
-				checkIfLayerHasLoaded(val);
-			}, 5000);
+			/*
+			 * window.setTimeout(function() { checkIfLayerHasLoaded(val); },
+			 * 5000);
+			 */
 		});
 	}
 
@@ -623,6 +689,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		removePopups : removePopups,
 		addFeaturesFromDataWithColor : addFeaturesFromDataWithColor,
 		removeCustomLayer : removeCustomLayer,
+		checkLoadingOfLayers : checkLoadingOfLayers
 	};
 
 }(OpenLayers, jQuery));

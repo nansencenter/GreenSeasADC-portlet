@@ -53,6 +53,8 @@ myNamespace.control = (function($, OL, ns) {
 		regenerateSavedQuery()
 
 		$('#gsadbcPortlet [title]').qtip();
+		//TODO: make it possible to disable this
+		setInterval(function(){myNamespace.mapViewer.checkLoadingOfLayers()},1000);
 	}
 
 	function regenerateSavedQuery() {
