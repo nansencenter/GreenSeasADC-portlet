@@ -1,6 +1,7 @@
 var myNamespace = myNamespace || {};
 
 var debugmW = false;// debug flag
+myNamespace.loadingLayersInterval = null;
 
 myNamespace.mapViewer = (function(OL, $) {
 	"use strict";
@@ -290,20 +291,22 @@ myNamespace.mapViewer = (function(OL, $) {
 		registerClickBehaviour();
 		if (debugmW)
 			console.log("Finished initMap");
+		triggerQTip2DoNotShowLoad();
 	}
 
 	function triggerQTip2DoNotShowLoad() {
 		if ($("#qTip2DoNotShowLoad").prop('checked')) {
 			$('#simple_map').qtip('hide');
 			$('#simple_map').qtip('disable');
+			clearInterval(myNamespace.loadingLayersInterval);
 		} else {
 			$('#simple_map').qtip('enable');
 			$('#simple_map').qtip('show');
+			myNamespace.loadingLayersInterval = setInterval(function(){checkLoadingOfLayers()},1000);
 		}
 	}
 
 	function checkLoadingOfLayers() {
-		// TODO: does not work on updating rasters
 		var mainDivID = "qTip2mapLoading"
 		var mainDiv = $("#" + mainDivID);
 		if (mainDiv.length === 0) {
@@ -323,8 +326,9 @@ myNamespace.mapViewer = (function(OL, $) {
 				displayClass : "olqTip2Button",
 				title : "Trigger information on loading of layers",
 				id : 'qTip2Button',
-				trigger : function(){
-					$("#qTip2DoNotShowLoad").trigger('click');},
+				trigger : function() {
+					$("#qTip2DoNotShowLoad").trigger('click');
+				},
 			});
 			var panel = new OpenLayers.Control.Panel({
 				defaultControl : qTip2Button,
@@ -339,10 +343,14 @@ myNamespace.mapViewer = (function(OL, $) {
 				$('#qTip2DoNotShowLoad').qtip();
 			}, 1000);
 		}
+		var divs = mainDiv.children("div");
+		for (var i = 0, l = divs.length; i < l; i++) {
+			$(divs[i]).hide();
+		}
 		if (!$("#qTip2DoNotShowLoad").prop('checked')) {
 			$.each(map.layers, function(i, layer) {
 				if (typeof layer.visibility === 'undefined' || layer.visibility) {
-					var name = layer.name.replace(/ /g,"_");
+					var name = layer.name.replace(/ /g, "_");
 					var div = $("#qTip2" + name);
 					if (div.length === 0) {
 						$(mainDiv).append("<div id='qTip2" + name + "'></div>");
@@ -353,6 +361,7 @@ myNamespace.mapViewer = (function(OL, $) {
 					} else {
 						div.html("Loaded " + layer.name);
 					}
+					$(div).show();
 				}
 			});
 		}
@@ -689,7 +698,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		removePopups : removePopups,
 		addFeaturesFromDataWithColor : addFeaturesFromDataWithColor,
 		removeCustomLayer : removeCustomLayer,
-		checkLoadingOfLayers : checkLoadingOfLayers
+		triggerQTip2DoNotShowLoad : triggerQTip2DoNotShowLoad
 	};
 
 }(OpenLayers, jQuery));
