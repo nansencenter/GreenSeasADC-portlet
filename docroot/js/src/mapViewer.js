@@ -1,6 +1,7 @@
 var myNamespace = myNamespace || {};
 
 var debugmW = false;// debug flag
+var gsadbcLoadingLayersInterval = null;
 
 myNamespace.mapViewer = (function(OL, $) {
 	"use strict";
@@ -301,6 +302,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		} else {
 			$('#simple_map').qtip('enable');
 			$('#simple_map').qtip('show');
+			clearInterval(gsadbcLoadingLayersInterval);
 			gsadbcLoadingLayersInterval = setInterval(function() {
 				checkLoadingOfLayers()
 			}, 1000);
@@ -308,6 +310,7 @@ myNamespace.mapViewer = (function(OL, $) {
 	}
 
 	function checkLoadingOfLayers() {
+		console.log("Checking load");
 		var mainDivID = "qTip2mapLoading"
 		var mainDiv = $("#" + mainDivID);
 		if (mainDiv.length === 0) {
