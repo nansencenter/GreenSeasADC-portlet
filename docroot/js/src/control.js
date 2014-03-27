@@ -814,6 +814,11 @@ myNamespace.control = (function($, OL, ns) {
 		var myTreeContainer = $.jstree._reference("#parametersTree").get_container();
 		var allChildren = myTreeContainer.find("li");
 		var requestData = [];
+		var region = myNamespace.mainQueryObject.region;
+		if ((typeof myNamespace.mainQueryObject.region !== 'undefined')
+				&& (myNamespace.mainQueryObject.region !== null)) {
+			region = 'gsadbcRegionFilterPlaceHolder';
+		}
 		$.each(allChildren, function(i, val) {
 			if ((typeof window.combinedParameters[val.id] === "undefined")
 					|| (window.combinedParameters[val.id].method !== "groupLayers")) {
@@ -864,16 +869,15 @@ myNamespace.control = (function($, OL, ns) {
 								id,
 								ns.query.constructParameterFilterString(propertyNames,
 										myNamespace.mainQueryObject.depth, myNamespace.mainQueryObject.filterBbox,
-										myNamespace.mainQueryObject.date, myNamespace.mainQueryObject.months,
-										'gsadbcRegionFilterPlaceHolder', myNamespace.mainQueryObject.cruise) ]);
+										myNamespace.mainQueryObject.date, myNamespace.mainQueryObject.months, region,
+										myNamespace.mainQueryObject.cruise) ]);
 					}
 				}
 			}
 		});
 		if (requestData.length !== 0) {
 			incomingRequests = 0;
-			if ((typeof myNamespace.mainQueryObject.region !== 'undefined')
-					&& (myNamespace.mainQueryObject.region !== null)) {
+			if (region === 'gsadbcRegionFilterPlaceHolder') {
 				ns.WebFeatureService.getUpdatedParameters(requestData, ns.query.constructString(ns.query
 						.createRegionFilter(myNamespace.mainQueryObject.region)));
 			} else {
