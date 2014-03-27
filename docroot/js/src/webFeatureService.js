@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugwfs = true;// debug flag
+var debugwfs = false;// debug flag
 
 myNamespace.WebFeatureService = (function($, OL) {
 	"use strict";
@@ -187,8 +187,12 @@ myNamespace.WebFeatureService = (function($, OL) {
 		if (debugwfs) {
 			console.log("getUpdatedParameters, region:"+region);
 		}
-		if (typeof region !== 'undefined')
+		
+		var swapPosLists = true;
+		if (typeof region !== 'undefined'){
 			region = swapPosList(region);
+			swapPosLists = false;
+		}
 		var modifiedRequestData = [ {} ];
 		var index = 0;
 		var currentSize = 0;
@@ -204,7 +208,7 @@ myNamespace.WebFeatureService = (function($, OL) {
 			};
 			// TODO: swappos should only be needed once for this, a lot of
 			// duplicated data
-			var xml = convertParametersToGetFeatureXML(extraPar, false);
+			var xml = convertParametersToGetFeatureXML(extraPar, swapPosLists);
 			var currentLength = xml.length;
 			currentSize += currentLength;
 			if (number > 75 || (number !== 0 && currentSize > maxStringSize)) {

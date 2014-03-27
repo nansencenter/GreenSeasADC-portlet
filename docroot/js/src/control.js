@@ -872,11 +872,13 @@ myNamespace.control = (function($, OL, ns) {
 		});
 		if (requestData.length !== 0) {
 			incomingRequests = 0;
-			if (myNamespace.mainQueryObject.region !== null)
+			if ((typeof myNamespace.mainQueryObject.region !== 'undefined')
+					&& (myNamespace.mainQueryObject.region !== null)) {
 				ns.WebFeatureService.getUpdatedParameters(requestData, ns.query.constructString(ns.query
 						.createRegionFilter(myNamespace.mainQueryObject.region)));
-			else
+			} else {
 				ns.WebFeatureService.getUpdatedParameters(requestData);
+			}
 			$("#loadTreeNumbersDiv").html("<b><i>Loading inventory numbers, please wait...</i></b>");
 		}
 	}
