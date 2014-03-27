@@ -189,7 +189,7 @@ myNamespace.WebFeatureService = (function($, OL) {
 		}
 		
 		var swapPosLists = true;
-		if (typeof region !== 'undefined'){
+		if (typeof region !== 'undefined' && region !== null){
 			region = swapPosList(region);
 			swapPosLists = false;
 		}
