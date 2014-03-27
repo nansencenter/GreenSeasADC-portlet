@@ -29,7 +29,7 @@ myNamespace.ajax = (function($) {
 	}
 	// TODO: add identifier to check for uniqeness
 	var getUpdateParametersDataFromServerCall = null;
-	function getUpdateParametersDataFromServer(dataRequests, length, identifier) {
+	function getUpdateParametersDataFromServer(dataRequests, length,region, identifier) {
 		if (dataRequests.length !== 0) {
 			var splittingRequests = false;
 			if (typeof identifier === 'undefined') {
@@ -38,7 +38,7 @@ myNamespace.ajax = (function($) {
 				if (length > requestsEach) {
 					splittingRequests = true;
 					var simultaneousRequests = Math.round(length / requestsEach);
-					if (simultaneousRequests > 3){
+					if (simultaneousRequests > 3) {
 						simultaneousRequests = 3;
 					}
 					var newDataRequests = [];
@@ -52,7 +52,7 @@ myNamespace.ajax = (function($) {
 					}
 
 					for (var i = 0; i < simultaneousRequests; i++) {
-						getUpdateParametersDataFromServer(newDataRequests[i].reverse(), length, identifier);
+						getUpdateParametersDataFromServer(newDataRequests[i].reverse(), length,region, identifier);
 					}
 				}
 			}
@@ -63,10 +63,12 @@ myNamespace.ajax = (function($) {
 				data[portletNameSpace + 'requestType'] = "updateTreeWithInventoryNumbers";
 				data[portletNameSpace + 'data'] = JSON.stringify(dataRequest);
 				data[portletNameSpace + 'url'] = window.WFSServer;
+				if (typeof region === 'string')
+					data[portletNameSpace + 'gsadbcRegionFilterPlaceHolder'] = region;
 				var success = function() {
 					if (identifier === getUpdateParametersDataFromServerCall) {
 						// Call next request
-						getUpdateParametersDataFromServer(dataRequests, length, identifier);
+						getUpdateParametersDataFromServer(dataRequests, length,region, identifier);
 						// JSON Data coming back from Server
 						var responseData = this.get('responseData');
 						myNamespace.control.updateTreeWithInventoryNumbers(responseData, length);

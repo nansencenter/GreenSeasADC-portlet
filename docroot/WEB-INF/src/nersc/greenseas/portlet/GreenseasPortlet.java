@@ -166,6 +166,10 @@ public class GreenseasPortlet extends MVCPortlet {
 			return;
 		} else if (requestType.equals("updateTreeWithInventoryNumbers")) {
 			String urlS = resourceRequest.getParameter("url");
+			String region = resourceRequest.getParameter("gsadbcRegionFilterPlaceHolder");
+			if (region != null){
+				region = region.substring(51, region.length()-13);
+			}
 			JSONParser parser = new JSONParser();
 			JSONObject jsonO = null;
 			try {
@@ -194,7 +198,7 @@ public class GreenseasPortlet extends MVCPortlet {
 			ArrayList<GetNumberOfFeatures> threadds = new ArrayList<GetNumberOfFeatures>();
 			for (int i = 0; i < numberOfThreads; i++) {
 				GetNumberOfFeatures runnable = new GetNumberOfFeatures(responseMaps.get(i), requestMaps.get(i),
-						charset, urlS, i);
+						charset, urlS, i,region);
 				Thread thread = new Thread(runnable);
 				thread.start();
 				threadds.add(runnable);
@@ -226,21 +230,23 @@ public class GreenseasPortlet extends MVCPortlet {
 			return;
 		}
 	}
-
+	private static String placeHolder = "<ogc:Within><ogc:PropertyName>point</ogc:PropertyName><gml:Envelope xmlns:gml=\"http://www.opengis.net/gml\"><gml:lowerCorner>undefined undefined</gml:lowerCorner><gml:upperCorner>undefined undefined</gml:upperCorner></gml:Envelope></ogc:Within>";
+	
 	class GetNumberOfFeatures implements Runnable {
 
 		public GetNumberOfFeatures(Map<String, String> responseMap, Map<String, String> requestMap, String charset,
-				String url, int number) {
+				String url, int number,String region) {
 			super();
 			this.responseMap = responseMap;
 			this.requestMap = requestMap;
 			this.charset = charset;
 			this.urlS = url;
 			this.number = number;
+			this.region = region;
 		}
 
 		Map<String, String> responseMap, requestMap;
-		String charset, urlS;
+		String charset, urlS,region;
 		boolean done = false;
 		int number;
 
@@ -249,7 +255,17 @@ public class GreenseasPortlet extends MVCPortlet {
 			try {
 				for (String key : requestMap.keySet()) {
 					URL url = new URL(urlS);
-					byte[] request = ((String) requestMap.get(key)).getBytes(charset);
+					String requestS = (String) requestMap.get(key);
+					if (region != null){
+						requestS = requestS.replace(GreenseasPortlet.placeHolder, region);
+						/*System.out.println("-------------------------------------------------------------------------");
+						System.out.println("Replacing!");
+						System.out.println(GreenseasPortlet.placeHolder);
+						System.out.println("............with...............");
+						System.out.println(region);
+						System.out.println("-------------------------------------------------------------------------");*/
+					}
+					byte[] request = requestS.getBytes(charset);
 					URLConnection connection = url.openConnection();
 					// POST REQUEST!
 					connection.setDoOutput(true);
@@ -275,7 +291,6 @@ public class GreenseasPortlet extends MVCPortlet {
 			}
 			done = true;
 		}
-
 	}
 
 	public String getNumberOfFeatures(InputStream in) {

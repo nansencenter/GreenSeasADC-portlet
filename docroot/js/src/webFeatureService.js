@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-var debugwfs = false;// debug flag
+var debugwfs = true;// debug flag
 
 myNamespace.WebFeatureService = (function($, OL) {
 	"use strict";
@@ -33,6 +33,8 @@ myNamespace.WebFeatureService = (function($, OL) {
 	function swapPosList(filter) {
 		if (debugwfs)
 			console.log("swapPosList START");
+		if (debugwfs)
+			console.log(filter);
 		var newFilter = "";
 		var xmlDoc;
 		if (myNamespace.utilities.findBrowser() !== "Firefox") {
@@ -121,7 +123,7 @@ myNamespace.WebFeatureService = (function($, OL) {
 		return new XMLSerializer().serializeToString(xmlDoc);
 	}
 
-	function convertParametersToGetFeatureXML(parameters) {
+	function convertParametersToGetFeatureXML(parameters, swapPosLists) {
 		var propertyName = "";
 		if (parameters.PROPERTYNAME) {
 			propertyName = "propertyName=\"" + window.database + ":" + parameters.PROPERTYNAME + "\" ";
@@ -140,7 +142,8 @@ myNamespace.WebFeatureService = (function($, OL) {
 		}
 		var filter = parameters.FILTER || "";
 		// console.log("-------------------filter-------------------");
-		filter = swapPosList(filter);
+		if (typeof swapPosLists === 'undefined' || swapPosLists === true)
+			filter = swapPosList(filter);
 		// console.log(filter);
 		// console.log("-------------------filter-------------------");
 		var xml = "<GetFeature service=\"WFS\" version=\"1.1.0\" outputFormat=\"" + outputFormat + "\" " + propertyName
@@ -180,12 +183,18 @@ myNamespace.WebFeatureService = (function($, OL) {
 		asyncGetRequest($.extend(parameters, extraParameters), callback);
 	}
 
-	function getUpdatedParameters(requestData) {
+	function getUpdatedParameters(requestData, region) {
+		if (debugwfs) {
+			console.log("getUpdatedParameters, region:"+region);
+		}
+		if (typeof region !== 'undefined')
+			region = swapPosList(region);
 		var modifiedRequestData = [ {} ];
 		var index = 0;
 		var currentSize = 0;
 		var number = 0;
-		//maxStringSize depends on maxPostSize on tomcat server - default is 2 MB which leads to aprox max string 1.6 million
+		// maxStringSize depends on maxPostSize on tomcat server - default is 2
+		// MB which leads to aprox max string 1.6 million
 		var maxStringSize = 8000000;
 		for (var i = 0, l = requestData.length; i < l; i++) {
 			var extraPar = {
@@ -195,7 +204,7 @@ myNamespace.WebFeatureService = (function($, OL) {
 			};
 			// TODO: swappos should only be needed once for this, a lot of
 			// duplicated data
-			var xml = convertParametersToGetFeatureXML(extraPar);
+			var xml = convertParametersToGetFeatureXML(extraPar, false);
 			var currentLength = xml.length;
 			currentSize += currentLength;
 			if (number > 75 || (number !== 0 && currentSize > maxStringSize)) {
@@ -207,7 +216,7 @@ myNamespace.WebFeatureService = (function($, OL) {
 			modifiedRequestData[index][requestData[i][1]] = xml;
 			number++;
 		}
-		myNamespace.ajax.getUpdateParametersDataFromServer(modifiedRequestData.reverse(), (index + 1));
+		myNamespace.ajax.getUpdateParametersDataFromServer(modifiedRequestData.reverse(), (index + 1), region);
 	}
 
 	// public interface

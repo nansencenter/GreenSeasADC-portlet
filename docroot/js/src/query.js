@@ -83,6 +83,12 @@ myNamespace.query = (function(OL, $) {
 	function createRegionFilter(region) {
 		if (debugq)
 			console.log("createRegionFilter");
+		if (region === 'gsadbcRegionFilterPlaceHolder')
+			return new OL.Filter.Spatial({
+				type : OL.Filter.Spatial.WITHIN,
+				value : region,
+				property : window.geometryParameter
+			});
 		// var format = new OpenLayers.Format.WKT();
 		var geometry = OL.Geometry.fromWKT(window.polygon[region]);
 		if (debugq)
@@ -414,7 +420,9 @@ myNamespace.query = (function(OL, $) {
 		createDepthHashMap : createDepthHashMap,
 		constructFilter : constructFilter,
 		constructFilterString : constructFilterString,
-		constructParameterFilterString : constructParameterFilterString
+		constructParameterFilterString : constructParameterFilterString,
+		createRegionFilter : createRegionFilter,
+		constructString : constructString,
 	};
 
 }(OpenLayers, jQuery));

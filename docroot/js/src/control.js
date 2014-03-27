@@ -865,14 +865,18 @@ myNamespace.control = (function($, OL, ns) {
 								ns.query.constructParameterFilterString(propertyNames,
 										myNamespace.mainQueryObject.depth, myNamespace.mainQueryObject.filterBbox,
 										myNamespace.mainQueryObject.date, myNamespace.mainQueryObject.months,
-										myNamespace.mainQueryObject.region, myNamespace.mainQueryObject.cruise) ]);
+										'gsadbcRegionFilterPlaceHolder', myNamespace.mainQueryObject.cruise) ]);
 					}
 				}
 			}
 		});
 		if (requestData.length !== 0) {
 			incomingRequests = 0;
-			ns.WebFeatureService.getUpdatedParameters(requestData);
+			if (myNamespace.mainQueryObject.region !== null)
+				ns.WebFeatureService.getUpdatedParameters(requestData, ns.query.constructString(ns.query
+						.createRegionFilter(myNamespace.mainQueryObject.region)));
+			else
+				ns.WebFeatureService.getUpdatedParameters(requestData);
 			$("#loadTreeNumbersDiv").html("<b><i>Loading inventory numbers, please wait...</i></b>");
 		}
 	}
