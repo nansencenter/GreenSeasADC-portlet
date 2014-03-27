@@ -365,7 +365,14 @@
 			<p>Select/configure Layers:</p>
 			<div id='rasterLayersDiv'>
 				<h3>
-					<span id='rasterLayersDivHeaderText'>Raster Layers <em>(off)</em></span>
+					<span id='upDownLayersDivHeaderText'>Move layers up/down<!-- <em>(off)</em> --></span>
+				</h3>
+				<div id='upDownLayersDiv'>
+				<div id='upDownLayersHelpText'></div>
+				<table id='upDownLayersTable' class='table'></table>
+				</div>
+				<h3>
+					<span id='rasterLayersDivHeaderText'>Add Raster Layers <!-- <em>(off)</em> --></span>
 				</h3>
 				<div id='mapLayersDiv'>
 					Dataset/Variable/Colorscale(min/max/auto)/Layertype(boxfill/contour/etc)/Scale(linear/logarithmic)/Elevation/Date/Time
@@ -374,7 +381,7 @@
 					<input type='button' id='addLayerButton' value="Add new layer" />
 				</div>
 				<h3>
-					<span id='parametersLayerDivHeaderText'>Parameter Layers <em>(off)</em></span>
+					<span id='parametersLayerDivHeaderText'>Add Parameter Layers  <!-- <em>(off)</em> --></span>
 				</h3>
 				<div id='parameterLayerVariableAccordionDiv'>
 					<div id='parameterLayerVariableHelpText'></div>

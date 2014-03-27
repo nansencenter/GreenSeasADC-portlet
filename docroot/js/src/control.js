@@ -53,6 +53,7 @@ myNamespace.control = (function($, OL, ns) {
 		regenerateSavedQuery()
 
 		$('#gsadbcPortlet [title]').qtip();
+		ns.mapLayers.generateLayerTable();
 	}
 
 	function regenerateSavedQuery() {

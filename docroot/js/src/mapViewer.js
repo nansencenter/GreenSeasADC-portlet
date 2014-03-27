@@ -11,10 +11,32 @@ myNamespace.mapViewer = (function(OL, $) {
 	// -58.2311019897461,-71.0900039672852,80.9666748046875,86.3916702270508
 
 	// map on which layers are drawn
-	var map;
+	// var map;
 
 	var mapPanel, printProvider;
 
+	
+	function updateIndex(name,delta){
+		var layers = map.getLayersByName(name);
+		for (var i = 0, l = layers.length; i < l; i++) {
+			map.raiseLayer(layers[i],delta);
+		}
+	}
+	function getListOfLayers() {
+		var list = [];
+		for (var i = 0, l = map.layers.length; i < l; i++) {
+			var layer = map.layers[i];
+			if (!layer.isBaseLayer) {
+				list.push({
+					name : layer.name,
+					//TODO: if using id, keep index on update (id will be renewed I think)
+					id : layer.id,
+					index : map.getLayerIndex(layer)
+				});
+			}
+		}
+		return list;
+	}
 	// Object that stores the layers for the parameters
 	var parameterLayers = {};
 	var customLayers = {};
@@ -701,7 +723,9 @@ myNamespace.mapViewer = (function(OL, $) {
 		removePopups : removePopups,
 		addFeaturesFromDataWithColor : addFeaturesFromDataWithColor,
 		removeCustomLayer : removeCustomLayer,
-		triggerQTip2DoNotShowLoad : triggerQTip2DoNotShowLoad
+		triggerQTip2DoNotShowLoad : triggerQTip2DoNotShowLoad,
+		getListOfLayers : getListOfLayers,
+		updateIndex:updateIndex
 	};
 
 }(OpenLayers, jQuery));

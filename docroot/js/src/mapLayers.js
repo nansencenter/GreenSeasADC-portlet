@@ -1,11 +1,51 @@
 var myNamespace = myNamespace || {};
 
 var debugMl = false;// debug flag
+myNamespace.upDownLayersTable = null;
 
 myNamespace.mapLayers = (function($, bH) {
 	"use strict";
 
 	var activeLayers = 0;
+
+	function generateLayerTable() {
+		var layers = myNamespace.mapViewer.getListOfLayers().reverse();
+		// TODO: more constructive layer names
+		var aoColumns = [ {
+			sTitle : "Index"
+		}, {
+			sTitle : "Layer Name"
+		} ];
+		var tableData = [];
+		for (var i = 0, l = layers.length; i < l; i++) {
+			tableData.push({ '0':i, '1':layers[i].name, 'DT_RowId':"upDownLayersTableRow"+i });
+		}
+		if (myNamespace.upDownLayersTable !== null)
+			myNamespace.upDownLayersTable.fnDestroy();
+		myNamespace.upDownLayersTable = $('#upDownLayersTable').dataTable({
+			"bDeferRender" : true,
+			'aaSorting' : [],
+			// "bProcessing" : true,
+			"aaData" : tableData,
+			"aoColumns" : aoColumns
+		}).rowReordering({
+			onFinishEvent : function(newPosition, oldPosition) {
+				movedRow(newPosition, oldPosition);
+			}
+		});
+	}
+
+	function movedRow(newPosition, oldPosition) {
+		var data = myNamespace.upDownLayersTable.fnGetData();
+		var name = null;
+		for (var i = 0, l = data.length; i < l; i++) {
+			if (data[i][0]==newPosition){
+				name = data[i][1];
+				break;
+			}
+		}
+		myNamespace.mapViewer.updateIndex(name, -(newPosition - oldPosition));
+	}
 
 	function checkWidth() {
 		var widthAvailable = document.getElementById("mapContainer").offsetWidth
@@ -327,13 +367,12 @@ myNamespace.mapLayers = (function($, bH) {
 		var time = $('#timeVariable' + activeLayer).find(":selected").val();
 		myNamespace.mapViewer.addWMSLayer(url, name, layer, colorscalerange, style, logscale, elevation, date + "T"
 				+ time, longName);
+		generateLayerTable();
 		if (debugMl)
 			console.log("Toggled layer");
 	}
 
 	function addLegend(name, logscale, min, max, div) {
-		console.log("Adding legend!");
-		console.log(div);
 		var legend = "<img src='" + window.contextPath + "/images/legendGraphicV.png' alt='Color Scale'>";
 		var isLogscale = (logscale === "true");
 		// console.log(isLogscale);
@@ -373,6 +412,8 @@ myNamespace.mapLayers = (function($, bH) {
 			$('#parameterLayerVariableHelpText').html(
 					"<p>Run a query and filter selected parameters to view options here.</p>");
 			addWMSLayerSelector();
+			$("#upDownLayersHelpText").html(
+					"<em>Tip: Drag and drop the rows in the table to move the layers up and down on the map</em>");
 			break;
 		case 'mainSearch':
 			// main search
@@ -380,6 +421,7 @@ myNamespace.mapLayers = (function($, bH) {
 					"<p>Run a query and filter selected parameters to view options here.</p>");
 			$("#parameterLayerVariableContainer").hide();
 			disableAddParameterLayerButton();
+			generateLayerTable();
 			break;
 		case 'loadedParameters':
 			// filter parameters
@@ -387,11 +429,13 @@ myNamespace.mapLayers = (function($, bH) {
 			$("#parameterLayerVariableContainer").show();
 			addParameterLayerVariableSelector();
 			addAddParameterLayerButton();
+			generateLayerTable();
 			break;
 		case 'loadingParameters':
 			// Loading
 			$("#parameterLayerVariableContainer").hide();
 			disableAddParameterLayerButton();
+			generateLayerTable();
 			break;
 		default:
 			// do nothing
@@ -473,6 +517,7 @@ myNamespace.mapLayers = (function($, bH) {
 					"<div id='colorScaleLegendParameter" + activeLayer + "' class='colorScaleLegend'></div>");
 		}
 		addLegend("Par " + activeLayer, false, min, max, '#colorScaleLegendParameter' + activeLayer);
+		generateLayerTable();
 	}
 
 	var activeParameterLayers = 0;
@@ -500,7 +545,8 @@ myNamespace.mapLayers = (function($, bH) {
 		updateHTML : updateHTML,
 		setUpStyleForLegend : setUpStyleForLegend,
 		addParametersLayerButton : addParametersLayerButton,
-		addWMSLayerSelector : addWMSLayerSelector
+		addWMSLayerSelector : addWMSLayerSelector,
+		generateLayerTable : generateLayerTable
 	};
 
 }(jQuery, myNamespace.buttonEventHandlers));
