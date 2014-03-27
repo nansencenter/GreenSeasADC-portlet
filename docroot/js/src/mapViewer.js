@@ -310,7 +310,6 @@ myNamespace.mapViewer = (function(OL, $) {
 	}
 
 	function checkLoadingOfLayers() {
-		console.log("Checking load");
 		var mainDivID = "qTip2mapLoading"
 		var mainDiv = $("#" + mainDivID);
 		if (mainDiv.length === 0) {
