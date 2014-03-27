@@ -258,12 +258,12 @@ public class GreenseasPortlet extends MVCPortlet {
 					String requestS = (String) requestMap.get(key);
 					if (region != null){
 						requestS = requestS.replace(GreenseasPortlet.placeHolder, region);
-						/*System.out.println("-------------------------------------------------------------------------");
-						System.out.println("Replacing!");
-						System.out.println(GreenseasPortlet.placeHolder);
-						System.out.println("............with...............");
-						System.out.println(region);
-						System.out.println("-------------------------------------------------------------------------");*/
+//						System.out.println("-------------------------------------------------------------------------");
+//						System.out.println("Replacing!");
+//						System.out.println(GreenseasPortlet.placeHolder);
+//						System.out.println("............with...............");
+//						System.out.println(region);
+//						System.out.println("-------------------------------------------------------------------------");
 					}
 					byte[] request = requestS.getBytes(charset);
 					URLConnection connection = url.openConnection();
