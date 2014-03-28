@@ -306,7 +306,8 @@ myNamespace.mapViewer = (function(OL, $) {
 		map.addControl(control);
 
 		addMapLayers();
-		//TODO: registerClickBehaviour();
+		//TODO: 
+		registerClickBehaviour();
 		if (debugmW)
 			console.log("Finished initMap");
 		triggerQTip2DoNotShowLoad();
@@ -485,13 +486,13 @@ myNamespace.mapViewer = (function(OL, $) {
 					var layersA = event.object.layers;
 					var filters = "";
 					var delimiter = "";
-					for (var i = 0, l = layersA.length; i < l; i++) {
+					for (var i = layersA.length-1, l = 0;i >= l; i--) {
 						var filter = "<Filter xmlns:gml=\"http://www.opengis.net/gml\"></Filter>";
 						if (typeof layersA[i].params.FILTER === "string") {
 							filter = layersA[i].params.FILTER;
 						}
 						filters += delimiter + '(' + filter + ')';
-						delimiter = ";";
+						delimiter = "";
 					}
 					event.object.vendorParams = {
 						filter : filters + ""
@@ -598,7 +599,8 @@ myNamespace.mapViewer = (function(OL, $) {
 		// map.setLayerIndex(pointLayer, 10);
 		pointLayer.addFeatures(pointFeatures);
 		parameterLayers[name] = pointLayer;
-		//TODO: registerClickBehaviour()
+		//TODO: 
+		registerClickBehaviour()
 		if (debugmW)
 			console.log("addFeaturesFromData ended");
 	}
@@ -689,7 +691,8 @@ myNamespace.mapViewer = (function(OL, $) {
 		map.addLayer(newLayer);
 		// map.setLayerIndex(newLayer, index);
 		layers[name] = newLayer;
-		//TODO: registerClickBehaviour();
+		//TODO: 
+		registerClickBehaviour();
 		if (debugmW)
 			console.log("Added the layer: " + name);
 	}
