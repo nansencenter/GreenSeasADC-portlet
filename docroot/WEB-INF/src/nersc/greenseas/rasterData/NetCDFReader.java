@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.geotoolkit.referencing.CRS;
+import org.geotoolkit.referencing.crs.DefaultGeographicCRS;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -132,8 +133,10 @@ public class NetCDFReader {
 			try {
 				if (p != null) {
 					if (horizontalGrid != null) {
-						HorizontalPosition pos = new HorizontalPositionImpl(p.lon, p.lat, CRS.decode("EPSG:4326"));
+						HorizontalPosition pos = new HorizontalPositionImpl(p.lon, p.lat, DefaultGeographicCRS.WGS84/*CRS.decode("EPSG:4326")*/);
 						GridCoordinates gridCoords = horizontalGrid.findNearestGridPoint(pos);
+						if (gridCoords == null)
+							throw new ReadRasterException("The position was outside the boundingbox");
 						Array data = grid.readDataSlice(time, elevation, gridCoords.getCoordinateValue(1),
 								gridCoords.getCoordinateValue(0));
 						// we know its a scalar //TODO?
@@ -192,6 +195,7 @@ public class NetCDFReader {
 				}
 			} catch (IndexOutOfBoundsException e) {
 				log("Got IndexOutOfBoundsException when processing the point:" + p, e);
+			} catch (ReadRasterException e) {
 			}
 		}
 		return val;
