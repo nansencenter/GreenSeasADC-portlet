@@ -236,25 +236,20 @@ myNamespace.matchup = (function($, ns) {
 					maxY = databaseValue;
 			}
 		});
-		minX = (minX - 0.5).toFixed();
-		maxX = (maxX + 0.5).toFixed();
-		minY = (minY - 0.5).toFixed();
-		maxY = (maxY + 0.5).toFixed();
+		minX = parseFloat((minX - 0.5).toFixed());
+		maxX = parseFloat((maxX + 0.5).toFixed());
+		minY = parseFloat((minY - 0.5).toFixed());
+		maxY = parseFloat((maxY + 0.5).toFixed());
 		var min = minX < minY ? minX : minY;
 		var max = maxX > maxY ? maxX : maxY;
-		min = parseFloat(min);
-		max = parseFloat(max);
+//		min = parseFloat(min);
+//		max = parseFloat(max);
 
-		if (debugc) {
-			console.log("min/max:" + minX + "," + minY + "," + maxX + "," + maxY);
+		if (debugmu) {
+			console.log("min/max:" + minX + "," + minY + "," + maxX + "," + maxY+"->"+min+","+max);
 
 			console.log(responseData);
-			console.log("scatterData:");
-			var sd = "[";
-			$.each(scatterData, function(i, d) {
-				sd += "[" + d[0] + "," + d[1] + "],";
-			});
-			console.log(sd + "]");
+			console.log(scatterData);
 		}
 		$('#highchartsContainer').highcharts(
 				{
@@ -265,16 +260,16 @@ myNamespace.matchup = (function($, ns) {
 						text : 'Scatter plot'
 					},
 					xAxis : [ {
-						min : min,
-						max : max,
+						min : minX,
+						max : maxX,
 						title : {
 							enabled : true,
 							text : 'Model value'
 						}
 					}, ],
 					yAxis : [ {
-						min : min,
-						max : max,
+						min : minY,
+						max : maxY,
 						title : {
 							enabled : true,
 							text : 'Database value'
