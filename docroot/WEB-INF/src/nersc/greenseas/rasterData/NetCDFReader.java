@@ -133,7 +133,7 @@ public class NetCDFReader {
 			try {
 				if (p != null) {
 					if (horizontalGrid != null) {
-						HorizontalPosition pos = new HorizontalPositionImpl(p.lon, p.lat, DefaultGeographicCRS.WGS84/*CRS.decode("EPSG:4326")*/);
+						HorizontalPosition pos = new HorizontalPositionImpl(p.lon, p.lat, DefaultGeographicCRS.WGS84);
 						GridCoordinates gridCoords = horizontalGrid.findNearestGridPoint(pos);
 						if (gridCoords == null)
 							throw new ReadRasterException("The position was outside the boundingbox");
