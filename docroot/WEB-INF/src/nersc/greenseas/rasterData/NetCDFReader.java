@@ -120,6 +120,9 @@ public class NetCDFReader {
 		HorizontalGrid horizontalGrid = null;
 		if (gcs.getXHorizAxis().getRank() > 1) {
 			horizontalGrid = LookUpTableGrid.generate(gcs);
+		} else {
+//			System.out.println("gcs.getXHorizAxis().getRank() <= 1");
+//			System.out.println(gcs.getXHorizAxis().getRank());
 		}
 		Map<Integer, Map<String, Double>> val = new HashMap<Integer, Map<String, Double>>();
 		if (time == null)
@@ -161,6 +164,7 @@ public class NetCDFReader {
 							val.put(p.id, values);
 						}
 					} else {
+//						System.out.println("horizontalGrid == null");
 						int[] xy = gcs.findXYindexFromLatLon(p.lat, p.lon, null);
 
 						// read the data at that lat, lon and the first time and
@@ -192,10 +196,13 @@ public class NetCDFReader {
 							val.put(p.id, values);
 						}
 					}
+				} else {
+//					System.out.println("p == null");
 				}
 			} catch (IndexOutOfBoundsException e) {
 				log("Got IndexOutOfBoundsException when processing the point:" + p, e);
 			} catch (ReadRasterException e) {
+//				System.out.println(e.getMessage());
 			}
 		}
 		return val;
