@@ -12,11 +12,10 @@ myNamespace.mapViewer = (function(OL, $) {
 
 	var mapPanel, printProvider;
 
-	
-	function updateIndex(name,delta){
+	function updateIndex(name, delta) {
 		var layers = map.getLayersByName(name);
 		for (var i = 0, l = layers.length; i < l; i++) {
-			map.raiseLayer(layers[i],delta);
+			map.raiseLayer(layers[i], delta);
 		}
 	}
 	function getListOfLayers() {
@@ -115,7 +114,7 @@ myNamespace.mapViewer = (function(OL, $) {
 
 	function addFeaturesFromDataWithColor(data, parameter, name, min, max) {
 		var index = 1000;
-		if (typeof customLayers[name] !== 'undefined'){
+		if (typeof customLayers[name] !== 'undefined') {
 			index = map.getLayerIndex(customLayers[name])
 			map.removeLayer(customLayers[name]);
 		}
@@ -164,8 +163,8 @@ myNamespace.mapViewer = (function(OL, $) {
 		}
 		pointLayer.addFeatures(pointFeatures);
 		map.addLayer(pointLayer);
-		while (map.getLayerIndex(pointLayer)>index){
-			map.raiseLayer(pointLayer,-1);
+		while (map.getLayerIndex(pointLayer) > index) {
+			map.raiseLayer(pointLayer, -1);
 		}
 		customLayers[name] = pointLayer;
 	}
@@ -307,7 +306,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		map.addControl(control);
 
 		addMapLayers();
-		registerClickBehaviour();
+		//TODO: registerClickBehaviour();
 		if (debugmW)
 			console.log("Finished initMap");
 		triggerQTip2DoNotShowLoad();
@@ -446,17 +445,68 @@ myNamespace.mapViewer = (function(OL, $) {
 	}
 
 	var popups = [];
+	var info = null;
 	function registerClickBehaviour() {
+		if (info !== null) {
+			info.deactivate();
+			map.removeControl(info);
+		}
+		var layers = [];
+		$.each(parameterLayers, function(i, val) {
+			if (val instanceof OpenLayers.Layer.WMS)
+				layers.push(val);
+		});
+
+		for (layer in mapLayers) {
+			if (layer !== 'datapoints' && mapLayers.hasOwnProperty(layer)) {
+				layers.push(mapLayers[layer]);
+				break;
+			}
+		}
+		if (layers.length === 0)
+			layers.push(mapLayers.datapoints);
+		console.log("Adding layers:");
+		console.log(layers);
 
 		// clicking feature opens popup with basic info
-		var info = new OpenLayers.Control.WMSGetFeatureInfo({
-			url : myNamespace.WMSserver,
-			title : 'Identify features by clicking',
+		info = new OpenLayers.Control.WMSGetFeatureInfo({
 			queryVisible : true,
-			maxFeatures : 20,
-			/* infoFormat : "text/xml", */
+			maxFeatures : 2000,
+			layers : layers,
+			// drillDown : true,
 			eventListeners : {
+				nogetfeatureinfo : function(event) {
+					console.log("nogetfeatureinfo");
+					console.log(event);
+				},
+				beforegetfeatureinfo : function(event) {
+					console.log("beforegetfeatureinfo");
+					console.log(event);
+					var layersA = event.object.layers;
+					var filters = "";
+					var delimiter = "";
+					for (var i = 0, l = layersA.length; i < l; i++) {
+						var filter = "<Filter xmlns:gml=\"http://www.opengis.net/gml\"></Filter>";
+						if (typeof layersA[i].params.FILTER === "string") {
+							filter = layersA[i].params.FILTER;
+						}
+						filters += delimiter + '(' + filter + ')';
+						delimiter = ";";
+					}
+					event.object.vendorParams = {
+						filter : filters + ""
+					};
+					/*
+					 * if (typeof event.object.layers[0].params.FILTER ===
+					 * "string") { console.log("Adding filter");
+					 * event.object.vendorParams = { filter :
+					 * event.object.layers[0].params.FILTER }; } else {
+					 * console.log(typeof event.object.layers[0].params.FILTER); }
+					 */
+				},
 				getfeatureinfo : function(event) {
+					console.log("getfeatureinfo");
+					console.log(event);
 					var popup = new OpenLayers.Popup.FramedCloud("chicken", map.getLonLatFromPixel(event.xy), null,
 							event.text, null, true);
 					map.addPopup(popup);
@@ -545,11 +595,10 @@ myNamespace.mapViewer = (function(OL, $) {
 			}
 		}
 		map.addLayer(pointLayer);
-		map.setLayerIndex(pointLayer, 10);
+		// map.setLayerIndex(pointLayer, 10);
 		pointLayer.addFeatures(pointFeatures);
 		parameterLayers[name] = pointLayer;
-
-		console.log(strategy);
+		//TODO: registerClickBehaviour()
 		if (debugmW)
 			console.log("addFeaturesFromData ended");
 	}
@@ -602,11 +651,11 @@ myNamespace.mapViewer = (function(OL, $) {
 		if (debugmW)
 			console.log("addLayerWMS started");
 		var layers = parameterLayers;
-		var index = 999;
+		// var index = 999;
 		var color = window[layer + "Color"] || "#610B0B";
 		var newLayer;
 		if (layer === window.metaDataTable) {
-			index = 998;
+			// index = 998;
 			layers = mapLayers;
 		} else {
 			color = window[layer + "Color"] || getRandomColor();
@@ -638,8 +687,9 @@ myNamespace.mapViewer = (function(OL, $) {
 		if (debugmW)
 			console.log("created the new layer");
 		map.addLayer(newLayer);
-		map.setLayerIndex(newLayer, index);
+		// map.setLayerIndex(newLayer, index);
 		layers[name] = newLayer;
+		//TODO: registerClickBehaviour();
 		if (debugmW)
 			console.log("Added the layer: " + name);
 	}
@@ -678,8 +728,8 @@ myNamespace.mapViewer = (function(OL, $) {
 		}
 		customLayers[shortName] = layer;
 		map.addLayer(layer);
-		while (map.getLayerIndex(layer)>index){
-			map.raiseLayer(layer,-1);
+		while (map.getLayerIndex(layer) > index) {
+			map.raiseLayer(layer, -1);
 		}
 		if (debugmW)
 			console.log("Added the WMS layer");
@@ -709,7 +759,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		removeCustomLayer : removeCustomLayer,
 		triggerQTip2DoNotShowLoad : triggerQTip2DoNotShowLoad,
 		getListOfLayers : getListOfLayers,
-		updateIndex:updateIndex
+		updateIndex : updateIndex
 	};
 
 }(OpenLayers, jQuery));
