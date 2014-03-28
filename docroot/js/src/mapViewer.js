@@ -5,13 +5,10 @@ var gsadbcLoadingLayersInterval = null;
 
 myNamespace.mapViewer = (function(OL, $) {
 	"use strict";
-	// TODO fix bound
-	var currentBounds = new OpenLayers.Bounds(-60, -72, 82, 88), maxExtent = new OpenLayers.Bounds(-120, -88, 120, 88);
-	// from layer preview
-	// -58.2311019897461,-71.0900039672852,80.9666748046875,86.3916702270508
+	var currentBounds = new OpenLayers.Bounds(-60, -75, 85, 90), maxExtent = new OpenLayers.Bounds(-180, -90, 180, 90);
 
 	// map on which layers are drawn
-	// var map;
+	var map;
 
 	var mapPanel, printProvider;
 
@@ -29,7 +26,6 @@ myNamespace.mapViewer = (function(OL, $) {
 			if (!layer.isBaseLayer) {
 				list.push({
 					name : layer.name,
-					//TODO: if using id, keep index on update (id will be renewed I think)
 					id : layer.id,
 					index : map.getLayerIndex(layer)
 				});
@@ -37,11 +33,12 @@ myNamespace.mapViewer = (function(OL, $) {
 		}
 		return list;
 	}
-	// Object that stores the layers for the parameters
+	// Objects that store the different layers
 	var parameterLayers = {};
 	var customLayers = {};
 	var mapLayers = {};
 	// some background layers, user may select one
+	var numberOfBackgroundLayers = 4;
 	var backgroundLayers = {
 		demis : new OpenLayers.Layer.WMS(
 				"Demis WMS",
@@ -117,8 +114,11 @@ myNamespace.mapViewer = (function(OL, $) {
 	}
 
 	function addFeaturesFromDataWithColor(data, parameter, name, min, max) {
-		if (typeof customLayers[name] !== 'undefined')
+		var index = 1000;
+		if (typeof customLayers[name] !== 'undefined'){
+			index = map.getLayerIndex(customLayers[name])
 			map.removeLayer(customLayers[name]);
+		}
 		var pointLayer = new OL.Layer.Vector(name, {
 			projection : "EPSG:4326"
 		});
@@ -139,7 +139,6 @@ myNamespace.mapViewer = (function(OL, $) {
 			}
 		}
 		var range = max - min;
-		console.log([ min, max, range ]);
 		for (id in data) {
 			if (data.hasOwnProperty(id)) {
 				var value = data[id].properties[parameter];
@@ -165,7 +164,9 @@ myNamespace.mapViewer = (function(OL, $) {
 		}
 		pointLayer.addFeatures(pointFeatures);
 		map.addLayer(pointLayer);
-		map.setLayerIndex(pointLayer, 9);
+		while (map.getLayerIndex(pointLayer)>index){
+			map.raiseLayer(pointLayer,-1);
+		}
 		customLayers[name] = pointLayer;
 	}
 	var legendPallete = [ "#00008f", "#00009f", "#0000af", "#0000bf", "#0000cf", "#0000df", "#0000ef", "#0000ff",
@@ -265,10 +266,6 @@ myNamespace.mapViewer = (function(OL, $) {
 		});
 		popupsPanel.addControls([ popupsButton ]);
 		map.addControl(popupsPanel);
-		// TODO: does not work with the Ext
-		// var graticule = new OpenLayers.Control.Graticule();
-		// graticule.displayInLayerSwitcher = true;
-		// map.addControl(graticule);
 
 		// Adding the layers to the map
 		var bg = backgroundLayers, fg = mapLayers;
@@ -393,13 +390,8 @@ myNamespace.mapViewer = (function(OL, $) {
 	}
 
 	function addMapLayers() {
-		// TODO: does not work as intended
 		$.each(mapLayers, function(i, val) {
 			map.addLayer(val);
-			/*
-			 * window.setTimeout(function() { checkIfLayerHasLoaded(val); },
-			 * 5000);
-			 */
 		});
 	}
 
@@ -652,17 +644,6 @@ myNamespace.mapViewer = (function(OL, $) {
 			console.log("Added the layer: " + name);
 	}
 
-	function updateIndices() {
-		$.each(mapLayers, function(i, layer) {
-			map.removeLayer(layer);
-			map.addLayer(layer);
-		});
-		$.each(parameterLayers, function(i, layer) {
-			map.removeLayer(layer);
-			map.addLayer(layer);
-		});
-	}
-
 	function addWMSLayer(url, shortName, layerID, colorscalerange, style, logscale, elevation, time, longName) {
 		if (debugmW)
 			console.log("Adding the WMS layer");
@@ -688,15 +669,18 @@ myNamespace.mapViewer = (function(OL, $) {
 		layer.longName = longName;
 		if (debugmW)
 			console.log("Created the WMS layer");
+		var index = numberOfBackgroundLayers;
 		if (shortName in customLayers) {
+			index = map.getLayerIndex(customLayers[shortName])
 			map.removeLayer(customLayers[shortName]);
 			if (debugmW)
 				console.log("Removed the existing WMS layer");
 		}
 		customLayers[shortName] = layer;
 		map.addLayer(layer);
-		map.setLayerIndex(layer, 500);
-		updateIndices();
+		while (map.getLayerIndex(layer)>index){
+			map.raiseLayer(layer,-1);
+		}
 		if (debugmW)
 			console.log("Added the WMS layer");
 	}

@@ -369,7 +369,8 @@
 				</h3>
 				<div id='upDownLayersDiv'>
 				<div id='upDownLayersHelpText'></div>
-				<table id='upDownLayersTable' class='table'></table>
+				<div id='upDownLayersTableDiv'>
+				</div>
 				</div>
 				<h3>
 					<span id='rasterLayersDivHeaderText'>Add Raster Layers <!-- <em>(off)</em> --></span>

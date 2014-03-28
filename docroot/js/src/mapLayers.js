@@ -20,8 +20,11 @@ myNamespace.mapLayers = (function($, bH) {
 		for (var i = 0, l = layers.length; i < l; i++) {
 			tableData.push({ '0':i, '1':layers[i].name, 'DT_RowId':"upDownLayersTableRow"+i });
 		}
-		if (myNamespace.upDownLayersTable !== null)
+		if (myNamespace.upDownLayersTable !== null){
 			myNamespace.upDownLayersTable.fnDestroy();
+			$('#upDownLayersTableDiv').html("");
+		}
+		$('#upDownLayersTableDiv').html("<table id='upDownLayersTable' class='table'></table>");
 		myNamespace.upDownLayersTable = $('#upDownLayersTable').dataTable({
 			"bDeferRender" : true,
 			'aaSorting' : [],
