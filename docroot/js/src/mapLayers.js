@@ -18,9 +18,13 @@ myNamespace.mapLayers = (function($, bH) {
 		} ];
 		var tableData = [];
 		for (var i = 0, l = layers.length; i < l; i++) {
-			tableData.push({ '0':i, '1':layers[i].name, 'DT_RowId':"upDownLayersTableRow"+i });
+			tableData.push({
+				'0' : i,
+				'1' : layers[i].name,
+				'DT_RowId' : "upDownLayersTableRow" + i
+			});
 		}
-		if (myNamespace.upDownLayersTable !== null){
+		if (myNamespace.upDownLayersTable !== null) {
 			myNamespace.upDownLayersTable.fnDestroy();
 			$('#upDownLayersTableDiv').html("");
 		}
@@ -42,7 +46,7 @@ myNamespace.mapLayers = (function($, bH) {
 		var data = myNamespace.upDownLayersTable.fnGetData();
 		var name = null;
 		for (var i = 0, l = data.length; i < l; i++) {
-			if (data[i][0]==newPosition){
+			if (data[i][0] == newPosition) {
 				name = data[i][1];
 				break;
 			}
@@ -424,6 +428,7 @@ myNamespace.mapLayers = (function($, bH) {
 					"<p>Run a query and filter selected parameters to view options here.</p>");
 			$("#parameterLayerVariableContainer").hide();
 			disableAddParameterLayerButton();
+			resetParameterLayers();
 			generateLayerTable();
 			break;
 		case 'loadedParameters':
@@ -435,6 +440,7 @@ myNamespace.mapLayers = (function($, bH) {
 			generateLayerTable();
 			break;
 		case 'loadingParameters':
+			resetParameterLayers();
 			// Loading
 			$("#parameterLayerVariableContainer").hide();
 			disableAddParameterLayerButton();
@@ -443,6 +449,16 @@ myNamespace.mapLayers = (function($, bH) {
 		default:
 			// do nothing
 			break;
+		}
+	}
+
+	function resetParameterLayers() {
+		$("#parameterLayerVariableContainer").html("");
+		for (; activeParameterLayers > 0; activeParameterLayers--) {
+			var colorScaleLegendDiv = $('#colorScaleLegendParameter' + (activeParameterLayers-1));
+			if (colorScaleLegendDiv.length !== 0)
+				colorScaleLegendDiv.remove();
+			myNamespace.mapViewer.removeCustomLayer("Par " + (activeParameterLayers-1));
 		}
 	}
 
