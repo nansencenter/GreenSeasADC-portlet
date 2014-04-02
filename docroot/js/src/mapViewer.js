@@ -306,13 +306,16 @@ myNamespace.mapViewer = (function(OL, $) {
 		map.addControl(control);
 
 		addMapLayers();
-		//TODO: 
+		// TODO:
 		registerClickBehaviour();
 		if (debugmW)
 			console.log("Finished initMap");
 		triggerQTip2DoNotShowLoad();
 	}
 
+	function convertAllIllegalCharactersToUnderscore(str) {
+		return str.replace(/([;&,\.\+\*\~':"\!\^#$%@\[\]\(\)=>\/\//| ])/g, '_');
+	}
 	function triggerQTip2DoNotShowLoad() {
 		if ($("#qTip2DoNotShowLoad").prop('checked')) {
 			$('#simple_map').qtip('hide');
@@ -372,7 +375,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		if (!$("#qTip2DoNotShowLoad").prop('checked')) {
 			$.each(map.layers, function(i, layer) {
 				if (typeof layer.visibility === 'undefined' || layer.visibility) {
-					var name = layer.name.replace(/ /g, "_");
+					var name = convertAllIllegalCharactersToUnderscore(layer.name);// 
 					var div = $("#qTip2" + name);
 					if (div.length === 0) {
 						$(mainDiv).append("<div id='qTip2" + name + "'></div>");
@@ -466,8 +469,6 @@ myNamespace.mapViewer = (function(OL, $) {
 		}
 		if (layers.length === 0)
 			layers.push(mapLayers.datapoints);
-		console.log("Adding layers:");
-		console.log(layers);
 
 		// clicking feature opens popup with basic info
 		info = new OpenLayers.Control.WMSGetFeatureInfo({
@@ -486,7 +487,7 @@ myNamespace.mapViewer = (function(OL, $) {
 					var layersA = event.object.layers;
 					var filters = "";
 					var delimiter = "";
-					for (var i = layersA.length-1, l = 0;i >= l; i--) {
+					for (var i = layersA.length - 1, l = 0; i >= l; i--) {
 						var filter = "<Filter xmlns:gml=\"http://www.opengis.net/gml\"></Filter>";
 						if (typeof layersA[i].params.FILTER === "string") {
 							filter = layersA[i].params.FILTER;
@@ -599,7 +600,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		// map.setLayerIndex(pointLayer, 10);
 		pointLayer.addFeatures(pointFeatures);
 		parameterLayers[name] = pointLayer;
-		//TODO: 
+		// TODO:
 		registerClickBehaviour()
 		if (debugmW)
 			console.log("addFeaturesFromData ended");
@@ -691,7 +692,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		map.addLayer(newLayer);
 		// map.setLayerIndex(newLayer, index);
 		layers[name] = newLayer;
-		//TODO: 
+		// TODO:
 		registerClickBehaviour();
 		if (debugmW)
 			console.log("Added the layer: " + name);
