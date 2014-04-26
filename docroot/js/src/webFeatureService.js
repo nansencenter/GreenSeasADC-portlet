@@ -2,7 +2,7 @@ var myNamespace = myNamespace || {};
 
 var debugwfs = false;// debug flag
 
-myNamespace.WebFeatureService = (function($, OL) {
+myNamespace.WebFeatureService = (function($, OL,ns) {
 	"use strict";
 
 	// fires an asyn. HTTP GET request to server
@@ -37,7 +37,7 @@ myNamespace.WebFeatureService = (function($, OL) {
 			console.log(filter);
 		var newFilter = "";
 		var xmlDoc;
-		if (myNamespace.utilities.findBrowser() !== "Firefox") {
+		if (ns.utilities.findBrowser() !== "Firefox") {
 			try {
 				if (window.DOMParser) {
 					parser = new DOMParser();
@@ -220,7 +220,7 @@ myNamespace.WebFeatureService = (function($, OL) {
 			modifiedRequestData[index][requestData[i][1]] = xml;
 			number++;
 		}
-		myNamespace.ajax.getUpdateParametersDataFromServer(modifiedRequestData.reverse(), (index + 1), region);
+		ns.ajax.getUpdateParametersDataFromServer(modifiedRequestData.reverse(), (index + 1), region);
 	}
 
 	// public interface
@@ -230,4 +230,4 @@ myNamespace.WebFeatureService = (function($, OL) {
 		getUpdatedParameters : getUpdatedParameters,
 	};
 
-}(jQuery, OpenLayers));
+}(jQuery, OpenLayers,myNamespace));

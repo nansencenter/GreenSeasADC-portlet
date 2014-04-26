@@ -17,16 +17,7 @@ myNamespace.XMLParser = (function($) {
 
 	function getXmlDoc(xmlSchema) {
 		var xmlDoc;
-		// var browser = myNamespace.utilities.findBrowser();
-		/*
-		 * if (browser === "Chrome" || browser === "Firefox") { xmlDoc =
-		 * xmlSchema.responseXML; } else {
-		 */
-		// if (xmlSchema._object) {
 		xmlDoc = xmlSchema._object.responseXML;
-		/*
-		 * } else { xmlDoc = xmlSchema.responseXML; }
-		 */
 		return xmlDoc;
 	}
 
@@ -37,7 +28,6 @@ myNamespace.XMLParser = (function($) {
 			console.log(xmlSchema);
 		var parameters = {};
 		var xmlDoc = getXmlDoc(xmlSchema);
-		// if (debugXML)
 		if (debugXML)
 			console.log(xmlDoc);
 		var layers = $(xmlDoc.documentElement).find("Layer[queryable=1]");
@@ -90,4 +80,4 @@ myNamespace.XMLParser = (function($) {
 		extractParameters : extractParameters,
 	};
 
-}(jQuery));
+}(jQuery,myNamespace));

@@ -24,6 +24,10 @@ myNamespace.utilities = (function($) {
 		return selectElement;
 	}
 
+	function convertAllIllegalCharactersToUnderscore(str) {
+		return str.replace(/([;&,\.\+\*\~':"\!\^#$%@\[\]\(\)=>\/\//| ])/g, '_');
+	}
+
 	function setUpSelector(hashMap, id, name) {
 		name = "name='" + name + "'";
 		var selectElement = "<select id='" + id + "' " + name + ">";
@@ -42,13 +46,23 @@ myNamespace.utilities = (function($) {
 		M = M[2] ? [ M[1], M[2] ] : [ N, navigator.appVersion, '-?' ];
 		return M[0];
 	}
+	function getRandomColor() {
+		var letters = '0123456789ABCDEF'.split('');
+		var color = '#';
+		for (var i = 0; i < 6; i++) {
+			color += letters[Math.round(Math.random() * 15)];
+		}
+		return color;
+	}
 
 	// public interface
 	return {
 		rand : rand,
 		setUpSelectorArray : setUpSelectorArray,
 		setUpSelector : setUpSelector,
-		findBrowser : findBrowser
+		findBrowser : findBrowser,
+		getRandomColor : getRandomColor,
+		convertAllIllegalCharactersToUnderscore : convertAllIllegalCharactersToUnderscore
 	};
 
 }(jQuery));

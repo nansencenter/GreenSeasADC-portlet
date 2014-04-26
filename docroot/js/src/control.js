@@ -169,10 +169,13 @@ myNamespace.control = (function($, OL, ns) {
 		ns.mapViewer.removeAllParameterLayers();
 		ns.mapViewer.removeBasicSearchLayer();
 		ns.ajax.resetParameterDataSearch();
-		myNamespace.parametersQueryString = null;
+		ns.parametersQueryString = null;
 		setHTMLLoadingMainQuery();
 
 		var filterBbox = ns.query.createfilterBoxHashMap();
+		if (document.lonlatform.updatemapcheck.checked) {
+			ns.mapViewer.zoomToExtent(filterBbox,true);
+		}
 		var date = ns.query.createDateHashMap();
 		var months = ns.query.createMonthArray();
 		var depth = ns.query.createDepthHashMap();
@@ -234,8 +237,8 @@ myNamespace.control = (function($, OL, ns) {
 			propertyName = ns.handleParameters.mainParameters.parameters;
 		}
 
-		myNamespace.mainQueryArray = mainQueryArray;
-		myNamespace.mainQueryObject = mainQueryObject;
+		ns.mainQueryArray = mainQueryArray;
+		ns.mainQueryObject = mainQueryObject;
 
 		if (debugc)
 			console.log("control.js: calling ns.query.constructFilterString()"); // TEST
@@ -474,73 +477,73 @@ myNamespace.control = (function($, OL, ns) {
 		$("#timeSeriesDiv").show();
 		$("#propertiesPlotDiv").show();
 		$("#exportParametersDiv").show();
-		myNamespace.matchup.updateMatchupParameter();
+		ns.matchup.updateMatchupParameter();
 	}
 
 	function hasMainQueryObjectChanged() {
-		if (myNamespace.mainQueryObject == null)
+		if (ns.mainQueryObject == null)
 			return true;
 		var filterBbox = ns.query.createfilterBoxHashMap();
 		if (filterBbox) {
-			if (myNamespace.mainQueryObject.filterBbox) {
-				if (filterBbox.bottom !== myNamespace.mainQueryObject.filterBbox.bottom)
+			if (ns.mainQueryObject.filterBbox) {
+				if (filterBbox.bottom !== ns.mainQueryObject.filterBbox.bottom)
 					return true;
-				if (filterBbox.left !== myNamespace.mainQueryObject.filterBbox.left)
+				if (filterBbox.left !== ns.mainQueryObject.filterBbox.left)
 					return true;
-				if (filterBbox.right !== myNamespace.mainQueryObject.filterBbox.right)
+				if (filterBbox.right !== ns.mainQueryObject.filterBbox.right)
 					return true;
-				if (filterBbox.top !== myNamespace.mainQueryObject.filterBbox.top)
+				if (filterBbox.top !== ns.mainQueryObject.filterBbox.top)
 					return true;
 			} else {
 				return true;
 			}
-		} else if (myNamespace.mainQueryObject.filterBbox)
+		} else if (ns.mainQueryObject.filterBbox)
 			return true;
 
 		var date = ns.query.createDateHashMap();
 		if (date) {
-			if (myNamespace.mainQueryObject.date) {
-				if (date.fromDate !== myNamespace.mainQueryObject.date.fromDate)
+			if (ns.mainQueryObject.date) {
+				if (date.fromDate !== ns.mainQueryObject.date.fromDate)
 					return true;
-				if (date.toDate !== myNamespace.mainQueryObject.date.toDate)
+				if (date.toDate !== ns.mainQueryObject.date.toDate)
 					return true;
-				if (date.time !== myNamespace.mainQueryObject.date.time)
+				if (date.time !== ns.mainQueryObject.date.time)
 					return true;
-				if (date.fromTime !== myNamespace.mainQueryObject.date.fromTime)
+				if (date.fromTime !== ns.mainQueryObject.date.fromTime)
 					return true;
-				if (date.toTime !== myNamespace.mainQueryObject.date.toTime)
+				if (date.toTime !== ns.mainQueryObject.date.toTime)
 					return true;
 			} else {
 				return true;
 			}
-		} else if (myNamespace.mainQueryObject.date)
+		} else if (ns.mainQueryObject.date)
 			return true;
 
 		var depth = ns.query.createDepthHashMap();
 		if (depth) {
-			if (myNamespace.mainQueryObject.depth) {
-				if (depth.max !== myNamespace.mainQueryObject.depth.max)
+			if (ns.mainQueryObject.depth) {
+				if (depth.max !== ns.mainQueryObject.depth.max)
 					return true;
-				if (depth.min !== myNamespace.mainQueryObject.depth.min)
+				if (depth.min !== ns.mainQueryObject.depth.min)
 					return true;
 			} else {
 				return true;
 			}
-		} else if (myNamespace.mainQueryObject.depth) {
+		} else if (ns.mainQueryObject.depth) {
 			return true;
 		}
 
 		var region = ns.query.createRegionArray();
 		if (region) {
-			if (myNamespace.mainQueryObject.region) {
-				if (region !== myNamespace.mainQueryObject.region) {
+			if (ns.mainQueryObject.region) {
+				if (region !== ns.mainQueryObject.region) {
 					return true;
 				}
 			} else {
 				return true;
 			}
 		} else {
-			if (myNamespace.mainQueryObject.region) {
+			if (ns.mainQueryObject.region) {
 				return true;
 			}
 		}
@@ -550,24 +553,24 @@ myNamespace.control = (function($, OL, ns) {
 			cruise = $("#cruiseSelected").find(":selected").val();
 		}
 		if (cruise) {
-			if (myNamespace.mainQueryObject.cruise) {
-				if (cruise !== myNamespace.mainQueryObject.cruise)
+			if (ns.mainQueryObject.cruise) {
+				if (cruise !== ns.mainQueryObject.cruise)
 					return true;
 			} else
 				return true;
-		} else if (myNamespace.mainQueryObject.cruise)
+		} else if (ns.mainQueryObject.cruise)
 			return true;
 
 		// TODO: does not handle metadata
 
 		var months = ns.query.createMonthArray();
 		if (months)
-			if (myNamespace.mainQueryObject.months) {
-				if (!months.compare(myNamespace.mainQueryObject.months))
+			if (ns.mainQueryObject.months) {
+				if (!months.compare(ns.mainQueryObject.months))
 					return true;
 			} else
 				return true;
-		else if (myNamespace.mainQueryObject.months)
+		else if (ns.mainQueryObject.months)
 			return true;
 		return false;
 	}
@@ -593,10 +596,10 @@ myNamespace.control = (function($, OL, ns) {
 				propertyName.push(parameter + qfPostFix);
 			}
 		});
-		var filter = ns.query.constructParameterFilterString(propertyNameNeed, myNamespace.mainQueryObject.depth,
-				myNamespace.mainQueryObject.filterBbox, myNamespace.mainQueryObject.date,
-				myNamespace.mainQueryObject.months, myNamespace.mainQueryObject.region,
-				myNamespace.mainQueryObject.cruise);
+		var filter = ns.query.constructParameterFilterString(propertyNameNeed, ns.mainQueryObject.depth,
+				ns.mainQueryObject.filterBbox, ns.mainQueryObject.date,
+				ns.mainQueryObject.months, ns.mainQueryObject.region,
+				ns.mainQueryObject.cruise);
 		// Requesting features from the first layer through an asynchronous
 		// request and sending response to displayParameter
 		ns.WebFeatureService.getFeature({
@@ -815,9 +818,9 @@ myNamespace.control = (function($, OL, ns) {
 		var myTreeContainer = $.jstree._reference("#parametersTree").get_container();
 		var allChildren = myTreeContainer.find("li");
 		var requestData = [];
-		var region = myNamespace.mainQueryObject.region;
-		if ((typeof myNamespace.mainQueryObject.region !== 'undefined')
-				&& (myNamespace.mainQueryObject.region !== null)) {
+		var region = ns.mainQueryObject.region;
+		if ((typeof ns.mainQueryObject.region !== 'undefined')
+				&& (ns.mainQueryObject.region !== null)) {
 			region = 'gsadbcRegionFilterPlaceHolder';
 		}
 		$.each(allChildren, function(i, val) {
@@ -869,9 +872,9 @@ myNamespace.control = (function($, OL, ns) {
 								layer,
 								id,
 								ns.query.constructParameterFilterString(propertyNames,
-										myNamespace.mainQueryObject.depth, myNamespace.mainQueryObject.filterBbox,
-										myNamespace.mainQueryObject.date, myNamespace.mainQueryObject.months, region,
-										myNamespace.mainQueryObject.cruise) ]);
+										ns.mainQueryObject.depth, ns.mainQueryObject.filterBbox,
+										ns.mainQueryObject.date, ns.mainQueryObject.months, region,
+										ns.mainQueryObject.cruise) ]);
 					}
 				}
 			}
@@ -880,7 +883,7 @@ myNamespace.control = (function($, OL, ns) {
 			incomingRequests = 0;
 			if (region === 'gsadbcRegionFilterPlaceHolder') {
 				ns.WebFeatureService.getUpdatedParameters(requestData, ns.query.constructString(ns.query
-						.createRegionFilter(myNamespace.mainQueryObject.region)));
+						.createRegionFilter(ns.mainQueryObject.region)));
 			} else {
 				ns.WebFeatureService.getUpdatedParameters(requestData);
 			}
@@ -1016,32 +1019,24 @@ myNamespace.control = (function($, OL, ns) {
 		ns.matchup.compareRaster(data);
 	}
 
-	function addAParameterToData(values, parameter) {
+	function addAParameterToData(values, parameter, timeTable,elevationTable) {
 		$.each(data, function(id) {
 			val = null;
 			lat = null;
 			lon = null;
+			time = null;
 			if (!(typeof values[id] === 'undefined')) {
 				val = values[id].value;
 				lat = values[id].lat;
 				lon = values[id].lon;
 			}
-			data[id].properties[parameter] = val;
+			data[id].properties["Model value for " + parameter] = val;
 			data[id].properties["Model lat for " + parameter] = lat;
 			data[id].properties["Model lon for " + parameter] = lon;
+			data[id].properties["Model time for " + parameter] = Highcharts.dateFormat('%Y-%m-%d %H:%M', timeTable[data[id].matchedTime]);
+			data[id].properties["Model elevation for " + parameter] = elevationTable[data[id].matchedElevation];
 		});
-		// console.log(data);
-		var constructedTable = ns.tableConstructor.parameterTable(data);
-		// console.log(constructedTable);
-		$("#parametersTable").html(
-				"Entries where the selected parameters are available<br>" + "<div class='scrollArea'>"
-						+ constructedTable + "</div>");
-		// TODO: performance! this is extremely slow!
-		$("#parametersResultTable").dataTable({
-			"bDeferRender" : true,
-			'aaSorting' : []
-		});
-		// console.log("addAParameterToData DONE");
+		setHTMLParametersLoaded();
 	}
 
 	function initiateRasterDataButton() {
@@ -1128,7 +1123,7 @@ myNamespace.control = (function($, OL, ns) {
 
 	function saveQueryButton() {
 		var query = "";
-		if (myNamespace.mainQueryObject == null) {
+		if (ns.mainQueryObject == null) {
 			ns.errorMessage
 					.showErrorMessage("You seem to not have performed a query. Please do so before you can save it.");
 			return;
@@ -1161,8 +1156,8 @@ myNamespace.control = (function($, OL, ns) {
 			}
 		}
 		var message = "";
-		if (myNamespace.parameterQueryArray !== null) {
-			query += delimiter + "parameters" + equalsSign + myNamespace.parameterQueryArray;
+		if (ns.parameterQueryArray !== null) {
+			query += delimiter + "parameters" + equalsSign + ns.parameterQueryArray;
 		}
 		if (query.length === 0) {
 			message = "<b>The query is empty!</b><br>";
@@ -1172,35 +1167,55 @@ myNamespace.control = (function($, OL, ns) {
 			url += "?query=" + encodeURIComponent(query);
 		$("#saveContainer").html(message + "<a href='" + url + "'>" + url + "</a>");
 	}
+
+	function loadFileFromIDButton() {
+		// TODO: move
+		var statusElement = $("#loadFileFromIDMessage");
+		if (statusElement.length === 0) {
+			$("#loadFromFileIDDiv").append("<div id='loadFileFromIDMessage'></div>");
+			statusElement = $("#loadFileFromIDMessage");
+		}
+		statusElement.html("Loading file...");
+		ns.ajax.loadFileFromID($("#rasterUploadedFileID").val());
+	}
+	
+	function createNetCDFUsingHOneButton(){
+		ns.fileCreation.createNetCDFUsingHOne(data);
+	}
 	// public interface
 	return {
 		activateBbox : activateBbox,
-		addLayerButton : addLayerButton,
-		toggleLayerButton : toggleLayerButton,
-		addTimeSeriesVariableButton : addTimeSeriesVariableButton,
-		timeSeriesButton : timeSeriesButton,
 		init : init,
-		calculateStatisticsButton : calculateStatisticsButton,
 		viewParameterNames : viewParameterNames,
-		initiateRasterDataButton : initiateRasterDataButton,
-		compareRasterButton : compareRasterButton,
 		initiateParameters : initiateParameters,
 		setLonLatInput : setLonLatInput,
-		mainQueryButton : mainQueryButton,
-		filterParametersButton : filterParametersButton,
 		setBboxInputToCurrentMapExtent : setBboxInputToCurrentMapExtent,
 		lonLatAnywhere : lonLatAnywhere,
+		addAParameterToData : addAParameterToData,
+		getData : getData,
+		updateTreeWithInventoryNumbers : updateTreeWithInventoryNumbers,
+
+		// Buttons
+		saveQueryButton : saveQueryButton,
+		loadFileFromIDButton : loadFileFromIDButton,
+		mainQueryButton : mainQueryButton,
+		filterParametersButton : filterParametersButton,
 		linkParametersExportButton : linkParametersExportButton,
 		propertiesPlotButton : propertiesPlotButton,
+		initiateRasterDataButton : initiateRasterDataButton,
+		compareRasterButton : compareRasterButton,
 		filterParametersTreeButton : filterParametersTreeButton,
+		addLayerButton : addLayerButton,
+		toggleLayerButton : toggleLayerButton,
+		timeSeriesButton : timeSeriesButton,
+		addTimeSeriesVariableButton : addTimeSeriesVariableButton,
+		calculateStatisticsButton : calculateStatisticsButton,
 		collapseAllButton : collapseAllButton,
 		expandAllButton : expandAllButton,
 		toggleOrderPlanktonButton : toggleOrderPlanktonButton,
 		clearSelectionButton : clearSelectionButton,
-		addAParameterToData : addAParameterToData,
-		getData : getData,
-		updateTreeWithInventoryNumbers : updateTreeWithInventoryNumbers,
-		saveQueryButton : saveQueryButton,
+		
+		createNetCDFUsingHOneButton:createNetCDFUsingHOneButton,
 	};
 
 }(jQuery, OpenLayers, myNamespace));

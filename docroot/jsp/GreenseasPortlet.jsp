@@ -342,6 +342,12 @@
 						<div id="percent">0%</div>
 					</div>
 					<div id="status"></div>
+					<div id="loadFromFileIDDiv">
+						<br>
+						File ID:
+						<input id='rasterUploadedFileID' type="text" size="35" />
+						<input type='button' id='loadFileFromIDButton' value="Load from fileID" />
+					</div>
 				</div>
 				<h3>
 					<span id='openDAPOptionHeaderText'>Use dataset from OpenDAP <em>(on)</em></span>
@@ -368,9 +374,8 @@
 					<span id='upDownLayersDivHeaderText'>Move layers up/down<!-- <em>(off)</em> --></span>
 				</h3>
 				<div id='upDownLayersDiv'>
-				<div id='upDownLayersHelpText'></div>
-				<div id='upDownLayersTableDiv'>
-				</div>
+					<div id='upDownLayersHelpText'></div>
+					<div id='upDownLayersTableDiv'></div>
 				</div>
 				<h3>
 					<span id='rasterLayersDivHeaderText'>Add Raster Layers <!-- <em>(off)</em> --></span>
@@ -382,7 +387,7 @@
 					<input type='button' id='addLayerButton' value="Add new layer" />
 				</div>
 				<h3>
-					<span id='parametersLayerDivHeaderText'>Add Parameter Layers  <!-- <em>(off)</em> --></span>
+					<span id='parametersLayerDivHeaderText'>Add Parameter Layers <!-- <em>(off)</em> --></span>
 				</h3>
 				<div id='parameterLayerVariableAccordionDiv'>
 					<div id='parameterLayerVariableHelpText'></div>

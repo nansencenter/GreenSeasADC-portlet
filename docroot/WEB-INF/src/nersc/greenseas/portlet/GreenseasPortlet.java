@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,6 @@ import java.util.Set;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletException;
-import javax.portlet.PortletSession;
 import javax.portlet.PortletURL;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
@@ -44,12 +44,14 @@ import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import nersc.greenseas.configuration.DatabaseProperties;
 import nersc.greenseas.rasterData.NetCDFReader;
+import nersc.greenseas.rasterData.NetCDFWriter;
 
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.util.PortalUtil;
@@ -67,7 +69,7 @@ public class GreenseasPortlet extends MVCPortlet {
 
 	@Override
 	public void doView(RenderRequest renderRequest, RenderResponse renderResponse) throws IOException, PortletException {
-		//TODO: validate/escape to prevent injection
+		// TODO: validate/escape to prevent injection
 		renderRequest.setAttribute("allParametersHeader", DatabaseProperties.getAllParametersHeader());
 		renderRequest.setAttribute("allLayers", DatabaseProperties.getAllLayers());
 		renderRequest.setAttribute("allProperties", DatabaseProperties.getAllProperties());
@@ -89,153 +91,240 @@ public class GreenseasPortlet extends MVCPortlet {
 			PortletException {
 		System.out.println("Calling serveResource");
 		resourceResponse.setContentType("text/javascript");
-		PortletSession session = resourceRequest.getPortletSession();
-		String uri = (String) session.getAttribute("rasterFile");
+		String uri = resourceRequest.getParameter("fileID");
 		String requestType = resourceRequest.getParameter("requestType");
 		System.out.println("requestType:'" + requestType + "'");
 		String opendapDataURL = resourceRequest.getParameter("opendapDataURL");
-		if (opendapDataURL != null) {
-			uri = opendapDataURL;
-			System.out.println("uri set to:" + opendapDataURL);
-		}
-		if (uri != null) {
-			if (requestType.startsWith("getDataValuesOf:")) {
-				System.out.println("requestType is getDataValuesOf:");
-				Map<String, String[]> parameterMap = resourceRequest.getParameterMap();
-				Map<Integer, Map<String, Double>> values = NetCDFReader.getDatavaluesFromNetCDFFile(uri, parameterMap);
-				if (values == null)
-					return;
-				JSONObject jsonObject = new JSONObject(values);
-				// System.out.println("Returning with jsonObject:");
-				// System.out.println(jsonObject.toJSONString());
+		if (requestType != null) {
+			if (requestType.equals("serveNetCDFFile")) {
+				String location = resourceRequest.getParameter("fileID");
+				if (location != null) {
+					resourceResponse.setContentType("application/x-netcdf");
+					OutputStream out = resourceResponse.getPortletOutputStream();
+					InputStream in = null;
+					try {
+						in = new FileInputStream(new File(location));
+						if (in != null) {
+							byte[] buffer = new byte[4096];
+							int len;
 
-				PrintWriter writer = resourceResponse.getWriter();
-				writer.write(jsonObject.toString());
-				return;
-			} else if (requestType.equals("getLayersFromNetCDFFile")) {
-				System.out.println("requestType is getLayersFromNetCDFFile:");
-				System.out.println("opendapDataURL:" + opendapDataURL);
-				System.out.println("uri:" + uri);
-				Map<String, String> values = NetCDFReader.getLayersFromRaster(uri);
-				if (values == null) {
-					System.out.println("No values found!");
-					return;
-				}
-				JSONObject jsonObject = new JSONObject(values);
+							while ((len = in.read(buffer)) != -1) {
+								out.write(buffer, 0, len);
+							}
 
-				System.out.println("Returning with jsonObject:");
-				System.out.println(jsonObject.toJSONString());
-
-				PrintWriter writer = resourceResponse.getWriter();
-				writer.write(jsonObject.toString());
-				session.setAttribute("rasterFile", uri);
-				return;
-			} else if (requestType.equals("getMetaDimensions")) {
-				System.out.println("getMetaDimensions:" + uri);
-				String parameter = resourceRequest.getParameter("rasterParameter");
-				if (parameter == null)
-					return;
-				Map<String, Map<String, String>> values = NetCDFReader.getDimensionsFromRasterParameter(uri, parameter);
-				if (values == null)
-					return;
-				JSONObject jsonObject = new JSONObject(values);
-
-				System.out.println("Returning with jsonObject:");
-				System.out.println(jsonObject.toJSONString());
-
-				PrintWriter writer = resourceResponse.getWriter();
-				writer.write(jsonObject.toString());
-				return;
-			}
-		}
-		if (requestType.equals("getLonghurstPolygon")) {
-			Map<String, String> values = new HashMap<String, String>();
-			String region = resourceRequest.getParameter("longhurstRegion");
-			System.out.println("getLonghurstPolygon:" + region);
-			String polygon = DatabaseProperties.getLonghurstPolygon(region);
-			values.put(region, polygon);
-			JSONObject jsonObject = new JSONObject(values);
-
-			System.out.println("Returning with polygon!=null:" + (polygon != null));
-
-			// System.out.println("Returning with jsonObject:");
-			// System.out.println(jsonObject.toJSONString());
-
-			PrintWriter writer = resourceResponse.getWriter();
-			writer.write(jsonObject.toString());
-			return;
-		} else if (requestType.equals("updateTreeWithInventoryNumbers")) {
-			String urlS = resourceRequest.getParameter("url");
-			String region = resourceRequest.getParameter("gsadbcRegionFilterPlaceHolder");
-			if (region != null){
-				region = region.substring(51, region.length()-13);
-			}
-			JSONParser parser = new JSONParser();
-			JSONObject jsonO = null;
-			try {
-				jsonO = (JSONObject) parser.parse(resourceRequest.getParameter("data"));
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			String charset = "UTF-8";
-			int numberOfThreads = 4;
-			Set<?> entrySet = jsonO.keySet();
-			ArrayList<Map<String, String>> responseMaps = new ArrayList<Map<String, String>>();
-			ArrayList<Map<String, String>> requestMaps = new ArrayList<Map<String, String>>();
-			for (int i = 0; i < numberOfThreads; i++) {
-				responseMaps.add(new HashMap<String, String>());
-				requestMaps.add(new HashMap<String, String>());
-			}
-
-			int thredd = 0;
-			for (Object o : entrySet) {
-				String key = (String) o;
-				String request = (String) jsonO.get(key);
-				requestMaps.get(thredd).put(key, request);
-				thredd = (thredd + 1) % numberOfThreads;
-			}
-			ArrayList<GetNumberOfFeatures> threadds = new ArrayList<GetNumberOfFeatures>();
-			for (int i = 0; i < numberOfThreads; i++) {
-				GetNumberOfFeatures runnable = new GetNumberOfFeatures(responseMaps.get(i), requestMaps.get(i),
-						charset, urlS, i,region);
-				Thread thread = new Thread(runnable);
-				thread.start();
-				threadds.add(runnable);
-			}
-			while (true) {
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				boolean done = true;
-				for (int i = 0; i < numberOfThreads; i++) {
-					if (!threadds.get(i).done) {
-						done = false;
-						break;
+							out.flush();
+							System.out.println("Wrote nc file to outputstream");
+						}
+					} catch (Exception e) {
+						// TODO: handle exception
+					} finally {
+						if (in != null)
+							in.close();
+						if (out != null)
+							out.close();
 					}
 				}
-				if (done)
-					break;
+				return;
 			}
-			Map<String, String> responseMap = new HashMap<String, String>();
+			if (uri != null || opendapDataURL != null) {
+				if (opendapDataURL == null) {
+					String[] folders = { "content", "gsadbc", "uploadedFiles" };
+					String filePath = createDirectory(System.getProperty("catalina.base"), folders);
+					for (int i = 0; i < uri.length(); i++) {
+						char c = uri.charAt(i);
+						if (c < '0' || (c > '9' && c < 'A') || (c > 'Z' && c < 'a') || c > 'z')
+							throw new InvalidFileNameException("Invalid file name (illegal character:'" + c + "'):"
+									+ uri);
+					}
+					String fileExtension = ".nc";
+					uri = filePath + uri + fileExtension;
+				} else {
+					uri = opendapDataURL;
+				}
+				if (requestType.startsWith("getDataValuesOf:")) {
+					System.out.println("requestType is getDataValuesOf:");
+					Map<String, String[]> parameterMap = resourceRequest.getParameterMap();
+					Map<Integer, Map<String, Double>> values = NetCDFReader.getDatavaluesFromNetCDFFile(uri,
+							parameterMap);
+					if (values == null)
+						return;
+					JSONObject jsonObject = new JSONObject(values);
+					// System.out.println("Returning with jsonObject:");
+					// System.out.println(jsonObject.toJSONString());
 
-			for (int i = 0; i < numberOfThreads; i++) {
-				responseMap.putAll(responseMaps.get(i));
+					PrintWriter writer = resourceResponse.getWriter();
+					writer.write(jsonObject.toString());
+					return;
+				} else if (requestType.equals("getLayersFromNetCDFFile")) {
+					System.out.println("requestType is getLayersFromNetCDFFile:");
+					System.out.println("opendapDataURL:" + opendapDataURL);
+					System.out.println("uri:" + uri);
+					Map<String, String> values = NetCDFReader.getLayersFromRaster(uri);
+					if (values == null) {
+						System.out.println("No values found!");
+						return;
+					}
+					JSONObject jsonObject = new JSONObject(values);
+
+					System.out.println("Returning with jsonObject:");
+					System.out.println(jsonObject.toJSONString());
+
+					PrintWriter writer = resourceResponse.getWriter();
+					writer.write(jsonObject.toString());
+					return;
+				} else if (requestType.equals("getMetaDimensions")) {
+					System.out.println("getMetaDimensions:" + uri);
+					String parameter = resourceRequest.getParameter("rasterParameter");
+					if (parameter == null)
+						return;
+					Map<String, Map<String, String>> values = NetCDFReader.getDimensionsFromRasterParameter(uri,
+							parameter);
+					if (values == null)
+						return;
+					JSONObject jsonObject = new JSONObject(values);
+
+					System.out.println("Returning with jsonObject:");
+					System.out.println(jsonObject.toJSONString());
+
+					PrintWriter writer = resourceResponse.getWriter();
+					writer.write(jsonObject.toString());
+					return;
+				} else if (requestType.equals("loadFileFromID")) {
+					System.out.println(uri);
+					JSONObject jsonObject = new JSONObject();
+					File f = new File(uri);
+					boolean exists = f.exists();
+					// sleep for 1 seconds to mitigate brute force attacks
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+					}
+					jsonObject.put("fileIDExists", exists);
+					PrintWriter writer = resourceResponse.getWriter();
+					writer.write(jsonObject.toString());
+					return;
+				}
 			}
-			JSONObject jsonObject = new JSONObject(responseMap);
-			PrintWriter writer = resourceResponse.getWriter();
-			writer.write(jsonObject.toString());
-			return;
+			if (requestType.equals("getLonghurstPolygon")) {
+				Map<String, String> values = new HashMap<String, String>();
+				String region = resourceRequest.getParameter("longhurstRegion");
+				System.out.println("getLonghurstPolygon:" + region);
+				String polygon = DatabaseProperties.getLonghurstPolygon(region);
+				values.put(region, polygon);
+				JSONObject jsonObject = new JSONObject(values);
+
+				System.out.println("Returning with polygon!=null:" + (polygon != null));
+
+				PrintWriter writer = resourceResponse.getWriter();
+				writer.write(jsonObject.toString());
+				return;
+			} else if (requestType.equals("createNetCDFUsingH.1")) {
+				JSONParser parser = new JSONParser();
+				JSONArray jsonA = null;
+				JSONObject jsonO = null;
+				int numberOfFeatures = 0;
+				try {
+					jsonA = (JSONArray) parser.parse(resourceRequest.getParameter("data"));
+					String variablesString = resourceRequest.getParameter("variables");
+					numberOfFeatures = Integer.parseInt(resourceRequest.getParameter("numberOfFeatures"));
+					System.out.println(variablesString);
+					jsonO = (JSONObject) parser.parse(variablesString);
+				} catch (ParseException e) {
+				}
+				String location = NetCDFWriter.createNetCDF(jsonA, jsonO, numberOfFeatures);
+				Map<String, String> values = new HashMap<String, String>();
+				values.put("fileID", location);
+				JSONObject jsonObject = new JSONObject(values);
+				PrintWriter writer = resourceResponse.getWriter();
+				writer.write(jsonObject.toString());
+				return;
+			} else if (requestType.equals("getLonghurstPolygon")) {
+				Map<String, String> values = new HashMap<String, String>();
+				String region = resourceRequest.getParameter("longhurstRegion");
+				System.out.println("getLonghurstPolygon:" + region);
+				String polygon = DatabaseProperties.getLonghurstPolygon(region);
+				values.put(region, polygon);
+				JSONObject jsonObject = new JSONObject(values);
+
+				System.out.println("Returning with polygon!=null:" + (polygon != null));
+
+				PrintWriter writer = resourceResponse.getWriter();
+				writer.write(jsonObject.toString());
+				return;
+			} else if (requestType.equals("updateTreeWithInventoryNumbers")) {
+				String urlS = resourceRequest.getParameter("url");
+				String region = resourceRequest.getParameter("gsadbcRegionFilterPlaceHolder");
+				if (region != null) {
+					region = region.substring(51, region.length() - 13);
+				}
+				JSONParser parser = new JSONParser();
+				JSONObject jsonO = null;
+				try {
+					jsonO = (JSONObject) parser.parse(resourceRequest.getParameter("data"));
+				} catch (ParseException e) {
+				}
+				String charset = "UTF-8";
+				int numberOfThreads = 4;
+				Set<?> entrySet = jsonO.keySet();
+				ArrayList<Map<String, String>> responseMaps = new ArrayList<Map<String, String>>();
+				ArrayList<Map<String, String>> requestMaps = new ArrayList<Map<String, String>>();
+				for (int i = 0; i < numberOfThreads; i++) {
+					responseMaps.add(new HashMap<String, String>());
+					requestMaps.add(new HashMap<String, String>());
+				}
+
+				int thredd = 0;
+				for (Object o : entrySet) {
+					String key = (String) o;
+					String request = (String) jsonO.get(key);
+					requestMaps.get(thredd).put(key, request);
+					thredd = (thredd + 1) % numberOfThreads;
+				}
+				ArrayList<GetNumberOfFeatures> threadds = new ArrayList<GetNumberOfFeatures>();
+				for (int i = 0; i < numberOfThreads; i++) {
+					GetNumberOfFeatures runnable = new GetNumberOfFeatures(responseMaps.get(i), requestMaps.get(i),
+							charset, urlS, i, region);
+					Thread thread = new Thread(runnable);
+					thread.start();
+					threadds.add(runnable);
+				}
+				while (true) {
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					boolean done = true;
+					for (int i = 0; i < numberOfThreads; i++) {
+						if (!threadds.get(i).done) {
+							done = false;
+							break;
+						}
+					}
+					if (done)
+						break;
+				}
+				Map<String, String> responseMap = new HashMap<String, String>();
+
+				for (int i = 0; i < numberOfThreads; i++) {
+					responseMap.putAll(responseMaps.get(i));
+				}
+				JSONObject jsonObject = new JSONObject(responseMap);
+				PrintWriter writer = resourceResponse.getWriter();
+				writer.write(jsonObject.toString());
+				return;
+			}
+		} else {
+
 		}
 	}
+
 	private static String placeHolder = "<ogc:Within><ogc:PropertyName>point</ogc:PropertyName><gml:Envelope xmlns:gml=\"http://www.opengis.net/gml\"><gml:lowerCorner>undefined undefined</gml:lowerCorner><gml:upperCorner>undefined undefined</gml:upperCorner></gml:Envelope></ogc:Within>";
-	
+
 	class GetNumberOfFeatures implements Runnable {
 
 		public GetNumberOfFeatures(Map<String, String> responseMap, Map<String, String> requestMap, String charset,
-				String url, int number,String region) {
+				String url, int number, String region) {
 			super();
 			this.responseMap = responseMap;
 			this.requestMap = requestMap;
@@ -246,7 +335,7 @@ public class GreenseasPortlet extends MVCPortlet {
 		}
 
 		Map<String, String> responseMap, requestMap;
-		String charset, urlS,region;
+		String charset, urlS, region;
 		boolean done = false;
 		int number;
 
@@ -256,14 +345,8 @@ public class GreenseasPortlet extends MVCPortlet {
 				for (String key : requestMap.keySet()) {
 					URL url = new URL(urlS);
 					String requestS = (String) requestMap.get(key);
-					if (region != null){
+					if (region != null) {
 						requestS = requestS.replace(GreenseasPortlet.placeHolder, region);
-//						System.out.println("-------------------------------------------------------------------------");
-//						System.out.println("Replacing!");
-//						System.out.println(GreenseasPortlet.placeHolder);
-//						System.out.println("............with...............");
-//						System.out.println(region);
-//						System.out.println("-------------------------------------------------------------------------");
 					}
 					byte[] request = requestS.getBytes(charset);
 					URLConnection connection = url.openConnection();
@@ -271,8 +354,6 @@ public class GreenseasPortlet extends MVCPortlet {
 					connection.setDoOutput(true);
 					connection.setRequestProperty("Accept-Charset", charset);
 					connection.setRequestProperty("Content-Type", "text/xml;charset=" + charset);
-					// connection.setRequestProperty("Content-Length", "" +
-					// Integer.toString(request.length));
 					OutputStream wr = connection.getOutputStream();
 					try {
 						wr.write(request);
@@ -329,25 +410,41 @@ public class GreenseasPortlet extends MVCPortlet {
 		return result;
 	}
 
+	private static String createRandomString(int number) {
+		SecureRandom sr = new SecureRandom();
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < number; i++) {
+			int randomInt = sr.nextInt(62);
+			char nextChar = '_';
+			if (randomInt < 10) {
+				nextChar = (char) (randomInt + 48);
+			} else if (randomInt < 36) {
+				nextChar = (char) (randomInt + 55);
+			} else {
+				nextChar = (char) (randomInt + 61);
+			}
+			sb.append(nextChar);
+		}
+		return sb.toString();
+	}
+
 	public void submitFile(ActionRequest actionRequest, ActionResponse actionResponse) throws Exception {
 		UploadPortletRequest uploadRequest = PortalUtil.getUploadPortletRequest(actionRequest);
 
 		// uploaded filename
-		String submissionFileName = uploadRequest.getFileName("file");
-		// uploaded file you can see it in /tomcat/temp
-		// TODO: must delete these files when done with!
+		String randomFileName = createRandomString(30);
+		String fileExtension = ".nc";
+
+		// uploaded file you can see it in /tomcat/temp is moved to
+		// /tomcat/content/gsadbc/uploadedFiles
 		File submissionFile = uploadRequest.getFile("file");
 		System.out.println("Uploaded files");
-		/* System.getProperty("user.home") */
 		String[] folders = { "content", "gsadbc", "uploadedFiles" };
 		String filePath = createDirectory(System.getProperty("catalina.base"), folders);
-		String fileURI = filePath + submissionFileName;
+		String fileURI = filePath + randomFileName + fileExtension;
 		moveFile(submissionFile.getAbsolutePath(), fileURI);
 
-		PortletSession session = actionRequest.getPortletSession();
-		// String oldFileName = (String) session.getAttribute("rasterFile");
-		session.setAttribute("rasterFile", fileURI);
-
+		actionResponse.addProperty("fileID", randomFileName);
 	}
 
 	private String createDirectory(String base, String[] subFolders) {
@@ -375,8 +472,7 @@ public class GreenseasPortlet extends MVCPortlet {
 		return base;
 	}
 
-	private void moveFile(String moveFrom, String moveTo) {
-
+	private boolean moveFile(String moveFrom, String moveTo) {
 		InputStream inStream = null;
 		OutputStream outStream = null;
 
@@ -405,9 +501,11 @@ public class GreenseasPortlet extends MVCPortlet {
 			afile.delete();
 
 			System.out.println("File is copied successful from '" + moveFrom + "' to '" + moveTo + "'");
+			return true;
 
 		} catch (IOException e) {
 			e.printStackTrace();
+			return false;
 		}
 	}
 }

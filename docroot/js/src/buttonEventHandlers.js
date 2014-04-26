@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-myNamespace.buttonEventHandlers = (function($) {
+myNamespace.buttonEventHandlers = (function($,ns) {
 	"use strict";
 
 	function add(element, eventFunction) {
@@ -81,24 +81,24 @@ myNamespace.buttonEventHandlers = (function($) {
 				"#openDAPOptionHeaderText"));
 
 		// buttons that call methods
-		var c = myNamespace.control;
-		callFromControl("#filterParameters", c.filterParametersButton);
-		callFromControl("#filterParametersTreeButton", c.filterParametersTreeButton);
-		callFromControl("#toggleOrderPlanktonButton", c.toggleOrderPlanktonButton);
-		callFromControl("#clearSelectionButton", c.clearSelectionButton);
-		callFromControl("#collapseAllButton", c.collapseAllButton);
-		callFromControl("#expandAllButton", c.expandAllButton);
-		callFromControl("#addLayerButton", c.addLayerButton);
-		callFromControl("#compareRasterButton", c.compareRasterButton);
-		callFromControl("#addTimeSeriesVariableButton", c.addTimeSeriesVariableButton);
-		callFromControl("#propertiesPlotButton", c.propertiesPlotButton);
-		callFromControl("#timeSeriesButton", c.timeSeriesButton);
-		callFromControl("#filter", c.mainQueryButton);
-		callFromControl("#toCurrentExtent", c.setBboxInputToCurrentMapExtent);
-		callFromControl("#anywhereButton", c.lonLatAnywhere);
-		callFromControl("#initiateRasterDataButton", c.initiateRasterDataButton);
-		callFromControl("#calculateStatisticsButton", c.calculateStatisticsButton);
-		callFromControl("#saveQueryButton", c.saveQueryButton);
+		callFromControl("#filterParameters", ns.control.filterParametersButton);
+		callFromControl("#filterParametersTreeButton", ns.control.filterParametersTreeButton);
+		callFromControl("#toggleOrderPlanktonButton", ns.control.toggleOrderPlanktonButton);
+		callFromControl("#clearSelectionButton", ns.control.clearSelectionButton);
+		callFromControl("#collapseAllButton", ns.control.collapseAllButton);
+		callFromControl("#expandAllButton", ns.control.expandAllButton);
+		callFromControl("#addLayerButton", ns.control.addLayerButton);
+		callFromControl("#compareRasterButton", ns.control.compareRasterButton);
+		callFromControl("#addTimeSeriesVariableButton", ns.control.addTimeSeriesVariableButton);
+		callFromControl("#propertiesPlotButton", ns.control.propertiesPlotButton);
+		callFromControl("#timeSeriesButton", ns.control.timeSeriesButton);
+		callFromControl("#filter", ns.control.mainQueryButton);
+		callFromControl("#toCurrentExtent", ns.control.setBboxInputToCurrentMapExtent);
+		callFromControl("#anywhereButton", ns.control.lonLatAnywhere);
+		callFromControl("#initiateRasterDataButton", ns.control.initiateRasterDataButton);
+		callFromControl("#calculateStatisticsButton", ns.control.calculateStatisticsButton);
+		callFromControl("#saveQueryButton", ns.control.saveQueryButton);
+		callFromControl("#loadFileFromIDButton", ns.control.loadFileFromIDButton);
 
 		// on change events
 		$("#exportParametersFormats").change(function() {
@@ -132,7 +132,40 @@ myNamespace.buttonEventHandlers = (function($) {
 						} else {
 							// saveAs("data:"+type+";base64,"+
 							// btoa(csvContent),name);
-							myNamespace.errorMessage
+							ns.errorMessage
+									.showErrorMessage("Can not download because blob consutrctor is not supported in this browser!\nKnown supported browsers: \nChrome 29 on Windows\nFirefox 24 on Windows\nInternet Explorer 10 on Windows\n\nKnown not supported browsers:\nSafari 5 on Windows");
+						}
+					}
+
+				});
+	}
+	
+	function linkParametersExportButton2(csvContent, type, name) {
+		$("#exportParameter").unbind("click");
+		add(
+				"#exportParameter",
+				function() {
+					//csvContent = callback(data);
+					try {
+						saveAs(new Blob([ csvContent ], {
+							type : type
+						}), name);
+					} catch (e) {
+						window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder
+								|| window.MSBlobBuilder || window.webkitURL;
+						if (e.name === 'TypeError' && window.BlobBuilder) {
+							var bb = new BlobBuilder();
+							bb.append([ csvContent ]);
+							saveAs(bb.getBlob(type), name);
+						} else if (e.name === "InvalidStateError") {
+							// InvalidStateError (tested on FF13 WinXP)
+							saveAs(new Blob([ csvContent ], {
+								type : type
+							}), name);
+						} else {
+							// saveAs("data:"+type+";base64,"+
+							// btoa(csvContent),name);
+							ns.errorMessage
 									.showErrorMessage("Can not download because blob consutrctor is not supported in this browser!\nKnown supported browsers: \nChrome 29 on Windows\nFirefox 24 on Windows\nInternet Explorer 10 on Windows\n\nKnown not supported browsers:\nSafari 5 on Windows");
 						}
 					}
@@ -147,9 +180,10 @@ myNamespace.buttonEventHandlers = (function($) {
 	// public interface
 	return {
 		change : change,
+		linkParametersExportButton2:linkParametersExportButton2,
 		callFromControl : callFromControl,
 		initHandlers : initHandlers,
 		linkParametersExportButton : linkParametersExportButton,
 	};
 
-}(jQuery));
+}(jQuery,myNamespace));

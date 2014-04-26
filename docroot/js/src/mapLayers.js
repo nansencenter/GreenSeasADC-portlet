@@ -3,13 +3,13 @@ var myNamespace = myNamespace || {};
 var debugMl = false;// debug flag
 myNamespace.upDownLayersTable = null;
 
-myNamespace.mapLayers = (function($, bH) {
+myNamespace.mapLayers = (function($, ns) {
 	"use strict";
 
 	var activeLayers = 0;
 
 	function generateLayerTable() {
-		var layers = myNamespace.mapViewer.getListOfLayers().reverse();
+		var layers = ns.mapViewer.getListOfLayers().reverse();
 		// TODO: more constructive layer names
 		var aoColumns = [ {
 			sTitle : "Index"
@@ -24,12 +24,12 @@ myNamespace.mapLayers = (function($, bH) {
 				'DT_RowId' : "upDownLayersTableRow" + i
 			});
 		}
-		if (myNamespace.upDownLayersTable !== null) {
-			myNamespace.upDownLayersTable.fnDestroy();
+		if (ns.upDownLayersTable !== null) {
+			ns.upDownLayersTable.fnDestroy();
 			$('#upDownLayersTableDiv').html("");
 		}
 		$('#upDownLayersTableDiv').html("<table id='upDownLayersTable' class='table'></table>");
-		myNamespace.upDownLayersTable = $('#upDownLayersTable').dataTable({
+		ns.upDownLayersTable = $('#upDownLayersTable').dataTable({
 			"bDeferRender" : true,
 			'aaSorting' : [],
 			// "bProcessing" : true,
@@ -43,7 +43,7 @@ myNamespace.mapLayers = (function($, bH) {
 	}
 
 	function movedRow(newPosition, oldPosition) {
-		var data = myNamespace.upDownLayersTable.fnGetData();
+		var data = ns.upDownLayersTable.fnGetData();
 		var name = null;
 		for (var i = 0, l = data.length; i < l; i++) {
 			if (data[i][0] == newPosition) {
@@ -51,7 +51,7 @@ myNamespace.mapLayers = (function($, bH) {
 				break;
 			}
 		}
-		myNamespace.mapViewer.updateIndex(name, -(newPosition - oldPosition));
+		ns.mapViewer.updateIndex(name, -(newPosition - oldPosition));
 	}
 
 	function checkWidth() {
@@ -66,20 +66,20 @@ myNamespace.mapLayers = (function($, bH) {
 		else
 			maxLayers = Math.floor(widthAvailable / 57);
 		if ((activeLayers + activeParameterLayers) >= maxLayers) {
-			myNamespace.errorMessage.showErrorMessage("Adding more than " + maxLayers
+			ns.errorMessage.showErrorMessage("Adding more than " + maxLayers
 					+ " layers to the map might cause a display-problem with the legends, use with caution."
 					+ " Possible solutions: Increase your window-size or zoom out (in the browser, not on the map).");
 		}
 	}
 	function addWMSLayerSelector() {
 		checkWidth();
-		var selectElement = myNamespace.utilities.setUpSelectorArray(window.wmsLayers,
-				"mapLayersWMSURL" + activeLayers, activeLayers);
+		var selectElement = ns.utilities.setUpSelectorArray(window.wmsLayers, "mapLayersWMSURL" + activeLayers,
+				activeLayers);
 		var button = "<input type='button' id='toggleLayerButton" + activeLayers + "' name='" + activeLayers
 				+ "' value='Update on map' title='Add/refresh this layer on the map'/>";
 		$("#layerURLSelectorContainer").append("<br><h5>Raster " + activeLayers + "</h5>" + button + selectElement);
-		bH.change("#mapLayersWMSURL" + activeLayers, addWMSLayerVariableSelector);
-		bH.callFromControl("#toggleLayerButton" + activeLayers, toggleLayerButton);
+		ns.buttonEventHandlers.change("#mapLayersWMSURL" + activeLayers, addWMSLayerVariableSelector);
+		ns.buttonEventHandlers.callFromControl("#toggleLayerButton" + activeLayers, toggleLayerButton);
 		$("#toggleLayerButton" + activeLayers).prop("disabled", true);
 		activeLayers++;
 	}
@@ -100,7 +100,7 @@ myNamespace.mapLayers = (function($, bH) {
 			$("#layerMetaData" + activeLayer).html("");
 			return;
 		}
-		var identifier = myNamespace.utilities.rand();
+		var identifier = ns.utilities.rand();
 		whichWMSLayerVariableSelectorQueries[activeLayer] = identifier;
 		var html = "Loading variables, please wait...";
 
@@ -117,7 +117,7 @@ myNamespace.mapLayers = (function($, bH) {
 					"<div id ='" + selectedElement.id + "variable" + activeLayer + "' style='display: inline'>" + html
 							+ "</div>");
 		}
-		myNamespace.WebMapService.getCapabilities(function(response) {
+		ns.WebMapService.getCapabilities(function(response) {
 			if (identifier === whichWMSLayerVariableSelectorQueries[activeLayer]) {
 				setupVariableSelectorForWMSLayer(response, selectedElement);
 				if (debugMl)
@@ -156,7 +156,7 @@ myNamespace.mapLayers = (function($, bH) {
 					zAxisMap[val] = val;
 				});
 			}
-			zAxis += myNamespace.utilities.setUpSelector(zAxisMap, "zAxisVariable" + activeLayer, activeLayer);
+			zAxis += ns.utilities.setUpSelector(zAxisMap, "zAxisVariable" + activeLayer, activeLayer);
 		}
 		var tAxis = "";
 		// time = "T00:00:00.000Z";
@@ -173,7 +173,7 @@ myNamespace.mapLayers = (function($, bH) {
 					});
 				});
 			});
-			tAxis = myNamespace.utilities.setUpSelector(tAxisMap, "dateVariable" + activeLayer, activeLayer);
+			tAxis = ns.utilities.setUpSelector(tAxisMap, "dateVariable" + activeLayer, activeLayer);
 		}
 		var colorscaleMin = 0;
 		var colorscaleMax = 1;
@@ -196,40 +196,39 @@ myNamespace.mapLayers = (function($, bH) {
 			"true" : "Logarithmic Scale",
 		};
 		// TOOD: disable logscale for colorscalerange with values <= 0
-		var styleSelector = myNamespace.utilities.setUpSelector(styles, "styleVariable" + activeLayer, activeLayer);
-		var logscaleSelector = myNamespace.utilities.setUpSelector(logscales, "logscaleVariable" + activeLayer,
-				activeLayer);
+		var styleSelector = ns.utilities.setUpSelector(styles, "styleVariable" + activeLayer, activeLayer);
+		var logscaleSelector = ns.utilities.setUpSelector(logscales, "logscaleVariable" + activeLayer, activeLayer);
 
 		var html = colorscalerange + styleSelector + logscaleSelector + zAxis + tAxis;
 		$("#layerMetaData" + activeLayer).html(html);
 
-		bH
+		ns.buttonEventHandlers
 				.change(
 						"#logscaleVariable" + activeLayer,
 						function(event) {
 							if (event.target.options[event.target.selectedIndex].value === "true") {
 								if ($("#colorscalerangeMin" + activeLayer).val() <= 0) {
-									myNamespace.errorMessage
+									ns.errorMessage
 											.showErrorMessage("Cannot use a logarithmic scale with negative or zero values. Changing back to linear scale.");
 									$(event.target).val("false");
 								}
 							}
 						});
 
-		bH
+		ns.buttonEventHandlers
 				.change(
 						"#colorscalerangeMin" + activeLayer,
 						function(event) {
 							if ($("#colorscalerangeMin" + activeLayer).val() <= 0) {
 								if ($('#logscaleVariable' + activeLayer).find(":selected").val() === "true") {
-									myNamespace.errorMessage
+									ns.errorMessage
 											.showErrorMessage("Cannot use a logarithmic scale with negative or zero values. Changing to Linear scale.");
 									$('#logscaleVariable' + activeLayer).val("false");
 								}
 							}
 						});
 
-		bH.change("#colorscalerangeAuto" + activeLayer, function(event) {
+		ns.buttonEventHandlers.change("#colorscalerangeAuto" + activeLayer, function(event) {
 			// console.log(this.checked);
 			if (this.checked) {
 				$("#colorscalerangeMin" + activeLayer).prop('disabled', true);
@@ -241,9 +240,9 @@ myNamespace.mapLayers = (function($, bH) {
 			}
 
 		});
-		bH.change("#dateVariable" + activeLayer, function(event) {
+		ns.buttonEventHandlers.change("#dateVariable" + activeLayer, function(event) {
 			var date = event.target.options[event.target.selectedIndex].value;
-			myNamespace.WebMapService.getTimesteps(function(response) {
+			ns.WebMapService.getTimesteps(function(response) {
 				setUpTimeSelector(response, activeLayer);
 			}, $('#mapLayersWMSURL' + activeLayer).val(), $('#WMSLayerVariable' + activeLayer).find(":selected").val(),
 					date);
@@ -258,7 +257,7 @@ myNamespace.mapLayers = (function($, bH) {
 		var dateTime = null;
 		if ((!(typeof date === 'undefined')) && (!(typeof time === 'undefined')) && date !== "" && time !== "") {
 			dateTime = date + "T" + time;
-			myNamespace.WebMapService.getMinMax(function(response) {
+			ns.WebMapService.getMinMax(function(response) {
 				setUpAutoRange(response, activeLayer);
 			}, $('#mapLayersWMSURL' + activeLayer).val(), $('#WMSLayerVariable' + activeLayer).find(":selected").val(),
 					$('#zAxisVariable' + activeLayer).find(":selected").val(), dateTime);
@@ -280,7 +279,7 @@ myNamespace.mapLayers = (function($, bH) {
 		$.each(obj.timesteps, function(i, time) {
 			timeMap[time] = time;
 		});
-		var selectElement = myNamespace.utilities.setUpSelector(timeMap, "timeVariable" + activeLayer);
+		var selectElement = ns.utilities.setUpSelector(timeMap, "timeVariable" + activeLayer);
 		$("#timeVariable" + activeLayer).remove();
 		$("#dateVariable" + activeLayer).after(selectElement);
 		if ($('#colorscalerangeAuto' + activeLayer).is(":checked"))
@@ -295,18 +294,18 @@ myNamespace.mapLayers = (function($, bH) {
 		if (debugMl)
 			console.log("setupVariableSelectorForWMSLayer activeLayer:" + activeLayer);
 
-		var variables = myNamespace.XMLParser.extractWMSParameters(response);
+		var variables = ns.XMLParser.extractWMSParameters(response);
 		var hashMap = {
 			"NONE" : "Select variable",
 		};
 		$.each(variables, function(i, val) {
 			hashMap[i] = val;
 		});
-		var selectElement = myNamespace.utilities.setUpSelector(hashMap, "WMSLayerVariable" + activeLayer, activeLayer);
+		var selectElement = ns.utilities.setUpSelector(hashMap, "WMSLayerVariable" + activeLayer, activeLayer);
 
 		var html = selectElement + "<div id='layerMetaData" + activeLayer + "'></div>";
 		$("#" + selectedElement.id + "variable" + activeLayer).html(html);
-		bH.change("#WMSLayerVariable" + activeLayer, updateMetaDataSelection);
+		ns.buttonEventHandlers.change("#WMSLayerVariable" + activeLayer, updateMetaDataSelection);
 	}
 
 	var whichupdateMetaDataSelection = {};
@@ -319,11 +318,11 @@ myNamespace.mapLayers = (function($, bH) {
 			$("#layerMetaData" + activeLayer).html("");
 			return;
 		}
-		var identifier = myNamespace.utilities.rand();
+		var identifier = ns.utilities.rand();
 		whichupdateMetaDataSelection[activeLayer] = identifier;
 		if ($('#colorscalerangeAuto' + activeLayer).is(":checked"))
 			updateAutoRange(activeLayer);
-		myNamespace.WebMapService.getMetadata(function(response) {
+		ns.WebMapService.getMetadata(function(response) {
 			if (identifier === whichupdateMetaDataSelection[activeLayer]) {
 				setUpLayerMetaData(response, activeLayer);
 			}
@@ -342,7 +341,7 @@ myNamespace.mapLayers = (function($, bH) {
 		if (url === "NONE") {
 			if (colorScaleLegendDiv.length !== 0)
 				colorScaleLegendDiv.remove();
-			myNamespace.mapViewer.removeCustomLayer(name);
+			ns.mapViewer.removeCustomLayer(name);
 			return;
 		}
 		var layer = $('#WMSLayerVariable' + activeLayer).find(":selected").val();
@@ -372,8 +371,8 @@ myNamespace.mapLayers = (function($, bH) {
 		}
 		var elevation = $('#zAxisVariable' + activeLayer).find(":selected").val();
 		var time = $('#timeVariable' + activeLayer).find(":selected").val();
-		myNamespace.mapViewer.addWMSLayer(url, name, layer, colorscalerange, style, logscale, elevation, date + "T"
-				+ time, longName);
+		ns.mapViewer.addWMSLayer(url, name, layer, colorscalerange, style, logscale, elevation, date + "T" + time,
+				longName);
 		generateLayerTable();
 		if (debugMl)
 			console.log("Toggled layer");
@@ -399,7 +398,7 @@ myNamespace.mapLayers = (function($, bH) {
 	}
 
 	function setUpStyleForLegend() {
-		var browser = myNamespace.utilities.findBrowser();
+		var browser = ns.utilities.findBrowser();
 		// console.log("Browser:" + browser);
 		var legend = $("#innerLegend");
 		if (browser === "Trident") {
@@ -455,16 +454,16 @@ myNamespace.mapLayers = (function($, bH) {
 	function resetParameterLayers() {
 		$("#parameterLayerVariableContainer").html("");
 		for (; activeParameterLayers > 0; activeParameterLayers--) {
-			var colorScaleLegendDiv = $('#colorScaleLegendParameter' + (activeParameterLayers-1));
+			var colorScaleLegendDiv = $('#colorScaleLegendParameter' + (activeParameterLayers - 1));
 			if (colorScaleLegendDiv.length !== 0)
 				colorScaleLegendDiv.remove();
-			myNamespace.mapViewer.removeCustomLayer("Par " + (activeParameterLayers-1));
+			ns.mapViewer.removeCustomLayer("Par " + (activeParameterLayers - 1));
 		}
 	}
 
 	function addParametersLayerButton(data, parameter) {
 		if (parameter !== 'NONE')
-			myNamespace.mapViewer.addFeaturesFromDataWithColor(data, parameter);
+			ns.mapViewer.addFeaturesFromDataWithColor(data, parameter);
 	}
 
 	function disableAddParameterLayerButton() {
@@ -478,7 +477,7 @@ myNamespace.mapLayers = (function($, bH) {
 		if (button.length === 0) {
 			$('#parameterLayerVariableContainer').after(
 					"<input type='button' id='addParametersLayerButton' value='Add Layer' />");
-			bH.callFromControl("#addParametersLayerButton", addParameterLayerVariableSelector);
+			ns.buttonEventHandlers.callFromControl("#addParametersLayerButton", addParameterLayerVariableSelector);
 		} else {
 			button.show();
 		}
@@ -524,13 +523,13 @@ myNamespace.mapLayers = (function($, bH) {
 		if (parameter === "NONE") {
 			if (colorScaleLegendDiv.length !== 0)
 				colorScaleLegendDiv.remove();
-			myNamespace.mapViewer.removeCustomLayer("Par " + activeLayer);
+			ns.mapViewer.removeCustomLayer("Par " + activeLayer);
 			return;
 		}
 		var min = parseFloat($("#colorscalerangeParameterMin" + activeLayer).val());
 		var max = parseFloat($("#colorscalerangeParameterMax" + activeLayer).val());
-		myNamespace.mapViewer.addFeaturesFromDataWithColor(myNamespace.control.getData(), parameter, "Par "
-				+ event.target.name, min, max);
+		ns.mapViewer
+				.addFeaturesFromDataWithColor(ns.control.getData(), parameter, "Par " + event.target.name, min, max);
 		if (colorScaleLegendDiv.length === 0) {
 			$("#innerLegend").append(
 					"<div id='colorScaleLegendParameter" + activeLayer + "' class='colorScaleLegend'></div>");
@@ -545,7 +544,7 @@ myNamespace.mapLayers = (function($, bH) {
 		var selectElement = "<select id='parameterLayerVariable" + activeParameterLayers + "' name='"
 				+ activeParameterLayers + "'" + ">";
 		var options = "<option value='NONE'>Select parameter</option>"
-				+ myNamespace.matchup.generateOptionsFromAllSelectedParameters();
+				+ ns.matchup.generateOptionsFromAllSelectedParameters();
 		selectElement += options + "</select>";
 		var button = "<input type='button' id='toggleParameterLayerButton" + activeParameterLayers
 				+ "' value='Update on map' name='" + activeParameterLayers + "'/>";
@@ -553,8 +552,8 @@ myNamespace.mapLayers = (function($, bH) {
 		$("#parameterLayerVariableContainer").append(
 				"<br><h5>Parameter " + activeParameterLayers + "</h5>" + button + selectElement + metaDataElement);
 		// ADD events
-		bH.change("#parameterLayerVariable" + activeParameterLayers, addParameterLayerOptionsSelector);
-		bH.callFromControl("#toggleParameterLayerButton" + activeParameterLayers, toggleParameterLayerButton);
+		ns.buttonEventHandlers.change("#parameterLayerVariable" + activeParameterLayers, addParameterLayerOptionsSelector);
+		ns.buttonEventHandlers.callFromControl("#toggleParameterLayerButton" + activeParameterLayers, toggleParameterLayerButton);
 		$("#toggleParameterLayerButton" + activeParameterLayers).prop("disabled", true);
 		activeParameterLayers++;
 	}
@@ -568,4 +567,4 @@ myNamespace.mapLayers = (function($, bH) {
 		generateLayerTable : generateLayerTable
 	};
 
-}(jQuery, myNamespace.buttonEventHandlers));
+}(jQuery, myNamespace));

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.geotoolkit.referencing.CRS;
 import org.geotoolkit.referencing.crs.DefaultGeographicCRS;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -51,9 +50,9 @@ public class NetCDFReader {
 		try {
 			ncfile = NetcdfDataset.openDataset(uri);
 			GridDataset grid = new GridDataset(ncfile);
+			System.out.println(grid);
 			PointSet pointSet = createPoints(parameterMap);
-			values = getDatavaluesFromGridDataset(grid, pointSet.points, pointSet.parameter, pointSet.time,
-					pointSet.elevation);
+			values = getDatavaluesFromGridDataset(grid, pointSet.points, pointSet.parameter, pointSet.elevation);
 		} catch (IOException ioe) {
 			log("getDatavaluesFromNetCDFFile got IOException: trying to open " + uri, ioe);
 		} catch (Exception e) {
@@ -78,21 +77,24 @@ public class NetCDFReader {
 		Point[] points = new Point[parameterMap.size() - 1];
 		int i = 0;
 		String parameter = null;
-		String time = null;
 		String elevation = null;
 		for (String key : keySet) {
 			if (key.startsWith("requestType")) {
 				parameter = parameterMap.get(key)[0].substring(16);
-			} else if (key.startsWith("time")) {
-				time = parameterMap.get(key)[0];
 			} else if (key.startsWith("elevation")) {
 				elevation = parameterMap.get(key)[0];
 			} else if (!key.startsWith("opendapDataURL")) {
 				String values = parameterMap.get(key)[0];
 				try {
 					JSONObject jsonO = (JSONObject) parser.parse(values);
+					Object elevationObject = jsonO.get("elevation");
+					Integer elevationInteger = null;
+					if (elevationObject != null) {
+						elevationInteger = (int) (long) (Long) elevationObject;
+					}
 					points[i++] = new Point(Integer.parseInt(key), Double.parseDouble(jsonO.get("lat").toString()),
-							Double.parseDouble(jsonO.get("lon").toString()), 0, "", "");
+							Double.parseDouble(jsonO.get("lon").toString()), elevationInteger, "",
+							(Long) jsonO.get("time"));
 				} catch (ParseException e) {
 					log("ParseException", e);
 				} catch (NumberFormatException e) {
@@ -102,107 +104,75 @@ public class NetCDFReader {
 				}
 			}
 		}
-		return new PointSet(points, parameter, time, elevation);
+		return new PointSet(points, parameter, elevation);
 	}
 
 	private static void log(String string, Exception e) {
 		System.out.println(string);
 		System.out.println("EXCEPTION:" + e.getMessage());
-		e.printStackTrace();
+		System.out.println("EXCEPTION:" + e.getClass());
 	}
 
 	private static Map<Integer, Map<String, Double>> getDatavaluesFromGridDataset(GridDataset gds, Point[] points,
-			String parameter, Integer time, Integer elevation) throws IOException, NoSuchAuthorityCodeException,
-			FactoryException {
+			String parameter, Integer elevationIn) throws IOException, NoSuchAuthorityCodeException, FactoryException {
 		System.out.println("process file for parameter:" + parameter);
 		GridDatatype grid = gds.findGridDatatype(parameter);
+		System.out.println(grid);
 		GridCoordSystem gcs = grid.getCoordinateSystem();
 		HorizontalGrid horizontalGrid = null;
 		if (gcs.getXHorizAxis().getRank() > 1) {
 			horizontalGrid = LookUpTableGrid.generate(gcs);
-		} else {
-//			System.out.println("gcs.getXHorizAxis().getRank() <= 1");
-//			System.out.println(gcs.getXHorizAxis().getRank());
 		}
 		Map<Integer, Map<String, Double>> val = new HashMap<Integer, Map<String, Double>>();
-		if (time == null)
-			time = 0;
-		if (elevation == null)
-			elevation = 0;
 		for (int i = 0; i < points.length; i++) {
 			Point p = points[i];
 			// find the x,y index for a specific lat/lon position
 			// xy[0] = x, xy[1] = y
 			try {
 				if (p != null) {
+					Integer elevation = elevationIn;
+					if (elevation == null)
+						elevation = p.elevation;
 					if (horizontalGrid != null) {
 						HorizontalPosition pos = new HorizontalPositionImpl(p.lon, p.lat, DefaultGeographicCRS.WGS84);
 						GridCoordinates gridCoords = horizontalGrid.findNearestGridPoint(pos);
 						if (gridCoords == null)
 							throw new ReadRasterException("The position was outside the boundingbox");
-						Array data = grid.readDataSlice(time, elevation, gridCoords.getCoordinateValue(1),
+						Array data = grid.readDataSlice(p.time, elevation, gridCoords.getCoordinateValue(1),
 								gridCoords.getCoordinateValue(0));
 						// we know its a scalar //TODO?
-						if (data.getDouble(0) == Double.NaN) {
-							// System.out.println("Lat/Long x/y NOT FOUND for "
-							// + p
-							// +
-							// ": " + xy[0] + "," + xy[1] + " VALUE:"
-							// + data.getDouble(0));
-						} else {
+						if (data.getDouble(0) != Double.NaN) {
 							Map<String, Double> values = new HashMap<String, Double>();
 							values.put("value", data.getDouble(0));
 							LatLonPoint latlonP = gcs.getLatLon(gridCoords.getCoordinateValue(0),
 									gridCoords.getCoordinateValue(1));
 							values.put("lat", latlonP.getLatitude());
 							values.put("lon", latlonP.getLongitude());
-							// System.out.println("Lat/Long x/y FOUND for " + p
-							// +
-							// ": " +
-							// xy[0] + "," + xy[1] + " VALUE:"
-							// + data.getDouble(0));
 							val.put(p.id, values);
 						}
 					} else {
-//						System.out.println("horizontalGrid == null");
 						int[] xy = gcs.findXYindexFromLatLon(p.lat, p.lon, null);
 
 						// read the data at that lat, lon and the first time and
-						// z
-						// level
-						// (if
-						// any)
+						// z level (if any)
 						// note order is t, z, y, x
-						// TODO: TIME/DEPTH
-						Array data = grid.readDataSlice(time, elevation, xy[1], xy[0]);
+						if (elevation == null)
+							elevation = -1;
+						Array data = grid.readDataSlice(p.time, elevation, xy[1], xy[0]);
 						// we know its a scalar //TODO?
-						if (data.getDouble(0) == Double.NaN) {
-							// System.out.println("Lat/Long x/y NOT FOUND for "
-							// + p
-							// +
-							// ": " + xy[0] + "," + xy[1] + " VALUE:"
-							// + data.getDouble(0));
-						} else {
+						if (data.getDouble(0) != Double.NaN) {
 							Map<String, Double> values = new HashMap<String, Double>();
 							values.put("value", data.getDouble(0));
 							LatLonPoint latlonP = gcs.getLatLon(xy[0], xy[1]);
 							values.put("lat", latlonP.getLatitude());
 							values.put("lon", latlonP.getLongitude());
-							// System.out.println("Lat/Long x/y FOUND for " + p
-							// +
-							// ": " +
-							// xy[0] + "," + xy[1] + " VALUE:"
-							// + data.getDouble(0));
 							val.put(p.id, values);
 						}
 					}
-				} else {
-//					System.out.println("p == null");
 				}
 			} catch (IndexOutOfBoundsException e) {
 				log("Got IndexOutOfBoundsException when processing the point:" + p, e);
 			} catch (ReadRasterException e) {
-//				System.out.println(e.getMessage());
 			}
 		}
 		return val;
@@ -216,9 +186,9 @@ public class NetCDFReader {
 			ncfile = NetcdfDataset.openDataset(uri);
 			values = getLayersFromNetCDFFile(ncfile);
 		} catch (IOException ioe) {
-			log("getLayersFromNetCDFFile got IOException: trying to open " + uri, ioe);
+			log("getLayersFromRaster got IOException: trying to open " + uri, ioe);
 		} catch (Exception e) {
-			log("getLayersFromNetCDFFile got Exception: trying to open " + uri, e);
+			log("getLayersFromRaster got Exception: trying to open " + uri, e);
 		} finally {
 			if (null != ncfile)
 				try {
@@ -254,16 +224,21 @@ public class NetCDFReader {
 	}
 
 	public static Map<String, Map<String, String>> getDimensionsFromRasterParameter(String uri, String parameter) {
+		System.out.println("getDimensionsFromRasterParameter");
 		NetcdfDataset ncfile = null;
 		Map<String, Map<String, String>> values = null;
 		try {
+			System.out.println(0);
 			ncfile = NetcdfDataset.openDataset(uri);
+			System.out.println(1);
 			GridDataset grid = new GridDataset(ncfile);
+			System.out.println(2);
 			values = getDimensionsFromNetCDFFile(grid, parameter);
+			System.out.println(3);
 		} catch (IOException ioe) {
-			log("getLayersFromNetCDFFile got IOException: trying to open " + uri, ioe);
+			log("getDimensionsFromRasterParameter got IOException: trying to open " + uri, ioe);
 		} catch (Exception e) {
-			log("getLayersFromNetCDFFile got Exception: trying to open " + uri, e);
+			log("getDimensionsFromRasterParameter got Exception: trying to open " + uri, e);
 		} finally {
 			if (null != ncfile)
 				try {
@@ -278,8 +253,10 @@ public class NetCDFReader {
 
 	private static Map<String, Map<String, String>> getDimensionsFromNetCDFFile(GridDataset grid, String parameter)
 			throws Exception {
+		System.out.println("getDimensionsFromNetCDFFile");
 		Map<String, Map<String, String>> dimensions = new HashMap<String, Map<String, String>>();
 		GridDatatype gridDataType = grid.findGridDatatype(parameter);
+		//TODO: do something here for non-grid datatypes
 		GridCoordSystem gridCoordSystem = gridDataType.getCoordinateSystem();
 		CoordinateAxis time = gridCoordSystem.getTimeAxis();
 		if (time != null) {
@@ -320,16 +297,11 @@ public class NetCDFReader {
 class PointSet {
 	Point[] points;
 	String parameter;
-	Integer time, elevation;
+	Integer elevation;
 
-	public PointSet(Point[] points, String parameter, String time, String elevation) {
+	public PointSet(Point[] points, String parameter, String elevation) {
 		this.points = points;
 		this.parameter = parameter;
-		try {
-			this.time = Integer.parseInt(time);
-		} catch (NumberFormatException e) {
-			this.time = null;
-		}
 		try {
 			this.elevation = Integer.parseInt(elevation);
 		} catch (NumberFormatException e) {
@@ -340,22 +312,23 @@ class PointSet {
 
 class Point {
 	int id;
-	double lat, lon, depth;
-	String date, time;
+	Integer time, elevation;
+	double lat, lon;
+	String date;
 
-	public Point(int id, double lat, double lon, double depth, String date, String time) {
+	public Point(int id, double lat, double lon, Integer elevation, String date, long long1) {
 		this.id = id;
 		this.lat = lat;
 		this.lon = lon;
-		this.depth = depth;
+		this.elevation = elevation;
 		this.date = date;
-		this.time = time;
+		this.time = (int) long1;
 		// System.out.println("Generated new point:" + toString());
 	}
 
 	@Override
 	public String toString() {
-		return "Point [id=" + id + ", lat=" + lat + ", lon=" + lon + ", depth=" + depth + ", date=" + date + ", time="
-				+ time + "]";
+		return "Point [id=" + id + ", time=" + time + ", lat=" + lat + ", lon=" + lon + ", depth=" + elevation
+				+ ", date=" + date + "]";
 	}
 }

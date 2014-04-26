@@ -1,9 +1,9 @@
 var myNamespace = myNamespace || {};
 
 var debugmW = false;// debug flag
-var gsadbcLoadingLayersInterval = null;
+myNamespace.gsadbcLoadingLayersInterval = null;
 
-myNamespace.mapViewer = (function(OL, $) {
+myNamespace.mapViewer = (function(OL, $, ns) {
 	"use strict";
 	var currentBounds = new OpenLayers.Bounds(-60, -75, 85, 90), maxExtent = new OpenLayers.Bounds(-180, -90, 180, 90);
 
@@ -92,16 +92,16 @@ myNamespace.mapViewer = (function(OL, $) {
 			}, {
 				isBaseLayer : false
 			}),
-		/*
-		 * barnes : new OpenLayers.Layer.WMS( "Barnes tempcu01",
-		 * window.WMSServer, { layers : "v7_temperature", format :
-		 * window.WMSformat, filter : '<ogc:Filter
-		 * xmlns:ogc="http://www.opengis.net/ogc"><ogc:And><ogc:PropertyIsBetween><ogc:PropertyName>depth_of_sample</ogc:PropertyName><ogc:LowerBoundary><ogc:Literal>0</ogc:Literal></ogc:LowerBoundary><ogc:UpperBoundary><ogc:Literal>10</ogc:Literal></ogc:UpperBoundary></ogc:PropertyIsBetween><ogc:Or><ogc:Not><ogc:PropertyIsNull><ogc:PropertyName>tempcu01</ogc:PropertyName></ogc:PropertyIsNull></ogc:Not></ogc:Or></ogc:And></ogc:Filter>',
-		 * 
-		 * styles : "BarnesTest",
-		 * 
-		 * transparent : true }, { isBaseLayer : false }) //
-		 */
+
+		// barnes : new OpenLayers.Layer.WMS( "Barnes tempcu01",
+		// window.WMSServer, { layers : "v7_temperature", format :
+		// window.WMSformat, filter : '<ogc:Filter
+		// xmlns:ogc="http://www.opengis.net/ogc"><ogc:And><ogc:PropertyIsBetween><ogc:PropertyName>depth_of_sample</ogc:PropertyName><ogc:LowerBoundary><ogc:Literal>0</ogc:Literal></ogc:LowerBoundary><ogc:UpperBoundary><ogc:Literal>10</ogc:Literal></ogc:UpperBoundary></ogc:PropertyIsBetween><ogc:Or><ogc:Not><ogc:PropertyIsNull><ogc:PropertyName>tempcu01</ogc:PropertyName></ogc:PropertyIsNull></ogc:Not></ogc:Or></ogc:And></ogc:Filter>',
+		//		  
+		// styles : "BarnesTest",
+		//		  
+		// transparent : true }, { isBaseLayer : false }) //
+
 		};
 	}
 
@@ -176,14 +176,7 @@ myNamespace.mapViewer = (function(OL, $) {
 			"#ffb700", "#ffa700", "#ff9700", "#ff8700", "#ff7700", "#ff6700", "#ff5700", "#ff4700", "#ff3700",
 			"#ff2700", "#ff1700", "#ff0700", "#f60000", "#e40000", "#d30000", "#c10000", "#af0000", "#9e0000",
 			"#8c0000" ];
-	function getRandomColor() {
-		var letters = '0123456789ABCDEF'.split('');
-		var color = '#';
-		for (var i = 0; i < 6; i++) {
-			color += letters[Math.round(Math.random() * 15)];
-		}
-		return color;
-	}
+
 
 	function initMap() {
 		if (debugmW)
@@ -276,7 +269,7 @@ myNamespace.mapViewer = (function(OL, $) {
 
 		if (debugmW)
 			console.log("Added mapLayers");
-		map.zoomToExtent(currentBounds, true);
+		map.zoomToExtent(currentBounds, false);
 
 		// add drag-box mouse control to map
 		var control = new OpenLayers.Control();
@@ -297,9 +290,8 @@ myNamespace.mapViewer = (function(OL, $) {
 						.getLonLatFromPixel(new OpenLayers.Pixel(genbounds.right, genbounds.top));
 
 				// left bottom top right
-				myNamespace.control.setLonLatInput(ll.lon.toFixed(4), ll.lat.toFixed(4), ur.lat.toFixed(4), ur.lon
-						.toFixed(4));
-				myNamespace.control.activateBbox();
+				ns.control.setLonLatInput(ll.lon.toFixed(4), ll.lat.toFixed(4), ur.lat.toFixed(4), ur.lon.toFixed(4));
+				ns.control.activateBbox();
 			}
 		});
 
@@ -313,19 +305,17 @@ myNamespace.mapViewer = (function(OL, $) {
 		triggerQTip2DoNotShowLoad();
 	}
 
-	function convertAllIllegalCharactersToUnderscore(str) {
-		return str.replace(/([;&,\.\+\*\~':"\!\^#$%@\[\]\(\)=>\/\//| ])/g, '_');
-	}
+
 	function triggerQTip2DoNotShowLoad() {
 		if ($("#qTip2DoNotShowLoad").prop('checked')) {
 			$('#simple_map').qtip('hide');
 			$('#simple_map').qtip('disable');
-			clearInterval(gsadbcLoadingLayersInterval);
+			clearInterval(myNamespace.gsadbcLoadingLayersInterval);
 		} else {
 			$('#simple_map').qtip('enable');
 			$('#simple_map').qtip('show');
-			clearInterval(gsadbcLoadingLayersInterval);
-			gsadbcLoadingLayersInterval = setInterval(function() {
+			clearInterval(myNamespace.gsadbcLoadingLayersInterval);
+			myNamespace.gsadbcLoadingLayersInterval = setInterval(function() {
 				checkLoadingOfLayers()
 			}, 1000);
 		}
@@ -362,7 +352,7 @@ myNamespace.mapViewer = (function(OL, $) {
 			panel.addControls([ qTip2Button ]);
 			map.addControl(panel);
 			setTimeout(function() {
-				myNamespace.buttonEventHandlers.change("#qTip2DoNotShowLoad", triggerQTip2DoNotShowLoad);
+				ns.buttonEventHandlers.change("#qTip2DoNotShowLoad", triggerQTip2DoNotShowLoad);
 				triggerQTip2DoNotShowLoad();
 				$('.olqTip2ButtonItemActive').qtip();
 				$('#qTip2DoNotShowLoad').qtip();
@@ -375,7 +365,7 @@ myNamespace.mapViewer = (function(OL, $) {
 		if (!$("#qTip2DoNotShowLoad").prop('checked')) {
 			$.each(map.layers, function(i, layer) {
 				if (typeof layer.visibility === 'undefined' || layer.visibility) {
-					var name = convertAllIllegalCharactersToUnderscore(layer.name);// 
+					var name = ns.utilities.convertAllIllegalCharactersToUnderscore(layer.name);// 
 					var div = $("#qTip2" + name);
 					if (div.length === 0) {
 						$(mainDiv).append("<div id='qTip2" + name + "'></div>");
@@ -407,12 +397,12 @@ myNamespace.mapViewer = (function(OL, $) {
 
 	function createPDF() {
 		var comment = "Map printed from: " + document.URL;
-		if (myNamespace.mainQueryArray)
-			$.each(myNamespace.mainQueryArray, function(i, val) {
+		if (ns.mainQueryArray)
+			$.each(ns.mainQueryArray, function(i, val) {
 				comment += "\n" + val;
 			});
-		if (myNamespace.parametersQueryString)
-			comment += "\n" + myNamespace.parametersQueryString;
+		if (ns.parametersQueryString)
+			comment += "\n" + ns.parametersQueryString;
 		var activeLayers = "";
 		var delimiter = "";
 		$.each(mapLayers, function(i, val) {
@@ -498,13 +488,14 @@ myNamespace.mapViewer = (function(OL, $) {
 					event.object.vendorParams = {
 						filter : filters + ""
 					};
-					/*
-					 * if (typeof event.object.layers[0].params.FILTER ===
-					 * "string") { console.log("Adding filter");
-					 * event.object.vendorParams = { filter :
-					 * event.object.layers[0].params.FILTER }; } else {
-					 * console.log(typeof event.object.layers[0].params.FILTER); }
-					 */
+
+					// if (typeof event.object.layers[0].params.FILTER ===
+					// "string") { console.log("Adding filter");
+					// event.object.vendorParams = { filter :
+					// event.object.layers[0].params.FILTER }; } else {
+					// console.log(typeof event.object.layers[0].params.FILTER);
+					// }
+
 				},
 				getfeatureinfo : function(event) {
 					console.log("getfeatureinfo");
@@ -661,7 +652,7 @@ myNamespace.mapViewer = (function(OL, $) {
 			// index = 998;
 			layers = mapLayers;
 		} else {
-			color = window[layer + "Color"] || getRandomColor();
+			color = window[layer + "Color"] || ns.utilities.getRandomColor();
 		}
 		if (name in layers) {
 			if (debugmW)
@@ -743,14 +734,16 @@ myNamespace.mapViewer = (function(OL, $) {
 		return map.getExtent();
 	}
 
-	function zoomToExtent(bbox, bool) {
-		map.zoomToExtent(bbox, bool);
+	function zoomToExtent(bbox,swapLonLat) {
+		if (swapLonLat){
+			bbox = new OL.Bounds(bbox.bottom, bbox.left, bbox.top, bbox.right);
+		}
+		map.zoomToExtent(bbox, true);
 	}
 
 	// public interface
 	return {
 		addWMSLayer : addWMSLayer,
-		getRandomColor : getRandomColor,
 		addLayerWMS : addLayerWMS,
 		addFeaturesFromData : addFeaturesFromData,
 		removeAllParameterLayers : removeAllParameterLayers,
@@ -766,4 +759,4 @@ myNamespace.mapViewer = (function(OL, $) {
 		updateIndex : updateIndex
 	};
 
-}(OpenLayers, jQuery));
+}(OpenLayers, jQuery, myNamespace));

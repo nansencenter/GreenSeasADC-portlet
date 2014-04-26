@@ -2,7 +2,7 @@ var myNamespace = myNamespace || {};
 
 var debugq = false;// debug flag
 
-myNamespace.query = (function(OL, $) {
+myNamespace.query = (function(OL, $,ns) {
 	"use strict";
 
 	var previousFilter;
@@ -325,16 +325,8 @@ myNamespace.query = (function(OL, $) {
 		var filterBbox = null;
 		if (document.getElementById('bboxEnabledCheck').checked) {
 			var top = $('#top').val(), left = $('#left').val(), right = $('#right').val(), bottom = $('#bottom').val();
-
 			// bbox for filter
 			filterBbox = new OL.Bounds(bottom, left, top, right);
-
-			// bbox for zoom
-			var zoomBbox = new OL.Bounds(left, bottom, right, top);
-
-			if (document.lonlatform.updatemapcheck.checked) {
-				myNamespace.mapViewer.zoomToExtent(zoomBbox, true);
-			}
 		}
 		return filterBbox;
 	}
@@ -367,7 +359,7 @@ myNamespace.query = (function(OL, $) {
 		if (document.getElementById('regionEnabledCheck').checked) {
 			var region = $("#longhurstRegionSelected").find(":selected").val();
 			if (!(!(typeof window.polygon === 'undefined') && !(typeof window.polygon[region] === 'undefined')))
-				myNamespace.ajax.getLonghurstPolygon(region);
+				ns.ajax.getLonghurstPolygon(region);
 			return region;
 		}
 	}
@@ -425,4 +417,4 @@ myNamespace.query = (function(OL, $) {
 		constructString : constructString,
 	};
 
-}(OpenLayers, jQuery));
+}(OpenLayers, jQuery,myNamespace));

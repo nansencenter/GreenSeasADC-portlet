@@ -73,7 +73,7 @@ myNamespace.statistics = (function($, ns) {
 		var tsData = {};
 		var extraColors = [];
 		for (var i = colors.length - 1, l = variables.length; i < l; i++) {
-			extraColors.push(ns.mapViewer.getRandomColor());
+			extraColors.push(ns.utilities.getRandomColor());
 		}
 		tsData.series = [];
 		$.each(variables, function(i, val) {
@@ -229,8 +229,8 @@ myNamespace.statistics = (function($, ns) {
 	}
 
 	function generateTimeSeries(allData) {
-		if (myNamespace.mainQueryObject.metaData)
-			if (myNamespace.mainQueryObject.metaData.indexOf("date") < 0) {
+		if (ns.mainQueryObject.metaData)
+			if (ns.mainQueryObject.metaData.indexOf("date") < 0) {
 				ns.errorMessage
 						.showErrorMessage("You need to select date amongst the metadata if you want to create a timeseries");
 				return;

@@ -2,7 +2,7 @@ var myNamespace = myNamespace || {};
 
 var debughP = false;// debug flag
 
-myNamespace.handleParameters = (function($) {
+myNamespace.handleParameters = (function($,ns) {
 	// TODO: make this a hashtable of hashtable, it must store the type of the
 	// variable: i.e. string, date, point, boolean, for comparison purposes
 	var availableParameters = {};
@@ -133,7 +133,7 @@ myNamespace.handleParameters = (function($) {
 	function initiateParameters(input) {
 		if (debughP)
 			console.log("Initiating Parameters");
-		var parameters = myNamespace.XMLParser.extractParameters(input);
+		var parameters = ns.XMLParser.extractParameters(input);
 		var table = parameters.pop();
 		if (table === window.metaDataTable) {
 			mainParameters.parameters = parameters;
@@ -199,4 +199,4 @@ myNamespace.handleParameters = (function($) {
 		getHeader : getHeader
 	};
 
-}(jQuery));
+}(jQuery,myNamespace));
