@@ -410,7 +410,7 @@
 					<br><input type="checkbox" id="saveQueryUpdateInventory"  />Automatically update inventory numbers
 					<br><input type="checkbox" id="saveQueryRunParameterFilter"  />Automatically run the parameter filter
 					<br><input type="checkbox" id="saveQueryAutoDownloadCSV"  />Automatically download as csv
-					<br><input type="checkbox" id="saveQueryDisableMap" title='Disables the map for faster execution of queries' />Disable the map
+					<!--  <br><input type="checkbox" id="saveQueryDisableMap" title='Disables the map for faster execution of queries' />Disable the map-->
 					<br><input type='button' id='saveQueryButton' value="Save Query" />
 				</div>
 			</div>
