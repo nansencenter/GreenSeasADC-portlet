@@ -15,8 +15,12 @@ myNamespace.fileCreation = (function($, ns) {
 
 		return headerString;
 	}
-	function createCSV(dataIn) {
-		var csvContent = createCSVHeader(ns.handleParameters.getHeadersFromFeatures(dataIn));
+	function createCSV(dataIn, headersIn) {
+		var allHeaders = ns.handleParameters.getShortMetadataHeaders().concat(
+				ns.handleParameters.getShortHeadersFromSelected());
+		var metaData = ns.handleParameters.getMetadata();
+		var selected = ns.handleParameters.chosenParameters.allSelected;
+		var csvContent = createCSVHeader(allHeaders);
 		csvContent += csvDelimiter + "Query:" + ns.mainQueryArray + "\n";
 		if (debugfC)
 			console.log("Added headers: " + csvContent);
@@ -29,10 +33,22 @@ myNamespace.fileCreation = (function($, ns) {
 
 			for (prop in properties) {
 				if (properties.hasOwnProperty(prop)) {
-					var value = properties[prop];
-					if (value === null)
-						value = "";
-					csvContent += csvDelimiter + value;
+					var index = metaData.indexOf(prop);
+					if (index === -1)
+						index = selected.indexOf(prop);
+					if (index !== -1) {
+						if (prop === "date") {
+							var date = new Date(properties[prop]);
+							csvContent += csvDelimiter + date.getUTCFullYear();;
+							csvContent += csvDelimiter + (date.getUTCMonth()+1);
+							csvContent += csvDelimiter + date.getUTCDate();
+						} else {
+							var value = properties[prop];
+							if (value === null)
+								value = "";
+							csvContent += csvDelimiter + value;
+						}
+					}
 				}
 			}
 
@@ -155,14 +171,15 @@ myNamespace.fileCreation = (function($, ns) {
 			console.log("Great success!");
 			console.log(this.get('responseData').fileID);
 			var element = $("#netCDFFileDownloadDiv");
-			url = window.ajaxCallResourceURL+'&requestType=serveNetCDFFile&fileID='+encodeURIComponent(this.get('responseData').fileID);
-			if (element.length === 0){
+			url = window.ajaxCallResourceURL + '&requestType=serveNetCDFFile&fileID='
+					+ encodeURIComponent(this.get('responseData').fileID);
+			if (element.length === 0) {
 				element = "<div id='netCDFFileDownloadDiv'></div>";
 				$("#errorMessageDialog").after(element);
 				element = $("#netCDFFileDownloadDiv");
 			}
 			element.hide();
-			element.html("<a href='"+url+"' id='netCDFFileDownloadA' download='testFileName.nc'/>");
+			element.html("<a href='" + url + "' id='netCDFFileDownloadA' download='testFileName.nc'/>");
 			$("#netCDFFileDownloadA")[0].click();
 		};
 		ns.ajax.aui(data, success, failure);
@@ -179,7 +196,7 @@ myNamespace.fileCreation = (function($, ns) {
 		var allVariablesValues = {};
 		var descriptions = {};
 
-		var addVariables = myNamespace.handleParameters.chosenParameters.allSelected;
+		var addVariables = ns.handleParameters.chosenParameters.allSelected;
 
 		// TODO: sort by el timeo!
 		$.each(addVariables, function(i, val) {

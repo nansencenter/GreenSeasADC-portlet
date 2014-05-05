@@ -2,12 +2,12 @@ var myNamespace = myNamespace || {};
 
 var debughP = false;// debug flag
 
-myNamespace.handleParameters = (function($,ns) {
+myNamespace.handleParameters = (function($, ns) {
 	// TODO: make this a hashtable of hashtable, it must store the type of the
 	// variable: i.e. string, date, point, boolean, for comparison purposes
 	var availableParameters = {};
 	mainParameters = {
-		basicHeader : [ "ID", "Lat (dec.deg)", "Long (dec.deg)" ],
+		basicHeader : [ "GS-ID", "Latitude", "Longitude" ],
 	};
 	var chosenParameters = {
 		parametersByTable : {},
@@ -182,9 +182,98 @@ myNamespace.handleParameters = (function($,ns) {
 			});
 		return mainParameters.basicHeader.concat(parameterHeaders);
 	}
+	function getShortHeadersFromSelected() {
+		var parameterHeaders = [];
+		$.each(chosenParameters.allSelected, function(i, key) {
+			var split = key.split(":");
+			var table = "";
+			var parameter = "";
+			if (split.length === 2) {
+				table = split[0];
+				parameter = split[1];
+			} else {
+				table = window.metaDataTable;
+				parameter = split[0];
+			}
+			parameterHeaders.push(parameter);
+		});
+		return parameterHeaders.reverse();
+	}
+
+	function getShortHeader(par, table) {
+		return par;
+	}
+
+	function getShortMetadataHeaders() {
+		var metaHeader = [];
+		var metaTemp = mainParameters.parameters;
+		if (mainParameters.chosenMetadata) {
+			metaTemp = mainParameters.chosenMetadata;
+		}
+		$.each(metaTemp, function(i, val) {
+
+			if (val === "date") {
+				metaHeader.push("year");
+				metaHeader.push("month");
+				metaHeader.push("day");
+			} else {
+				if (val !== window.geometryParameter)
+					metaHeader.push(getShortHeader(val, window.metaDataTable));
+			}
+		});
+		return mainParameters.basicHeader.concat(metaHeader);
+	}
+	function getMetadata() {
+		var meta = [];
+		var metaTemp = mainParameters.parameters;
+		if (mainParameters.chosenMetadata) {
+			metaTemp = mainParameters.chosenMetadata;
+		}
+		$.each(metaTemp, function(i, val) {
+			if (val !== window.geometryParameter)
+				meta.push(val);
+		});
+		return meta;
+	}
+
+	function getShortHeadersFromFeatures(features) {
+		if (debughP)
+			console.log("getShortHeadersFromFeatures");
+		var parameterHeaders = [];
+		var feature = features[Object.keys(features)[0]];
+		if (debughP)
+			console.log(feature);
+		if (!(typeof feature === 'undefined'))
+			$.each(feature.properties, function(key) {
+				var split = key.split(":");
+				var table = "";
+				var parameter = "";
+				if (split.length === 2) {
+					table = split[0];
+					parameter = split[1];
+				} else {
+					table = window.metaDataTable;
+					parameter = split[0];
+				}
+				if (debughP)
+					console.log("Parameter:" + parameter);
+				parameterHeaders.push(getShortHeader(parameter, table));
+				/*
+				 * // test if it is a qf if
+				 * (parameter.substring(parameter.length -
+				 * window.qfPostFix.length) === window.qfPostFix) {
+				 * parameterHeaders.push(window.qfHeader); if (debughP)
+				 * console.log("Found QF"); } else { if (debughP)
+				 * console.log("NO QF");
+				 * parameterHeaders.push(getHeader(parameter, table)); }
+				 */
+			});
+		return mainParameters.basicHeader.concat(parameterHeaders);
+	}
 
 	// public interface
 	return {
+		getShortHeadersFromFeatures : getShortHeadersFromFeatures,
 		getHeadersFromFeatures : getHeadersFromFeatures,
 		getHeaderFromRawData : getHeaderFromRawData,
 		resetMetadataSelection : resetMetadataSelection,
@@ -196,7 +285,10 @@ myNamespace.handleParameters = (function($,ns) {
 		chosenParameters : chosenParameters,
 		availableParameters : availableParameters,
 		selectParameters : selectParameters,
-		getHeader : getHeader
+		getHeader : getHeader,
+		getShortMetadataHeaders : getShortMetadataHeaders,
+		getShortHeadersFromSelected : getShortHeadersFromSelected,
+		getMetadata : getMetadata,
 	};
 
-}(jQuery,myNamespace));
+}(jQuery, myNamespace));
