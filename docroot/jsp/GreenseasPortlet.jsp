@@ -38,7 +38,8 @@
 		</ul>
 		<div id="queryTab">
 			<div id='search'>
-				<p>Search options. If the search is too big, it may take some time, especially in Internet Explorer.</p>
+				<p>Search options. If the search is too big, it may take some time, especially in Internet Explorer. The
+					recommended browser is the latest version of Google Chrome.</p>
 				<div id='queryOptions'>
 					<h3>
 						<span id='bboxHeaderText'>Bounding box <em>(off)</em></span>
@@ -405,7 +406,12 @@
 					This is currently in beta and it is possible that the link might not work in future versions, however it would
 					always be possible to interpret the query from the link.
 					<div id="saveContainer"></div>
-					<input type='button' id='saveQueryButton' value="Save Query" />
+					<br><input type="checkbox" id="saveQueryRunMainQuery"  />Automatically run main query
+					<br><input type="checkbox" id="saveQueryUpdateInventory"  />Automatically update inventory numbers
+					<br><input type="checkbox" id="saveQueryRunParameterFilter"  />Automatically run the parameter filter
+					<br><input type="checkbox" id="saveQueryAutoDownloadCSV"  />Automatically download as csv
+					<br><input type="checkbox" id="saveQueryDisableMap" title='Disables the map for faster execution of queries' />Disable the map
+					<br><input type='button' id='saveQueryButton' value="Save Query" />
 				</div>
 			</div>
 		</div>

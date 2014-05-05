@@ -58,10 +58,11 @@ myNamespace.control = (function($, OL, ns) {
 
 	function regenerateSavedQuery() {
 		if (ns.parameters.linkedQuery !== "null") {
+			
 			// TODO: Set some sort of message that it is loaded
 			var filters = ns.parameters.linkedQuery.split(";");
-			for (var i = 0, l = filters.length; i < l; i++) {
-				var split = filters[i].split("::");
+			for (var j = 0, len = filters.length; j < len; j++) {
+				var split = filters[j].split("::");
 				switch (split[0]) {
 				case 'filterBbox':
 					$("#bboxEnabledCheck").prop("checked", false);
@@ -129,7 +130,9 @@ myNamespace.control = (function($, OL, ns) {
 						checkNodeInTree(parametersFromQuery[i], "#parametersTree");
 					}
 					break;
-
+				case 'otherOptions':
+					ns.savedOptions = split[1].split(",");
+					break;
 				default:
 					break;
 				}
@@ -174,7 +177,7 @@ myNamespace.control = (function($, OL, ns) {
 
 		var filterBbox = ns.query.createfilterBoxHashMap();
 		if (document.lonlatform.updatemapcheck.checked) {
-			ns.mapViewer.zoomToExtent(filterBbox,true);
+			ns.mapViewer.zoomToExtent(filterBbox, true);
 		}
 		var date = ns.query.createDateHashMap();
 		var months = ns.query.createMonthArray();
@@ -311,6 +314,13 @@ myNamespace.control = (function($, OL, ns) {
 				"aoColumns" : aoColumns
 			});
 			$("#filterParameters").show();
+			var index = ns.savedOptions.indexOf("runParameterFilter");
+			if (index!== -1){
+				filterParametersButton();
+				ns.savedOptions.splice(index,1);
+			} else {
+				ns.savedOptions = [];
+			}
 		}
 	}
 
@@ -597,9 +607,8 @@ myNamespace.control = (function($, OL, ns) {
 			}
 		});
 		var filter = ns.query.constructParameterFilterString(propertyNameNeed, ns.mainQueryObject.depth,
-				ns.mainQueryObject.filterBbox, ns.mainQueryObject.date,
-				ns.mainQueryObject.months, ns.mainQueryObject.region,
-				ns.mainQueryObject.cruise);
+				ns.mainQueryObject.filterBbox, ns.mainQueryObject.date, ns.mainQueryObject.months,
+				ns.mainQueryObject.region, ns.mainQueryObject.cruise);
 		// Requesting features from the first layer through an asynchronous
 		// request and sending response to displayParameter
 		ns.WebFeatureService.getFeature({
@@ -641,6 +650,14 @@ myNamespace.control = (function($, OL, ns) {
 				console.log("tablesToQuery.length === 0");
 			ns.mapViewer.addFeaturesFromData(data, "All parameters");
 			setHTMLParametersLoaded();
+			//save-options
+			index = ns.savedOptions.indexOf("autoDownloadCSV");
+			if (index!== -1){
+				$("#exportParameter").click();
+				ns.savedOptions.splice(index,1);
+			} else {
+				ns.savedOptions = [];
+			}
 		} else {
 			queryLayer();
 		}
@@ -819,8 +836,7 @@ myNamespace.control = (function($, OL, ns) {
 		var allChildren = myTreeContainer.find("li");
 		var requestData = [];
 		var region = ns.mainQueryObject.region;
-		if ((typeof ns.mainQueryObject.region !== 'undefined')
-				&& (ns.mainQueryObject.region !== null)) {
+		if ((typeof ns.mainQueryObject.region !== 'undefined') && (ns.mainQueryObject.region !== null)) {
 			region = 'gsadbcRegionFilterPlaceHolder';
 		}
 		$.each(allChildren, function(i, val) {
@@ -871,10 +887,9 @@ myNamespace.control = (function($, OL, ns) {
 						requestData.push([
 								layer,
 								id,
-								ns.query.constructParameterFilterString(propertyNames,
-										ns.mainQueryObject.depth, ns.mainQueryObject.filterBbox,
-										ns.mainQueryObject.date, ns.mainQueryObject.months, region,
-										ns.mainQueryObject.cruise) ]);
+								ns.query.constructParameterFilterString(propertyNames, ns.mainQueryObject.depth,
+										ns.mainQueryObject.filterBbox, ns.mainQueryObject.date,
+										ns.mainQueryObject.months, region, ns.mainQueryObject.cruise) ]);
 					}
 				}
 			}
@@ -993,8 +1008,14 @@ myNamespace.control = (function($, OL, ns) {
 				filterParametersTreeButton();
 			}
 		});
+		
+		if (parametersFromQuery != null) {
+			for (var i = 0, l = parametersFromQuery.length; i < l; i++) {
+				checkNodeInTree(parametersFromQuery[i], "#parametersTree");
+			}
+		}
 
-		var countDown = allLayers.length;
+		var countDown = Object.keys(allLayers).length;
 		for ( var table in allLayers) {
 			if (allLayers.hasOwnProperty(table)) {
 				if (allLayers[table])
@@ -1004,22 +1025,34 @@ myNamespace.control = (function($, OL, ns) {
 			}
 		}
 		if (countDown === 0) {
-			initiatedAllParameters = true;
-		}
-		if (parametersFromQuery != null) {
-			for (var i = 0, l = parametersFromQuery.length; i < l; i++) {
-				checkNodeInTree(parametersFromQuery[i], "#parametersTree");
-			}
+			allParametersInitiated();
 		}
 	}
 	var parametersFromQuery = null;
-	var initiatedAllParameters = false;
 
+	function allParametersInitiated(){
+		console.log("allParametersInitiated");
+		var index = ns.savedOptions.indexOf("updateInventory");
+		if (index === -1){
+			$('#updateParametersList').prop('checked', false);
+		} else {
+			$('#updateParametersList').prop('checked', true);
+			ns.savedOptions.splice(index,1);
+		}
+		index = ns.savedOptions.indexOf("runMainQuery");
+		if (index!== -1){
+			mainQueryButton();
+			ns.savedOptions.splice(index,1);
+		} else {
+			ns.savedOptions = [];
+		}
+	}
+	
 	function compareRasterButton() {
 		ns.matchup.compareRaster(data);
 	}
 
-	function addAParameterToData(values, parameter, timeTable,elevationTable) {
+	function addAParameterToData(values, parameter, timeTable, elevationTable) {
 		$.each(data, function(id) {
 			val = null;
 			lat = null;
@@ -1033,7 +1066,8 @@ myNamespace.control = (function($, OL, ns) {
 			data[id].properties["Model value for " + parameter] = val;
 			data[id].properties["Model lat for " + parameter] = lat;
 			data[id].properties["Model lon for " + parameter] = lon;
-			data[id].properties["Model time for " + parameter] = Highcharts.dateFormat('%Y-%m-%d %H:%M', timeTable[data[id].matchedTime]);
+			data[id].properties["Model time for " + parameter] = Highcharts.dateFormat('%Y-%m-%d %H:%M',
+					timeTable[data[id].matchedTime]);
 			data[id].properties["Model elevation for " + parameter] = elevationTable[data[id].matchedElevation];
 		});
 		setHTMLParametersLoaded();
@@ -1079,9 +1113,10 @@ myNamespace.control = (function($, OL, ns) {
 
 	function toggleOrderPlanktonButton() {
 		lastSearchString = null;
-		var multi = [ 0 ];
+		// TODO: make the "2" seperate from this logic
+		var multi = [ 0, 2 ];
 		if ($('#toggleOrderPlanktonButton').val() === "Sort plankton by type") {
-			multi = [ 1 ];
+			multi = [ 1, 2 ];
 			// $('#toggleOrderPlanktonButton').val("Sort plankton by element");
 			// } else
 			// if ($('#toggleOrderPlanktonButton').val()
@@ -1158,10 +1193,37 @@ myNamespace.control = (function($, OL, ns) {
 		var message = "";
 		if (ns.parameterQueryArray !== null) {
 			query += delimiter + "parameters" + equalsSign + ns.parameterQueryArray;
+			delimiter = ';';
+		}
+		var otherOptions = "";
+		var otherOptionsDelimiter = "";
+		if ($("#saveQueryRunMainQuery").is(":checked")) {
+			otherOptions += otherOptionsDelimiter + "runMainQuery";
+			otherOptionsDelimiter = ",";
+		}
+		if ($("#saveQueryUpdateInventory").is(":checked")) {
+			otherOptions += otherOptionsDelimiter + "updateInventory";
+			otherOptionsDelimiter = ",";
+		}
+		if ($("#saveQueryRunParameterFilter").is(":checked")) {
+			otherOptions += otherOptionsDelimiter + "runParameterFilter";
+			otherOptionsDelimiter = ",";
+		}
+		if ($("#saveQueryAutoDownloadCSV").is(":checked")) {
+			otherOptions += otherOptionsDelimiter + "autoDownloadCSV";
+			otherOptionsDelimiter = ",";
+		}
+		if ($("#saveQueryDisableMap").is(":checked")) {
+			otherOptions += otherOptionsDelimiter + "disableMap";
+			otherOptionsDelimiter = ",";
+		}
+		if (otherOptions.length !== 0) {
+			query += delimiter + "otherOptions" + equalsSign + otherOptions;
 		}
 		if (query.length === 0) {
 			message = "<b>The query is empty!</b><br>";
 		}
+		//TODO: check if parameters are selected in case filter is not run and throw a warning
 		var url = ns.parameters.portletURL;
 		if (query.length !== 0)
 			url += "?query=" + encodeURIComponent(query);
@@ -1178,8 +1240,8 @@ myNamespace.control = (function($, OL, ns) {
 		statusElement.html("Loading file...");
 		ns.ajax.loadFileFromID($("#rasterUploadedFileID").val());
 	}
-	
-	function createNetCDFUsingHOneButton(){
+
+	function createNetCDFUsingHOneButton() {
 		ns.fileCreation.createNetCDFUsingHOne(data);
 	}
 	// public interface
@@ -1214,8 +1276,8 @@ myNamespace.control = (function($, OL, ns) {
 		expandAllButton : expandAllButton,
 		toggleOrderPlanktonButton : toggleOrderPlanktonButton,
 		clearSelectionButton : clearSelectionButton,
-		
-		createNetCDFUsingHOneButton:createNetCDFUsingHOneButton,
+
+		createNetCDFUsingHOneButton : createNetCDFUsingHOneButton,
 	};
 
 }(jQuery, OpenLayers, myNamespace));

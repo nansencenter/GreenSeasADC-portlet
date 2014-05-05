@@ -136,7 +136,7 @@ myNamespace.tableConstructor = (function($, ns) {
 
 	function parametersList(multi) {
 		if (typeof multi === 'undefined')
-			multi = [ 0 ];
+			multi = [ 0, 2 ];
 		if (debugtC)
 			console.log("Making parameters");
 		displayed = [];
