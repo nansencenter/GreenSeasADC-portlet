@@ -29,8 +29,13 @@ public class DatabaseProperties {
 	 *         parameterHeaders
 	 */
 	public static String getAllParametersHeader() {
-		StringBuffer allParametersHeader = new StringBuffer("window.allParametersHeader = {");
+		String jsParName = "allParametersHeader";
 		String fileName = "parameterHeaders.properties";
+		return getParametersFromFile(jsParName, fileName);
+	}
+
+	private static String getParametersFromFile(String jsParName, String fileName) {
+		StringBuffer allParametersHeader = new StringBuffer("window."+jsParName+" = {");
 		Properties prop = getProperties(fileName);
 		if (prop == null)
 			return "window.allParametersHeader = {};";
@@ -205,6 +210,12 @@ public class DatabaseProperties {
 		}
 		parameters.append("};");
 		return parameters.toString();
+	}
+
+	public static String getAllParametersShortHeader() {
+		String jsParName = "allParametersShortHeader";
+		String fileName = "shortParameterHeaders.properties";
+		return getParametersFromFile(jsParName, fileName);
 	}
 }
 

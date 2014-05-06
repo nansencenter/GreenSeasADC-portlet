@@ -431,6 +431,8 @@
 	<%=renderRequest.getAttribute("allProperties")%>
 	<!-- Initiating window.allParametersHeader -->
 	<%=renderRequest.getAttribute("allParametersHeader")%>
+	<!-- Initiating window.allParametersShortHeader -->
+	<%=renderRequest.getAttribute("allParametersShortHeader")%>
 	<!-- Initiating window.wmsLayers -->linkedQuery
 	<%=renderRequest.getAttribute("wmsLayers")%>
 	<!-- Initiating window.openDAPURLs -->

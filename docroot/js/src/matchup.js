@@ -466,14 +466,10 @@ myNamespace.matchup = (function($, ns) {
 					allTimesFromRaster, allElevationsFromRaster);
 		var minX, minY, maxX, maxY;
 		var count = 0;
-		console.log("Looping");
-		console.log(responseData);
-		console.log(databaseVariable);
 		$.each(responseData, function(i, val) {
 			var databaseValue = parseFloat(data[i].properties[databaseVariable]);
 			if (databaseValue !== -999 && val.value !== null) {
 				val.value = parseFloat(val.value);
-				console.log(data[i]);
 				var properties = {
 					id : data[i].id,
 					depth : data[i].properties[depthParameterName],

@@ -19,11 +19,12 @@ myNamespace.fileCreation = (function($, ns) {
 		var allHeaders = ns.handleParameters.getShortMetadataHeaders().concat(
 				ns.handleParameters.getShortHeadersFromSelected());
 		var metaData = ns.handleParameters.getMetadata();
-		var selected = ns.handleParameters.chosenParameters.allSelected;
+		var selected = metaData.concat(ns.handleParameters.chosenParameters.allSelected.reverse());
 		var csvContent = createCSVHeader(allHeaders);
 		csvContent += csvDelimiter + "Query:" + ns.mainQueryArray + "\n";
 		if (debugfC)
 			console.log("Added headers: " + csvContent);
+		var qf = ns.handleParameters.chosenParameters.qf;
 		$.each(dataIn, function(i, val) {
 			var properties = val.properties;
 			csvContent += val.id + csvDelimiter;
@@ -31,23 +32,28 @@ myNamespace.fileCreation = (function($, ns) {
 			csvContent += pos[0] + csvDelimiter;
 			csvContent += pos[1] + "";
 
-			for (prop in properties) {
+			for (var i = 0, l = selected.length; i < l; i++) {
+				var prop = selected[i];
 				if (properties.hasOwnProperty(prop)) {
-					var index = metaData.indexOf(prop);
-					if (index === -1)
-						index = selected.indexOf(prop);
-					if (index !== -1) {
-						if (prop === "date") {
-							var date = new Date(properties[prop]);
-							csvContent += csvDelimiter + date.getUTCFullYear();;
-							csvContent += csvDelimiter + (date.getUTCMonth()+1);
-							csvContent += csvDelimiter + date.getUTCDate();
-						} else {
-							var value = properties[prop];
-							if (value === null)
-								value = "";
-							csvContent += csvDelimiter + value;
-						}
+					if (prop === "date") {
+						var date = new Date(properties[prop]);
+						csvContent += csvDelimiter + date.getUTCFullYear();
+						;
+						csvContent += csvDelimiter + (date.getUTCMonth() + 1);
+						csvContent += csvDelimiter + date.getUTCDate();
+					} else {
+						var value = properties[prop];
+						if (value === null)
+							value = "";
+						csvContent += csvDelimiter + value;
+						if (qf)
+							if (prop.indexOf(":") !== -1) {
+								value = properties[prop + window.qfPostFix];
+								if (value === null)
+									value = "";
+								csvContent += csvDelimiter + value;
+							}
+
 					}
 				}
 			}

@@ -71,6 +71,7 @@ public class GreenseasPortlet extends MVCPortlet {
 	public void doView(RenderRequest renderRequest, RenderResponse renderResponse) throws IOException, PortletException {
 		// TODO: validate/escape to prevent injection
 		renderRequest.setAttribute("allParametersHeader", DatabaseProperties.getAllParametersHeader());
+		renderRequest.setAttribute("allParametersShortHeader", DatabaseProperties.getAllParametersShortHeader());
 		renderRequest.setAttribute("allLayers", DatabaseProperties.getAllLayers());
 		renderRequest.setAttribute("allProperties", DatabaseProperties.getAllProperties());
 		renderRequest.setAttribute("longhurstRegions", DatabaseProperties.getLonghurstRegions());

@@ -28,6 +28,9 @@ myNamespace.control = (function($, OL, ns) {
 
 		setHTMLInit();
 
+		// Initialize onchange for save query boxes:
+		setUpOnChangeForSaveQueryBoxes();
+
 		// initialize map viewer
 		ns.mapViewer.initMap();
 
@@ -56,9 +59,52 @@ myNamespace.control = (function($, OL, ns) {
 		ns.mapLayers.generateLayerTable();
 	}
 
+	function setUpOnChangeForSaveQueryBoxes() {
+		ns.buttonEventHandlers.change("#saveQueryRunMainQuery", saveQueryRunMainQueryChange);
+		ns.buttonEventHandlers.change("#saveQueryUpdateInventory", saveQueryUpdateInventoryChange);
+		ns.buttonEventHandlers.change("#saveQueryRunParameterFilter", saveQueryRunParameterFilterChange);
+		ns.buttonEventHandlers.change("#saveQueryAutoDownloadCSV", saveQueryAutoDownloadCSVChange);
+	}
+
+	function saveQueryRunMainQueryChange() {
+		if (!$('#saveQueryRunMainQuery').is(':checked')) {
+			if ($('#saveQueryUpdateInventory').is(':checked')) {
+				$("#saveQueryUpdateInventory").click();
+			}
+			if ($('#saveQueryRunParameterFilter').is(':checked')) {
+				$("#saveQueryRunParameterFilter").click();
+			}
+		}
+	}
+	function saveQueryUpdateInventoryChange() {
+		if ($('#saveQueryUpdateInventory').is(':checked')) {
+			if (!$('#saveQueryRunMainQuery').is(':checked')) {
+				$("#saveQueryRunMainQuery").click();
+			}
+		}
+	}
+	function saveQueryRunParameterFilterChange() {
+		if ($('#saveQueryRunParameterFilter').is(':checked')) {
+			if (!$('#saveQueryRunMainQuery').is(':checked')) {
+				$("#saveQueryRunMainQuery").click();
+			}
+		} else {
+			if ($('#saveQueryAutoDownloadCSV').is(':checked')) {
+				$("#saveQueryAutoDownloadCSV").click();
+			}
+		}
+	}
+	function saveQueryAutoDownloadCSVChange() {
+		if ($('#saveQueryAutoDownloadCSV').is(':checked')) {
+			if (!$('#saveQueryRunParameterFilter').is(':checked')) {
+				$("#saveQueryRunParameterFilter").click();
+			}
+		}
+	}
+
 	function regenerateSavedQuery() {
 		if (ns.parameters.linkedQuery !== "null") {
-			
+
 			// TODO: Set some sort of message that it is loaded
 			var filters = ns.parameters.linkedQuery.split(";");
 			for (var j = 0, len = filters.length; j < len; j++) {
@@ -314,12 +360,14 @@ myNamespace.control = (function($, OL, ns) {
 				"aoColumns" : aoColumns
 			});
 			$("#filterParameters").show();
-			var index = ns.savedOptions.indexOf("runParameterFilter");
-			if (index!== -1){
-				filterParametersButton();
-				ns.savedOptions.splice(index,1);
-			} else {
-				ns.savedOptions = [];
+			if (typeof ns.savedOptions !== "undefined") {
+				var index = ns.savedOptions.indexOf("runParameterFilter");
+				if (index !== -1) {
+					filterParametersButton();
+					ns.savedOptions.splice(index, 1);
+				} else {
+					ns.savedOptions = [];
+				}
 			}
 		}
 	}
@@ -349,7 +397,7 @@ myNamespace.control = (function($, OL, ns) {
 			ns.parametersQueryString = parametersQueryString;
 			ns.parameterQueryArray = parameterQueryArray;
 			setHTMLLoadingParameters();
-			ns.handleParameters.selectParameters(selected);
+			ns.handleParameters.selectParameters(selected, document.getElementById('qualityFlagsEnabledCheck').checked);
 
 			// Resetting tablesToQuery between filters
 			tablesToQuery = [];
@@ -650,13 +698,16 @@ myNamespace.control = (function($, OL, ns) {
 				console.log("tablesToQuery.length === 0");
 			ns.mapViewer.addFeaturesFromData(data, "All parameters");
 			setHTMLParametersLoaded();
-			//save-options
-			index = ns.savedOptions.indexOf("autoDownloadCSV");
-			if (index!== -1){
-				$("#exportParameter").click();
-				ns.savedOptions.splice(index,1);
-			} else {
-				ns.savedOptions = [];
+			// save-options
+
+			if (typeof ns.savedOptions !== "undefined") {
+				index = ns.savedOptions.indexOf("autoDownloadCSV");
+				if (index !== -1) {
+					$("#exportParameter").click();
+					ns.savedOptions.splice(index, 1);
+				} else {
+					ns.savedOptions = [];
+				}
 			}
 		} else {
 			queryLayer();
@@ -719,7 +770,7 @@ myNamespace.control = (function($, OL, ns) {
 		var qf = document.getElementById('qualityFlagsEnabledCheck').checked;
 		// TODO: inconsistency if this changes between search and response
 
-		var outPutParameters = ns.handleParameters.chosenParameters.parametersByTable[layer];
+		var outPutParameters = ns.handleParameters.chosenParameters.allSelected;// parametersByTable[layer];
 
 		if (debugc) {
 			console.log(features);
@@ -728,7 +779,7 @@ myNamespace.control = (function($, OL, ns) {
 		}
 		$.each(features, function(i, feature) {
 			$.each(feature.properties, function(j, parameter) {
-				if (outPutParameters.indexOf(j) > -1) {
+				if (outPutParameters.indexOf(layer + ":" + j) > -1) {
 					if (feature.id in data) {
 						newData[feature.id] = data[feature.id];
 						newData[feature.id].properties[layer + ":" + j] = parameter;
@@ -1008,7 +1059,7 @@ myNamespace.control = (function($, OL, ns) {
 				filterParametersTreeButton();
 			}
 		});
-		
+
 		if (parametersFromQuery != null) {
 			for (var i = 0, l = parametersFromQuery.length; i < l; i++) {
 				checkNodeInTree(parametersFromQuery[i], "#parametersTree");
@@ -1030,24 +1081,25 @@ myNamespace.control = (function($, OL, ns) {
 	}
 	var parametersFromQuery = null;
 
-	function allParametersInitiated(){
-		console.log("allParametersInitiated");
-		var index = ns.savedOptions.indexOf("updateInventory");
-		if (index === -1){
-			$('#updateParametersList').prop('checked', false);
-		} else {
-			$('#updateParametersList').prop('checked', true);
-			ns.savedOptions.splice(index,1);
-		}
-		index = ns.savedOptions.indexOf("runMainQuery");
-		if (index!== -1){
-			mainQueryButton();
-			ns.savedOptions.splice(index,1);
-		} else {
-			ns.savedOptions = [];
+	function allParametersInitiated() {
+		if (typeof ns.savedOptions !== "undefined") {
+			var index = ns.savedOptions.indexOf("updateInventory");
+			if (index === -1) {
+				$('#updateParametersList').prop('checked', false);
+			} else {
+				$('#updateParametersList').prop('checked', true);
+				ns.savedOptions.splice(index, 1);
+			}
+			index = ns.savedOptions.indexOf("runMainQuery");
+			if (index !== -1) {
+				mainQueryButton();
+				ns.savedOptions.splice(index, 1);
+			} else {
+				ns.savedOptions = [];
+			}
 		}
 	}
-	
+
 	function compareRasterButton() {
 		ns.matchup.compareRaster(data);
 	}
@@ -1223,7 +1275,8 @@ myNamespace.control = (function($, OL, ns) {
 		if (query.length === 0) {
 			message = "<b>The query is empty!</b><br>";
 		}
-		//TODO: check if parameters are selected in case filter is not run and throw a warning
+		// TODO: check if parameters are selected in case filter is not run and
+		// throw a warning
 		var url = ns.parameters.portletURL;
 		if (query.length !== 0)
 			url += "?query=" + encodeURIComponent(query);

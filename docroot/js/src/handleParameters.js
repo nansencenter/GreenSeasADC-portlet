@@ -40,7 +40,8 @@ myNamespace.handleParameters = (function($, ns) {
 		return mainParameters.basicHeader.concat(metaHeader.reverse());
 	}
 
-	function selectParameters(par) {
+	function selectParameters(par,qf) {
+		chosenParameters.qf = qf;
 		chosenParameters.allSelected = [];
 		chosenParameters.tablesSelected = [];
 		chosenParameters.parametersByTable = {};
@@ -195,13 +196,21 @@ myNamespace.handleParameters = (function($, ns) {
 				table = window.metaDataTable;
 				parameter = split[0];
 			}
-			parameterHeaders.push(parameter);
+			if (chosenParameters.qf)
+				parameterHeaders.push(qfHeader);
+			parameterHeaders.push(getShortHeader(parameter,table));
 		});
 		return parameterHeaders.reverse();
 	}
 
-	function getShortHeader(par, table) {
-		return par;
+	function getShortHeader(parameter, table) {
+		var header;
+		try {
+				header = allParametersShortHeader[table][parameter];
+		} catch (e) {
+			return parameter;
+		}
+		return header ? header : parameter;
 	}
 
 	function getShortMetadataHeaders() {
@@ -209,6 +218,8 @@ myNamespace.handleParameters = (function($, ns) {
 		var metaTemp = mainParameters.parameters;
 		if (mainParameters.chosenMetadata) {
 			metaTemp = mainParameters.chosenMetadata;
+		} else {
+			metaTemp = metaTemp.reverse();
 		}
 		$.each(metaTemp, function(i, val) {
 
