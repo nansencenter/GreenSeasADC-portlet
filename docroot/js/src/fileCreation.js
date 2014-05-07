@@ -18,10 +18,12 @@ myNamespace.fileCreation = (function($, ns) {
 	function createCSV(dataIn, headersIn) {
 		var allHeaders = ns.handleParameters.getShortMetadataHeaders().concat(
 				ns.handleParameters.getShortHeadersFromSelected());
+		var allUnits = ns.handleParameters.getShortMetadataUnits().concat(
+				ns.handleParameters.getShortUnitsFromSelected());
 		var metaData = ns.handleParameters.getMetadata();
-		var selected = metaData.concat(ns.handleParameters.chosenParameters.allSelected.reverse());
-		var csvContent = createCSVHeader(allHeaders);
-		csvContent += csvDelimiter + "Query:" + ns.mainQueryArray + "\n";
+		var selected = metaData.concat(ns.handleParameters.chosenParameters.allSelected.slice().reverse());
+		var csvContent = "sep=;\n" + createCSVHeader(allHeaders);
+		csvContent += csvDelimiter + "Query:" + ns.mainQueryArray + "\n" + createCSVHeader(allUnits) + "\n";
 		if (debugfC)
 			console.log("Added headers: " + csvContent);
 		var qf = ns.handleParameters.chosenParameters.qf;

@@ -217,6 +217,12 @@ public class DatabaseProperties {
 		String fileName = "shortParameterHeaders.properties";
 		return getParametersFromFile(jsParName, fileName);
 	}
+
+	public static String getAllParametersUnit() {
+		String jsParName = "allParametersUnit";
+		String fileName = "parameterUnits.properties";
+		return getParametersFromFile(jsParName, fileName);
+	}
 }
 
 /**

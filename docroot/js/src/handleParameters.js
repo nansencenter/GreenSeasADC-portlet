@@ -8,6 +8,7 @@ myNamespace.handleParameters = (function($, ns) {
 	var availableParameters = {};
 	mainParameters = {
 		basicHeader : [ "GS-ID", "Latitude", "Longitude" ],
+		basicUnits : ["int","degrees_north","degrees_east"]
 	};
 	var chosenParameters = {
 		parametersByTable : {},
@@ -202,6 +203,25 @@ myNamespace.handleParameters = (function($, ns) {
 		});
 		return parameterHeaders.reverse();
 	}
+	function getShortUnitsFromSelected() {
+		var parameterUnits = [];
+		$.each(chosenParameters.allSelected, function(i, key) {
+			var split = key.split(":");
+			var table = "";
+			var parameter = "";
+			if (split.length === 2) {
+				table = split[0];
+				parameter = split[1];
+			} else {
+				table = window.metaDataTable;
+				parameter = split[0];
+			}
+			if (chosenParameters.qf)
+				parameterUnits.push(qfHeader);
+			parameterUnits.push(getUnits(parameter,table));
+		});
+		return parameterUnits.reverse();
+	}
 
 	function getShortHeader(parameter, table) {
 		var header;
@@ -212,6 +232,18 @@ myNamespace.handleParameters = (function($, ns) {
 		}
 		return header ? header : parameter;
 	}
+	
+	function getUnits(parameter, table) {
+		var units;
+		try {
+			units = allParametersUnit[table][parameter];
+		} catch (e) {
+			return parameter;
+		}
+		return units ? units : parameter;
+	}
+	
+	
 
 	function getShortMetadataHeaders() {
 		var metaHeader = [];
@@ -219,7 +251,7 @@ myNamespace.handleParameters = (function($, ns) {
 		if (mainParameters.chosenMetadata) {
 			metaTemp = mainParameters.chosenMetadata;
 		} else {
-			metaTemp = metaTemp.reverse();
+			metaTemp = metaTemp.slice().reverse();
 		}
 		$.each(metaTemp, function(i, val) {
 
@@ -233,6 +265,26 @@ myNamespace.handleParameters = (function($, ns) {
 			}
 		});
 		return mainParameters.basicHeader.concat(metaHeader);
+	}
+	function getShortMetadataUnits() {
+		var metaUnits = [];
+		var metaTemp = mainParameters.parameters;
+		if (mainParameters.chosenMetadata) {
+			metaTemp = mainParameters.chosenMetadata;
+		} else {
+			metaTemp = metaTemp.slice().reverse();
+		}
+		$.each(metaTemp, function(i, val) {
+			if (val === "date") {
+				metaUnits.push("year");
+				metaUnits.push("month");
+				metaUnits.push("day_of_month");
+			} else {
+				if (val !== window.geometryParameter)
+					metaUnits.push(getUnits(val, window.metaDataTable));
+			}
+		});
+		return mainParameters.basicUnits.concat(metaUnits);
 	}
 	function getMetadata() {
 		var meta = [];
@@ -300,6 +352,8 @@ myNamespace.handleParameters = (function($, ns) {
 		getShortMetadataHeaders : getShortMetadataHeaders,
 		getShortHeadersFromSelected : getShortHeadersFromSelected,
 		getMetadata : getMetadata,
+		getShortMetadataUnits:getShortMetadataUnits,
+		getShortUnitsFromSelected:getShortUnitsFromSelected,
 	};
 
 }(jQuery, myNamespace));
