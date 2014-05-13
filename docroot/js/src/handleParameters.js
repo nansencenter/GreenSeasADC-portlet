@@ -8,7 +8,7 @@ myNamespace.handleParameters = (function($, ns) {
 	var availableParameters = {};
 	mainParameters = {
 		basicHeader : [ "GS-ID", "Latitude", "Longitude" ],
-		basicUnits : ["int","degrees_north","degrees_east"]
+		basicUnits : [ "int", "degrees_north", "degrees_east" ]
 	};
 	var chosenParameters = {
 		parametersByTable : {},
@@ -41,7 +41,7 @@ myNamespace.handleParameters = (function($, ns) {
 		return mainParameters.basicHeader.concat(metaHeader.reverse());
 	}
 
-	function selectParameters(par,qf) {
+	function selectParameters(par, qf) {
 		chosenParameters.qf = qf;
 		chosenParameters.allSelected = [];
 		chosenParameters.tablesSelected = [];
@@ -199,7 +199,7 @@ myNamespace.handleParameters = (function($, ns) {
 			}
 			if (chosenParameters.qf)
 				parameterHeaders.push(qfHeader);
-			parameterHeaders.push(getShortHeader(parameter,table));
+			parameterHeaders.push(getShortHeader(parameter, table));
 		});
 		return parameterHeaders.reverse();
 	}
@@ -218,7 +218,7 @@ myNamespace.handleParameters = (function($, ns) {
 			}
 			if (chosenParameters.qf)
 				parameterUnits.push(qfHeader);
-			parameterUnits.push(getUnits(parameter,table));
+			parameterUnits.push(getUnits(parameter, table));
 		});
 		return parameterUnits.reverse();
 	}
@@ -226,13 +226,13 @@ myNamespace.handleParameters = (function($, ns) {
 	function getShortHeader(parameter, table) {
 		var header;
 		try {
-				header = allParametersShortHeader[table][parameter];
+			header = allParametersShortHeader[table][parameter];
 		} catch (e) {
 			return parameter;
 		}
 		return header ? header : parameter;
 	}
-	
+
 	function getUnits(parameter, table) {
 		var units;
 		try {
@@ -242,8 +242,6 @@ myNamespace.handleParameters = (function($, ns) {
 		}
 		return units ? units : parameter;
 	}
-	
-	
 
 	function getShortMetadataHeaders() {
 		var metaHeader = [];
@@ -291,6 +289,8 @@ myNamespace.handleParameters = (function($, ns) {
 		var metaTemp = mainParameters.parameters;
 		if (mainParameters.chosenMetadata) {
 			metaTemp = mainParameters.chosenMetadata;
+		} else {
+			metaTemp = metaTemp.slice().reverse();
 		}
 		$.each(metaTemp, function(i, val) {
 			if (val !== window.geometryParameter)
@@ -352,8 +352,8 @@ myNamespace.handleParameters = (function($, ns) {
 		getShortMetadataHeaders : getShortMetadataHeaders,
 		getShortHeadersFromSelected : getShortHeadersFromSelected,
 		getMetadata : getMetadata,
-		getShortMetadataUnits:getShortMetadataUnits,
-		getShortUnitsFromSelected:getShortUnitsFromSelected,
+		getShortMetadataUnits : getShortMetadataUnits,
+		getShortUnitsFromSelected : getShortUnitsFromSelected,
 	};
 
 }(jQuery, myNamespace));

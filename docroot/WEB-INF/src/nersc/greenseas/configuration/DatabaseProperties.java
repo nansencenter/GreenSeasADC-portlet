@@ -35,7 +35,7 @@ public class DatabaseProperties {
 	}
 
 	private static String getParametersFromFile(String jsParName, String fileName) {
-		StringBuffer allParametersHeader = new StringBuffer("window."+jsParName+" = {");
+		StringBuffer allParametersHeader = new StringBuffer("window." + jsParName + " = {");
 		Properties prop = getProperties(fileName);
 		if (prop == null)
 			return "window.allParametersHeader = {};";
@@ -132,7 +132,6 @@ public class DatabaseProperties {
 		properties.append("];");
 		return properties.toString();
 	}
-	
 
 	public static String getCruisesList() {
 		StringBuffer properties = new StringBuffer();
@@ -167,22 +166,25 @@ public class DatabaseProperties {
 	}
 
 	private static Properties getProperties(String fileName) {
+		String fileSep = System.getProperty("file.separator");
 		try {
 			Properties prop = new OrderedProperties();
-			String propertiesFolder = System.getProperty("user.home") + "\\.gsadbc\\properties\\";
+			String propertiesFolder = System.getProperty("user.home") + fileSep + ".gsadbc" + fileSep + "properties"
+					+ fileSep;
 			File file = new File(propertiesFolder + fileName);
 			if (file.exists())
 				prop.load(new FileInputStream(file));
-			else
+			else{
 				prop.load(DatabaseProperties.class.getClassLoader().getResourceAsStream(fileName));
+			}
 			return prop;
 		} catch (Exception e) {
 			System.out.println("Error reading the property file:" + fileName);
 			return null;
 		}
 	}
-	
-	public static String[] getAllowedHosts(){
+
+	public static String[] getAllowedHosts() {
 		String fileName = "greenSeasServer.properties";
 		Properties prop = getProperties(fileName);
 		return prop.getProperty("allowedHostsOnProxy").split(",");
