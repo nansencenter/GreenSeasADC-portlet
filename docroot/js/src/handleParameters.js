@@ -112,6 +112,18 @@ myNamespace.handleParameters = (function($, ns) {
 		return getHeader(split[1], split[0]);
 	}
 
+	function getTooltip(parameter, table) {
+		var tooltip;
+		try {
+			tooltip = allParametersTooltips[table][parameter];
+			if (typeof tooltip === 'undefined')
+				tooltip = getHeader(parameter, table)
+		} catch (e) {
+			return parameter;
+		}
+		return tooltip ? tooltip : parameter;
+	}
+
 	function getHeader(parameter, table) {
 		var header;
 		try {
@@ -354,6 +366,8 @@ myNamespace.handleParameters = (function($, ns) {
 		getMetadata : getMetadata,
 		getShortMetadataUnits : getShortMetadataUnits,
 		getShortUnitsFromSelected : getShortUnitsFromSelected,
+		getTooltip : getTooltip,
+		getShortHeader : getShortHeader,
 	};
 
 }(jQuery, myNamespace));

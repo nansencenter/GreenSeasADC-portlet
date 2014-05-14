@@ -225,6 +225,12 @@ public class DatabaseProperties {
 		String fileName = "parameterUnits.properties";
 		return getParametersFromFile(jsParName, fileName);
 	}
+
+	public static String getAllParametersTooltips() {
+		String jsParName = "allParametersTooltips";
+		String fileName = "parameterTooltips.properties";
+		return getParametersFromFile(jsParName, fileName);
+	}
 }
 
 /**

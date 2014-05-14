@@ -1078,6 +1078,11 @@ myNamespace.control = (function($, OL, ns) {
 		if (countDown === 0) {
 			allParametersInitiated();
 		}
+		
+		//Wait 1 second for the tree to load and then create qtip-tooltips
+		setTimeout(function() {
+			$("#parametersTree [title]").qtip();
+		}, 1000);
 	}
 	var parametersFromQuery = null;
 
@@ -1153,6 +1158,14 @@ myNamespace.control = (function($, OL, ns) {
 			$("#parametersTree").jstree("clear_search");
 			$("#parametersTree").jstree("search", searchString);
 			lastSearchString = searchString;
+			$("#parametersTree [title]").qtip({
+				position : {
+					corner : {
+						target : 'bottomLeft',
+						tooltip : 'bottomLeft'
+					}
+				}
+			});
 		}
 	}
 

@@ -111,12 +111,16 @@ myNamespace.tableConstructor = (function($, ns) {
 
 		return headerString + "</thead>";
 	}
+	
+	function generateTooltip(par,table){
+		return " title='<b>"+ns.handleParameters.getShortHeader(par, table)+"</b>:"+ns.handleParameters.getTooltip(par, table)+"'";
+	}
 
 	function listItem(value, table, header) {
 		displayed.push(table + ":" + value);
 		if (typeof header === "undefined")
 			header = ns.handleParameters.getHeader(value, table);
-		return "<li id='" + table + ":" + value + "' data-baseheader='" + header + "' data-index='0'><a>" + header
+		return "<li id='" + table + ":" + value + "' data-baseheader='" + header + "' data-index='0'><a"+generateTooltip(value,table)+">" + header
 				+ "</a></li>";
 	}
 
@@ -151,7 +155,7 @@ myNamespace.tableConstructor = (function($, ns) {
 		$.each(groupLayers, function(i, groupLayer) {
 			var group = window.combinedParameters[groupLayer];
 			str += "<li id=\"" + groupLayer + "\" rel='noBox' data-baseheader='" + group.header + "' data-index='"
-					+ window.combinedParameters[groupLayer].index + "'><a>" + group.header + "</a>";
+					+ window.combinedParameters[groupLayer].index + "'><a"+generateTooltip(groupLayer.split(":")[1],"combined")+">" + group.header + "</a>";
 			str += "<ul>";
 			$.each(group.parameters, function(j, table) {
 				tablesDoneInGroup.push(table);
@@ -254,7 +258,7 @@ myNamespace.tableConstructor = (function($, ns) {
 				displayed.push(comb);
 				var combHeader = ns.handleParameters.getTableHeader(comb);
 				str += "<li id='" + comb + "'" + rel + " data-baseheader='" + combHeader + "' data-index='"
-						+ window.combinedParameters[comb].index + "'><a>" + combHeader + "</a>";
+						+ window.combinedParameters[comb].index + "'><a"+generateTooltip(comb.split(":")[1],"combined")+">" + combHeader + "</a>";
 				str += "<ul>";
 				$.each(window.combinedParameters[comb].parameters, function(i, val) {
 					if (multi) {

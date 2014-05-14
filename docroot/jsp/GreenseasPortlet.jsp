@@ -431,11 +431,13 @@
 	<%=renderRequest.getAttribute("allProperties")%>
 	<!-- Initiating window.allParametersHeader -->
 	<%=renderRequest.getAttribute("allParametersHeader")%>
+	<!-- Initiating window.allParametersTooltips -->
+	<%=renderRequest.getAttribute("allParametersTooltips")%>
 	<!-- Initiating window.allParametersShortHeader -->
 	<%=renderRequest.getAttribute("allParametersShortHeader")%>
-	<!-- Initiating window.allParametersShortHeader -->
+	<!-- Initiating window.allParametersUnit -->
 	<%=renderRequest.getAttribute("allParametersUnit")%>
-	<!-- Initiating window.wmsLayers -->linkedQuery
+	<!-- Initiating window.wmsLayers -->
 	<%=renderRequest.getAttribute("wmsLayers")%>
 	<!-- Initiating window.openDAPURLs -->
 	<%=renderRequest.getAttribute("openDAPURLs")%>
