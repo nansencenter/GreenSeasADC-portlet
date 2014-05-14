@@ -122,7 +122,7 @@ myNamespace.statistics = (function($, ns) {
 		var horizontalPar = $("#propertiesPlotVariable1").find(":selected").val();
 		var verticalPar = $("#propertiesPlotVariable2").find(":selected").val();
 		var ppData = generatePropertiesPlotData(horizontalPar, verticalPar, allData);
-		// $(function() {
+		console.log(ppData);
 		$('#propertiesPlotContainer').highcharts(
 				{
 					chart : {
@@ -167,11 +167,10 @@ myNamespace.statistics = (function($, ns) {
 						xAxis : 0,
 						showInLegend : false,
 						data : ppData,
-						// cropThreshold : 20000,
+						cropThreshold : 50000,
 						animation : false
 					} ]
 				});
-		// });
 	}
 
 	function generatePropertiesPlotData(horizontalPar, verticalPar, allData) {
