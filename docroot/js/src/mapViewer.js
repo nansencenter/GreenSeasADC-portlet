@@ -141,7 +141,7 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 		for (id in data) {
 			if (data.hasOwnProperty(id)) {
 				var value = data[id].properties[parameter];
-				if (typeof value !== 'undefined' && value !== -999 && value !== '-999') {
+				if (typeof value !== 'undefined' && value !== -999 && value !== '-999' && value !== null) {
 					value = parseFloat(value);
 					var lonLat = new OL.LonLat(data[id].geometry.coordinates[0], data[id].geometry.coordinates[1]);
 					var pointGeometry = new OL.Geometry.Point(lonLat.lat, lonLat.lon);
