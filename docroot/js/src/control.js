@@ -334,7 +334,8 @@ myNamespace.control = (function($, OL, ns) {
 		// saving the data for merging
 		basicData = jsonObject.features;
 		replaceId(basicData);
-		data = convertArrayToHashMap($.extend(true, {}, basicData));
+		basicData = convertArrayToHashMap(basicData);
+		data = $.extend(true, {}, basicData);
 
 		if (length < 1) {
 			$("#loadingText").html("");
@@ -403,26 +404,14 @@ myNamespace.control = (function($, OL, ns) {
 			tablesToQuery = [];
 
 			// Cloning in the data from the basic search
-			data = convertArrayToHashMap($.extend(true, {}, basicData));
+			data = $.extend(true, {}, basicData);
 			if (debugc)
 				console.log("Adding all selected tables to tablesSelected");
 
-			// var foundCombine = false;
 			// Adding all selected layers to tablesToQuery
 			$.each(ns.handleParameters.chosenParameters.tablesSelected, function(i, table) {
-				// if (table !== "combined")
 				tablesToQuery.push(table);
-				// else
-				// foundCombine = true;
-			});/*
-				 * // Adding extra layers from combined to tablesToQuery: if
-				 * (foundCombine)
-				 * $.each(ns.handleParameters.chosenParameters.parametersByTable.combined,
-				 * function(i, val) { var table =
-				 * window.combinedParameters[val].layer; if (typeof
-				 * tablesToQuery[table] === "undefined")
-				 * tablesToQuery.push(table); });
-				 */
+			});
 			// query the first layer
 			queryLayer();
 
@@ -757,6 +746,9 @@ myNamespace.control = (function($, OL, ns) {
 			return;
 		}
 
+		if ($.isEmptyObject(data))
+			return;
+
 		var combined = [];
 		// Add all combine filters for this layer to combined (val could be
 		// "combined:temperature")
@@ -777,44 +769,73 @@ myNamespace.control = (function($, OL, ns) {
 			console.log(combined);
 			console.log(outPutParameters);
 		}
+		var currentStations = {};
+		console.log(1);
+		// cruise_ID and station_ID will always need to be a part of metadata
+		$.each(data, function(i, val) {
+			var stationDOI = val.properties[metaDataTable + ":" + cruiseIDParameterName]
+					+ val.properties[metaDataTable + ":" + stationIDParameterName];
+			currentStations[stationDOI] = true;
+		});
+		console.log(2);
+		console.log(basicData);
+		// Go through all features from the response
 		$.each(features, function(i, feature) {
-			$.each(feature.properties, function(j, parameter) {
-				if (outPutParameters.indexOf(layer + ":" + j) > -1) {
-					if (feature.id in data) {
-						newData[feature.id] = data[feature.id];
+			console.log(2.1 + ": " + feature.id);
+			var stationDOI = basicData[feature.id].properties[metaDataTable + ":" + cruiseIDParameterName]
+					+ basicData[feature.id].properties[metaDataTable + ":" + stationIDParameterName];
+			//console.log(2.2);
+			if (currentStations[stationDOI]) {
+				// Go through all paramters from the current feature
+				// and add them to newData if it matches with the other layers
+				$.each(feature.properties, function(j, parameter) {
+					if (outPutParameters.indexOf(layer + ":" + j) > -1) {
+						if (typeof newData[feature.id] === 'undefined')
+							newData[feature.id] = data[feature.id];
+						if (typeof newData[feature.id] === 'undefined')
+							newData[feature.id] = basicData[feature.id];
 						newData[feature.id].properties[layer + ":" + j] = parameter;
 						if (qf) {
-							newData[feature.id].properties[layer + ":" + j + window.qfPostFix] = feature.properties[j
-									+ window.qfPostFix];
+							newData[feature.id].properties[layer + ":" + j + qfPostFix] = feature.properties[j
+									+ qfPostFix];
 						}
 					}
-				}
-			});
-			$.each(combined, function(j, comb) {
-				if (window.combinedParameters[comb].method === "prioritized") {
-					var val = null;
-					var qfString = "";
-					for (var k = 0, l = window.combinedParameters[comb].parameters.length; k < l; k++) {
-						// TODO: this is not always a string (should usually be
-						// a number if the database is "correct"
-						if (feature.properties[window.combinedParameters[comb].parameters[k]] !== null
-								&& feature.properties[window.combinedParameters[comb].parameters[k]].trim() !== "") {
-							val = feature.properties[window.combinedParameters[comb].parameters[k]];
+				});
+				// Go through all combined layers and check for a value
+				// (only supported for prioritized atm)
+				$.each(combined, function(j, comb) {
+					if (combinedParameters[comb].method === "prioritized") {
+						if (typeof newData[feature.id].properties[comb] !== 'undefined') {
+							var val = null;
+							var qfString = "";
+							for (var k = 0, l = combinedParameters[comb].parameters.length; k < l; k++) {
+								// TODO: this is not always a string
+								// (should usually be a number
+								// if the database is "correct")
+								if (feature.properties[combinedParameters[comb].parameters[k]] !== null
+										&& feature.properties[combinedParameters[comb].parameters[k]].trim() !== "") {
+									val = feature.properties[combinedParameters[comb].parameters[k]];
+									if (qf)
+										qfString = feature.properties[combinedParameters[comb].parameters[k]
+												+ qfPostFix];
+									break;
+								}
+							}
+							if (typeof newData[feature.id] === 'undefined')
+								newData[feature.id] = data[feature.id];
+							if (typeof newData[feature.id] === 'undefined')
+								newData[feature.id] = basicData[feature.id];
+							newData[feature.id].properties[comb] = val;
 							if (qf)
-								qfString = feature.properties[window.combinedParameters[comb].parameters[k]
-										+ window.qfPostFix];
-							break;
+								newData[feature.id].properties[comb + qfPostFix] = qfString;
 						}
+					} else {
+						console.log("typeof newData[feature.id].properties[comb] === 'undefined'");
 					}
-					if (feature.id in data) {
-						newData[feature.id] = data[feature.id];
-						newData[feature.id].properties[comb] = val;
-						if (qf)
-							newData[feature.id].properties[comb + window.qfPostFix] = qfString;
-					}
-				}
-			});
+				});
+			}
 		});
+		console.log(3);
 		data = newData;
 		if (debugc) {
 			console.log("Ended adding Data:");
@@ -1078,8 +1099,8 @@ myNamespace.control = (function($, OL, ns) {
 		if (countDown === 0) {
 			allParametersInitiated();
 		}
-		
-		//Wait 1 second for the tree to load and then create qtip-tooltips
+
+		// Wait 1 second for the tree to load and then create qtip-tooltips
 		setTimeout(function() {
 			$("#parametersTree [title]").qtip();
 		}, 1000);
@@ -1306,16 +1327,19 @@ myNamespace.control = (function($, OL, ns) {
 		statusElement.html("Loading file...");
 		ns.ajax.loadFileFromID($("#rasterUploadedFileID").val());
 	}
-	
-	function downloadSelectedParInfoButton(){
+
+	function downloadSelectedParInfoButton() {
 		var allSelected = $("#parametersTree").jstree("get_checked", null, true);
 		var separator = ";"
-		var content="\uFEFFsep="+separator+"\nShort Header"+separator+"Long Header(units)"+separator+"Description\n";
-		for (var i = 0, l = allSelected.length;i<l;i++){
+		var content = "\uFEFFsep=" + separator + "\nShort Header" + separator + "Long Header(units)" + separator
+				+ "Description\n";
+		for (var i = 0, l = allSelected.length; i < l; i++) {
 			var split = allSelected[i].id.split(":");
-			content += ns.handleParameters.getShortHeader(split[1],split[0])+separator+ns.handleParameters.getHeader(split[1],split[0])+separator+ns.handleParameters.getTooltip(split[1],split[0])+"\n";
+			content += ns.handleParameters.getShortHeader(split[1], split[0]) + separator
+					+ ns.handleParameters.getHeader(split[1], split[0]) + separator
+					+ ns.handleParameters.getTooltip(split[1], split[0]) + "\n";
 		}
-		ns.utilities.downloadData(content,"data:text/csv;charset=utf-8", "GreenSeas-ParameterInfo.csv");
+		ns.utilities.downloadData(content, "data:text/csv;charset=utf-8", "GreenSeas-ParameterInfo.csv");
 	}
 
 	function createNetCDFUsingHOneButton() {
@@ -1353,8 +1377,8 @@ myNamespace.control = (function($, OL, ns) {
 		expandAllButton : expandAllButton,
 		toggleOrderPlanktonButton : toggleOrderPlanktonButton,
 		clearSelectionButton : clearSelectionButton,
-		downloadSelectedParInfoButton:downloadSelectedParInfoButton,
-		
+		downloadSelectedParInfoButton : downloadSelectedParInfoButton,
+
 		createNetCDFUsingHOneButton : createNetCDFUsingHOneButton,
 	};
 
