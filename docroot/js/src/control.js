@@ -1306,6 +1306,17 @@ myNamespace.control = (function($, OL, ns) {
 		statusElement.html("Loading file...");
 		ns.ajax.loadFileFromID($("#rasterUploadedFileID").val());
 	}
+	
+	function downloadSelectedParInfoButton(){
+		var allSelected = $("#parametersTree").jstree("get_checked", null, true);
+		var separator = ";"
+		var content="\uFEFFsep="+separator+"\nShort Header"+separator+"Long Header(units)"+separator+"Description\n";
+		for (var i = 0, l = allSelected.length;i<l;i++){
+			var split = allSelected[i].id.split(":");
+			content += ns.handleParameters.getShortHeader(split[1],split[0])+separator+ns.handleParameters.getHeader(split[1],split[0])+separator+ns.handleParameters.getTooltip(split[1],split[0])+"\n";
+		}
+		ns.utilities.downloadData(content,"data:text/csv;charset=utf-8", "GreenSeas-ParameterInfo.csv");
+	}
 
 	function createNetCDFUsingHOneButton() {
 		ns.fileCreation.createNetCDFUsingHOne(data);
@@ -1342,7 +1353,8 @@ myNamespace.control = (function($, OL, ns) {
 		expandAllButton : expandAllButton,
 		toggleOrderPlanktonButton : toggleOrderPlanktonButton,
 		clearSelectionButton : clearSelectionButton,
-
+		downloadSelectedParInfoButton:downloadSelectedParInfoButton,
+		
 		createNetCDFUsingHOneButton : createNetCDFUsingHOneButton,
 	};
 

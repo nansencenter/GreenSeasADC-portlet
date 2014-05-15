@@ -99,6 +99,7 @@ myNamespace.buttonEventHandlers = (function($,ns) {
 		callFromControl("#calculateStatisticsButton", ns.control.calculateStatisticsButton);
 		callFromControl("#saveQueryButton", ns.control.saveQueryButton);
 		callFromControl("#loadFileFromIDButton", ns.control.loadFileFromIDButton);
+		callFromControl("#downloadSelectedParInfoButton", ns.control.downloadSelectedParInfoButton);
 
 		// on change events
 		$("#exportParametersFormats").change(function() {

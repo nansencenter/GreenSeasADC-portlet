@@ -228,6 +228,7 @@
 						<input type="button" id="expandAllButton" value="Expand All" title='Expand all nodes in the list' />
 						<input type="button" id="toggleOrderPlanktonButton" value="Sort plankton by type"
 							title='Toggle sort by plankton type/size' />
+						<input type="button" id="downloadSelectedParInfoButton" value="Download info on selected" title='Download info/description on selected parameters' />
 						<div id='loadTreeNumbersDiv'></div>
 						<div id="parametersTree"></div>
 						<br>

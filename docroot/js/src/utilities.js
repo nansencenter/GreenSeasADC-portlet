@@ -54,9 +54,37 @@ myNamespace.utilities = (function($) {
 		}
 		return color;
 	}
+	
+	function downloadData(content,type, name) {
+		//content = callback(data);
+		try {
+			saveAs(new Blob([ content ], {
+				type : type
+			}), name);
+		} catch (e) {
+			window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder
+					|| window.MSBlobBuilder || window.webkitURL;
+			if (e.name === 'TypeError' && window.BlobBuilder) {
+				var bb = new BlobBuilder();
+				bb.append([ content ]);
+				saveAs(bb.getBlob(type), name);
+			} else if (e.name === "InvalidStateError") {
+				// InvalidStateError (tested on FF13 WinXP)
+				saveAs(new Blob([ content ], {
+					type : type
+				}), name);
+			} else {
+				// saveAs("data:"+type+";base64,"+
+				// btoa(content),name);
+				ns.errorMessage
+						.showErrorMessage("Can not download because blob consutrctor is not supported in this browser!\nKnown supported browsers: \nChrome 29 on Windows\nFirefox 24 on Windows\nInternet Explorer 10 on Windows\n\nKnown not supported browsers:\nSafari 5 on Windows");
+			}
+		}
+	}
 
 	// public interface
 	return {
+		downloadData:downloadData,
 		rand : rand,
 		setUpSelectorArray : setUpSelectorArray,
 		setUpSelector : setUpSelector,
