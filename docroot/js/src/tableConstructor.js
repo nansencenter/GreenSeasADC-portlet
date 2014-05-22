@@ -7,8 +7,7 @@ myNamespace.tableConstructor = (function($, ns) {
 
 	function generateStatistics(features) {
 		var header = "<table id='generalStatisticsTable' class='table'>", footer = "</tbody></table>", rows = "";
-		var headers = [ "Parameter", "Quantity", "Min", "Max","Average", "Sample Standard Deviation",
-				"Variance" ];
+		var headers = [ "Parameter", "Quantity", "Min", "Max", "Average", "Sample Standard Deviation", "Variance" ];
 		var tableHeader = headerFrom(headers);
 
 		var selectedParameters = ns.handleParameters.chosenParameters.allSelected;
@@ -111,17 +110,18 @@ myNamespace.tableConstructor = (function($, ns) {
 
 		return headerString + "</thead>";
 	}
-	
-	function generateTooltip(par,table){
-		return " title='<b>"+ns.handleParameters.getShortHeader(par, table)+"</b>:"+ns.handleParameters.getTooltip(par, table)+"'";
+
+	function generateTooltip(par, table) {
+		return " title='<b>" + ns.handleParameters.getShortHeader(par, table) + "</b>:"
+				+ ns.handleParameters.getTooltip(par, table) + "'";
 	}
 
 	function listItem(value, table, header) {
 		displayed.push(table + ":" + value);
 		if (typeof header === "undefined")
 			header = ns.handleParameters.getHeader(value, table);
-		return "<li id='" + table + ":" + value + "' data-baseheader='" + header + "' data-index='0'><a"+generateTooltip(value,table)+">" + header
-				+ "</a></li>";
+		return "<li id='" + table + ":" + value + "' data-baseheader='" + header + "' data-index='0'><a"
+				+ generateTooltip(value, table) + ">" + header + "</a></li>";
 	}
 
 	function metadataList() {
@@ -155,7 +155,8 @@ myNamespace.tableConstructor = (function($, ns) {
 		$.each(groupLayers, function(i, groupLayer) {
 			var group = window.combinedParameters[groupLayer];
 			str += "<li id=\"" + groupLayer + "\" rel='noBox' data-baseheader='" + group.header + "' data-index='"
-					+ window.combinedParameters[groupLayer].index + "'><a"+generateTooltip(groupLayer.split(":")[1],"combined")+">" + group.header + "</a>";
+					+ window.combinedParameters[groupLayer].index + "'><a"
+					+ generateTooltip(groupLayer.split(":")[1], "combined") + ">" + group.header + "</a>";
 			str += "<ul>";
 			$.each(group.parameters, function(j, table) {
 				tablesDoneInGroup.push(table);
@@ -258,7 +259,8 @@ myNamespace.tableConstructor = (function($, ns) {
 				displayed.push(comb);
 				var combHeader = ns.handleParameters.getTableHeader(comb);
 				str += "<li id='" + comb + "'" + rel + " data-baseheader='" + combHeader + "' data-index='"
-						+ window.combinedParameters[comb].index + "'><a"+generateTooltip(comb.split(":")[1],"combined")+">" + combHeader + "</a>";
+						+ window.combinedParameters[comb].index + "'><a"
+						+ generateTooltip(comb.split(":")[1], "combined") + ">" + combHeader + "</a>";
 				str += "<ul>";
 				$.each(window.combinedParameters[comb].parameters, function(i, val) {
 					if (multi) {
@@ -281,8 +283,10 @@ myNamespace.tableConstructor = (function($, ns) {
 	}
 
 	function generateAoColumns(data) {
+		var allHeaders = ns.handleParameters.getMetadataHeaders().concat(ns.handleParameters.getHeadersFromSelected());
+		console.log(allHeaders);
 		var aoColumns = [];
-		$.each(ns.handleParameters.getHeadersFromFeatures(data), function(i, val) {
+		$.each(allHeaders, function(i, val) {
 			aoColumns.push({
 				"sTitle" : val
 			});
@@ -291,22 +295,44 @@ myNamespace.tableConstructor = (function($, ns) {
 	}
 
 	function generateTableData(data) {
+		var metaData = ns.handleParameters.getMetadata();
+		var selected = metaData.concat(ns.handleParameters.chosenParameters.allSelected.slice().reverse()).concat(ns.handleParameters.chosenParameters.additionalParameters.slice().reverse());
+
+		console.log(selected);
 		var tableData = [];
-		$.each(data, function(i, val) {
+		var qf = ns.handleParameters.chosenParameters.qf;
+		$.each(data, function(id, val) {
 			var row = [];
-			row.push(i);
+			row.push(id);
 			row.push(val.geometry.coordinates[0]);
 			row.push(val.geometry.coordinates[1]);
-			tableData.push(row);
-			for (prop in val.properties) {
-				if (val.properties.hasOwnProperty(prop)) {
-					if (val.properties[prop] !== null)
-						row.push(val.properties[prop]);
+
+			var properties = val.properties;
+			for (var i = 0, l = selected.length; i < l; i++) {
+				var prop = selected[i];
+				if (properties.hasOwnProperty(prop)) {
+					if (properties[prop] !== null)
+						row.push(properties[prop]);
 					else
 						row.push("");
+				} else {
+					row.push("");
+				}
+				// Add the quality flag
+				if (qf) {
+					// If its not metadata
+					if (prop.indexOf(":") !== -1) {
+						var value = properties[prop + window.qfPostFix];
+						if (typeof value === 'undefined' || value === null)
+							value = "";
+						row.push(value);
+					}
 				}
 			}
+			// Add the row to the output
+			tableData.push(row);
 		});
+		console.log(tableData);
 		return tableData;
 	}
 

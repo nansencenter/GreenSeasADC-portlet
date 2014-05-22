@@ -455,7 +455,7 @@ myNamespace.matchup = (function($, ns) {
 		});
 		if (useOpendap)
 			dataRequest[portletNameSpace + 'opendapDataURL'] = $("#opendapDataURL").find(":selected").val();
-		var values = ns.ajax.getDatavaluesFromRaster(dataRequest, data,compareData);
+		var values = ns.ajax.getDatavaluesFromRaster(dataRequest, data, compareData);
 	}
 
 	function compareData(responseData, data) {
@@ -468,7 +468,10 @@ myNamespace.matchup = (function($, ns) {
 		var count = 0;
 		$.each(responseData, function(i, val) {
 			var databaseValue = parseFloat(data[i].properties[databaseVariable]);
-			if (databaseValue !== -999 && val.value !== null) {
+			if (!isNaN(databaseValue) && databaseValue !== -999 && val.value !== null) {
+				console.log("----------------");
+				console.log(data[i]);
+				console.log(val);
 				val.value = parseFloat(val.value);
 				var properties = {
 					id : data[i].id,
@@ -626,7 +629,7 @@ myNamespace.matchup = (function($, ns) {
 		updateMatchupParameter : updateMatchupParameter,
 		setUpOPeNDAPSelector : setUpOPeNDAPSelector,
 		compareRaster : compareRaster,
-		//compareData : compareData,
+		// compareData : compareData,
 		generateOptionsFromAllSelectedParameters : generateOptionsFromAllSelectedParameters,
 		loadFileFromID : loadFileFromID,
 	};

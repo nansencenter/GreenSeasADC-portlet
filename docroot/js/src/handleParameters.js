@@ -13,12 +13,33 @@ myNamespace.handleParameters = (function($, ns) {
 	var chosenParameters = {
 		parametersByTable : {},
 		allSelected : [],
-		tablesSelected : []
+		tablesSelected : [],
+		//TODO: additionalParameters needs to be updated when the matchup is added
+		additionalParameters: []
 	};
-
+	
+	function addNewParameters(parameters){
+		chosenParameters.additionalParameters = chosenParameters.additionalParameters.concat(parameters);
+	}
+	/**
+	 * To reset metadata selection when a new main-query is run 
+	 * (does not reset the jstree, only internal selection)
+	 */
 	function resetMetadataSelection() {
+		chosenParameters.additionalParameters = [];
 		delete mainParameters.chosenMetadata;
 	}
+	
+
+	/**
+	 * To reset parameters selection when a new main-query is run 
+	 * (does not reset the jstree, only internal selection)
+	 */
+	function resetParametersSelection() {
+		chosenParameters.allSelected = [];
+	}
+	
+	
 
 	function getMetadataHeaders() {
 		var metaHeader = [];
@@ -30,15 +51,17 @@ myNamespace.handleParameters = (function($, ns) {
 			$.each(mainParameters.chosenMetadata, function(i, val) {
 				metaHeader.push(getHeader(val, window.metaDataTable));
 			});
-		} else
+		} else{
 			$.each(mainParameters.parameters, function(i, val) {
 				if (val !== window.geometryParameter)
 					metaHeader.push(getHeader(val, window.metaDataTable));
 			});
+			metaHeader.reverse();
+		}
 		if (debughP) {
 			console.log("Returning headers:");
 		}
-		return mainParameters.basicHeader.concat(metaHeader.reverse());
+		return mainParameters.basicHeader.concat(metaHeader);
 	}
 
 	function selectParameters(par, qf) {
@@ -198,6 +221,9 @@ myNamespace.handleParameters = (function($, ns) {
 	}
 	function getShortHeadersFromSelected() {
 		var parameterHeaders = [];
+		$.each(chosenParameters.additionalParameters, function(i, key) {
+			parameterHeaders.push(key);
+		});
 		$.each(chosenParameters.allSelected, function(i, key) {
 			var split = key.split(":");
 			var table = "";
@@ -215,8 +241,39 @@ myNamespace.handleParameters = (function($, ns) {
 		});
 		return parameterHeaders.reverse();
 	}
+	function getHeadersFromSelected() {
+		var parameterHeaders = [];
+		$.each(chosenParameters.additionalParameters, function(i, key) {
+			parameterHeaders.push(key);
+		});
+		$.each(chosenParameters.allSelected, function(i, key) {
+			var split = key.split(":");
+			var table = "";
+			var parameter = "";
+			if (split.length === 2) {
+				table = split[0];
+				parameter = split[1];
+			} else {
+				table = window.metaDataTable;
+				parameter = split[0];
+			}
+			if (chosenParameters.qf)
+				parameterHeaders.push(qfHeader);
+			parameterHeaders.push(getHeader(parameter, table));
+		});
+		return parameterHeaders.reverse();
+	}
 	function getShortUnitsFromSelected() {
 		var parameterUnits = [];
+		$.each(chosenParameters.additionalParameters, function(i, key) {
+			var split = key.split("(");
+			var unit = "N/A";
+			if (split.length > 1){
+				unit=split[split.length-1];
+				unit = unit.substring(0, unit.length - 1);
+			}
+			parameterUnits.push(unit);
+		});
 		$.each(chosenParameters.allSelected, function(i, key) {
 			var split = key.split(":");
 			var table = "";
@@ -348,18 +405,13 @@ myNamespace.handleParameters = (function($, ns) {
 
 	// public interface
 	return {
+		//getters 
 		getShortHeadersFromFeatures : getShortHeadersFromFeatures,
 		getHeadersFromFeatures : getHeadersFromFeatures,
 		getHeaderFromRawData : getHeaderFromRawData,
-		resetMetadataSelection : resetMetadataSelection,
 		getMetadataHeaders : getMetadataHeaders,
-		selectMetadata : selectMetadata,
 		mainParameters : mainParameters,
 		getTableHeader : getTableHeader,
-		initiateParameters : initiateParameters,
-		chosenParameters : chosenParameters,
-		availableParameters : availableParameters,
-		selectParameters : selectParameters,
 		getHeader : getHeader,
 		getShortMetadataHeaders : getShortMetadataHeaders,
 		getShortHeadersFromSelected : getShortHeadersFromSelected,
@@ -368,6 +420,18 @@ myNamespace.handleParameters = (function($, ns) {
 		getShortUnitsFromSelected : getShortUnitsFromSelected,
 		getTooltip : getTooltip,
 		getShortHeader : getShortHeader,
+		getHeadersFromSelected: getHeadersFromSelected,
+		
+		
+
+		resetParametersSelection : resetParametersSelection,
+		resetMetadataSelection : resetMetadataSelection,
+		selectMetadata : selectMetadata,
+		initiateParameters : initiateParameters,
+		chosenParameters : chosenParameters,
+		availableParameters : availableParameters,
+		selectParameters : selectParameters,
+		addNewParameters:addNewParameters,
 	};
 
 }(jQuery, myNamespace));

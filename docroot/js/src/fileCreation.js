@@ -21,7 +21,7 @@ myNamespace.fileCreation = (function($, ns) {
 		var allUnits = ns.handleParameters.getShortMetadataUnits().concat(
 				ns.handleParameters.getShortUnitsFromSelected());
 		var metaData = ns.handleParameters.getMetadata();
-		var selected = metaData.concat(ns.handleParameters.chosenParameters.allSelected.slice().reverse());
+		var selected = metaData.concat(ns.handleParameters.chosenParameters.allSelected.slice().reverse()).concat(ns.handleParameters.chosenParameters.additionalParameters.slice().reverse());
 		var csvContent = "sep=;\n" + createCSVHeader(allHeaders);
 		csvContent += csvDelimiter + "Query:" + ns.mainQueryArray + "\n" + createCSVHeader(allUnits) + "\n";
 		if (debugfC)
@@ -204,6 +204,7 @@ myNamespace.fileCreation = (function($, ns) {
 		var allVariablesValues = {};
 		var descriptions = {};
 
+		//todo:additionalparamteres
 		var addVariables = ns.handleParameters.chosenParameters.allSelected;
 
 		// TODO: sort by el timeo!
