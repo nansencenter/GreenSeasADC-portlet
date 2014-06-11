@@ -38,7 +38,7 @@ myNamespace.fileCreation = (function($, ns) {
 				var prop = selected[i];
 				if (properties.hasOwnProperty(prop)) {
 					if (prop === "date") {
-						var date = new Date(properties[prop]);
+						var date = new Date(properties[prop].replace("Z",""));
 						csvContent += csvDelimiter + date.getUTCFullYear();
 						;
 						csvContent += csvDelimiter + (date.getUTCMonth() + 1);
@@ -57,6 +57,17 @@ myNamespace.fileCreation = (function($, ns) {
 							}
 
 					}
+				} else {
+					var value = "";
+					csvContent += csvDelimiter + value;
+					if (qf)
+						if (prop.indexOf(":") !== -1) {
+							value = properties[prop + window.qfPostFix];
+							if (value === null)
+								value = "";
+							csvContent += csvDelimiter + value;
+						}
+
 				}
 			}
 

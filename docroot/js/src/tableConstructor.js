@@ -284,7 +284,10 @@ myNamespace.tableConstructor = (function($, ns) {
 
 	function generateAoColumns(data) {
 		var allHeaders = ns.handleParameters.getMetadataHeaders().concat(ns.handleParameters.getHeadersFromSelected());
-		console.log(allHeaders);
+		if (debugtC) {
+			console.log("generateAoColumns");
+			console.log(allHeaders);
+		}
 		var aoColumns = [];
 		$.each(allHeaders, function(i, val) {
 			aoColumns.push({
@@ -296,9 +299,12 @@ myNamespace.tableConstructor = (function($, ns) {
 
 	function generateTableData(data) {
 		var metaData = ns.handleParameters.getMetadata();
-		var selected = metaData.concat(ns.handleParameters.chosenParameters.allSelected.slice().reverse()).concat(ns.handleParameters.chosenParameters.additionalParameters.slice().reverse());
-
-		console.log(selected);
+		var selected = metaData.concat(ns.handleParameters.chosenParameters.allSelected.slice().reverse()).concat(
+				ns.handleParameters.chosenParameters.additionalParameters.slice().reverse());
+		if (debugtC) {
+			console.log("generateTableData");
+			console.log(selected);
+		}
 		var tableData = [];
 		var qf = ns.handleParameters.chosenParameters.qf;
 		$.each(data, function(id, val) {
@@ -332,7 +338,9 @@ myNamespace.tableConstructor = (function($, ns) {
 			// Add the row to the output
 			tableData.push(row);
 		});
-		console.log(tableData);
+		if (debugtC) {
+			console.log(tableData);
+		}
 		return tableData;
 	}
 
