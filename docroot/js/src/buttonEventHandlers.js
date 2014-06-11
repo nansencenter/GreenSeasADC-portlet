@@ -65,6 +65,7 @@ myNamespace.buttonEventHandlers = (function($,ns) {
 
 		add("#bboxEnabledCheck", checkParameter("bboxEnabledCheck", "Bounding box", "#bboxHeaderText"));
 		add("#cruiseEnabledCheck", checkParameter("cruiseEnabledCheck", "Cruise/Station", "#cruiseHeaderText"));
+		add("#biomesEnabledCheck", checkParameter("biomesEnabledCheck", "GreenSeas Biomes", "#biomesHeaderText"));
 		add("#regionEnabledCheck", checkParameter("regionEnabledCheck", "Longhurst region", "#regionHeaderText"));
 
 		add("#dateEnabledCheck", checkParameters([ "monthEnabledCheck", "dateEnabledCheck" ], "Date/Time/Month",

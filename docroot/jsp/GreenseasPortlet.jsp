@@ -88,7 +88,7 @@
 						Between
 						<input type="date" id="fromDate" value="1913-01-01" />
 						and
-						<input type="date" id="toDate" value="2012-01-01" />
+						<input type="date" id="toDate" value="2015-01-01" />
 						<br>
 						<input type="checkbox" id="timeEnabledCheck" title='Enables the time query within the date-query' />
 						Include time in the date-search (date search must be enabled for this)
@@ -201,6 +201,23 @@
 					</div>
 
 					<h3>
+						<span id='biomesHeaderText'>GreenSeas Biomes <em>(off)</em></span>
+					</h3>
+					<div id='biomes'>
+
+						<input type="checkbox" id="biomesEnabledCheck" title='Enables the Biomes query' />
+						Enable in query						
+						<input type="checkbox" id="biomesBySphereCheck" title='Enables the option to search by north/south hemisphere - This will rebuild the biomes tree.' />
+						Search by north/south hemisphere
+
+						<br>
+						Search by Biomes<br>
+						<div id='biomesList'>
+						</div>
+
+					</div>
+
+					<h3>
 						<span id='parametersHeaderText'>Parameters</span>
 					</h3>
 					<div id='parametersNeeded'>
@@ -228,7 +245,8 @@
 						<input type="button" id="expandAllButton" value="Expand All" title='Expand all nodes in the list' />
 						<input type="button" id="toggleOrderPlanktonButton" value="Sort plankton by type"
 							title='Toggle sort by plankton type/size' />
-						<input type="button" id="downloadSelectedParInfoButton" value="Download info on selected" title='Download info/description on selected parameters' />
+						<input type="button" id="downloadSelectedParInfoButton" value="Download info on selected"
+							title='Download info/description on selected parameters' />
 						<div id='loadTreeNumbersDiv'></div>
 						<div id="parametersTree"></div>
 						<br>
@@ -407,12 +425,21 @@
 					This is currently in beta and it is possible that the link might not work in future versions, however it would
 					always be possible to interpret the query from the link.
 					<div id="saveContainer"></div>
-					<br><input type="checkbox" id="saveQueryRunMainQuery"  />Automatically run main query
-					<br><input type="checkbox" id="saveQueryUpdateInventory"  />Automatically update inventory numbers
-					<br><input type="checkbox" id="saveQueryRunParameterFilter"  />Automatically run the parameter filter
-					<br><input type="checkbox" id="saveQueryAutoDownloadCSV"  />Automatically download as csv
+					<br>
+					<input type="checkbox" id="saveQueryRunMainQuery" />
+					Automatically run main query
+					<br>
+					<input type="checkbox" id="saveQueryUpdateInventory" />
+					Automatically update inventory numbers
+					<br>
+					<input type="checkbox" id="saveQueryRunParameterFilter" />
+					Automatically run the parameter filter
+					<br>
+					<input type="checkbox" id="saveQueryAutoDownloadCSV" />
+					Automatically download as csv
 					<!--  <br><input type="checkbox" id="saveQueryDisableMap" title='Disables the map for faster execution of queries' />Disable the map-->
-					<br><input type='button' id='saveQueryButton' value="Save Query" />
+					<br>
+					<input type='button' id='saveQueryButton' value="Save Query" />
 				</div>
 			</div>
 		</div>

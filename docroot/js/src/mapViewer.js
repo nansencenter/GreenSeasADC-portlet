@@ -177,7 +177,6 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 			"#ff2700", "#ff1700", "#ff0700", "#f60000", "#e40000", "#d30000", "#c10000", "#af0000", "#9e0000",
 			"#8c0000" ];
 
-
 	function initMap() {
 		if (debugmW)
 			console.log("Starting initMap");
@@ -304,7 +303,6 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 			console.log("Finished initMap");
 		triggerQTip2DoNotShowLoad();
 	}
-
 
 	function triggerQTip2DoNotShowLoad() {
 		if ($("#qTip2DoNotShowLoad").prop('checked')) {
@@ -607,32 +605,36 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 		if (debugmW)
 			console.log("swapLonLatInFilteR started with filter:" + filter);
 		if (filter) {
-			var newFilter = "";
-			var startSub = filter.indexOf("<gml:lowerCorner>") + 17;
-			// Check if there actually is a bbox
-			if (startSub === 16)
-				return filter;
-			var endSub = filter.indexOf("</gml:lowerCorner>");
-			newFilter += filter.substring(0, startSub);
+			var startIndex = 0;
+			while (true) {
+				var newFilter = "";
+				var startSub = filter.indexOf("<gml:lowerCorner>", startIndex) + 17;
+				// Check if there actually is a bbox
+				if (startSub === 16)
+					return filter;
+				var endSub = filter.indexOf("</gml:lowerCorner>", startIndex);
+				newFilter += filter.substring(0, startSub);
 
-			var oldCoordinates = filter.substring(startSub, endSub);
-			var lonLat = oldCoordinates.split(" ");
-			newFilter += lonLat[1] + " " + lonLat[0];
-			var startSub = filter.indexOf("<gml:upperCorner>") + 17;
-			// Check if there actually is a bbox again
-			if (startSub === 16)
-				return filter;
-			newFilter += filter.substring(endSub, startSub);
-			endSub = filter.indexOf("</gml:upperCorner>");
+				var oldCoordinates = filter.substring(startSub, endSub);
+				var lonLat = oldCoordinates.split(" ");
+				newFilter += lonLat[1] + " " + lonLat[0];
+				var startSub = filter.indexOf("<gml:upperCorner>", startIndex) + 17;
+				// Check if there actually is a bbox again
+				if (startSub === 16)
+					return filter;
+				newFilter += filter.substring(endSub, startSub);
+				endSub = filter.indexOf("</gml:upperCorner>", startIndex);
 
-			oldCoordinates = filter.substring(startSub, endSub);
-			lonLat = oldCoordinates.split(" ");
-			newFilter += lonLat[1] + " " + lonLat[0];
+				oldCoordinates = filter.substring(startSub, endSub);
+				lonLat = oldCoordinates.split(" ");
+				newFilter += lonLat[1] + " " + lonLat[0];
 
-			newFilter += filter.substring(endSub);
-			if (debugmW)
-				console.log("swapLonLatInFilteR ended with filter:" + newFilter);
-			return newFilter;
+				newFilter += filter.substring(endSub);
+				if (debugmW)
+					console.log("swapLonLatInFilteR ended with filter:" + newFilter);
+				startIndex = endSub + 10;
+				filter = newFilter;
+			}
 		} else {
 			return "";
 		}
@@ -734,8 +736,8 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 		return map.getExtent();
 	}
 
-	function zoomToExtent(bbox,swapLonLat) {
-		if (swapLonLat){
+	function zoomToExtent(bbox, swapLonLat) {
+		if (swapLonLat) {
 			bbox = new OL.Bounds(bbox.bottom, bbox.left, bbox.top, bbox.right);
 		}
 		map.zoomToExtent(bbox, true);

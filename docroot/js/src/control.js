@@ -19,6 +19,7 @@ myNamespace.control = (function($, OL, ns) {
 	var basicData = null;
 
 	function init() {
+		biomesSetup();
 		if (debugc) {
 			console.log("control.js: starting init() method...");// TEST
 		}
@@ -59,6 +60,44 @@ myNamespace.control = (function($, OL, ns) {
 		ns.mapLayers.generateLayerTable();
 	}
 
+	function setUpBiomesTree() {
+		var html = "";
+		if ($('#biomesBySphereCheck').is(':checked')) {
+			html = "<div id='biomesList'><ul><li id='North'><a>North hemisphere</a><ul><li id='N-Gyre'><a>Gyre</a><ul><li id='N-Gyre1'><a>Gyre 1</a></li><li id='N-Gyre2'><a>Gyre 2</a></li><li id='N-Gyre3'><a>Gyre 3</a></li><li id='N-Gyre4'><a>Gyre 4</a></li></ul></li><li id='N-Non-Gyre'><a>Non-Gyre</a><ul><li id='N-Non-Gyre1'><a>Non-Gyre 1</a></li><li id='N-Non-Gyre2'><a>Non-Gyre 2</a></li><li id='N-Non-Gyre3'><a>Non-Gyre 3</a></li><li id='N-Non-Gyre4'><a>Non-Gyre 4</a></li><li id='N-Non-Gyre5'><a>Non-Gyre 5</a></li></ul></li></ul></li><li id='South'><a>South hemisphere</a><ul><li id='S-Gyre'><a>Gyre</a><ul><li id='S-Gyre1'><a>Gyre 1</a></li><li id='S-Gyre2'><a>Gyre 2</a></li><li id='S-Gyre3'><a>Gyre 3</a></li></ul></li><li id='S-Non-Gyre'><a>Non-Gyre</a><ul><li id='S-Non-Gyre1'><a>Non-Gyre 1</a></li><li id='S-Non-Gyre2'><a>Non-Gyre 2</a></li><li id='S-Non-Gyre3'><a>Non-Gyre 3</a></li><li id='S-Non-Gyre4'><a>Non-Gyre 4</a></li><li id='S-Non-Gyre5'><a>Non-Gyre 5</a></li></ul></li></ul></li></ul></div>";
+		} else {
+			html = "<div id='biomesList'><ul><li id='Gyre'><a>Gyre</a><ul><li id='Gyre1'><a>Gyre 1</a></li><li id='Gyre2'><a>Gyre 2</a></li><li id='Gyre3'><a>Gyre 3</a></li><li id='Gyre4'><a>Gyre 4</a></li></ul></li><li id='Non-Gyre'><a>Non-Gyre</a><ul><li id='Non-Gyre1'><a>Non-Gyre 1</a></li><li id='Non-Gyre2'><a>Non-Gyre 2</a></li><li id='Non-Gyre3'><a>Non-Gyre 3</a></li><li id='Non-Gyre4'><a>Non-Gyre 4</a></li><li id='Non-Gyre5'><a>Non-Gyre 5</a></li></ul></li></ul></div>";
+		}
+		$("#biomesList").html(html);
+		$("#biomesList").jstree({
+			"plugins" : [ "themes", "html_data", "checkbox", "ui" ],
+			"themes" : {
+				"theme" : "default",
+				"icons" : false
+			}
+		});
+		$("#biomesList").bind("select_node.jstree", function(event, data) {
+			// `data.rslt.obj` is the jquery extended node that was clicked
+			if ($("#biomesList").jstree("is_checked", data.rslt.obj))
+				$("#biomesList").jstree("uncheck_node", data.rslt.obj);
+			else
+				$("#biomesList").jstree("check_node", data.rslt.obj);
+		});
+		window.setTimeout(function() {
+			$('#biomesList').jstree('open_all');
+			if (biomesFromQuery != null) {
+				for (var i = 0, l = biomesFromQuery.length; i < l; i++) {
+					checkNodeInTree(biomesFromQuery[i], "#biomesList");
+				}
+				biomesFromQuery = null;
+			}
+		}, 10);
+
+	}
+
+	function biomesSetup() {
+		setUpBiomesTree();
+		ns.buttonEventHandlers.change("#biomesBySphereCheck", setUpBiomesTree);
+	}
 	function setUpOnChangeForSaveQueryBoxes() {
 		ns.buttonEventHandlers.change("#saveQueryRunMainQuery", saveQueryRunMainQueryChange);
 		ns.buttonEventHandlers.change("#saveQueryUpdateInventory", saveQueryUpdateInventoryChange);
@@ -160,15 +199,16 @@ myNamespace.control = (function($, OL, ns) {
 					$("#cruiseSelected").val(split[1]);
 					break;
 				case 'metaData':
+					console.log("Setting metadatashit");
 					$("#metadataEnabledCheck").prop("checked", false);
 					$("#metadataEnabledCheck").trigger('click');
 					metaDataFromStore = split[1].split(",");
 					if (initatedMetadata) {
 						for (var i = 0, l = metaDataFromStore.length; i < l; i++) {
-							$("#metadataTree").jstree("select_node",
-									"#" + window.metaDataTable + "\\:" + metaDataFromStore[i]);
+							checkNodeInTree("#" + window.metaDataTable + "\\:" + metaDataFromStore[i], "select_node");
 						}
 					}
+					console.log("Setting metadatashit done");
 					break;
 				case 'parameters':
 					parametersFromQuery = split[1].split(",");
@@ -176,12 +216,27 @@ myNamespace.control = (function($, OL, ns) {
 						checkNodeInTree(parametersFromQuery[i], "#parametersTree");
 					}
 					break;
+				case 'biomes':
+					$("#biomesEnabledCheck").prop("checked", false);
+					$("#biomesEnabledCheck").trigger('click');
+					biomesFromQuery = split[1].split(",");
+					var l = biomesFromQuery.length;
+					var biomesBySphere = false;
+					if (biomesFromQuery[biomesFromQuery.length - 1] === 'biomesBySphereCheck') {
+						$("#biomesBySphereCheck").prop("checked", false);
+						$("#biomesBySphereCheck").trigger('click');
+						l--;
+					}
+					for (var i = 0; i < l; i++) {
+						checkNodeInTree("#" + biomesFromQuery[i], "#biomesList")
+					}
+					break;
 				case 'otherOptions':
 					ns.savedOptions = split[1].split(",");
-					for (var i = 0, l = ns.savedOptions.length;i<l;i++){
-						if (ns.savedOptions[i] === "qualityFlagsEnabled"){
+					for (var i = 0, l = ns.savedOptions.length; i < l; i++) {
+						if (ns.savedOptions[i] === "qualityFlagsEnabled") {
 							$('#qualityFlagsEnabledCheck').prop('checked', true);
-							ns.savedOptions.slice(i,1);
+							ns.savedOptions.slice(i, 1);
 							break;
 						}
 					}
@@ -238,6 +293,7 @@ myNamespace.control = (function($, OL, ns) {
 		var months = ns.query.createMonthArray();
 		var depth = ns.query.createDepthHashMap();
 		var region = ns.query.createRegionArray();
+		var biomes = ns.query.createBiomesArray();
 		var cruise = null;
 		if (document.getElementById('cruiseEnabledCheck').checked) {
 			cruise = $("#cruiseSelected").find(":selected").val();
@@ -267,6 +323,10 @@ myNamespace.control = (function($, OL, ns) {
 		if (months) {
 			mainQueryArray.push("Months:" + months);
 			mainQueryObject.months = months;
+		}
+		if (biomes) {
+			mainQueryArray.push("Biomes:" + biomes);
+			mainQueryObject.biomes = biomes;
 		}
 		if (region) {
 			mainQueryArray.push("Region:" + $("#longhurstRegionSelected").find(":selected").html());
@@ -300,7 +360,7 @@ myNamespace.control = (function($, OL, ns) {
 		if (debugc)
 			console.log("control.js: calling ns.query.constructFilterString()"); // TEST
 
-		var filter = ns.query.constructFilterString(filterBbox, date, attr, depth, months, region, cruise);
+		var filter = ns.query.constructFilterString(filterBbox, date, attr, depth, months, region, cruise, biomes);
 
 		// GetFeature request with filter, callback handles result
 		if (debugc)
@@ -522,8 +582,8 @@ myNamespace.control = (function($, OL, ns) {
 		$("#exportParametersDiv").show();
 		ns.matchup.updateMatchupParameter();
 	}
-	
-	function updateSearchResultsTable(){
+
+	function updateSearchResultsTable() {
 		$("#parametersTable").html(
 				"Entries where the selected parameters are available<br>"
 						+ "<table id='parametersResultTable' class='table'></table>");
@@ -631,6 +691,15 @@ myNamespace.control = (function($, OL, ns) {
 				return true;
 		else if (ns.mainQueryObject.months)
 			return true;
+		var biomes = ns.query.createBiomesArray();
+		if (biomes)
+			if (ns.mainQueryObject.biomes) {
+				if (!biomes.compare(ns.mainQueryObject.biomes))
+					return true;
+			} else
+				return true;
+		else if (ns.mainQueryObject.biomes)
+			return true;
 		return false;
 	}
 
@@ -657,7 +726,7 @@ myNamespace.control = (function($, OL, ns) {
 		});
 		var filter = ns.query.constructParameterFilterString(propertyNameNeed, ns.mainQueryObject.depth,
 				ns.mainQueryObject.filterBbox, ns.mainQueryObject.date, ns.mainQueryObject.months,
-				ns.mainQueryObject.region, ns.mainQueryObject.cruise);
+				ns.mainQueryObject.region, ns.mainQueryObject.cruise, ns.mainQueryObject.biomes);
 		// Requesting features from the first layer through an asynchronous
 		// request and sending response to displayParameter
 		ns.WebFeatureService.getFeature({
@@ -665,7 +734,7 @@ myNamespace.control = (function($, OL, ns) {
 			PROPERTYNAMES : [ window.geometryParameter ].concat(propertyName),
 			FILTER : filter,
 		}, function(response) {
-			displayParameter(response, layer, filter,firstRun);
+			displayParameter(response, layer, filter, firstRun);
 		});
 	}
 
@@ -681,7 +750,7 @@ myNamespace.control = (function($, OL, ns) {
 
 	// display a parameter as a table
 	// non-public
-	function displayParameter(response, layer, filterIn,firstRun) {
+	function displayParameter(response, layer, filterIn, firstRun) {
 		highLightFeaturesWMS(filterIn, layer, ns.handleParameters.getTableHeader(layer));
 		var responseAsJSON;
 		if (debugc)
@@ -693,7 +762,7 @@ myNamespace.control = (function($, OL, ns) {
 				console.error("Could not parse response to parameter data request");
 			return;
 		}
-		addData(responseAsJSON,firstRun);
+		addData(responseAsJSON, firstRun);
 		if (tablesToQuery.length === 0) {
 			if (debugc)
 				console.log("tablesToQuery.length === 0");
@@ -757,8 +826,8 @@ myNamespace.control = (function($, OL, ns) {
 			data = {};
 			return;
 		}
-
-		console.log("PROCESSING: " + layer);
+		if (debugc)
+			console.log("PROCESSING: " + layer);
 
 		if ($.isEmptyObject(data))
 			return;
@@ -784,24 +853,24 @@ myNamespace.control = (function($, OL, ns) {
 			console.log(outPutParameters);
 		}
 		var currentStations = {};
-//		console.log(1);
+		// console.log(1);
 		// cruise_ID and station_ID will always need to be a part of metadata
 		$.each(data, function(i, val) {
 			var stationDOI = '' + val.properties[cruiseIDParameterName] + val.properties[stationIDParameterName];
 			currentStations[stationDOI] = true;
 		});
-//		console.log(currentStations);
-//		console.log(2);
-//		console.log(basicData);
+		// console.log(currentStations);
+		// console.log(2);
+		// console.log(basicData);
 		// Go through all features from the response
 		$.each(features, function(i, feature) {
-//			console.log(2.1 + ": " + feature.id);
+			// console.log(2.1 + ": " + feature.id);
 			var stationDOI = '' + basicData[feature.id].properties[cruiseIDParameterName]
 					+ basicData[feature.id].properties[stationIDParameterName];
-//			console.log(2.2);
+			// console.log(2.2);
 			if (currentStations[stationDOI]) {
 
-//				console.log(2.3);
+				// console.log(2.3);
 				// Go through all paramters from the current feature
 				// and add them to newData if it matches with the other layers
 				$.each(feature.properties, function(j, parameter) {
@@ -817,14 +886,15 @@ myNamespace.control = (function($, OL, ns) {
 						}
 					}
 				});
-//				console.log(2.4);
+				// console.log(2.4);
 				// Go through all combined layers and check for a value
 				// (only supported for prioritized atm)
 				$.each(combined, function(j, comb) {
-//					console.log(comb);
+					// console.log(comb);
 					if (combinedParameters[comb].method === "prioritized") {
-//						console.log(newData[feature.id]);
-						if (typeof newData[feature.id] === 'undefined' || typeof newData[feature.id].properties[comb] === 'undefined') {
+						// console.log(newData[feature.id]);
+						if (typeof newData[feature.id] === 'undefined'
+								|| typeof newData[feature.id].properties[comb] === 'undefined') {
 							var val = null;
 							var qfString = "";
 							for (var k = 0, l = combinedParameters[comb].parameters.length; k < l; k++) {
@@ -841,28 +911,30 @@ myNamespace.control = (function($, OL, ns) {
 								}
 							}
 							if (val !== null) {
-							if (typeof newData[feature.id] === 'undefined')
-								newData[feature.id] = data[feature.id];
-							if (typeof newData[feature.id] === 'undefined')
-								newData[feature.id] = basicData[feature.id];
-							newData[feature.id].properties[comb] = val;
-							if (qf)
-								newData[feature.id].properties[comb + qfPostFix] = qfString;
+								if (typeof newData[feature.id] === 'undefined')
+									newData[feature.id] = data[feature.id];
+								if (typeof newData[feature.id] === 'undefined')
+									newData[feature.id] = basicData[feature.id];
+								newData[feature.id].properties[comb] = val;
+								if (qf)
+									newData[feature.id].properties[comb + qfPostFix] = qfString;
 							}
 						}
 					} else {
-//						console.log("typeof newData[feature.id].properties[comb] === 'undefined'");
+						// console.log("typeof
+						// newData[feature.id].properties[comb] ===
+						// 'undefined'");
 					}
 				});
 
-//				console.log(2.5);
+				// console.log(2.5);
 			} else {
-//				console.log("NOPE");
+				// console.log("NOPE");
 			}
 		});
 		if (!firstRun) {
 			currentStations = {};
-//			console.log(1.1);
+			// console.log(1.1);
 			// cruise_ID and station_ID will always need to be a part of
 			// metadata
 			// Add all info from the stations where we found this layer.
@@ -882,7 +954,7 @@ myNamespace.control = (function($, OL, ns) {
 
 			});
 		}
-//		console.log(3);
+		// console.log(3);
 		data = newData;
 		if (debugc) {
 			console.log("Ended adding Data:");
@@ -1008,7 +1080,8 @@ myNamespace.control = (function($, OL, ns) {
 								id,
 								ns.query.constructParameterFilterString(propertyNames, ns.mainQueryObject.depth,
 										ns.mainQueryObject.filterBbox, ns.mainQueryObject.date,
-										ns.mainQueryObject.months, region, ns.mainQueryObject.cruise) ]);
+										ns.mainQueryObject.months, region, ns.mainQueryObject.cruise,
+										ns.mainQueryObject.biomes) ]);
 					}
 				}
 			}
@@ -1068,6 +1141,7 @@ myNamespace.control = (function($, OL, ns) {
 
 	function checkNodeInTree(id, tree) {
 		window.setTimeout(function() {
+			console.log("CHECKING NODE in "+tree+":"+id);
 			$(tree).jstree("select_node", document.getElementById(id));
 		}, 0);
 	}
@@ -1153,6 +1227,7 @@ myNamespace.control = (function($, OL, ns) {
 		}, 1000);
 	}
 	var parametersFromQuery = null;
+	var biomesFromQuery = null;
 
 	function allParametersInitiated() {
 		if (typeof ns.savedOptions !== "undefined") {
@@ -1165,7 +1240,7 @@ myNamespace.control = (function($, OL, ns) {
 			}
 			index = ns.savedOptions.indexOf("runMainQuery");
 			if (index !== -1) {
-				mainQueryButton();
+				window.setTimeout(mainQueryButton, 500);
 				ns.savedOptions.splice(index, 1);
 			} else {
 				ns.savedOptions = [];
@@ -1195,7 +1270,8 @@ myNamespace.control = (function($, OL, ns) {
 					timeTable[data[id].matchedTime]);
 			data[id].properties["Model elevation for " + parameter] = elevationTable[data[id].matchedElevation];
 		});
-		var newParameters = ["Model value for " + parameter,"Model time for " + parameter,"Model lon for " + parameter,"Model lat for " + parameter];
+		var newParameters = [ "Model value for " + parameter, "Model time for " + parameter,
+				"Model lon for " + parameter, "Model lat for " + parameter ];
 		ns.handleParameters.addNewParameters(newParameters);
 		updateSearchResultsTable();
 	}

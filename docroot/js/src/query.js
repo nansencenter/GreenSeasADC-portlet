@@ -2,16 +2,16 @@ var myNamespace = myNamespace || {};
 
 var debugq = false;// debug flag
 
-myNamespace.query = (function(OL, $,ns) {
+myNamespace.query = (function(OL, $, ns) {
 	"use strict";
 
 	var previousFilter;
 
 	// construct an OGC XML filter object from attributes
-	function constructFilter(bbox, date, depth, param, months, region, cruise) {
+	function constructFilter(bbox, date, depth, param, months, region, cruise, biomes) {
 
 		// should we filter at all?
-		if (bbox || date || depth || param || months || region || cruise) {
+		if (bbox || date || depth || param || months || region || cruise || biomes) {
 			var filterArray = [];
 
 			// bbox filter
@@ -39,6 +39,10 @@ myNamespace.query = (function(OL, $,ns) {
 			if (months) {
 				var monthsFilter = createMonthFilter(months);
 				filterArray.push(monthsFilter);
+			}
+			if (biomes) {
+				var biomesFilter = createBiomesFilter(biomes);
+				filterArray.push(biomesFilter);
 			}
 			if (region) {
 				var regionFilter = createRegionFilter(region);
@@ -103,21 +107,21 @@ myNamespace.query = (function(OL, $,ns) {
 		return regionFilter;
 	}
 
-	function constructFilterString(bbox, date, attributes, depth, months, region, cruise) {
+	function constructFilterString(bbox, date, attributes, depth, months, region, cruise, biomes) {
 		if (debugq)
 			console.log("constructFilterString");
 		// generate filter object
-		var filterObject = constructFilter(bbox, date, depth, null, months, region, cruise);
+		var filterObject = constructFilter(bbox, date, depth, null, months, region, cruise, biomes);
 
 		return constructString(filterObject);
 
 	}
 
-	function constructParameterFilterString(parameters, depth, bbox, date, months, region, cruise) {
+	function constructParameterFilterString(parameters, depth, bbox, date, months, region, cruise, biomes) {
 		if (debugq)
 			console.log("constructParameterFilterString starting");
 		// generate filter object
-		var filterObject = constructFilter(bbox, date, depth, parameters, months, region, cruise);
+		var filterObject = constructFilter(bbox, date, depth, parameters, months, region, cruise, biomes);
 
 		if (debugq)
 			console.log("constructFilterString ending");// TEST
@@ -178,6 +182,63 @@ myNamespace.query = (function(OL, $,ns) {
 		} else {
 			return dateFilter;
 		}
+	}
+
+	function createEqualsFilter(property, value) {
+		return new OL.Filter.Comparison({
+			type : OpenLayers.Filter.Comparison.EQUAL_TO,
+			property : property,
+			value : value
+		});
+	}
+	function createBiomesFilter(biomes) {
+		var biomesFilterArray = [];
+		var biomesBySphere = false;
+		var len = biomes.length;
+		if (biomes[biomes.length - 1] === 'biomesBySphereCheck') {
+			biomesBySphere = true;
+			len--;
+		}
+		for (var i = 0; i < len; i++) {
+			var biome = biomes[i];
+			if (biomesBySphere) {
+				var north = true;
+				if (biome.charAt(0)==="S")
+					north = false;
+
+				var bbox =null;
+				if (north){
+					bbox = new OL.Bounds(0, -180, 90, 180);
+				} else {
+					bbox = new OL.Bounds(-90, -180, 0, 180);
+				}
+				biome=biome.substring(2);
+				var parameter = "biomenumberl1";
+				if (!isNaN(biome.charAt(biome.length - 1))) {
+					parameter = "biomenumberl2";
+				} else {
+					// merged Non-Gyre 1 and 2 on level 1
+					if (biome === 'Non-Gyre') {
+						biomesFilterArray.push(combineFilters([bboxFilter(bbox),createEqualsFilter(parameter, "Non-Gyre1")]));
+						biome = "Non-Gyre2";
+					}
+				}
+				biomesFilterArray.push(combineFilters([bboxFilter(bbox),createEqualsFilter(parameter, biome)]));
+			} else {
+				var parameter = "biomenumberl1";
+				if (!isNaN(biome.charAt(biome.length - 1))) {
+					parameter = "biomenumberl2";
+				} else {
+					// merged Non-Gyre 1 and 2 on level 1
+					if (biome === 'Non-Gyre') {
+						biomesFilterArray.push(createEqualsFilter(parameter, "Non-Gyre1"));
+						biome = "Non-Gyre2";
+					}
+				}
+				biomesFilterArray.push(createEqualsFilter(parameter, biome));
+			}
+		}
+		return combineFiltersOr(biomesFilterArray);
 	}
 
 	function createMonthFilter(months) {
@@ -403,8 +464,32 @@ myNamespace.query = (function(OL, $,ns) {
 		return depth;
 	}
 
+	function createBiomesArray() {
+		var biomes = null;
+		if (document.getElementById('biomesEnabledCheck').checked) {
+			var checkedBiomes = $("#biomesList").jstree("get_checked", null, true);
+			biomes = [];
+			$.each(checkedBiomes, function(i, val) {
+				if (val.getAttribute("id") !== "North" && val.getAttribute("id") !== "South") {
+					var parentNode = $.jstree._reference('#biomesList')._get_parent(val);
+					if (parentNode === -1 || parentNode[0].getAttribute("id") === "North"
+							|| parentNode[0].getAttribute("id") === "South"
+							|| !$("#biomesList").jstree("is_checked", $(parentNode))) {
+						biomes.push(val.getAttribute("id"));
+					}
+				}
+			});
+
+			if (document.getElementById('biomesBySphereCheck').checked) {
+				biomes.push("biomesBySphereCheck");
+			}
+		}
+		return biomes;
+	}
+
 	// public interface
 	return {
+		createBiomesArray : createBiomesArray,
 		createfilterBoxHashMap : createfilterBoxHashMap,
 		createRegionArray : createRegionArray,
 		createDateHashMap : createDateHashMap,
@@ -417,4 +502,4 @@ myNamespace.query = (function(OL, $,ns) {
 		constructString : constructString,
 	};
 
-}(OpenLayers, jQuery,myNamespace));
+}(OpenLayers, jQuery, myNamespace));
