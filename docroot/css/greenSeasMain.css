@@ -120,3 +120,17 @@
 	width: 16px;
 	cursor: pointer;
 }
+
+.olDisableNavButtonItemActive {
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	background: url('disable_moving.png');
+}
+.olDisableNavPanel {
+	top: 75%;
+	left: 2%;
+	height: 18px;
+	width: 18px;
+	cursor: pointer;
+}

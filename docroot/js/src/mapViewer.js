@@ -8,7 +8,7 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 	var currentBounds = new OpenLayers.Bounds(-60, -75, 85, 90), maxExtent = new OpenLayers.Bounds(-180, -90, 180, 90);
 
 	// map on which layers are drawn
-	var map;
+	// var map;
 
 	var mapPanel, printProvider;
 
@@ -258,6 +258,19 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 		popupsPanel.addControls([ popupsButton ]);
 		map.addControl(popupsPanel);
 
+		var disableNavButton = new OpenLayers.Control.Button({
+			displayClass : "olDisableNavButton",
+			title : "Disable/Enable mouse-navigation",
+			id : 'DisableNavButton',
+			trigger : disableNav,
+		});
+		var disableNavPanel = new OpenLayers.Control.Panel({
+			defaultControl : disableNavButton,
+			displayClass : "olDisableNavPanel"
+		});
+		disableNavPanel.addControls([ disableNavButton ]);
+		map.addControl(disableNavPanel);
+
 		// Adding the layers to the map
 		var bg = backgroundLayers, fg = mapLayers;
 		var layers = [];
@@ -302,6 +315,26 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 		if (debugmW)
 			console.log("Finished initMap");
 		triggerQTip2DoNotShowLoad();
+	}
+
+	var navEnabled = true;
+	function disableNav() {
+		var i = 0, len = map.controls.length;
+		for (; i < len; i++) {
+			if (map.controls[i].displayClass === "olControlNavigation")
+				break;
+		}
+		if (i < len) {
+			if (navEnabled) {
+				map.controls[i].deactivate();
+			} else {
+				map.controls[i].activate();
+			}
+			navEnabled = !navEnabled;
+		} else {
+			if (debugmW)
+				console.log("Navigation not found");
+		}
 	}
 
 	function triggerQTip2DoNotShowLoad() {
