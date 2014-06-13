@@ -123,6 +123,7 @@ myNamespace.statistics = (function($, ns) {
 		var verticalPar = $("#propertiesPlotVariable2").find(":selected").val();
 		var ppData = generatePropertiesPlotData(horizontalPar, verticalPar, allData);
 		console.log(ppData);
+		console.log(ppData.length);
 		$('#propertiesPlotContainer').highcharts(
 				{
 					chart : {
@@ -162,12 +163,16 @@ myNamespace.statistics = (function($, ns) {
 									+ ns.handleParameters.getHeaderFromRawData(verticalPar) + ':' + this.y;
 						}
 					},
+					plotOptions : {
+						scatter : {
+							turboThreshold : 100000
+						}
+					},
 					series : [ {
 						yAxis : 0,
 						xAxis : 0,
 						showInLegend : false,
 						data : ppData,
-						cropThreshold : 50000,
 						animation : false
 					} ]
 				});
