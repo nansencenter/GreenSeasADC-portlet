@@ -21,7 +21,8 @@ myNamespace.fileCreation = (function($, ns) {
 		var allUnits = ns.handleParameters.getShortMetadataUnits().concat(
 				ns.handleParameters.getShortUnitsFromSelected());
 		var metaData = ns.handleParameters.getMetadata();
-		var selected = metaData.concat(ns.handleParameters.chosenParameters.allSelected.slice().reverse()).concat(ns.handleParameters.chosenParameters.additionalParameters.slice().reverse());
+		var selected = metaData.concat(ns.handleParameters.chosenParameters.allSelected.slice().reverse()).concat(
+				ns.handleParameters.chosenParameters.additionalParameters.slice().reverse());
 		var csvContent = "sep=;\n" + createCSVHeader(allHeaders);
 		csvContent += csvDelimiter + "Query:" + ns.mainQueryArray + "\n" + createCSVHeader(allUnits) + "\n";
 		if (debugfC)
@@ -38,11 +39,16 @@ myNamespace.fileCreation = (function($, ns) {
 				var prop = selected[i];
 				if (properties.hasOwnProperty(prop)) {
 					if (prop === "date") {
-						var date = new Date(properties[prop].replace("Z",""));
-						csvContent += csvDelimiter + date.getUTCFullYear();
-						;
-						csvContent += csvDelimiter + (date.getUTCMonth() + 1);
-						csvContent += csvDelimiter + date.getUTCDate();
+						if (properties[prop] === null) {
+							csvContent += csvDelimiter + "N/A";
+							csvContent += csvDelimiter + "N/A";
+							csvContent += csvDelimiter + "N/A";
+						} else {
+							var date = new Date(properties[prop].replace("Z", ""));
+							csvContent += csvDelimiter + date.getUTCFullYear();
+							csvContent += csvDelimiter + (date.getUTCMonth() + 1);
+							csvContent += csvDelimiter + date.getUTCDate();
+						}
 					} else {
 						var value = properties[prop];
 						if (value === null)
@@ -215,7 +221,7 @@ myNamespace.fileCreation = (function($, ns) {
 		var allVariablesValues = {};
 		var descriptions = {};
 
-		//todo:additionalparamteres
+		// todo:additionalparamteres
 		var addVariables = ns.handleParameters.chosenParameters.allSelected;
 
 		// TODO: sort by el timeo!
