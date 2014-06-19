@@ -157,10 +157,18 @@ myNamespace.statistics = (function($, ns) {
 							var depth = "";
 							if (!(typeof this.point.depth === "undefined"))
 								depth = " Depth:" + this.point.depth;
-							return 'ID:' + this.point.id + time + '<br>Lat:' + this.point.lat + ' Long:'
-									+ this.point.lon + depth + '</b><br/>'
-									+ ns.handleParameters.getHeaderFromRawData(horizontalPar) + ':' + this.x + '<br>'
-									+ ns.handleParameters.getHeaderFromRawData(verticalPar) + ':' + this.y;
+							var xValues="";
+							if (!(typeof this.point.allHorizontalValues === "undefined")){
+								xValues="<br>All different values:"+this.point.allHorizontalValues;
+							}
+							var yValues="";
+							if (!(typeof this.point.allVerticalValues === "undefined")){
+								yValues="<br>All different values:"+this.point.allVerticalValues;
+							}
+							return 'Cruise:' + this.point.cruise + " Station:" + this.point.station + depth + time
+									+ '<br>Lat:' + this.point.lat + ' Long:' + this.point.lon + '</b><br/>'
+									+ ns.handleParameters.getHeaderFromRawData(horizontalPar) + ':' + this.x + xValues +'<br>'
+									+ ns.handleParameters.getHeaderFromRawData(verticalPar) + ':' + this.y+ xValues;
 						}
 					},
 					plotOptions : {
@@ -177,57 +185,151 @@ myNamespace.statistics = (function($, ns) {
 					} ]
 				});
 	}
+	
+	function roundValueForPP(value){
+		var method = $("#ppDepthBinningSelector").find(":selected").val();
+		switch (method) {
+		case "nearestm":
+			return Math.round(value);
+			break;
+		case "nearest5m":
+			return Math.round(value/5)*5;
+			break;
+		case "nearest10m":
+			return Math.round(value/10)*10;
+			break;
+		case "noBinning":
+			return value;
+			break;
+		default:
+			return value;
+			break;
+		}
+	}
 
 	function generatePropertiesPlotData(horizontalPar, verticalPar, allData) {
-		var ppData = [];
+		var stations = {};
 		$.each(allData, function(i, val) {
-			if (val.properties[horizontalPar]) {
-				var x = parseFloat(val.properties[horizontalPar]);
-				// if (debugc)
-				// console.log(value);
-				if (x !== -999 && val.properties[verticalPar]) {
-					if (val.properties[verticalPar]) {
-						var y = parseFloat(val.properties[verticalPar]);
-						if (y !== -999) {
-							var properties = {
-								// TODO: add time
-								x : x,
-								y : y,
-								id : val.id,
-								depth : val.properties[depthParameterName],
-								lat : val.geometry.coordinates[0],
-								lon : val.geometry.coordinates[1]
-							};
-							if (val.properties.date) {
-								var dateArr = val.properties.date.split("-");
-								if (dateArr.length === 3) {
-									var year = parseInt(dateArr[0]);
-									// Note that in JavaScript, months start at
-									// 0 for
-									// January, 1 for February etc.
-									var month = parseInt(dateArr[1]) - 1;
-									var day = parseInt(dateArr[2].substring(0, dateArr[2].length));
-									// Set to mid-day if no time is set
-									var hours = 12, minutes = 0, seconds = 0;
-									var time = false;
-									if (val.properties.time) {
-										var timeSplit = val.properties.time.split(":");
-										if (timeSplit.length === 3) {
-											hours = parseInt(timeSplit[0]);
-											minutes = parseInt(timeSplit[1]);
-											seconds = parseInt(timeSplit[2].substring(0, timeSplit[2].length));
-											time = true;
-										}
-									}
-									properties.time = time;
-									properties.date = Date.UTC(year, month, day, hours, minutes, seconds);
+			var stationDOI = '' + val.properties[cruiseIDParameterName] + "_" + val.properties[stationIDParameterName]
+					+ "_" + roundValueForPP(val.properties[depthParameterName]);
+			if (typeof stations[stationDOI] === 'undefined')
+				stations[stationDOI] = [];
+			stations[stationDOI].push(val);
+		});
+		console.log(stations);
+		var ppData = [];
+
+		$.each(stations, function(i, station) {
+			var horizontalValues = [];
+			var verticalValues = [];
+			var date = null;
+			var coords = null;
+			$.each(station, function(j, val) {
+				if (val.properties[horizontalPar]) {
+					var x = parseFloat(val.properties[horizontalPar]);
+					if (x !== -999) {
+						horizontalValues.push(x);
+					}
+				}
+
+				if (val.properties[verticalPar]) {
+					var y = parseFloat(val.properties[verticalPar]);
+					if (y !== -999) {
+						verticalValues.push(y);
+					}
+				}
+				if (coords === null) {
+					coords = {
+						station : val.properties[stationIDParameterName],
+						cruise : val.properties[cruiseIDParameterName],
+						depth : roundValueForPP(val.properties[depthParameterName]),
+						lat : val.geometry.coordinates[0],
+						lon : val.geometry.coordinates[1]
+					};
+				}
+				if (date === null) {
+					if (val.properties.date) {
+						var dateArr = val.properties.date.split("-");
+						if (dateArr.length === 3) {
+							var year = parseInt(dateArr[0]);
+							// Note that in JavaScript, months start at
+							// 0 for
+							// January, 1 for February etc.
+							var month = parseInt(dateArr[1]) - 1;
+							var day = parseInt(dateArr[2].substring(0, dateArr[2].length));
+							// Set to mid-day if no time is set
+							var hours = 12, minutes = 0, seconds = 0;
+							var time = false;
+							if (val.properties.time) {
+								var timeSplit = val.properties.time.split(":");
+								if (timeSplit.length === 3) {
+									hours = parseInt(timeSplit[0]);
+									minutes = parseInt(timeSplit[1]);
+									seconds = parseInt(timeSplit[2].substring(0, timeSplit[2].length));
+									time = true;
 								}
 							}
-							ppData.push(properties);
+							date = [];
+							date.time = time;
+							date.date = Date.UTC(year, month, day, hours, minutes, seconds);
 						}
 					}
 				}
+			});
+			console.log("STATION:" + i);
+			console.log(horizontalValues);
+			console.log(verticalValues);
+			console.log(date);
+			console.log(coords);
+			var duplicatesMethod = $("#ppDepthBinningDupMethodSelector").find(":selected").val();
+			if (duplicatesMethod === "average"){
+				var total = 0;
+				var lh = horizontalValues.length;
+				if (lh === 0)
+					return true;
+				var allHorizontalValues = horizontalValues;
+				for (var j = 0; j < lh; j++) {
+					total+=horizontalValues[j];
+				}
+				if (isNaN(total))
+					return true;
+				horizontalValues = [total/lh];
+				total = 0;
+				var lv = verticalValues.length;
+				if (lv === 0)
+					return true;
+				var allVerticalValues = verticalValues;
+				for (var k = 0; k < lv; k++) {
+					total+=verticalValues[k];
+				}
+				if (isNaN(total))
+					return true;
+				verticalValues = [total/lv];
+				console.log("AFTER AVERAGING:");
+				console.log(horizontalValues);
+				console.log(verticalValues);
 			}
+			for (var j = 0, lh = horizontalValues.length; j < lh; j++) {
+				for (var k = 0, lv = verticalValues.length; k < lv; k++) {
+					var properties = {
+						x : horizontalValues[j],
+						y : verticalValues[k],
+						station : coords.station,
+						cruise : coords.cruise,
+						depth : coords.depth,
+						lat : coords.lat,
+						lon : coords.lon,
+						date : date.date,
+						time : date.time
+					}
+					if (duplicatesMethod === "average"){
+						properties.allHorizontalValues = allHorizontalValues;
+						properties.allVerticalValues = allVerticalValues;
+					}
+					ppData.push(properties);
+				}
+			}
+
 		});
 		return ppData;
 	}
@@ -289,7 +391,12 @@ myNamespace.statistics = (function($, ns) {
 	}
 
 	function setUpPropertiesPlotVariables() {
-		var selectElement1 = "Horizontal Axis: <select id='propertiesPlotVariable1'>";
+		var selectDepthBinning = "Select binning of depth: ";
+		var selectArray = [{name:"Round to nearest meter",value:"nearestm"},{name:"Round to nearest 5 meters",value:"nearest5m"},{name:"Round to nearest 10 meters",value:"nearest10m"},{name:"Only compare exact matches (no binning)",value:"noBinning"}];
+		selectDepthBinning+=ns.utilities.setUpSelectorArray(selectArray,"ppDepthBinningSelector","ppDepthBinningSelector");
+		var selectArray = [{name:"Use an average value",value:"average"},{name:"Match all points against each other",value:"matchAll"}];
+		selectDepthBinning+="<br>How to handle duplicate values at a station/depth:"+ns.utilities.setUpSelectorArray(selectArray,"ppDepthBinningDupMethodSelector","ppDepthBinningDupMethodSelector");
+		var selectElement1 = "<br>Horizontal Axis: <select id='propertiesPlotVariable1'>";
 		var selectedParameters = ns.handleParameters.chosenParameters.allSelected;
 		var options = "";
 		$.each(selectedParameters, function(i, val) {
@@ -302,7 +409,7 @@ myNamespace.statistics = (function($, ns) {
 			options += "<option value=\"" + val + "\">" + ns.handleParameters.getHeaderFromRawData(val) + "</option>";
 		});
 		selectElement2 += options + "</select>";
-		$("#propertiesPlotVariableDiv").html(selectElement1 + selectElement2);
+		$("#propertiesPlotVariableDiv").html(selectDepthBinning+selectElement1 + selectElement2);
 	}
 
 	function setUpTimeSeriesVariables() {
