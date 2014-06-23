@@ -108,9 +108,9 @@ public class NetCDFReader {
 	}
 
 	private static void log(String string, Exception e) {
-		System.out.println(string);
-		System.out.println("EXCEPTION:" + e.getMessage());
-		System.out.println("EXCEPTION:" + e.getClass());
+//		System.out.println(string);
+//		System.out.println("EXCEPTION:" + e.getMessage());
+//		System.out.println("EXCEPTION:" + e.getClass());
 	}
 
 	private static Map<Integer, Map<String, Double>> getDatavaluesFromGridDataset(GridDataset gds, Point[] points,
@@ -228,13 +228,13 @@ public class NetCDFReader {
 		NetcdfDataset ncfile = null;
 		Map<String, Map<String, String>> values = null;
 		try {
-			System.out.println(0);
+//			System.out.println(0);
 			ncfile = NetcdfDataset.openDataset(uri);
-			System.out.println(1);
+//			System.out.println(1);
 			GridDataset grid = new GridDataset(ncfile);
-			System.out.println(2);
+//			System.out.println(2);
 			values = getDimensionsFromNetCDFFile(grid, parameter);
-			System.out.println(3);
+//			System.out.println(3);
 		} catch (IOException ioe) {
 			log("getDimensionsFromRasterParameter got IOException: trying to open " + uri, ioe);
 		} catch (Exception e) {
@@ -262,9 +262,9 @@ public class NetCDFReader {
 		if (time != null) {
 			Array values = time.read();
 			String unitsString = time.getUnitsString();
-			System.out.println("unit:" + unitsString);
+//			System.out.println("unit:" + unitsString);
 			DateUnit unit = new DateUnit(unitsString);
-			System.out.println("udunits dateunit: " + unit);
+//			System.out.println("udunits dateunit: " + unit);
 			IndexIterator iter = values.getIndexIterator();
 			int i = 0;
 			Map<String, String> timeMap = new HashMap<String, String>();

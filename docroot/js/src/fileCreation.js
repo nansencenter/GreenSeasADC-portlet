@@ -82,12 +82,15 @@ myNamespace.fileCreation = (function($, ns) {
 		return csvContent;
 	}
 
-	function createNetCDFUsingHOne(features) {
+	function createNetCDFUsingHOne(features, fileName) {
 
 		var dataArray = [];
 		var variables = null;
-		console.log(features);
 		var counter = 0;
+		var metaData = ns.handleParameters.getMetadata();
+		var selected = metaData.concat(ns.handleParameters.chosenParameters.allSelected.slice().reverse()).concat(
+				ns.handleParameters.chosenParameters.additionalParameters.slice().reverse());
+		// console.log([ "Selected:", selected ]);
 		for (feature in features) {
 			if (features.hasOwnProperty(feature)) {
 				var properties = features[feature].properties;
@@ -120,31 +123,35 @@ myNamespace.fileCreation = (function($, ns) {
 						units : "minutes since 1970-01-01",
 						dataType : "int"
 					};
-					for (prop in properties) {
-						if (properties.hasOwnProperty(prop)) {
-							if (prop !== depthParameterName && prop !== "time" && prop !== "date" && prop !== "lat"
-									&& prop != "lon") {
-								var name = ns.utilities.convertAllIllegalCharactersToUnderscore(prop);
-								var standardName = null;
-								if (prop.indexOf(":") == -1)
-									standardName = ns.handleParameters.getHeaderFromRawData(metaDataTable + ":" + prop);
-								else
-									standardName = ns.handleParameters.getHeaderFromRawData(prop);
-								var units = standardName.split("(");
-								if (units.length > 1)
-									units = units[units.length - 1].split(")")[0];
-								else
-									units = "N/A";
-								var dataType = "double";
-								if (typeof properties[prop] === "string")
-									dataType = "string";
-								variables[name] = {
-									standard_name : standardName,
-									coordinates : "time lat lon depth",
-									units : units,
-									dataType : dataType
-								};
+					for (var i = 0, l = selected.length; i < l; i++) {
+						var prop = selected[i];
+						// console.log("Checking: " + prop);
+						if (prop !== depthParameterName && prop !== "time" && prop !== "depth" && prop !== "date"
+								&& prop !== "lat" && prop != "lon") {
+							var name = ns.utilities.convertAllIllegalCharactersToUnderscore(prop);
+							var standardName = null, dataType = null;
+							if (prop.indexOf(":") == -1) {
+								standardName = ns.handleParameters
+										.getShortHeaderFromRawData(metaDataTable + ":" + prop);
+								dataType = ns.handleParameters.getDataTypeFromRawData(metaDataTable + ":" + prop);
+							} else {
+								standardName = ns.handleParameters.getShortHeaderFromRawData(prop);
+								dataType = ns.handleParameters.getDataTypeFromRawData(prop);
 							}
+							var units = standardName.split("(");
+							if (units.length > 1)
+								units = units[units.length - 1].split(")")[0];
+							else
+								units = "N/A";
+							// This will only convert to string if the first
+							// datapoint, if it does not have this property,
+							// then it will not work!
+							variables[name] = {
+								standard_name : standardName,
+								coordinates : "time lat lon depth",
+								units : units,
+								dataType : dataType
+							};
 						}
 					}
 				}
@@ -158,7 +165,10 @@ myNamespace.fileCreation = (function($, ns) {
 				// O.o
 
 				if (!(typeof properties.time === 'undefined')) {
+					// console.log("ADDIND TIME:" + properties.time);
 					time += properties.time;
+				} else {
+					time += '12:00:00Z';
 				}
 
 				// 1900-1-1 is eariliest date!
@@ -166,11 +176,30 @@ myNamespace.fileCreation = (function($, ns) {
 				time = Math.round((Date.parse(time) / 60000) + 36816480);
 				featureO.time = time;
 				featureO.depth = properties[depthParameterName];
-				for (prop in properties) {
+				for (var i = 0, l = selected.length; i < l; i++) {
+					var prop = selected[i];
 					if (properties.hasOwnProperty(prop)) {
 						if (prop !== depthParameterName && prop !== "time" && prop !== "date" && prop !== "lat"
 								&& prop != "lon") {
-							featureO[ns.utilities.convertAllIllegalCharactersToUnderscore(prop)] = properties[prop];
+							var validProp = ns.utilities.convertAllIllegalCharactersToUnderscore(prop);
+							var value = null;
+							switch (variables[validProp].dataType) {
+							case 'Double':
+								value = parseFloat(properties[prop]);
+								break;
+							case 'Int':
+								value = parseInt(properties[prop]);
+								break;
+							default:
+								//String
+								value = String(properties[prop]);
+								break;
+							}
+//							console.log(["DATATYPE:",validProp,value,variables[validProp].dataType]);
+							// console.log("TEST");
+							// console.log(ns.utilities.convertAllIllegalCharactersToUnderscore(prop));
+							// console.log(variables);
+							featureO[ns.utilities.convertAllIllegalCharactersToUnderscore(variables[validProp].standard_name)] = value;
 						}
 					}
 				}
@@ -178,14 +207,24 @@ myNamespace.fileCreation = (function($, ns) {
 				dataArray.push(featureO);
 			}
 		}
+		// converting to standard names
+		var newVariables = {};
+		$.each(variables, function(prop, val) {
+			
+			if (prop !== depthParameterName && prop !== "time" && prop !== "date" && prop !== "lat" && prop != "lon") {
+				newVariables[ns.utilities.convertAllIllegalCharactersToUnderscore(val.standard_name)] = val;
+			} else {
+				newVariables[prop] = val;
+			}
+		});
 
 		var data = {};
 		data[portletNameSpace + 'data'] = JSON.stringify(dataArray);
-		data[portletNameSpace + 'variables'] = JSON.stringify(variables);
+		data[portletNameSpace + 'variables'] = JSON.stringify(newVariables);
 		data[portletNameSpace + 'numberOfFeatures'] = counter;
-		console.log("DATA dataArray:");
-		console.log(dataArray);
-		console.log(variables);
+//		console.log("DATA dataArray:");
+//		console.log(dataArray);
+//		console.log(newVariables);
 		data[portletNameSpace + 'requestType'] = 'createNetCDFUsingH.1';
 
 		var failure = function() {
@@ -193,8 +232,8 @@ myNamespace.fileCreation = (function($, ns) {
 		};
 
 		var success = function(event, id, obj) {
-			console.log("Great success!");
-			console.log(this.get('responseData').fileID);
+//			console.log("Great success!");
+//			console.log(this.get('responseData').fileID);
 			var element = $("#netCDFFileDownloadDiv");
 			url = window.ajaxCallResourceURL + '&requestType=serveNetCDFFile&fileID='
 					+ encodeURIComponent(this.get('responseData').fileID);
@@ -204,7 +243,7 @@ myNamespace.fileCreation = (function($, ns) {
 				element = $("#netCDFFileDownloadDiv");
 			}
 			element.hide();
-			element.html("<a href='" + url + "' id='netCDFFileDownloadA' download='testFileName.nc'/>");
+			element.html("<a href='" + url + "' id='netCDFFileDownloadA' download='" + fileName + "'/>");
 			$("#netCDFFileDownloadA")[0].click();
 		};
 		ns.ajax.aui(data, success, failure);

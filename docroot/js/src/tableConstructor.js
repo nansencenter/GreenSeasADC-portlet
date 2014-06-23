@@ -7,22 +7,29 @@ myNamespace.tableConstructor = (function($, ns) {
 
 	function generateStatistics(features) {
 		var header = "<table id='generalStatisticsTable' class='table'>", footer = "</tbody></table>", rows = "";
-		var headers = [ "Parameter", "Quantity", "Min", "Max", "Average", "Sample Standard Deviation", "Variance" ];
+		var headers = [ "Parameter", "Quantity", "Min", "Max", "Average", "Median", "Lower quartile", "Upper quartile",
+				"Sample Standard Deviation", "Variance" ];
 		var tableHeader = headerFrom(headers);
 
-		var selectedParameters = ns.handleParameters.chosenParameters.allSelected;
+		var selectedParameters = ns.handleParameters.chosenParameters.allSelected.slice();
+
+		$.each(ns.handleParameters.chosenParameters.additionalParameters, function(j, parameter) {
+			if (parameter.indexOf("Model value for ") === 0) {
+				selectedParameters.push(parameter);
+			} else {
+				console.log([ j, parameter, parameter.indexOf("Model value for ") ]);
+			}
+		});
+
 		var statistics = {};
-		if (debugtC)
-			console.log("generateStatistics1");
 		$.each(selectedParameters, function(j, parameter) {
 			statistics[parameter] = {
 				"quantity" : 0,
 				"sum" : 0.0,
-				"sdSum" : 0.0
+				"sdSum" : 0.0,
+				values : []
 			};
 		});
-		if (debugtC)
-			console.log("generateStatistics2");
 		$.each(features, function(i, feature) {
 			var properties = feature.properties;
 			$.each(selectedParameters, function(j, parameter) {
@@ -30,6 +37,7 @@ myNamespace.tableConstructor = (function($, ns) {
 				if (parVal !== "" && parVal !== null && !isNaN(parVal) && parVal !== "-999") {
 					parVal = parseFloat(parVal);
 					statistics[parameter].quantity += 1;
+					statistics[parameter].values.push(parVal);
 					statistics[parameter].sum += parVal;
 					if (typeof statistics[parameter].min === 'undefined') {
 						statistics[parameter].min = parVal;
@@ -45,13 +53,44 @@ myNamespace.tableConstructor = (function($, ns) {
 			});
 		});
 
+		// calculate quartiles
+		$
+				.each(
+						selectedParameters,
+						function(j, parameter) {
+							statistics[parameter].values.sort(function(a, b) {
+								return a - b
+							});
+							var numbers = statistics[parameter].values.length;
+							if (numbers % 2 === 0) {
+								statistics[parameter].median = (statistics[parameter].values[numbers / 2] + statistics[parameter].values[(numbers / 2) - 1]) / 2;
+								if (numbers % 4 === 0) {
+									statistics[parameter].lowerq = (statistics[parameter].values[numbers / 4] + statistics[parameter].values[(numbers / 4) - 1]) / 2;
+									statistics[parameter].upperq = (statistics[parameter].values[(numbers / 4) * 3] + statistics[parameter].values[((numbers / 4) * 3) - 1]) / 2;
+								} else {
+									statistics[parameter].lowerq = statistics[parameter].values[Math.floor(numbers / 4)];
+									statistics[parameter].upperq = statistics[parameter].values[Math
+											.floor(numbers * 3 / 4)];
+								}
+							} else {
+								statistics[parameter].median = statistics[parameter].values[Math.floor(numbers / 2)];
+								var n = Math.floor(numbers / 4);
+								if (numbers % 4 === 1) {
+									statistics[parameter].lowerq = (statistics[parameter].values[n] * 0.75 + statistics[parameter].values[n - 1] * 0.25);
+									statistics[parameter].upperq = (statistics[parameter].values[3 * n] * 0.75 + statistics[parameter].values[3 * n + 1] * 0.25);
+
+								} else {
+									statistics[parameter].lowerq = (statistics[parameter].values[n] * 0.75 + statistics[parameter].values[n + 1] * 0.25);
+									statistics[parameter].upperq = (statistics[parameter].values[3 * n + 1] * 0.25 + statistics[parameter].values[3 * n + 2] * 0.75);
+								}
+							}
+						});
+
 		$.each(selectedParameters, function(j, parameter) {
 			var quantity = statistics[parameter].quantity;
 			var sum = statistics[parameter].sum;
 			statistics[parameter].average = sum / quantity;
 		});
-		if (debugtC)
-			console.log("generateStatistics5");
 		$.each(features, function(i, feature) {
 			var properties = feature.properties;
 			$.each(selectedParameters, function(j, parameter) {
@@ -62,34 +101,36 @@ myNamespace.tableConstructor = (function($, ns) {
 				}
 			});
 		});
-		if (debugtC)
-			console.log("generateStatistics3");
-		// var output = "";
 		$.each(selectedParameters, function(j, parameter) {
 			var quantity = statistics[parameter].quantity;
 			var sum = statistics[parameter].sum;
 			var average = statistics[parameter].average;
+			var median = statistics[parameter].median;
+			var lowerq = statistics[parameter].lowerq;
+			var upperq = statistics[parameter].upperq;
 			var variance = statistics[parameter].sdSum / quantity;
 			var sd = Math.sqrt(statistics[parameter].sdSum / (quantity - 1));
 			var parTable = parameter.split(":");
 			var min = statistics[parameter].min;
 			var max = statistics[parameter].max;
 			var row = "<tr>";
-			row += data(ns.handleParameters.getHeader(parTable[1], parTable[0]));
+			if (parTable.length === 2)
+				row += data(ns.handleParameters.getHeader(parTable[1], parTable[0]));
+			else
+				row += data(parameter);
 			row += data(quantity);
 			row += data(min);
 			row += data(max);
 			// row += data(sum);
 			row += data(average.toFixed(3));
+			row += data(median.toFixed(3));
+			row += data(lowerq.toFixed(3));
+			row += data(upperq.toFixed(3));
 			row += data(sd.toFixed(3));
 			row += data(variance.toFixed(3));
 			rows += row + "</tr>\n";
 		});
-		// output += "<br>";
-		if (debugtC)
-			console.log("generateStatistics4");
 		return concatTable(header, tableHeader, rows, footer);
-		// return output;
 	}
 
 	function concatTable(header, tableHeader, rows, footer) {

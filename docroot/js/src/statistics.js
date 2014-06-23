@@ -122,8 +122,8 @@ myNamespace.statistics = (function($, ns) {
 		var horizontalPar = $("#propertiesPlotVariable1").find(":selected").val();
 		var verticalPar = $("#propertiesPlotVariable2").find(":selected").val();
 		var ppData = generatePropertiesPlotData(horizontalPar, verticalPar, allData);
-		console.log(ppData);
-		console.log(ppData.length);
+//		console.log(ppData);
+//		console.log(ppData.length);
 		$('#propertiesPlotContainer').highcharts(
 				{
 					chart : {
@@ -216,7 +216,7 @@ myNamespace.statistics = (function($, ns) {
 				stations[stationDOI] = [];
 			stations[stationDOI].push(val);
 		});
-		console.log(stations);
+//		console.log(stations);
 		var ppData = [];
 
 		$.each(stations, function(i, station) {
@@ -276,11 +276,11 @@ myNamespace.statistics = (function($, ns) {
 					}
 				}
 			});
-			console.log("STATION:" + i);
-			console.log(horizontalValues);
-			console.log(verticalValues);
-			console.log(date);
-			console.log(coords);
+//			console.log("STATION:" + i);
+//			console.log(horizontalValues);
+//			console.log(verticalValues);
+//			console.log(date);
+//			console.log(coords);
 			var duplicatesMethod = $("#ppDepthBinningDupMethodSelector").find(":selected").val();
 			if (duplicatesMethod === "average"){
 				var total = 0;
@@ -305,9 +305,9 @@ myNamespace.statistics = (function($, ns) {
 				if (isNaN(total))
 					return true;
 				verticalValues = [total/lv];
-				console.log("AFTER AVERAGING:");
-				console.log(horizontalValues);
-				console.log(verticalValues);
+//				console.log("AFTER AVERAGING:");
+//				console.log(horizontalValues);
+//				console.log(verticalValues);
 			}
 			for (var j = 0, lh = horizontalValues.length; j < lh; j++) {
 				for (var k = 0, lv = verticalValues.length; k < lv; k++) {

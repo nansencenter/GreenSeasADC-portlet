@@ -231,6 +231,12 @@ public class DatabaseProperties {
 		String fileName = "parameterTooltips.properties";
 		return getParametersFromFile(jsParName, fileName);
 	}
+
+	public static Object getAllParametersDataType() {
+		String jsParName = "allParametersDataType";
+		String fileName = "parameterDataType.properties";
+		return getParametersFromFile(jsParName, fileName);
+	}
 }
 
 /**

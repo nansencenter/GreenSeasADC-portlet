@@ -469,9 +469,9 @@ myNamespace.matchup = (function($, ns) {
 		$.each(responseData, function(i, val) {
 			var databaseValue = parseFloat(data[i].properties[databaseVariable]);
 			if (!isNaN(databaseValue) && databaseValue !== -999 && val.value !== null) {
-				console.log("----------------");
-				console.log(data[i]);
-				console.log(val);
+//				console.log("----------------");
+//				console.log(data[i]);
+//				console.log(val);
 				val.value = parseFloat(val.value);
 				var properties = {
 					id : data[i].id,
@@ -596,23 +596,6 @@ myNamespace.matchup = (function($, ns) {
 							data : scatterData,
 							turboThreshold : 50000,
 							animation : false
-						}, {
-							showInLegend : false,
-							yAxis : 0,
-							xAxis : 0,
-							type : 'line',
-							name : 'X=Y',
-							data : [ [ min, min ], [ max, max ] ],
-							animation : false,
-							marker : {
-								enabled : false
-							},
-							states : {
-								hover : {
-									lineWidth : 0
-								}
-							},
-							enableMouseTracking : false
 						} ]
 					});
 		} else {

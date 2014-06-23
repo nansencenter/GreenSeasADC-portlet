@@ -199,7 +199,6 @@ myNamespace.control = (function($, OL, ns) {
 					$("#cruiseSelected").val(split[1]);
 					break;
 				case 'metaData':
-					console.log("Setting metadatashit");
 					$("#metadataEnabledCheck").prop("checked", false);
 					$("#metadataEnabledCheck").trigger('click');
 					metaDataFromStore = split[1].split(",");
@@ -208,7 +207,6 @@ myNamespace.control = (function($, OL, ns) {
 							checkNodeInTree("#" + window.metaDataTable + "\\:" + metaDataFromStore[i], "select_node");
 						}
 					}
-					console.log("Setting metadatashit done");
 					break;
 				case 'parameters':
 					parametersFromQuery = split[1].split(",");
@@ -744,8 +742,19 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function linkParametersExportButton() {
-		ns.buttonEventHandlers.linkParametersExportButton(ns.fileCreation.createCSV, data,
-				"data:text/csv;charset=utf-8", "Greenseas_Downloaded_Parameters.csv");
+		var exportFormat = $("#exportParametersFormats").find(":selected").val();
+		switch (exportFormat) {
+		case "csv":
+			ns.buttonEventHandlers.linkParametersExportButton(ns.fileCreation.createCSV, data,
+					"data:text/csv;charset=utf-8", "Greenseas_Downloaded_Parameters.csv");
+			break;
+		case "netCDF":
+			ns.buttonEventHandlers.linkParametersExportButton3(ns.fileCreation.createNetCDFUsingHOne, data, "Greenseas_Downloaded_Parameters.nc");
+			break;
+		default:
+			console.log("Invalid format	");
+		}
+		ns.buttonEventHandlers.change("#exportParametersFormats", linkParametersExportButton);
 	}
 
 	// display a parameter as a table
@@ -1141,7 +1150,7 @@ myNamespace.control = (function($, OL, ns) {
 
 	function checkNodeInTree(id, tree) {
 		window.setTimeout(function() {
-			console.log("CHECKING NODE in "+tree+":"+id);
+//			console.log("CHECKING NODE in " + tree + ":" + id);
 			$(tree).jstree("select_node", document.getElementById(id));
 		}, 0);
 	}

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.SecureRandom;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipOutputStream;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -53,6 +55,7 @@ import nersc.greenseas.configuration.DatabaseProperties;
 import nersc.greenseas.rasterData.NetCDFReader;
 import nersc.greenseas.rasterData.NetCDFWriter;
 
+import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.PortletURLUtil;
@@ -74,6 +77,7 @@ public class GreenseasPortlet extends MVCPortlet {
 		renderRequest.setAttribute("allParametersShortHeader", DatabaseProperties.getAllParametersShortHeader());
 		renderRequest.setAttribute("allParametersTooltips", DatabaseProperties.getAllParametersTooltips());
 		renderRequest.setAttribute("allParametersUnit", DatabaseProperties.getAllParametersUnit());
+		renderRequest.setAttribute("allParametersDataType", DatabaseProperties.getAllParametersDataType());
 		renderRequest.setAttribute("allLayers", DatabaseProperties.getAllLayers());
 		renderRequest.setAttribute("allProperties", DatabaseProperties.getAllProperties());
 		renderRequest.setAttribute("longhurstRegions", DatabaseProperties.getLonghurstRegions());
@@ -102,6 +106,16 @@ public class GreenseasPortlet extends MVCPortlet {
 			if (requestType.equals("serveNetCDFFile")) {
 				String location = resourceRequest.getParameter("fileID");
 				if (location != null) {
+					String[] folders = { "content", "gsadbc", "createdFiles" };
+					String filePath = createDirectory(System.getProperty("catalina.base"), folders);
+					for (int i = 0; i < location.length(); i++) {
+						char c = uri.charAt(i);
+						if (c < '0' || (c > '9' && c < 'A') || (c > 'Z' && c < 'a') || c > 'z')
+							throw new InvalidFileNameException("Invalid file name (illegal character:'" + c + "'):"
+									+ uri);
+					}
+					String fileExtension = ".nc";
+					location = filePath + location + fileExtension;
 					resourceResponse.setContentType("application/x-netcdf");
 					OutputStream out = resourceResponse.getPortletOutputStream();
 					InputStream in = null;
@@ -193,6 +207,7 @@ public class GreenseasPortlet extends MVCPortlet {
 					writer.write(jsonObject.toString());
 					return;
 				} else if (requestType.equals("loadFileFromID")) {
+					//TODO: fix security hole
 					System.out.println(uri);
 					JSONObject jsonObject = new JSONObject();
 					File f = new File(uri);
@@ -234,10 +249,35 @@ public class GreenseasPortlet extends MVCPortlet {
 					jsonO = (JSONObject) parser.parse(variablesString);
 				} catch (ParseException e) {
 				}
-				String location = NetCDFWriter.createNetCDF(jsonA, jsonO, numberOfFeatures);
+				String[] folders = { "content", "gsadbc", "createdFiles" };
+				String filePath = createDirectory(System.getProperty("catalina.base"), folders);
+				
+				String fileID = NetCDFWriter.createNetCDF(jsonA, jsonO, numberOfFeatures,filePath);
 				Map<String, String> values = new HashMap<String, String>();
-				values.put("fileID", location);
+				
+				values.put("fileID", fileID);
 				JSONObject jsonObject = new JSONObject(values);
+
+				
+				/*resourceResponse.setContentType("application/x-netcdf");
+				resourceResponse.addProperty(HttpHeaders.CACHE_CONTROL, "max-age=3600, must-revalidate");
+
+				OutputStream out = resourceResponse.getPortletOutputStream();
+
+				InputStream in = new FileInputStream(new File(location));
+
+				byte[] buffer = new byte[4096];
+				int len;
+
+				while ((len = in.read(buffer)) != -1) {
+					out.write(buffer, 0, len);
+				}
+
+				out.flush();
+				in.close();
+				out.close();*/
+				System.out.println("Returning with fileID" + fileID);
+
 				PrintWriter writer = resourceResponse.getWriter();
 				writer.write(jsonObject.toString());
 				return;

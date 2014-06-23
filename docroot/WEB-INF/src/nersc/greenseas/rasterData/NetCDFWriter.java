@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+
 import ucar.ma2.Array;
 import ucar.ma2.ArrayChar;
 import ucar.ma2.ArrayDouble;
@@ -21,14 +22,14 @@ import ucar.nc2.Variable;
 
 public class NetCDFWriter {
 
-	public static String createNetCDF(JSONArray data, JSONObject variables, int numberOfFeatures) {
+	public static String createNetCDF(JSONArray data, JSONObject variables, int numberOfFeatures, String filePath) {
 		// TODO Auto-generated method stub
 		NetcdfFileWriter writer = null;
 		try {
 			final int NAME_STRLEN = 50;
 			System.out.println("Creating netCDF");
-			String location = "C:\\Users\\alevin\\Documents\\Greenseas\\testCreateNetCDF\\Test-"
-					+ System.currentTimeMillis() + ".nc";
+			String fileID = "" + System.currentTimeMillis();
+			String location = filePath + fileID + ".nc";
 			writer = NetcdfFileWriter.createNew(Version.netcdf3, location, null);
 			writer.addDimension(null, "obs", numberOfFeatures);
 
@@ -44,12 +45,13 @@ public class NetCDFWriter {
 				String dataTypeString = (String) variableO.get("dataType");
 				String dimension = "obs";
 				Variable v = null;
-				if (dataTypeString.equals("int")) {
+				if (dataTypeString.equals("Int")) {
 					dataType = DataType.INT;
 					v = writer.addVariable(null, (String) key, dataType, dimension);
 					int[] shape = v.getShape();
 					values.put((String) key, new ArrayInt(shape));
-				} else if (dataTypeString.equals("string")) {
+					v.addAttribute(new Attribute("missing_value", -999));
+				} else if (dataTypeString.equals("String")) {
 					dataType = DataType.CHAR;
 					dimension += " name_strlen";
 					if (!addedStrlen) {
@@ -73,6 +75,24 @@ public class NetCDFWriter {
 						v.addAttribute(new Attribute(k2, (String) variableO.get(k)));
 				}
 			}
+
+			for (String key : values.keySet()) {
+				for (int i = 0; i < data.size(); i++) {
+					switch (dataTypes.get(key)) {
+					case INT:
+						ArrayInt arrayI = (ArrayInt) values.get(key);
+						arrayI.setInt(i, -999);
+						break;
+					case DOUBLE:
+						ArrayDouble arrayD= (ArrayDouble) values.get(key);
+						arrayD.setDouble(i, Double.NaN);
+						break;
+					default:
+						// CHAR - No need to set default
+						break;
+					}
+				}
+			}
 			for (int i = 0; i < data.size(); i++) {
 				JSONObject variableValues = (JSONObject) data.get(i);
 				Set<?> keys = variableValues.keySet();
@@ -82,9 +102,14 @@ public class NetCDFWriter {
 						ArrayInt array = (ArrayInt) values.get((String) k);
 						Object object = variableValues.get(k);
 						Integer value = null;
-						if (object != null)
+						if (object != null) {
 							try {
-								value = (Integer) object;
+								if (object instanceof Long) {
+									Long longValue = (Long) object;
+									value = longValue.intValue();
+								} else {
+									value = (Integer) object;
+								}
 							} catch (Exception e) {
 								value = null;
 								try {
@@ -94,6 +119,7 @@ public class NetCDFWriter {
 									// TODO: handle exception
 								}
 							}
+						}
 						if (value != null) {
 							array.setInt(i, value);
 						}
@@ -101,18 +127,21 @@ public class NetCDFWriter {
 						ArrayDouble array = (ArrayDouble) values.get((String) k);
 						Object object = variableValues.get(k);
 						Double value = Double.NaN;
-						if (object != null)
+						if (object != null) {
 							try {
-								value = (Double) object;
+								if (object instanceof Long) {
+									Long longValue = (Long) object;
+									value = longValue.doubleValue();
+								} else {
+									value = (Double) object;
+									if (Double.isNaN(value)) {
+										value = Double.parseDouble((String) object);
+									}
+								}
 							} catch (Exception e) {
 								value = Double.NaN;
-								try {
-									// System.out.println("got exception when trying to convert:"
-									// + (String) object);
-								} catch (Exception e2) {
-									// TODO: handle exception
-								}
 							}
+						}
 						array.setDouble(i, value);
 					} else if (dataType == DataType.CHAR) {
 						ArrayChar array = (ArrayChar) values.get((String) k);
@@ -144,19 +173,19 @@ public class NetCDFWriter {
 				valuesIterator.remove(); // avoids a
 											// ConcurrentModificationException
 			}
-			return location;
+			return fileID;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
 		} catch (InvalidRangeException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
 		} finally {
 			try {
 				writer.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+//				e.printStackTrace();
 			}
 		}
 		return null;

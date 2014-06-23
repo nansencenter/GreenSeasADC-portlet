@@ -14,32 +14,30 @@ myNamespace.handleParameters = (function($, ns) {
 		parametersByTable : {},
 		allSelected : [],
 		tablesSelected : [],
-		//TODO: additionalParameters needs to be updated when the matchup is added
-		additionalParameters: []
+		// TODO: additionalParameters needs to be updated when the matchup is
+		// added
+		additionalParameters : []
 	};
-	
-	function addNewParameters(parameters){
+
+	function addNewParameters(parameters) {
 		chosenParameters.additionalParameters = chosenParameters.additionalParameters.concat(parameters);
 	}
 	/**
-	 * To reset metadata selection when a new main-query is run 
-	 * (does not reset the jstree, only internal selection)
+	 * To reset metadata selection when a new main-query is run (does not reset
+	 * the jstree, only internal selection)
 	 */
 	function resetMetadataSelection() {
 		chosenParameters.additionalParameters = [];
 		delete mainParameters.chosenMetadata;
 	}
-	
 
 	/**
-	 * To reset parameters selection when a new main-query is run 
-	 * (does not reset the jstree, only internal selection)
+	 * To reset parameters selection when a new main-query is run (does not
+	 * reset the jstree, only internal selection)
 	 */
 	function resetParametersSelection() {
 		chosenParameters.allSelected = [];
 	}
-	
-	
 
 	function getMetadataHeaders() {
 		var metaHeader = [];
@@ -51,7 +49,7 @@ myNamespace.handleParameters = (function($, ns) {
 			$.each(mainParameters.chosenMetadata, function(i, val) {
 				metaHeader.push(getHeader(val, window.metaDataTable));
 			});
-		} else{
+		} else {
 			$.each(mainParameters.parameters, function(i, val) {
 				if (val !== window.geometryParameter)
 					metaHeader.push(getHeader(val, window.metaDataTable));
@@ -135,6 +133,16 @@ myNamespace.handleParameters = (function($, ns) {
 		return getHeader(split[1], split[0]);
 	}
 
+	function getDataTypeFromRawData(parameterTable) {
+		var split = parameterTable.split(":");
+		return getDataType(split[1], split[0]);
+	}
+
+	function getShortHeaderFromRawData(parameterTable) {
+		var split = parameterTable.split(":");
+		return getShortHeader(split[1], split[0]);
+	}
+
 	function getTooltip(parameter, table) {
 		var tooltip;
 		try {
@@ -158,6 +166,16 @@ myNamespace.handleParameters = (function($, ns) {
 			return parameter;
 		}
 		return header ? header : parameter;
+	}
+
+	function getDataType(parameter, table) {
+		var dataType;
+		try {
+			dataType = allParametersDataType[table][parameter];
+		} catch (e) {
+			return "String";
+		}
+		return dataType ? dataType : "String";
 	}
 
 	function getTableHeader(table) {
@@ -268,8 +286,8 @@ myNamespace.handleParameters = (function($, ns) {
 		$.each(chosenParameters.additionalParameters, function(i, key) {
 			var split = key.split("(");
 			var unit = "N/A";
-			if (split.length > 1){
-				unit=split[split.length-1];
+			if (split.length > 1) {
+				unit = split[split.length - 1];
 				unit = unit.substring(0, unit.length - 1);
 			}
 			parameterUnits.push(unit);
@@ -405,7 +423,7 @@ myNamespace.handleParameters = (function($, ns) {
 
 	// public interface
 	return {
-		//getters 
+		// getters
 		getShortHeadersFromFeatures : getShortHeadersFromFeatures,
 		getHeadersFromFeatures : getHeadersFromFeatures,
 		getHeaderFromRawData : getHeaderFromRawData,
@@ -420,9 +438,9 @@ myNamespace.handleParameters = (function($, ns) {
 		getShortUnitsFromSelected : getShortUnitsFromSelected,
 		getTooltip : getTooltip,
 		getShortHeader : getShortHeader,
-		getHeadersFromSelected: getHeadersFromSelected,
-		
-		
+		getHeadersFromSelected : getHeadersFromSelected,
+		getShortHeaderFromRawData : getShortHeaderFromRawData,
+		getDataTypeFromRawData:getDataTypeFromRawData,
 
 		resetParametersSelection : resetParametersSelection,
 		resetMetadataSelection : resetMetadataSelection,
@@ -431,7 +449,7 @@ myNamespace.handleParameters = (function($, ns) {
 		chosenParameters : chosenParameters,
 		availableParameters : availableParameters,
 		selectParameters : selectParameters,
-		addNewParameters:addNewParameters,
+		addNewParameters : addNewParameters,
 	};
 
 }(jQuery, myNamespace));

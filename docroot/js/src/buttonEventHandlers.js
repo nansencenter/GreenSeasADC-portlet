@@ -1,6 +1,6 @@
 var myNamespace = myNamespace || {};
 
-myNamespace.buttonEventHandlers = (function($,ns) {
+myNamespace.buttonEventHandlers = (function($, ns) {
 	"use strict";
 
 	function add(element, eventFunction) {
@@ -141,13 +141,13 @@ myNamespace.buttonEventHandlers = (function($,ns) {
 
 				});
 	}
-	
+
 	function linkParametersExportButton2(csvContent, type, name) {
 		$("#exportParameter").unbind("click");
 		add(
 				"#exportParameter",
 				function() {
-					//csvContent = callback(data);
+					// csvContent = callback(data);
 					try {
 						saveAs(new Blob([ csvContent ], {
 							type : type
@@ -175,17 +175,25 @@ myNamespace.buttonEventHandlers = (function($,ns) {
 				});
 	}
 
+	function linkParametersExportButton3(callback, data, name) {
+		$("#exportParameter").unbind("click");
+		add("#exportParameter", function() {
+			callback(data, name);
+		});
+	}
+
 	function change(element, eventFunction) {
+		$(element).unbind("change", eventFunction);
 		$(element).change(eventFunction);
 	}
 
 	// public interface
 	return {
 		change : change,
-		linkParametersExportButton2:linkParametersExportButton2,
+		linkParametersExportButton3 : linkParametersExportButton3,
 		callFromControl : callFromControl,
 		initHandlers : initHandlers,
 		linkParametersExportButton : linkParametersExportButton,
 	};
 
-}(jQuery,myNamespace));
+}(jQuery, myNamespace));

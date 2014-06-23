@@ -290,6 +290,7 @@
 				<input type='button' id='exportParameter' value="Export data" disabled />
 				<select id="exportParametersFormats">
 					<option value="csv">CSV</option>
+					<option value="netCDF">netCDF - featureType point</option>
 				</select>
 			</div>
 		</div>
@@ -459,6 +460,8 @@
 	<%=renderRequest.getAttribute("allProperties")%>
 	<!-- Initiating window.allParametersHeader -->
 	<%=renderRequest.getAttribute("allParametersHeader")%>
+	<!-- Initiating window.allParametersDataType -->
+	<%=renderRequest.getAttribute("allParametersDataType")%>
 	<!-- Initiating window.allParametersTooltips -->
 	<%=renderRequest.getAttribute("allParametersTooltips")%>
 	<!-- Initiating window.allParametersShortHeader -->
