@@ -211,7 +211,7 @@ myNamespace.WebFeatureService = (function($, OL,ns) {
 			var xml = convertParametersToGetFeatureXML(extraPar, swapPosLists);
 			var currentLength = xml.length;
 			currentSize += currentLength;
-			if (number > 60 || (number !== 0 && currentSize > maxStringSize)) {
+			if (number > 52 || (number !== 0 && currentSize > maxStringSize)) {
 				index++;
 				currentSize = currentLength;
 				number = 0;
