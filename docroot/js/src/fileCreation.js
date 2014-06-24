@@ -243,24 +243,43 @@ myNamespace.fileCreation = (function($, ns) {
 
 		var success = function(event, id, obj) {
 			try {
-				var element = $("#netCDFFileDownloadDiv");
+				obj = JSON.parse(obj.response);
 				url = window.ajaxCallResourceURL + '&requestType=serveNetCDFFile&fileID='
-						+ encodeURIComponent(this.get('responseData').fileID);
-				if (element.length === 0) {
-					element = "<div id='netCDFFileDownloadDiv'></div>";
-					$("#errorMessageDialog").after(element);
-					element = $("#netCDFFileDownloadDiv");
-				}
-				element.hide();
-				element.html("<a href='" + url + "' id='netCDFFileDownloadA' download='" + fileName + "'/>");
-				$("#netCDFFileDownloadA")[0].click();
+						+ encodeURIComponent(obj.fileID);
+				downloadFile(url);
 			} catch (e) {
-				console.log("The query seems to be too long");
+				console.log("The query seems to be too long?");
 				ns.errorMessage.showErrorMessage("There was an error in the response from the server.");
 			}
 			callbackWhenDone();
 		};
 		ns.ajax.aui(data, success, failure);
+	}
+	
+	function downloadFile(sUrl) {
+		isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+		isSafari = navigator.userAgent.toLowerCase().indexOf('safari') > -1;
+	    //If in Chrome or Safari - download via virtual link click
+	    if (isChrome || isSafari) {
+	        //Creating new link node.
+	        var link = document.createElement('a');
+	        link.href = sUrl;
+	 
+	        if (link.download !== undefined){
+	            //Set HTML5 download attribute. This will prevent file from opening if supported.
+	            var fileName = sUrl.substring(sUrl.lastIndexOf('/') + 1, sUrl.length);
+	            link.download = fileName;
+	        }
+	 
+	        //Dispatching click event.
+	        if (document.createEvent) {
+	            var e = document.createEvent('MouseEvents');
+	            e.initEvent('click' ,true ,true);
+	            link.dispatchEvent(e);
+	            return true;
+	        }
+	    }
+	    window.open(sUrl);
 	}
 
 	function createNetCDFGrid(features, parameter, timeResolution, latLonResolution) {

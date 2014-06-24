@@ -116,8 +116,12 @@ public class GreenseasPortlet extends MVCPortlet {
 					}
 					String fileExtension = ".nc";
 					location = filePath + location + fileExtension;
-					resourceResponse.setContentType("application/x-netcdf");
+					resourceResponse.setContentType("application/octet-stream");
+					resourceResponse.setProperty("Content-Disposition", "attachment;filename=\"Greenseas_Downloaded_Parameters.nc\"");
 					OutputStream out = resourceResponse.getPortletOutputStream();
+					
+//					Content-Type: application/octet-stream
+//					Content-Disposition: attachment;filename=\"filename.xxx\"
 					InputStream in = null;
 					try {
 						in = new FileInputStream(new File(location));
