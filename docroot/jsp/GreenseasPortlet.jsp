@@ -287,7 +287,7 @@
 				</div>
 			</div>
 			<div id="exportParametersDiv" class="floatLeft">
-				<input type='button' id='exportParameter' value="Export data" disabled />
+				<input type='button' id='exportParameter' value="Export data" disabled title="Export data" />
 				<select id="exportParametersFormats">
 					<option value="csv">CSV</option>
 					<option value="netCDF">netCDF - featureType point</option>

@@ -82,7 +82,7 @@ myNamespace.fileCreation = (function($, ns) {
 		return csvContent;
 	}
 
-	function createNetCDFUsingHOne(features, fileName) {
+	function createNetCDFUsingHOne(features, fileName, callbackWhenDone) {
 
 		var dataArray = [];
 		var variables = null;
@@ -129,20 +129,19 @@ myNamespace.fileCreation = (function($, ns) {
 						if (prop !== depthParameterName && prop !== "time" && prop !== "depth" && prop !== "date"
 								&& prop !== "lat" && prop != "lon") {
 							var name = ns.utilities.convertAllIllegalCharactersToUnderscore(prop);
-							var standardName = null, dataType = null;
+							var standardName = null, dataType = null,units = null;
 							if (prop.indexOf(":") == -1) {
 								standardName = ns.handleParameters
 										.getShortHeaderFromRawData(metaDataTable + ":" + prop);
 								dataType = ns.handleParameters.getDataTypeFromRawData(metaDataTable + ":" + prop);
+								units = ns.handleParameters.getUnitsFromRawData(metaDataTable + ":" + prop);
 							} else {
 								standardName = ns.handleParameters.getShortHeaderFromRawData(prop);
 								dataType = ns.handleParameters.getDataTypeFromRawData(prop);
+								units = ns.handleParameters.getUnitsFromRawData(prop);
 							}
-							var units = standardName.split("(");
-							if (units.length > 1)
-								units = units[units.length - 1].split(")")[0];
-							else
-								units = "N/A";
+							if (units === "°C")
+								units = "Celsius";
 							// This will only convert to string if the first
 							// datapoint, if it does not have this property,
 							// then it will not work!
@@ -186,20 +185,29 @@ myNamespace.fileCreation = (function($, ns) {
 							switch (variables[validProp].dataType) {
 							case 'Double':
 								value = parseFloat(properties[prop]);
+								if (isNaN(value))
+									value = null;
 								break;
 							case 'Int':
 								value = parseInt(properties[prop]);
+								if (value === -999)
+									value = null;
 								break;
 							default:
-								//String
+								// String
 								value = String(properties[prop]);
+								if (value === "" || value === "null")
+									value = null;
 								break;
 							}
-//							console.log(["DATATYPE:",validProp,value,variables[validProp].dataType]);
+							// console.log(["DATATYPE:",validProp,value,variables[validProp].dataType]);
 							// console.log("TEST");
 							// console.log(ns.utilities.convertAllIllegalCharactersToUnderscore(prop));
 							// console.log(variables);
-							featureO[ns.utilities.convertAllIllegalCharactersToUnderscore(variables[validProp].standard_name)] = value;
+							if (value !== null) {
+								featureO[ns.utilities
+										.convertAllIllegalCharactersToUnderscore(variables[validProp].standard_name)] = value;
+							}
 						}
 					}
 				}
@@ -210,7 +218,7 @@ myNamespace.fileCreation = (function($, ns) {
 		// converting to standard names
 		var newVariables = {};
 		$.each(variables, function(prop, val) {
-			
+
 			if (prop !== depthParameterName && prop !== "time" && prop !== "date" && prop !== "lat" && prop != "lon") {
 				newVariables[ns.utilities.convertAllIllegalCharactersToUnderscore(val.standard_name)] = val;
 			} else {
@@ -222,29 +230,35 @@ myNamespace.fileCreation = (function($, ns) {
 		data[portletNameSpace + 'data'] = JSON.stringify(dataArray);
 		data[portletNameSpace + 'variables'] = JSON.stringify(newVariables);
 		data[portletNameSpace + 'numberOfFeatures'] = counter;
-//		console.log("DATA dataArray:");
-//		console.log(dataArray);
-//		console.log(newVariables);
+		console.log("DATA dataArray:");
+		console.log(dataArray);
+		console.log(newVariables);
 		data[portletNameSpace + 'requestType'] = 'createNetCDFUsingH.1';
 
 		var failure = function() {
 			console.log("SOMETHING WENT WRONG!");
+			ns.errorMessage.showErrorMessage("There was an error in the response from the server.");
+			callbackWhenDone();
 		};
 
 		var success = function(event, id, obj) {
-//			console.log("Great success!");
-//			console.log(this.get('responseData').fileID);
-			var element = $("#netCDFFileDownloadDiv");
-			url = window.ajaxCallResourceURL + '&requestType=serveNetCDFFile&fileID='
-					+ encodeURIComponent(this.get('responseData').fileID);
-			if (element.length === 0) {
-				element = "<div id='netCDFFileDownloadDiv'></div>";
-				$("#errorMessageDialog").after(element);
-				element = $("#netCDFFileDownloadDiv");
+			try {
+				var element = $("#netCDFFileDownloadDiv");
+				url = window.ajaxCallResourceURL + '&requestType=serveNetCDFFile&fileID='
+						+ encodeURIComponent(this.get('responseData').fileID);
+				if (element.length === 0) {
+					element = "<div id='netCDFFileDownloadDiv'></div>";
+					$("#errorMessageDialog").after(element);
+					element = $("#netCDFFileDownloadDiv");
+				}
+				element.hide();
+				element.html("<a href='" + url + "' id='netCDFFileDownloadA' download='" + fileName + "'/>");
+				$("#netCDFFileDownloadA")[0].click();
+			} catch (e) {
+				console.log("The query seems to be too long");
+				ns.errorMessage.showErrorMessage("There was an error in the response from the server.");
 			}
-			element.hide();
-			element.html("<a href='" + url + "' id='netCDFFileDownloadA' download='" + fileName + "'/>");
-			$("#netCDFFileDownloadA")[0].click();
+			callbackWhenDone();
 		};
 		ns.ajax.aui(data, success, failure);
 	}

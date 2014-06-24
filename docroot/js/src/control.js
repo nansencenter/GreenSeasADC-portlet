@@ -702,10 +702,11 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	function queryLayer(firstRun) {
-		if (hasMainQueryObjectChanged())
+		if (firstRun && hasMainQueryObjectChanged()) {
 			ns.errorMessage
 					.showErrorMessage("You seem to have changed the main query options since you ran the main query."
 							+ " The filtering will happen with the options as they were when you last ran the main query.");
+		}
 		var layer = tablesToQuery.pop();
 		// Array with all parameters for the current layer
 		var propertyName = [];
@@ -749,7 +750,8 @@ myNamespace.control = (function($, OL, ns) {
 					"data:text/csv;charset=utf-8", "Greenseas_Downloaded_Parameters.csv");
 			break;
 		case "netCDF":
-			ns.buttonEventHandlers.linkParametersExportButton3(ns.fileCreation.createNetCDFUsingHOne, data, "Greenseas_Downloaded_Parameters.nc");
+			ns.buttonEventHandlers.linkParametersExportButton3(ns.fileCreation.createNetCDFUsingHOne, data,
+					"Greenseas_Downloaded_Parameters.nc");
 			break;
 		default:
 			console.log("Invalid format	");
@@ -1150,7 +1152,7 @@ myNamespace.control = (function($, OL, ns) {
 
 	function checkNodeInTree(id, tree) {
 		window.setTimeout(function() {
-//			console.log("CHECKING NODE in " + tree + ":" + id);
+			// console.log("CHECKING NODE in " + tree + ":" + id);
 			$(tree).jstree("select_node", document.getElementById(id));
 		}, 0);
 	}

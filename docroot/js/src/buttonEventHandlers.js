@@ -114,6 +114,9 @@ myNamespace.buttonEventHandlers = (function($, ns) {
 		add(
 				"#exportParameter",
 				function() {
+					$("#exportParameter").prop("disabled",true);
+					$("#exportParameter").prop("title","Loading data, please wait...");
+					$("#exportParameter").qtip();
 					csvContent = callback(data);
 					try {
 						saveAs(new Blob([ csvContent ], {
@@ -138,48 +141,24 @@ myNamespace.buttonEventHandlers = (function($, ns) {
 									.showErrorMessage("Can not download because blob consutrctor is not supported in this browser!\nKnown supported browsers: \nChrome 29 on Windows\nFirefox 24 on Windows\nInternet Explorer 10 on Windows\n\nKnown not supported browsers:\nSafari 5 on Windows");
 						}
 					}
-
+					enableExportButton();
 				});
+		enableExportButton();
 	}
-
-	function linkParametersExportButton2(csvContent, type, name) {
-		$("#exportParameter").unbind("click");
-		add(
-				"#exportParameter",
-				function() {
-					// csvContent = callback(data);
-					try {
-						saveAs(new Blob([ csvContent ], {
-							type : type
-						}), name);
-					} catch (e) {
-						window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder
-								|| window.MSBlobBuilder || window.webkitURL;
-						if (e.name === 'TypeError' && window.BlobBuilder) {
-							var bb = new BlobBuilder();
-							bb.append([ csvContent ]);
-							saveAs(bb.getBlob(type), name);
-						} else if (e.name === "InvalidStateError") {
-							// InvalidStateError (tested on FF13 WinXP)
-							saveAs(new Blob([ csvContent ], {
-								type : type
-							}), name);
-						} else {
-							// saveAs("data:"+type+";base64,"+
-							// btoa(csvContent),name);
-							ns.errorMessage
-									.showErrorMessage("Can not download because blob consutrctor is not supported in this browser!\nKnown supported browsers: \nChrome 29 on Windows\nFirefox 24 on Windows\nInternet Explorer 10 on Windows\n\nKnown not supported browsers:\nSafari 5 on Windows");
-						}
-					}
-
-				});
+	
+	function enableExportButton(){
+		$("#exportParameter").prop("disabled",false);
+		$("#exportParameter").qtip('option', 'content.text', "Export data")
 	}
 
 	function linkParametersExportButton3(callback, data, name) {
 		$("#exportParameter").unbind("click");
 		add("#exportParameter", function() {
-			callback(data, name);
+			$("#exportParameter").prop("disabled",true);
+			$("#exportParameter").qtip('option', 'content.text', "Loading data, please wait...")
+			callback(data, name, enableExportButton);
 		});
+		enableExportButton();
 	}
 
 	function change(element, eventFunction) {

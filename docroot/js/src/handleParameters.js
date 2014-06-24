@@ -132,6 +132,12 @@ myNamespace.handleParameters = (function($, ns) {
 		var split = parameterTable.split(":");
 		return getHeader(split[1], split[0]);
 	}
+	
+
+	function getUnitsFromRawData(parameterTable) {
+		var split = parameterTable.split(":");
+		return getUnits(split[1], split[0]);
+	}
 
 	function getDataTypeFromRawData(parameterTable) {
 		var split = parameterTable.split(":");
@@ -325,9 +331,11 @@ myNamespace.handleParameters = (function($, ns) {
 		try {
 			units = allParametersUnit[table][parameter];
 		} catch (e) {
-			return parameter;
+			return "N/A";
 		}
-		return units ? units : parameter;
+		if (!units && parameter.slice(-2) === "qf")
+			units = "QF";
+		return units ? units : "N/A";
 	}
 
 	function getShortMetadataHeaders() {
@@ -441,6 +449,7 @@ myNamespace.handleParameters = (function($, ns) {
 		getHeadersFromSelected : getHeadersFromSelected,
 		getShortHeaderFromRawData : getShortHeaderFromRawData,
 		getDataTypeFromRawData:getDataTypeFromRawData,
+		getUnitsFromRawData:getUnitsFromRawData,
 
 		resetParametersSelection : resetParametersSelection,
 		resetMetadataSelection : resetMetadataSelection,

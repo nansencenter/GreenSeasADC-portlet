@@ -127,6 +127,8 @@ myNamespace.statistics = (function($, ns) {
 		$('#propertiesPlotContainer').highcharts(
 				{
 					chart : {
+			            height: 400,
+			            width: 500,
 						type : 'scatter',
 						zoomType : 'xy'
 					},
