@@ -108,6 +108,12 @@ myNamespace.buttonEventHandlers = (function($, ns) {
 			// should so something here when we get more formats
 		});
 	}
+	
+	function onDownload(dataToDownload) {
+	  //  document.location = 
+		window.open('data:Application/octet-stream,' +
+	                         encodeURIComponent(dataToDownload),"_blank");
+	}
 
 	function linkParametersExportButton(callback, data, type, name) {
 		$("#exportParameter").unbind("click");
@@ -135,10 +141,11 @@ myNamespace.buttonEventHandlers = (function($, ns) {
 								type : type
 							}), name);
 						} else {
+							onDownload(csvContent);
 							// saveAs("data:"+type+";base64,"+
 							// btoa(csvContent),name);
-							ns.errorMessage
-									.showErrorMessage("Can not download because blob consutrctor is not supported in this browser!\nKnown supported browsers: \nChrome 29 on Windows\nFirefox 24 on Windows\nInternet Explorer 10 on Windows\n\nKnown not supported browsers:\nSafari 5 on Windows");
+//							ns.errorMessage
+//									.showErrorMessage("Can not download because blob consutrctor is not supported in this browser!\nKnown supported browsers: \nChrome 29 on Windows\nFirefox 24 on Windows\nInternet Explorer 10 on Windows\n\nKnown not supported browsers:\nSafari 5 on Windows");
 						}
 					}
 					enableExportButton();
