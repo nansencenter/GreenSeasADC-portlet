@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import opendap.dap.DAP2Exception;
+
 import org.geotoolkit.referencing.crs.DefaultGeographicCRS;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -54,8 +56,10 @@ public class NetCDFReader {
 			PointSet pointSet = createPoints(parameterMap);
 			values = getDatavaluesFromGridDataset(grid, pointSet.points, pointSet.parameter, pointSet.elevation);
 		} catch (IOException ioe) {
-			log("getDatavaluesFromNetCDFFile got IOException: trying to open " + uri, ioe);
+			values = createErrorMap();
+			log("getDatavaluesFromNetCDFFile got IOException: trying to read " + uri, ioe);
 		} catch (Exception e) {
+			values = createErrorMap();
 			log("getDatavaluesFromNetCDFFile got Exception: trying to open " + uri, e);
 		} finally {
 			if (null != ncfile)
@@ -66,6 +70,15 @@ public class NetCDFReader {
 				}
 		}
 		NetcdfDataset.shutdown();
+		return values;
+	}
+
+	private static Map<Integer, Map<String, Double>> createErrorMap() {
+		Map<Integer, Map<String, Double>> values;
+		values = new HashMap<Integer, Map<String,Double>>();
+		HashMap<String, Double> errorMap = new HashMap<String, Double>();
+		errorMap.put("Exception", Double.NaN);
+		values.put(-1,errorMap);
 		return values;
 	}
 
@@ -170,7 +183,10 @@ public class NetCDFReader {
 						}
 					}
 				}
-			} catch (IndexOutOfBoundsException e) {
+			} catch (opendap.dap.parsers.ParseException e){
+				log("Got ParseException when processing the point:" + p, e);
+			}
+			catch (IndexOutOfBoundsException e) {
 				log("Got IndexOutOfBoundsException when processing the point:" + p, e);
 			} catch (ReadRasterException e) {
 			}

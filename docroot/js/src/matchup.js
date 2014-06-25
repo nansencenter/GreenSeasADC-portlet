@@ -459,6 +459,12 @@ myNamespace.matchup = (function($, ns) {
 	}
 
 	function compareData(responseData, data) {
+		if (typeof responseData[-1] !== 'undefined'){
+			if (responseData[-1].Exception === null){
+				$('#highchartsContainer').html("There seems to have been an error in reading data from the raster.")
+				return;
+			}
+		}
 		var scatterData = [];
 		var databaseVariable = $("#matchVariable2").find(":selected").val();
 		if (Boolean(document.getElementById('updateComparedParameterInData').checked))
