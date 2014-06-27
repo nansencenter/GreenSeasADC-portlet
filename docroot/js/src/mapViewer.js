@@ -271,6 +271,19 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 		disableNavPanel.addControls([ disableNavButton ]);
 		map.addControl(disableNavPanel);
 
+		var toggleHelpButton = new OpenLayers.Control.Button({
+			displayClass : "olToggleHelpButton",
+			title : "Toggle helptext on/off",
+			id : 'ToggleHelpButton',
+			trigger : toggleHelp,
+		});
+		var toggleHelpPanel = new OpenLayers.Control.Panel({
+			defaultControl : toggleHelpButton,
+			displayClass : "olToggleHelpPanel"
+		});
+		toggleHelpPanel.addControls([ toggleHelpButton ]);
+		map.addControl(toggleHelpPanel);
+
 		// Adding the layers to the map
 		var bg = backgroundLayers, fg = mapLayers;
 		var layers = [];
@@ -315,6 +328,29 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 		if (debugmW)
 			console.log("Finished initMap");
 		triggerQTip2DoNotShowLoad();
+		createQtip2('.olDisableNavButtonItemActive', 'top left', 'top right', 'leftTop');
+		createQtip2('.olToggleHelpButtonItemActive', 'top left', 'top right', 'leftTop');
+		createQtip2('.olPopupsButtonItemActive', 'top left', 'top right', 'leftTop');
+		createQtip2('.olPDFButtonItemActive', 'top left', 'top right', 'leftTop');
+		$('.olControlZoom').prop("title", "Zoom in/out on the map");
+		createQtip2('.olControlZoom');
+		$('.olControlLayerSwitcher').children().each(function() {
+			if (!this.style || !this.style.display || this.style.display !== "none") {
+				$(this).prop("title", "Choose layers on the map");
+				createQtip2(this, 'bottom right', 'top right', 'bottomRight');
+				return false;
+			}
+		});
+		$('.olControlOverviewMap').children().each(function() {
+			if (!this.style || !this.style.display || this.style.display !== "none") {
+				$(this).prop("title", "View minimap");
+				createQtip2(this, 'bottom right', 'top right', 'bottomRight');
+				return false;
+			}
+		});
+		$('.olControlMousePosition').prop("title", "Displays the coordinates of your mouse position");
+		createQtip2('.olControlMousePosition');
+
 	}
 
 	var navEnabled = true;
@@ -352,6 +388,83 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 		}
 	}
 
+	function createQtip2(element, my, at, tip) {
+		if (!my)
+			my = "top left";
+		if (!at)
+			at = "bottom right";
+		if (!tip)
+			tip = "leftTop";
+		qTipList.push({
+			element : element,
+			my : my,
+			at : at,
+			tip : tip
+		});
+	}
+	var helpEnabled = false;
+	var qTipList = [];
+
+	function toggleHelp() {
+		hideTooltips();
+		if (helpEnabled) {
+			setDefaultTooltips();
+		} else {
+			showHelp();
+		}
+		helpEnabled = !helpEnabled;
+		ns.control.toggleHelp(helpEnabled);
+	}
+
+	function hideTooltips() {
+		for (var i = 0, l = qTipList.length; i < l; i++) {
+			$(qTipList[i].element).qtip().hide();
+		}
+	}
+
+	function showHelp() {
+		for (var i = 0, l = qTipList.length; i < l; i++) {
+			$(qTipList[i].element).qtip({
+				show : true,
+				hide : false,
+				events : {
+					focus : function(event, api) {
+						api.set('position.adjust.y', -5);
+					},
+					blur : function(event, api) {
+						api.set('position.adjust.y', 0);
+					},
+				},
+				style : {
+					tip : qTipList[i].tip
+				},
+				position : {
+					my : qTipList[i].my,
+					at : qTipList[i].at,
+				}
+			});
+		}
+	}
+
+	function setDefaultTooltips() {
+		for (var i = 0, l = qTipList.length; i < l; i++) {
+			$(qTipList[i].element).qtip({
+				show : 'mouseover',
+				hide : {
+					event : 'mouseleave',
+					delay : 1000
+				},
+				style : {
+					tip : qTipList[i].tip
+				},
+				position : {
+					my : qTipList[i].my,
+					at : qTipList[i].at,
+				}
+			});
+		}
+	}
+
 	function checkLoadingOfLayers() {
 		var mainDivID = "qTip2mapLoading"
 		var mainDiv = $("#" + mainDivID);
@@ -385,8 +498,9 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 			setTimeout(function() {
 				ns.buttonEventHandlers.change("#qTip2DoNotShowLoad", triggerQTip2DoNotShowLoad);
 				triggerQTip2DoNotShowLoad();
-				$('.olqTip2ButtonItemActive').qtip();
 				$('#qTip2DoNotShowLoad').qtip();
+				createQtip2('.olqTip2ButtonItemActive', 'top left', 'top right', 'leftTop');
+				setDefaultTooltips();
 			}, 1000);
 		}
 		var divs = mainDiv.children("div");
@@ -791,7 +905,7 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 		removeCustomLayer : removeCustomLayer,
 		triggerQTip2DoNotShowLoad : triggerQTip2DoNotShowLoad,
 		getListOfLayers : getListOfLayers,
-		updateIndex : updateIndex
+		updateIndex : updateIndex,
 	};
 
 }(OpenLayers, jQuery, myNamespace));

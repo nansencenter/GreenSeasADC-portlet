@@ -110,7 +110,6 @@ myNamespace.buttonEventHandlers = (function($, ns) {
 	}
 	
 	function onDownload(dataToDownload) {
-	  //  document.location = 
 		window.open('data:Application/octet-stream,' +
 	                         encodeURIComponent(dataToDownload),"_blank");
 	}
@@ -121,8 +120,7 @@ myNamespace.buttonEventHandlers = (function($, ns) {
 				"#exportParameter",
 				function() {
 					$("#exportParameter").prop("disabled",true);
-					$("#exportParameter").prop("title","Loading data, please wait...");
-					$("#exportParameter").qtip();
+					$("#exportParameter").qtip('option', 'content.text', "Loading data, please wait...")
 					csvContent = callback(data);
 					try {
 						saveAs(new Blob([ csvContent ], {

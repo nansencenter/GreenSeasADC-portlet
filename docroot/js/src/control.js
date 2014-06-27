@@ -56,8 +56,89 @@ myNamespace.control = (function($, OL, ns) {
 		ns.matchup.setUpOPeNDAPSelector();
 		regenerateSavedQuery()
 
-		$('#gsadbcPortlet [title]').qtip();
+		setDefaultTooltips();
 		ns.mapLayers.generateLayerTable();
+	}
+	function hideTooltips() {
+		$('#tabs [data-qtip2Enabled]').each(function() {
+			$(this).qtip().hide();
+		});
+	}
+	var tabs = [ "#queryTab", "#parametersTab", "#statsTab", "#matchUpTab", "#layersTab", "#saveTab" ];
+	var helpEnabled = false;
+	function toggleHelp(enableHelp) {
+		helpEnabled = enableHelp;
+		if (enableHelp) {
+			showVisibleHelp();
+			// set up onchange:
+			$("#tabsList li").each(function(i, val) {
+				$(this).unbind('click', function() {
+					if (helpEnabled)
+						showVisibleHelp();
+					});
+				$(this).on("click", function() {
+					if (helpEnabled)
+					showVisibleHelp();
+				});
+			});
+			$("#tabs h3").each(function(i, val) {
+				$(this).unbind('click', function() {
+					if (helpEnabled)
+						showVisibleHelp();
+				});
+				$(this).on("click", function() {
+					if (helpEnabled)
+						showVisibleHelp();
+				});
+			});
+		} else {
+			hideTooltips();
+			setDefaultTooltips();
+		}
+	}
+	function showVisibleHelp() {
+		hideTooltips();
+		setTimeout(function() {
+			$('#tabs [data-qtip2Enabled]').each(function() {
+				if ($(this).is(':visible')) {
+					$(this).qtip({
+						show : true,
+						hide : false,
+						events : {
+							focus : function(event, api) {
+								api.set('position.adjust.y', -5);
+							},
+							blur : function(event, api) {
+								api.set('position.adjust.y', 0);
+							},
+						},
+					});
+				}
+			});
+		}, 400);
+	}
+
+	function setDefaultTooltips() {
+		$('#tabs [data-qtip2Enabled]').each(function() {
+			$(this).qtip({
+				show : 'mouseover',
+				hide : {
+					event : 'mouseleave',
+					delay : 1000
+				},
+				events : {
+					focus : function(event, api) {
+						api.set('position.adjust.y', -5);
+					},
+					blur : function(event, api) {
+						api.set('position.adjust.y', 0);
+					},
+				},
+				style : {
+					tip : 'leftTop'
+				}
+			});
+		});
 	}
 
 	function setUpBiomesTree() {
@@ -1497,6 +1578,7 @@ myNamespace.control = (function($, OL, ns) {
 		addAParameterToData : addAParameterToData,
 		getData : getData,
 		updateTreeWithInventoryNumbers : updateTreeWithInventoryNumbers,
+		toggleHelp : toggleHelp,
 
 		// Buttons
 		saveQueryButton : saveQueryButton,

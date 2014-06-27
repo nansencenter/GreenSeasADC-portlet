@@ -134,3 +134,17 @@
 	width: 18px;
 	cursor: pointer;
 }
+
+.olToggleHelpButtonItemActive {
+	position: absolute;
+	width: 80px;
+	height: 80px;
+	background: url('Cute-Ball-Help-icon.png');
+}
+.olToggleHelpPanel {
+	top: 0%;
+	left: 5%;
+	height: 80px;
+	width: 80px;
+	cursor: pointer;
+}

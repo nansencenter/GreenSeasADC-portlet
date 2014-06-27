@@ -6,8 +6,8 @@
  * Released under the MIT, GPL licenses
  * http://jquery.org/license
  *
- * Date: Sat Mar 15 2014 08:21 EDT-0400
- * Plugins: None
+ * Date: Sun Mar 16 2014 12:44 EDT-0400
+ * Plugins: tips
  * Styles: None
  */
 .qtip{
@@ -126,3 +126,35 @@
 		color: #111;
 	}
 
+
+
+.qtip .qtip-tip{
+	margin: 0 auto;
+	overflow: hidden;
+	z-index: 10;
+	
+}
+
+	/* Opera bug #357 - Incorrect tip position
+	https://github.com/Craga89/qTip2/issues/367 */
+	x:-o-prefocus, .qtip .qtip-tip{
+		visibility: hidden;
+	}
+
+	.qtip .qtip-tip,
+	.qtip .qtip-tip .qtip-vml,
+	.qtip .qtip-tip canvas{
+		position: absolute;
+
+		color: #123456;
+		background: transparent;
+		border: 0 dashed transparent;
+	}
+	
+	.qtip .qtip-tip canvas{ top: 0; left: 0; }
+
+	.qtip .qtip-tip .qtip-vml{
+		behavior: url(#default#VML);
+		display: inline-block;
+		visibility: visible;
+	}
