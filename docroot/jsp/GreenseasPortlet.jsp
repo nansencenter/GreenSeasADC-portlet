@@ -43,7 +43,7 @@
 						<span id='bboxHeaderText'>Bounding box <em>(off)</em></span>
 					</h3>
 					<div id='bbox'>
-						<input type="checkbox" id="bboxEnabledCheck">
+						<input type="checkbox" id="bboxEnabledCheck" checked>
 						Enable in query
 						<br>
 						<em>Tip: You can hold shift and draw with mouse on map to set bounding box</em>
@@ -54,14 +54,14 @@
 						<div>
 							<form name="lonlatform">
 								<div class='centered'>
-									<input type='text' id='top' size="5" />
+									<input type='text' id='top' size="5" value="72" />
 								</div>
 								<div class='offcentered'>
-									<input type='text' id='left' size="5" />
-									<input type='text' id='right' size="5" />
+									<input type='text' id='left' size="5"  value="19" />
+									<input type='text' id='right' size="5"  value="20"/>
 								</div>
 								<div class='centered'>
-									<input type='text' id='bottom' size="5" />
+									<input type='text' id='bottom' size="5"  value="69"/>
 								</div>
 
 								<div title='If checked, map will move to this area when query is run'>
@@ -77,16 +77,16 @@
 					</h3>
 					<div id='datetime'>
 
-						<input type="checkbox" id="dateEnabledCheck">
+						<input type="checkbox" id="dateEnabledCheck" checked>
 						Search by date
 						<br>
 						<br>
 						<em>Date (Use yyyy-mm-dd format if no date picker appears)</em>
 						<br>
 						Between
-						<input type="date" id="fromDate" value="1913-01-01">
+						<input type="date" id="fromDate" value="2000-01-01">
 						and
-						<input type="date" id="toDate" value="2012-01-01">
+						<input type="date" id="toDate" value="2000-01-31">
 						<br>
 						<input type="checkbox" id="timeEnabledCheck">
 						Include time in the date-search (date search must be enabled for this)
@@ -229,7 +229,7 @@
 						</div>
 					</div>
 				</div>
-				<input type="checkbox" id="updateParametersList" checked />
+				<input type="checkbox" id="updateParametersList" />
 				Update the list of parameters with inventory numbers when the main query is run.
 				<br>
 				<input type='button' id='filter' value="Run main query" />

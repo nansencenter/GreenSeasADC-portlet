@@ -152,7 +152,7 @@ myNamespace.query = (function(OL, $) {
 
 		var dateFilter = new OL.Filter.Comparison({
 			type : OL.Filter.Comparison.BETWEEN,
-			property : "date",
+			property : dateParameter,
 			lowerBoundary : date.fromDate,
 			upperBoundary : date.toDate
 		});
