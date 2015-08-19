@@ -553,7 +553,8 @@ myNamespace.mapViewer = (function(OL, $) {
 			layers : layer,
 			transparent : true,
 			filter : swapLonLatFilter,
-			sld_body : getSLD(name, database + ":" + layer, color, 4),
+			//sld_body : getSLD(name, database + ":" + layer, color, 4),
+			styles:"BarnesSurface",
 			format : window.WMSformat
 		}, {
 			isBaseLayer : false,
