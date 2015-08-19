@@ -533,11 +533,20 @@ myNamespace.control = (function($, OL, ns) {
 		}
 		addData(responseAsJSON);
 		if (tablesToQuery.length === 0) {
+			cleanData();
 			ns.mapViewer.addFeaturesFromData(data, "All parameters");
 			setHTMLParametersLoaded();
 		} else {
 			queryLayer();
 		}
+	}
+	
+	function cleanData(){
+		$.each(data, function(i, asdgwe) {
+			if (i.indexOf(".") === -1){
+				delete data[i];
+			}
+		});
 	}
 
 	// non-public
@@ -605,6 +614,27 @@ myNamespace.control = (function($, OL, ns) {
 		}
 		$.each(features, function(i, feature) {
 			$.each(feature.properties, function(j, parameter) {
+				if (debugc) {
+					console.log(features);
+					console.log(combined);
+					console.log(outPutParameters);
+				}
+				if (outPutParameters.indexOf(j) > -1) {
+					if (data.hasOwnProperty(feature.id)) {
+						newData[feature.id] = data[feature.id];
+						if (!newData.hasOwnProperty(feature.id+"."+feature.properties.level)) {
+							newData[feature.id+"."+feature.properties.level] = $.extend(true, {}, data[feature.id]);
+						}
+						newData[feature.id+"."+feature.properties.level].properties[layer + ":" + j] = parameter;
+					}
+				}
+			});
+		});
+		
+		/*
+		  
+		$.each(features, function(i, feature) {
+			$.each(feature.properties, function(j, parameter) {
 				if (outPutParameters.indexOf(j) > -1) {
 					if (feature.id in data) {
 						newData[feature.id] = data[feature.id];
@@ -644,6 +674,8 @@ myNamespace.control = (function($, OL, ns) {
 				}
 			});
 		});
+		
+		*/
 		data = newData;
 		if (debugc) {
 			console.log("Ended adding Data:");
