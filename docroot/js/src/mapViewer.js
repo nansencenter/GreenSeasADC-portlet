@@ -726,7 +726,7 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 		var pointFeatures = [];
 		for (id in data) {
 			if (data.hasOwnProperty(id)) {
-				var lonLat = new OL.LonLat(data[id].geometry.coordinates[0], data[id].geometry.coordinates[1]);
+				var lonLat = new OL.LonLat(data[id].geometry.coordinates[1], data[id].geometry.coordinates[0]);
 				var pointGeometry = new OL.Geometry.Point(lonLat.lat, lonLat.lon);
 				var pointFeature = new OL.Feature.Vector(pointGeometry);
 				pointFeatures.push(pointFeature);
