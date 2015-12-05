@@ -75,10 +75,10 @@ myNamespace.control = (function($, OL, ns) {
 				$(this).unbind('click', function() {
 					if (helpEnabled)
 						showVisibleHelp();
-					});
+				});
 				$(this).on("click", function() {
 					if (helpEnabled)
-					showVisibleHelp();
+						showVisibleHelp();
 				});
 			});
 			$("#tabs h3").each(function(i, val) {
@@ -489,7 +489,7 @@ myNamespace.control = (function($, OL, ns) {
 			$("#list").html("No results found");
 		} else {
 			updateTreeInventoryNumbers();
-			highLightFeaturesWMS(filter, metaDataTable, window.basicSearchName);
+			highLightFeaturesWMS(filter, metaDataTable, window.basicSearchName, false);
 			var constructedTable = "<table id='mainQueryTable' class='table'></table>";
 
 			// remove "loading..." text
@@ -782,11 +782,15 @@ myNamespace.control = (function($, OL, ns) {
 		return false;
 	}
 
+	var allFilters = {};
 	function queryLayer(firstRun) {
 		if (firstRun && hasMainQueryObjectChanged()) {
 			ns.errorMessage
 					.showErrorMessage("You seem to have changed the main query options since you ran the main query."
 							+ " The filtering will happen with the options as they were when you last ran the main query.");
+		}
+		if (firstRun){
+			allFilters = {};
 		}
 		var layer = tablesToQuery.pop();
 		// Array with all parameters for the current layer
@@ -804,11 +808,13 @@ myNamespace.control = (function($, OL, ns) {
 				propertyName.push(parameter + qfPostFix);
 			}
 		});
-		var filter = ns.query.constructParameterFilterString(propertyNameNeed, ns.mainQueryObject.depth,
+		var filterTmp = ns.query.constructParameterFilterString(propertyNameNeed, ns.mainQueryObject.depth,
 				ns.mainQueryObject.filterBbox, ns.mainQueryObject.date, ns.mainQueryObject.months,
 				ns.mainQueryObject.region, ns.mainQueryObject.cruise, ns.mainQueryObject.biomes);
+		var filter = filterTmp[1]
 		// Requesting features from the first layer through an asynchronous
 		// request and sending response to displayParameter
+		allFilters[layer] = filterTmp[0];
 		ns.WebFeatureService.getFeature({
 			TYPENAME : layer,
 			PROPERTYNAMES : [ window.geometryParameter ].concat(propertyName),
@@ -819,8 +825,8 @@ myNamespace.control = (function($, OL, ns) {
 	}
 
 	// non-public
-	function highLightFeaturesWMS(filter, layer, name) {
-		ns.mapViewer.addLayerWMS(filter, layer, name);
+	function highLightFeaturesWMS(filter, layer, name, barnes) {
+		ns.mapViewer.addLayerWMS(filter, layer, name, barnes);
 	}
 
 	function linkParametersExportButton() {
@@ -840,10 +846,16 @@ myNamespace.control = (function($, OL, ns) {
 		ns.buttonEventHandlers.change("#exportParametersFormats", linkParametersExportButton);
 	}
 
+	function generateBarnesSurface(filter, layer, name) {
+		//highLightFeaturesWMS(filter, layer, name, true);
+	}
+
 	// display a parameter as a table
 	// non-public
 	function displayParameter(response, layer, filterIn, firstRun) {
-		highLightFeaturesWMS(filterIn, layer, ns.handleParameters.getTableHeader(layer));
+		var name = ns.handleParameters.getTableHeader(layer);
+		highLightFeaturesWMS(filterIn, layer, name, false);
+		generateBarnesSurface(filterIn, layer, name);
 		var responseAsJSON;
 		if (debugc)
 			console.log("qmeter: parameter=" + layer);// TEST
@@ -858,6 +870,7 @@ myNamespace.control = (function($, OL, ns) {
 		if (tablesToQuery.length === 0) {
 			if (debugc)
 				console.log("tablesToQuery.length === 0");
+			cleanData();
 			ns.mapViewer.addFeaturesFromData(data, "All parameters");
 			setHTMLParametersLoaded();
 			// save-options
@@ -874,6 +887,14 @@ myNamespace.control = (function($, OL, ns) {
 		} else {
 			queryLayer(false);
 		}
+	}
+
+	function cleanData() {
+		$.each(data, function(i, asdgwe) {
+			if (i.indexOf(".") === -1) {
+				delete data[i];
+			}
+		});
 	}
 
 	// non-public
@@ -909,6 +930,7 @@ myNamespace.control = (function($, OL, ns) {
 	function addData(response, firstRun) {
 		if (debugc) {
 			console.log("Started adding Data:");
+			console.log(data);
 		}
 		var features = response.features;
 		var layer = replaceId(features);
@@ -924,132 +946,181 @@ myNamespace.control = (function($, OL, ns) {
 		if ($.isEmptyObject(data))
 			return;
 
-		var combined = [];
-		// Add all combine filters for this layer to combined (val could be
-		// "combined:temperature")
-		$.each(ns.handleParameters.chosenParameters.combined, function(i, val) {
-			if (window.combinedParameters[val].layer === layer) {
-				combined.push(val);
-			}
-		});
-
-		// Add qualityFlags?
-		var qf = document.getElementById('qualityFlagsEnabledCheck').checked;
-		// TODO: inconsistency if this changes between search and response
-
 		var outPutParameters = ns.handleParameters.chosenParameters.allSelected;// parametersByTable[layer];
 
-		if (debugc) {
-			console.log(features);
-			console.log(combined);
-			console.log(outPutParameters);
-		}
-		var currentStations = {};
-		// console.log(1);
-		// cruise_ID and station_ID will always need to be a part of metadata
-		$.each(data, function(i, val) {
-			var stationDOI = '' + val.properties[cruiseIDParameterName] + val.properties[stationIDParameterName];
-			currentStations[stationDOI] = true;
-		});
-		// console.log(currentStations);
-		// console.log(2);
-		// console.log(basicData);
-		// Go through all features from the response
-		$.each(features, function(i, feature) {
-			// console.log(2.1 + ": " + feature.id);
-			var stationDOI = '' + basicData[feature.id].properties[cruiseIDParameterName]
-					+ basicData[feature.id].properties[stationIDParameterName];
-			// console.log(2.2);
-			if (currentStations[stationDOI]) {
-
-				// console.log(2.3);
-				// Go through all paramters from the current feature
-				// and add them to newData if it matches with the other layers
-				$.each(feature.properties, function(j, parameter) {
-					if (outPutParameters.indexOf(layer + ":" + j) > -1) {
-						if (typeof newData[feature.id] === 'undefined')
-							newData[feature.id] = data[feature.id];
-						if (typeof newData[feature.id] === 'undefined')
-							newData[feature.id] = basicData[feature.id];
-						newData[feature.id].properties[layer + ":" + j] = parameter;
-						if (qf) {
-							newData[feature.id].properties[layer + ":" + j + qfPostFix] = feature.properties[j
-									+ qfPostFix];
-						}
-					}
+		$.each(features,
+				function(i, feature) {
+					$
+							.each(feature.properties,
+									function(j, parameter) {
+										if (debugc) {
+											console.log(features);
+											console.log(outPutParameters);
+										}
+										if (outPutParameters.indexOf(layer + ":" + j) > -1) {
+											if (data.hasOwnProperty(feature.id)) {
+												newData[feature.id] = data[feature.id];
+												if (!newData
+														.hasOwnProperty(feature.id + "." + feature.properties.level)) {
+													newData[feature.id + "." + feature.properties.level] = $.extend(
+															true, {}, data[feature.id]);
+												}
+												newData[feature.id + "." + feature.properties.level].properties[layer
+														+ ":" + j] = parameter;
+											} else {
+												if (debugc) {
+													console.log("feature.id not in data");
+													console.log(feature.id);
+													console.log(data);
+												}
+											}
+										} else {
+											if (debugc) {
+												console.log("j not in outp");
+												console.log(j);
+												console.log(outPutParameters);
+											}
+										}
+									});
 				});
-				// console.log(2.4);
-				// Go through all combined layers and check for a value
-				// (only supported for prioritized atm)
-				$.each(combined, function(j, comb) {
-					// console.log(comb);
-					if (combinedParameters[comb].method === "prioritized") {
-						// console.log(newData[feature.id]);
-						if (typeof newData[feature.id] === 'undefined'
-								|| typeof newData[feature.id].properties[comb] === 'undefined') {
-							var val = null;
-							var qfString = "";
-							for (var k = 0, l = combinedParameters[comb].parameters.length; k < l; k++) {
-								// TODO: this is not always a string
-								// (should usually be a number
-								// if the database is "correct")
-								if (feature.properties[combinedParameters[comb].parameters[k]] !== null
-										&& feature.properties[combinedParameters[comb].parameters[k]].trim() !== "") {
-									val = feature.properties[combinedParameters[comb].parameters[k]];
-									if (qf)
-										qfString = feature.properties[combinedParameters[comb].parameters[k]
-												+ qfPostFix];
-									break;
-								}
-							}
-							if (val !== null) {
-								if (typeof newData[feature.id] === 'undefined')
-									newData[feature.id] = data[feature.id];
-								if (typeof newData[feature.id] === 'undefined')
-									newData[feature.id] = basicData[feature.id];
-								newData[feature.id].properties[comb] = val;
-								if (qf)
-									newData[feature.id].properties[comb + qfPostFix] = qfString;
-							}
-						}
-					} else {
-						// console.log("typeof
-						// newData[feature.id].properties[comb] ===
-						// 'undefined'");
-					}
-				});
-
-				// console.log(2.5);
-			} else {
-				// console.log("NOPE");
-			}
-		});
-		if (!firstRun) {
-			currentStations = {};
-			// console.log(1.1);
-			// cruise_ID and station_ID will always need to be a part of
-			// metadata
-			// Add all info from the stations where we found this layer.
-			$.each(newData, function(i, val) {
-				var stationDOI = '' + val.properties[cruiseIDParameterName] + val.properties[stationIDParameterName];
-				currentStations[stationDOI] = true;
-			});
-
-			$.each(data, function(i, val) {
-				if (typeof newData[i] === 'undefined') {
-					var stationDOI = '' + basicData[i].properties[cruiseIDParameterName]
-							+ basicData[i].properties[stationIDParameterName];
-					if (currentStations[stationDOI]) {
-						newData[i] = val;
-					}
-				}
-
-			});
-		}
+		//
+		// var combined = [];
+		// // Add all combine filters for this layer to combined (val could be
+		// // "combined:temperature")
+		// $.each(ns.handleParameters.chosenParameters.combined, function(i,
+		// val) {
+		// if (window.combinedParameters[val].layer === layer) {
+		// combined.push(val);
+		// }
+		// });
+		//
+		// // Add qualityFlags?
+		// var qf = document.getElementById('qualityFlagsEnabledCheck').checked;
+		// // TODO: inconsistency if this changes between search and response
+		//
+		// var outPutParameters =
+		// ns.handleParameters.chosenParameters.allSelected;//
+		// parametersByTable[layer];
+		//
+		// if (debugc) {
+		// console.log(features);
+		// console.log(combined);
+		// console.log(outPutParameters);
+		// }
+		// var currentStations = {};
+		// // console.log(1);
+		// // cruise_ID and station_ID will always need to be a part of metadata
+		// $.each(data, function(i, val) {
+		// var stationDOI = '' + val.properties[cruiseIDParameterName] +
+		// val.properties[stationIDParameterName];
+		// currentStations[stationDOI] = true;
+		// });
+		// // console.log(currentStations);
+		// // console.log(2);
+		// // console.log(basicData);
+		// // Go through all features from the response
+		// $.each(features, function(i, feature) {
+		// // console.log(2.1 + ": " + feature.id);
+		// var stationDOI = '' +
+		// basicData[feature.id].properties[cruiseIDParameterName]
+		// + basicData[feature.id].properties[stationIDParameterName];
+		// // console.log(2.2);
+		// if (currentStations[stationDOI]) {
+		//
+		// // console.log(2.3);
+		// // Go through all paramters from the current feature
+		// // and add them to newData if it matches with the other layers
+		// $.each(feature.properties, function(j, parameter) {
+		// if (outPutParameters.indexOf(layer + ":" + j) > -1) {
+		// if (typeof newData[feature.id] === 'undefined')
+		// newData[feature.id] = data[feature.id];
+		// if (typeof newData[feature.id] === 'undefined')
+		// newData[feature.id] = basicData[feature.id];
+		// newData[feature.id].properties[layer + ":" + j] = parameter;
+		// if (qf) {
+		// newData[feature.id].properties[layer + ":" + j + qfPostFix] =
+		// feature.properties[j
+		// + qfPostFix];
+		// }
+		// }
+		// });
+		// // console.log(2.4);
+		// // Go through all combined layers and check for a value
+		// // (only supported for prioritized atm)
+		// $.each(combined, function(j, comb) {
+		// // console.log(comb);
+		// if (combinedParameters[comb].method === "prioritized") {
+		// // console.log(newData[feature.id]);
+		// if (typeof newData[feature.id] === 'undefined'
+		// || typeof newData[feature.id].properties[comb] === 'undefined') {
+		// var val = null;
+		// var qfString = "";
+		// for (var k = 0, l = combinedParameters[comb].parameters.length; k <
+		// l; k++) {
+		// // TODO: this is not always a string
+		// // (should usually be a number
+		// // if the database is "correct")
+		// if (feature.properties[combinedParameters[comb].parameters[k]] !==
+		// null
+		// && feature.properties[combinedParameters[comb].parameters[k]].trim()
+		// !== "") {
+		// val = feature.properties[combinedParameters[comb].parameters[k]];
+		// if (qf)
+		// qfString = feature.properties[combinedParameters[comb].parameters[k]
+		// + qfPostFix];
+		// break;
+		// }
+		// }
+		// if (val !== null) {
+		// if (typeof newData[feature.id] === 'undefined')
+		// newData[feature.id] = data[feature.id];
+		// if (typeof newData[feature.id] === 'undefined')
+		// newData[feature.id] = basicData[feature.id];
+		// newData[feature.id].properties[comb] = val;
+		// if (qf)
+		// newData[feature.id].properties[comb + qfPostFix] = qfString;
+		// }
+		// }
+		// } else {
+		// // console.log("typeof
+		// // newData[feature.id].properties[comb] ===
+		// // 'undefined'");
+		// }
+		// });
+		//
+		// // console.log(2.5);
+		// } else {
+		// // console.log("NOPE");
+		// }
+		// });
+		// if (!firstRun) {
+		// currentStations = {};
+		// // console.log(1.1);
+		// // cruise_ID and station_ID will always need to be a part of
+		// // metadata
+		// // Add all info from the stations where we found this layer.
+		// $.each(newData, function(i, val) {
+		// var stationDOI = '' + val.properties[cruiseIDParameterName] +
+		// val.properties[stationIDParameterName];
+		// currentStations[stationDOI] = true;
+		// });
+		//
+		// $.each(data, function(i, val) {
+		// if (typeof newData[i] === 'undefined') {
+		// var stationDOI = '' + basicData[i].properties[cruiseIDParameterName]
+		// + basicData[i].properties[stationIDParameterName];
+		// if (currentStations[stationDOI]) {
+		// newData[i] = val;
+		// }
+		// }
+		//
+		// });
+		// }
 		// console.log(3);
 		data = newData;
 		if (debugc) {
 			console.log("Ended adding Data:");
+			console.log(data);
 		}
 	}
 
@@ -1173,7 +1244,7 @@ myNamespace.control = (function($, OL, ns) {
 								ns.query.constructParameterFilterString(propertyNames, ns.mainQueryObject.depth,
 										ns.mainQueryObject.filterBbox, ns.mainQueryObject.date,
 										ns.mainQueryObject.months, region, ns.mainQueryObject.cruise,
-										ns.mainQueryObject.biomes) ]);
+										ns.mainQueryObject.biomes) ])[1];
 					}
 				}
 			}
@@ -1566,6 +1637,10 @@ myNamespace.control = (function($, OL, ns) {
 	function createNetCDFUsingHOneButton() {
 		ns.fileCreation.createNetCDFUsingHOne(data);
 	}
+	
+	function getFilters(){
+		return allFilters;
+	}
 	// public interface
 	return {
 		activateBbox : activateBbox,
@@ -1579,6 +1654,7 @@ myNamespace.control = (function($, OL, ns) {
 		getData : getData,
 		updateTreeWithInventoryNumbers : updateTreeWithInventoryNumbers,
 		toggleHelp : toggleHelp,
+		getFilters: getFilters,
 
 		// Buttons
 		saveQueryButton : saveQueryButton,

@@ -43,7 +43,7 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 				"Demis WMS",
 				"http://www2.demis.nl/wms/wms.ashx?WMS=WorldMap",
 				{
-					layers : 'Countries,Bathymetry,Topography,Hillshading,Coastlines,Builtup+areas,Waterbodies,Rivers,Streams,Borders,Cities',
+					layers : 'Countries,Bathymetry,Topography,Hillshading,Coastlines,Waterbodies,Rivers,Streams,Borders',
 					format : 'image/png'
 				}),
 		generic : new OpenLayers.Layer.WMS("Generic background", "http://vmap0.tiles.osgeo.org/wms/vmap0", {
@@ -79,6 +79,137 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 				+ "</Size></Graphic></PointSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>";
 		return sld;
 	}
+
+	function getBarnesSLD(layer, valueAttr, scale, convergence, passes, minObservations, maxObservationDistance,
+			pixelsPerCell, queryBuffer, opacity,min,max) {
+		var colors = [ "000090", "0008FF", "0083FF", "01FBFD", "74FF88", "F3FF0A", "FF9000",
+				"FF1300", "8C0000" ];
+		var noDataColur = "#FFFFFF";
+		var noDataQuantity = -999;
+//	    +"              <ColorMapEntry color=\"#FFFFFF\" quantity=\"-990\" label=\"nodata\" opacity=\"0\"/>"
+//	    +"              <ColorMapEntry color=\"#000090\" quantity=\"-2\" label=\"-2\"/>"
+	    var colorMap = "<ColorMapEntry color=\""+noDataColur+"\" quantity=\""+noDataQuantity+"\" label=\"nodata\" opacity=\"0\"/>"
+	    var range = max-min;
+	    var interval = range/(colors.length-1);
+	    
+		$.each(colors,function(i,val){
+			var quantity = interval;
+			quantity *= i;
+			quantity += min;
+			colorMap += "<ColorMapEntry color=\"#"+val+"\" quantity=\""+(min+(i*interval))+"\" label=\""+(min+(i*interval))+"\"/>";
+		});
+		
+		//console.log(colorMap);
+	    
+		var sld = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+		    +"<StyledLayerDescriptor version=\"1.0.0\" xsi:schemaLocation=\"http://www.opengis.net/sld StyledLayerDescriptor.xsd\" xmlns=\"http://www.opengis.net/sld\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
+		    +"	<NamedLayer>"
+		    +"		<Name>"+layer+"</Name>"
+		    +"		<UserStyle>"
+		    +"			<FeatureTypeStyle>"
+		    +"				<Transformation>"
+		    +"					<ogc:Function name=\"gs:BarnesSurface\">"
+		    +"						<ogc:Function name=\"parameter\">"
+		    +"							<ogc:Literal>data</ogc:Literal>"
+		    +"						</ogc:Function>"
+		    +"						<ogc:Function name=\"parameter\">"
+		    +"							<ogc:Literal>valueAttr</ogc:Literal>"
+		    +"							<ogc:Literal>"+valueAttr+"</ogc:Literal>"
+		    +"						</ogc:Function>"
+		    +"						<ogc:Function name=\"parameter\">"
+		    +"							<ogc:Literal>scale</ogc:Literal>"
+		    +"							<ogc:Literal>"+scale+"</ogc:Literal>"
+		    +"						</ogc:Function>"
+		    +"						<ogc:Function name=\"parameter\">"
+		    +"							<ogc:Literal>convergence</ogc:Literal>"
+		    +"							<ogc:Literal>"+convergence+"</ogc:Literal>"
+		    +"						</ogc:Function>"
+		    +"						<ogc:Function name=\"parameter\">"
+		    +"							<ogc:Literal>passes</ogc:Literal>"
+		    +"							<ogc:Literal>"+passes+"</ogc:Literal>"
+		    +"						</ogc:Function>"
+		    +"						<ogc:Function name=\"parameter\">"
+		    +"							<ogc:Literal>minObservations</ogc:Literal>"
+		    +"							<ogc:Literal>"+minObservations+"</ogc:Literal>"
+		    +"						</ogc:Function>"
+		    +"						<ogc:Function name=\"parameter\">"
+		    +"							<ogc:Literal>maxObservationDistance</ogc:Literal>"
+		    +"							<ogc:Literal>"+maxObservationDistance+"</ogc:Literal>"
+		    +"						</ogc:Function>"
+		    +"						<ogc:Function name=\"parameter\">"
+		    +"							<ogc:Literal>pixelsPerCell</ogc:Literal>"
+		    +"							<ogc:Literal>"+pixelsPerCell+"</ogc:Literal>"
+		    +"						</ogc:Function>"
+		    +"						<ogc:Function name=\"parameter\">"
+		    +"							<ogc:Literal>queryBuffer</ogc:Literal>"
+		    +"							<ogc:Literal>"+queryBuffer+"</ogc:Literal>"
+		    +"						</ogc:Function>"
+		    +"						<ogc:Function name=\"parameter\">"
+		    +"							<ogc:Literal>outputBBOX</ogc:Literal>"
+		    +"							<ogc:Function name=\"env\">"
+		    +"								<ogc:Literal>wms_bbox</ogc:Literal>"
+		    +"							</ogc:Function>"
+		    +"						</ogc:Function>"
+		    +"						<ogc:Function name=\"parameter\">"
+		    +"							<ogc:Literal>outputWidth</ogc:Literal>"
+		    +"							<ogc:Function name=\"env\">"
+		    +"								<ogc:Literal>wms_width</ogc:Literal>"
+		    +"							</ogc:Function>"
+		    +"						</ogc:Function>"
+		    +"						<ogc:Function name=\"parameter\">"
+		    +"							<ogc:Literal>outputHeight</ogc:Literal>"
+		    +"							<ogc:Function name=\"env\">"
+		    +"								<ogc:Literal>wms_height</ogc:Literal>"
+		    +"							</ogc:Function>"
+		    +"						</ogc:Function>"
+		    +"					</ogc:Function>"
+		    +"				</Transformation>"
+		    +"				<Rule>"
+		    +"					<RasterSymbolizer>"
+		    +"						<!-- specify geometry attribute of input to pass validation -->"
+		    +"						<Geometry>"
+		    +"							<ogc:PropertyName>stpoint</ogc:PropertyName>"
+		    +"						</Geometry>"
+		    +"						<Opacity>"+opacity+"</Opacity>"
+		    +"						<ColorMap type=\"ramp\" >"
+		    +colorMap
+//		    +"							<ColorMapEntry color=\"#FFFFFF\" quantity=\"-990\" label=\"nodata\" opacity=\"0\"/>"
+//		    +"							<ColorMapEntry color=\"#2E4AC9\" quantity=\"-2\" label=\"-2\"/>"
+//		    +"							<ColorMapEntry color=\"#41A0FC\" quantity=\"0\" label=\"0\" />"
+//		    +"							<ColorMapEntry color=\"#58CCFB\" quantity=\"2\" label=\"2\" />"
+//		    +"							<ColorMapEntry color=\"#76F9FC\" quantity=\"3\" label=\"3\" />"
+//		    +"							<ColorMapEntry color=\"#6AC597\" quantity=\"4\" label=\"4\" />"
+//		    +"							<ColorMapEntry color=\"#479364\" quantity=\"4.25\" label=\"4.25\" />"
+//		    +"							<ColorMapEntry color=\"#2E6000\" quantity=\"4.5\" label=\"4.5\" />"
+//		    +"							<ColorMapEntry color=\"#579102\" quantity=\"4.75\" label=\"4.75\" />"
+//		    +"							<ColorMapEntry color=\"#9AF20C\" quantity=\"5\" label=\"5\" />"
+//		    +"							<ColorMapEntry color=\"#B7F318\" quantity=\"5.25\" label=\"5.25\" />"
+//		    +"							<ColorMapEntry color=\"#DBF525\" quantity=\"5.5\" label=\"5.5\" />"
+//		    +"							<ColorMapEntry color=\"#FAF833\" quantity=\"5.75\" label=\"5.75\" />"
+//		    +"							<ColorMapEntry color=\"#F9C933\" quantity=\"6\" label=\"6\" />"
+//		    +"							<ColorMapEntry color=\"#F19C33\" quantity=\"8\" label=\"8\" />"
+//		    +"							<ColorMapEntry color=\"#ED7233\" quantity=\"10\" label=\"10\" />"
+//		    +"							<ColorMapEntry color=\"#EA3F33\" quantity=\"14\" label=\"14\" />"
+//		    +"							<ColorMapEntry color=\"#BB3026\" quantity=\"999\" label=\"above 14\" />"
+//		    +"              <ColorMapEntry color=\"#FFFFFF\" quantity=\"-990\" label=\"nodata\" opacity=\"0\"/>"
+//		    +"              <ColorMapEntry color=\"#000090\" quantity=\"-2\" label=\"-2\"/>"
+//		    +"              <ColorMapEntry color=\"#0008FF\" quantity=\"-0.25\" label=\"-0.25\"/>"
+//		    +"              <ColorMapEntry color=\"#0083FF\" quantity=\"1.5\" label=\"1.5\"/>"
+//		    +"              <ColorMapEntry color=\"#01FBFD\" quantity=\"3.25\" label=\"3.25\"/>"
+//		    +"              <ColorMapEntry color=\"#74FF88\" quantity=\"5\" label=\"5\"/>"
+//		    +"              <ColorMapEntry color=\"#F3FF0A\" quantity=\"6.75\" label=\"6.75\"/>"
+//		    +"              <ColorMapEntry color=\"#FF9000\" quantity=\"8.5\" label=\"8.5\"/>"
+//		    +"              <ColorMapEntry color=\"#FF1300\" quantity=\"10.25\" label=\"10.25\"/>"
+//		    +"              <ColorMapEntry color=\"#8C0000\" quantity=\"12\" label=\"12\"/>"
+		    +"						</ColorMap>"
+		    +"					</RasterSymbolizer>"
+		    +"				</Rule>"
+		    +"			</FeatureTypeStyle>"
+		    +"		</UserStyle>"
+		    +"	</NamedLayer>"
+		    +"</StyledLayerDescriptor>"
+		    return sld;
+	}
 	// front layers drawn on the map widget, can be toggled on/off
 	function initMapLayers() {
 		mapLayers = {
@@ -92,6 +223,16 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 			}, {
 				isBaseLayer : false
 			}),
+			DemisLand: new OpenLayers.Layer.WMS(
+					"Land - Demis WMS",
+					"http://www2.demis.nl/wms/wms.ashx?WMS=WorldMap",
+					{
+						layers : 'Countries,Topography,Hillshading,Coastlines,Waterbodies,Rivers,Streams,Borders,Topography,Coastlines',
+						format : 'image/png',
+						transparent : true
+					}, {
+						isBaseLayer : false
+					})
 
 		// barnes : new OpenLayers.Layer.WMS( "Barnes tempcu01",
 		// window.WMSServer, { layers : "v7_temperature", format :
@@ -112,7 +253,7 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 		}
 	}
 
-	function addFeaturesFromDataWithColor(data, parameter, name, min, max) {
+	function addFeaturesFromDataWithColor(data, parameter, name, min, max, filter) {
 		var index = 1000;
 		if (typeof customLayers[name] !== 'undefined') {
 			index = map.getLayerIndex(customLayers[name])
@@ -138,12 +279,15 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 			}
 		}
 		var range = max - min;
+		var hasFilter = filter.hasOwnProperty("parameter");
 		for (id in data) {
 			if (data.hasOwnProperty(id)) {
 				var value = data[id].properties[parameter];
-				if (typeof value !== 'undefined' && value !== -999 && value !== '-999' && value !== null) {
+				// TODO: make hasFilter test robust
+				if (!(hasFilter && (data[id].properties[filter.parameter] < filter.min || data[id].properties[filter.parameter] > filter.max))
+						&& (typeof value !== 'undefined' && value !== -999 && value !== '-999' && value !== null)) {
 					value = parseFloat(value);
-					var lonLat = new OL.LonLat(data[id].geometry.coordinates[0], data[id].geometry.coordinates[1]);
+					var lonLat = new OL.LonLat(data[id].geometry.coordinates[1], data[id].geometry.coordinates[0]);
 					var pointGeometry = new OL.Geometry.Point(lonLat.lat, lonLat.lon);
 
 					value = parseInt(((value - min) / range) * 62);
@@ -220,8 +364,8 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 		new Ext.Panel({
 			renderTo : "simple_map",
 			layout : "fit",
-			width : 800,
-			height : 400,
+			width : 1600,
+			height : 800,
 			items : [ mapPanel ]
 		});
 
@@ -726,7 +870,7 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 		var pointFeatures = [];
 		for (id in data) {
 			if (data.hasOwnProperty(id)) {
-				var lonLat = new OL.LonLat(data[id].geometry.coordinates[0], data[id].geometry.coordinates[1]);
+				var lonLat = new OL.LonLat(data[id].geometry.coordinates[1], data[id].geometry.coordinates[0]);
 				var pointGeometry = new OL.Geometry.Point(lonLat.lat, lonLat.lon);
 				var pointFeature = new OL.Feature.Vector(pointGeometry);
 				pointFeatures.push(pointFeature);
@@ -790,7 +934,7 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 	// Adding a layer with a filter and name to the map using a WMS. The
 	// handling of the metadatatable is customized. name should not be "Data
 	// points"
-	function addLayerWMS(filter, layer, name) {
+	function addLayerWMS(filter, layer, name, barnes,valueAttr,scale,convergence,passes,minObservations,maxObservationDistance,pixelsPerCell,queryBuffer,opacity,min,max) {
 		if (debugmW)
 			console.log("addLayerWMS started");
 		var layers = parameterLayers;
@@ -810,25 +954,40 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 		}
 
 		var swapLonLatFilter = swapLonLatInFilteR(filter);
-		// console.log("Filter in:");
-		// console.log(filter);
-		// console.log("Filter out:");
-		// console.log(swapLonLatFilter);
 
-		newLayer = new OpenLayers.Layer.WMS(name, window.WMSServer, {
-			layers : layer,
-			transparent : true,
-			filter : swapLonLatFilter,
-			sld_body : getSLD(name, database + ":" + layer, color, 4),
-			format : window.WMSformat
-		}, {
-			isBaseLayer : false,
-			tileOptions : {
-				maxGetUrlLength : 2048
-			},
-		});
+		if (barnes) {
+			newLayer = new OpenLayers.Layer.WMS(name, window.WMSServer, {
+				// layers : layer,
+				transparent : true,
+				filter : swapLonLatFilter,
+				// styles : "BarnesSurface",
+				//layer,valueAttr,scale,convergence,passes,minObservations,maxObservationDistance,pixelsPerCell,queryBuffer,opacity
+				sld_body : getBarnesSLD(layer,valueAttr,scale,convergence,passes,minObservations,maxObservationDistance,pixelsPerCell,queryBuffer,opacity,min,max),
+			//"value",20.0,0.2,2,1,2,10,40,0.8),
+				format : window.WMSformat
+			}, {
+				isBaseLayer : false,
+				tileOptions : {
+					maxGetUrlLength : 2048
+				},
+			});
+		} else {
+			newLayer = new OpenLayers.Layer.WMS(name, window.WMSServer, {
+				layers : layer,
+				transparent : true,
+				filter : swapLonLatFilter,
+				sld_body : getSLD(name, database + ":" + layer, color, 4),
+				format : window.WMSformat
+			}, {
+				isBaseLayer : false,
+				tileOptions : {
+					maxGetUrlLength : 2048
+				},
+			});
+		}
+
 		if (debugmW)
-			console.log("created the new layer");
+			console.log("created the new layers");
 		map.addLayer(newLayer);
 		// map.setLayerIndex(newLayer, index);
 		layers[name] = newLayer;

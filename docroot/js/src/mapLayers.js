@@ -501,17 +501,80 @@ myNamespace.mapLayers = (function($, ns) {
 		// +"(Auto:<input type='checkbox' id='colorscalerangeParameterAut"+
 		// activeLayer + "'>)"
 		+ " from <input type='text' id='colorscalerangeParameterMin" + activeLayer
-				+ "' size='3' value='0.0'>to <input type='text' id='colorscalerangeParameterMax" + activeLayer
-				+ "' size='3' value='50.0'>";
+				+ "' size='3' value='-2'>to <input type='text' id='colorscalerangeParameterMax" + activeLayer
+				+ "' size='3' value='12'>";
 		// auto: calculate min/max
 		var linLogSelector = "<select id='logscaleParameterVariable"
 				+ activeLayer
-				+ "'><option value='false'>Linear Scale</option><option value='true'>Logarithmic Scale</option></select>";
-		$("#parameterLayerMetaData" + activeLayer).html(colorscaleSelector /*
-																			 * +
-																			 * linLogSelector
-																			 */);
+				+ "Add filter:<option value='false'>Linear Scale</option><option value='true'>Logarithmic Scale</option></select>";
+		var filterSelectElement = " Filter by: <select id='parameterLayerVariableFilter" + activeLayer + "' name='"
+				+ activeLayer + "'" + ">";
+		var options = "<option value='NONE'>Select parameter</option>"
+				+ ns.matchup.generateOptionsFromAllSelectedParameters();
+		filterSelectElement += options + "</select>";
+		var filterMetaDataElement = "<div id='filterLayerMetaData" + activeLayer + "'></div>";
+		$("#parameterLayerMetaData" + activeLayer).html(
+				colorscaleSelector + filterSelectElement + filterMetaDataElement /*
+																					 * +
+																					 * linLogSelector
+																					 */);
+
+		ns.buttonEventHandlers.change("#parameterLayerVariableFilter" + activeLayer, addFilter);
 		$("#toggleParameterLayerButton" + activeLayer).prop("disabled", false);
+	}
+
+	function addFilter(event) {
+		var selectedElement = event.target;
+		var activeLayer = selectedElement.name;
+
+		if (selectedElement.options[selectedElement.selectedIndex].value === "NONE") {
+			// TODO
+			$("#filterLayerMetaData" + activeLayer).html("");
+			return;
+		}
+		var filterRangeMin = 0;
+		var filterRangeMax = 10;
+		var filterRange = "Valid Range of data from  <input type='text' id='filterRangeMin" + activeLayer
+				+ "' size='3' value='" + filterRangeMin + "'/>" + "to <input type='text' id='filterRangeMax"
+				+ activeLayer + "' size='3' value='" + filterRangeMax + "'/>";
+		var barnesCheckBox = "<br>Barnes Surface<input type='checkbox' id='barnesCheckBox" + activeLayer + "' name='" + activeLayer + "'>";
+		var barnesMetaElement = "<div id='barnesMetaData" + activeLayer + "'></div>";
+		$("#filterLayerMetaData" + activeLayer).html(filterRange + barnesCheckBox+barnesMetaElement);
+		ns.buttonEventHandlers.change("#barnesCheckBox" + activeLayer, addBarnesMeta);
+	}
+	
+	function addBarnesMeta(event){
+		var selectedElement = event.target;
+		var activeLayer = selectedElement.name;
+
+		var html = "";
+		if (document.getElementById('barnesCheckBox'+activeLayer).checked) {
+			html = "Scale:  <input type='text' id='barnesMetaScale" + activeLayer
+			+ "' size='3' value='8'/>";
+			
+			html += " Convergence:  <input type='text' id='barnesConvergence" + activeLayer
+			+ "' size='3' value='0.3'/>";
+			
+			html += " Passes:  <input type='text' id='barnesPasses" + activeLayer
+			+ "' size='3' value='3'/>";
+			
+			html += " Min observations:  <input type='text' id='barnesMinObervations" + activeLayer
+			+ "' size='3' value='2'/>";
+			
+			html += " Max observation distance:  <input type='text' id='barnesMaxObservationDistance" + activeLayer
+			+ "' size='3' value='3'/>";
+			
+			html += " Pixels per cell:  <input type='text' id='barnesPixelsPerCell" + activeLayer
+			+ "' size='3' value='10'/>";
+			
+			html += " Query buffer:  <input type='text' id='barnesQueryBuffer" + activeLayer
+			+ "' size='3' value='15'/>";
+			
+			html += " Opacity:  <input type='text' id='barnesOpacity" + activeLayer
+			+ "' size='3' value='0.8'/>";
+		}
+		
+		$("#barnesMetaData" + activeLayer).html(html);
 	}
 
 	function toggleParameterLayerButton(event) {
@@ -528,13 +591,36 @@ myNamespace.mapLayers = (function($, ns) {
 		}
 		var min = parseFloat($("#colorscalerangeParameterMin" + activeLayer).val());
 		var max = parseFloat($("#colorscalerangeParameterMax" + activeLayer).val());
-		ns.mapViewer
-				.addFeaturesFromDataWithColor(ns.control.getData(), parameter, "Par " + event.target.name, min, max);
-		if (colorScaleLegendDiv.length === 0) {
-			$("#innerLegend").append(
-					"<div id='colorScaleLegendParameter" + activeLayer + "' class='colorScaleLegend'></div>");
+
+		// filter
+		var filter = {};
+		var barnesS = false;
+		if ($('#filterRangeMin0').length) {
+			filter.parameter = $("#parameterLayerVariableFilter" + activeLayer).val();
+			filter.min = parseFloat($("#filterRangeMin" + activeLayer).val());
+			filter.max = parseFloat($("#filterRangeMax" + activeLayer).val());
+			barnesS = $("#barnesCheckBox" + activeLayer).is(':checked');
 		}
-		addLegend("Par " + activeLayer, false, min, max, '#colorScaleLegendParameter' + activeLayer);
+
+		if (barnesS) {
+			var parameterSplit = parameter.split(":");
+			var OLfilter = ns.control.getFilters()[parameterSplit[0]];
+			//valueAttr,scale,convergence,passes,minObservations,maxObservationDistance,pixelsPerCell,queryBuffer,opacity
+			ns.mapViewer.addLayerWMS(ns.query.addParameterFilter($.extend(true, {}, OLfilter),filter), parameterSplit[0], "Par " + event.target.name, true,
+ 					parameterSplit[1], $(
+							"#barnesMetaScale" + activeLayer).val(), $("#barnesConvergence" + activeLayer).val(), $(
+							"#barnesPasses" + activeLayer).val(), $("#barnesMinObervations" + activeLayer).val(), $(
+							"#barnesMaxObservationDistance" + activeLayer).val(), $("#barnesPixelsPerCell" + activeLayer).val(), $(
+							"#barnesQueryBuffer" + activeLayer).val(), $("#barnesOpacity" + activeLayer).val(),min,max);
+		} else {
+			ns.mapViewer.addFeaturesFromDataWithColor(ns.control.getData(), parameter, "Par " + event.target.name, min,
+					max, filter);
+			if (colorScaleLegendDiv.length === 0) {
+				$("#innerLegend").append(
+						"<div id='colorScaleLegendParameter" + activeLayer + "' class='colorScaleLegend'></div>");
+			}
+			addLegend("Par " + activeLayer, false, min, max, '#colorScaleLegendParameter' + activeLayer);
+		}
 		generateLayerTable();
 	}
 
@@ -552,8 +638,10 @@ myNamespace.mapLayers = (function($, ns) {
 		$("#parameterLayerVariableContainer").append(
 				"<br><h5>Parameter " + activeParameterLayers + "</h5>" + button + selectElement + metaDataElement);
 		// ADD events
-		ns.buttonEventHandlers.change("#parameterLayerVariable" + activeParameterLayers, addParameterLayerOptionsSelector);
-		ns.buttonEventHandlers.callFromControl("#toggleParameterLayerButton" + activeParameterLayers, toggleParameterLayerButton);
+		ns.buttonEventHandlers.change("#parameterLayerVariable" + activeParameterLayers,
+				addParameterLayerOptionsSelector);
+		ns.buttonEventHandlers.callFromControl("#toggleParameterLayerButton" + activeParameterLayers,
+				toggleParameterLayerButton);
 		$("#toggleParameterLayerButton" + activeParameterLayers).prop("disabled", true);
 		activeParameterLayers++;
 	}

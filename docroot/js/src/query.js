@@ -125,7 +125,7 @@ myNamespace.query = (function(OL, $, ns) {
 
 		if (debugq)
 			console.log("constructFilterString ending");// TEST
-		return constructString(filterObject);
+		return [filterObject, constructString(filterObject)];
 
 	}
 
@@ -162,7 +162,7 @@ myNamespace.query = (function(OL, $, ns) {
 
 		var dateFilter = new OL.Filter.Comparison({
 			type : OL.Filter.Comparison.BETWEEN,
-			property : "date",
+			property : dateParameter,
 			lowerBoundary : date.fromDate,
 			upperBoundary : date.toDate
 		});
@@ -486,6 +486,19 @@ myNamespace.query = (function(OL, $, ns) {
 		}
 		return biomes;
 	}
+	
+	function addParameterFilter(OLfilter,filter){
+		var newFilter = new OL.Filter.Comparison({
+			type : OL.Filter.Comparison.BETWEEN,
+			property : filter.parameter,
+			lowerBoundary : filter.min,
+			upperBoundary : filter.max
+		});
+		
+		OLfilter.filters.push(newFilter)
+
+		return constructString(OLfilter);
+	}
 
 	// public interface
 	return {
@@ -500,6 +513,7 @@ myNamespace.query = (function(OL, $, ns) {
 		constructParameterFilterString : constructParameterFilterString,
 		createRegionFilter : createRegionFilter,
 		constructString : constructString,
+		addParameterFilter:addParameterFilter,
 	};
 
 }(OpenLayers, jQuery, myNamespace));

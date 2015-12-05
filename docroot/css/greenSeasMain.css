@@ -32,23 +32,23 @@
 /* #simple_map { position:relative; height:500px; width:1000px; } */
 #simple_map {
 	float: left;
-	height: 400px;
-	width: 800px;
+	height: 800px;
+	width: 1600px;
 }
 #rightOfMap {
-	height: 400px;
+	height: 800px;
 	font-size: 14px;
 	float: left;
 }
 #mapContainer {
-	height: 400px;
+	height: 800px;
 }
 .colorScaleLegend {
-	height: 400px;
+	height: 800px;
 	margin-left: 5px;
 }
 #legend {
-	height: 400px;
+	height: 800px;
 	float: left;
 	position: relative;
 	margin-right:-999em;

@@ -79,16 +79,16 @@
 					</h3>
 					<div id='datetime'>
 
-						<input type="checkbox" id="dateEnabledCheck" data-qtip2Enabled title='Enables the Date query' />
+						<input type="checkbox" id="dateEnabledCheck" data-qtip2Enabled title='Enables the Date query' checked />
 						Search by date
 						<br>
 						<br>
 						<em>Date (Use yyyy-mm-dd format if no date picker appears)</em>
 						<br>
 						Between
-						<input type="date" id="fromDate" value="1913-01-01" />
+						<input type="date" id="fromDate" value="1989-05-01" />
 						and
-						<input type="date" id="toDate" value="2015-01-01" />
+						<input type="date" id="toDate" value="1989-05-31" />
 						<br>
 						<input type="checkbox" id="timeEnabledCheck" data-qtip2Enabled
 							title='Enables the time query within the date-query' />
@@ -265,7 +265,7 @@
 				</div>
 				<div data-qtip2Enabled
 					title='If this option is selected when the main query is run, an inventory of all available parameters in the selection will be updated in the parameters list.' style='display: inline-block'>
-					<input type="checkbox" id="updateParametersList" checked />
+					<input type="checkbox" id="updateParametersList" />
 					Update the list of parameters with inventory numbers when the main query is run.
 				</div>
 				<br>
