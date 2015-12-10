@@ -144,7 +144,7 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 				if (typeof value !== 'undefined' && value !== -999 && value !== '-999' && value !== null) {
 					value = parseFloat(value);
 					var lonLat = new OL.LonLat(data[id].geometry.coordinates[0], data[id].geometry.coordinates[1]);
-					var pointGeometry = new OL.Geometry.Point(lonLat.lat, lonLat.lon);
+					var pointGeometry = new OL.Geometry.Point(lonLat.lon, lonLat.lat);
 
 					value = parseInt(((value - min) / range) * 62);
 					var color = legendPallete[value];
@@ -726,8 +726,8 @@ myNamespace.mapViewer = (function(OL, $, ns) {
 		var pointFeatures = [];
 		for (id in data) {
 			if (data.hasOwnProperty(id)) {
-				var lonLat = new OL.LonLat(data[id].geometry.coordinates[1], data[id].geometry.coordinates[0]);
-				var pointGeometry = new OL.Geometry.Point(lonLat.lat, lonLat.lon);
+				var lonLat = new OL.LonLat(data[id].geometry.coordinates[0], data[id].geometry.coordinates[1]);
+				var pointGeometry = new OL.Geometry.Point(lonLat.lon, lonLat.lat);
 				var pointFeature = new OL.Feature.Vector(pointGeometry);
 				pointFeatures.push(pointFeature);
 			}
