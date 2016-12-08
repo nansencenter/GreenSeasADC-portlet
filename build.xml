@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE project>
 
-<project name="GreenseasV.9-portlet" basedir="." default="deploy">
+<project name="GreenseasV.10-portlet" basedir="." default="deploy">
 	<import file="../build-common-portlet.xml" />
 </project>

@@ -88,10 +88,10 @@ myNamespace.mapLayers = (function($, ns) {
 
 	function addWMSLayerVariableSelector(event) {
 		var activeLayer = event.target.name;
-		if (debugMl) {
+		//if (debugMl) {
 			console.log("addWMSLayerVariableSelector for " + activeLayer);
 			console.log(event);
-		}
+		//}
 		var selectedElement = event.target;
 		if (selectedElement.options[selectedElement.selectedIndex].value === "NONE") {
 			if (debugMl)
