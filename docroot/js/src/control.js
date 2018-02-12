@@ -1355,15 +1355,22 @@ myNamespace.control = (function($, OL, ns) {
 				lat = values[id].lat;
 				lon = values[id].lon;
 			}
-			data[id].properties["Model value for " + parameter] = val;
-			data[id].properties["Model lat for " + parameter] = lat;
-			data[id].properties["Model lon for " + parameter] = lon;
-			data[id].properties["Model time for " + parameter] = Highcharts.dateFormat('%Y-%m-%d %H:%M',
-					timeTable[data[id].matchedTime]);
-			data[id].properties["Model elevation for " + parameter] = elevationTable[data[id].matchedElevation];
+			if (val != null) {
+				data[id].properties["Model value for " + parameter] = val;
+				data[id].properties["Model lat for " + parameter] = lat;
+				data[id].properties["Model lon for " + parameter] = lon;
+				data[id].properties["Model time for " + parameter] = Highcharts.dateFormat('%Y-%m-%d %H:%M',
+						timeTable[data[id].matchedTime]);
+				if (elevationTable){
+					data[id].properties["Model elevation for " + parameter] = elevationTable[data[id].matchedElevation];
+				}
+			}
 		});
 		var newParameters = [ "Model value for " + parameter, "Model time for " + parameter,
-				"Model lon for " + parameter, "Model lat for " + parameter ];
+				"Model lon for " + parameter ];
+		if (elevationTable) {
+			newParameters.append("Model lat for " + parameter);
+		}
 		ns.handleParameters.addNewParameters(newParameters);
 		updateSearchResultsTable();
 	}
