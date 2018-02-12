@@ -5,8 +5,8 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd"
 	version="2.0">
 	<portlet>
-		<portlet-name>GreenseasV.10</portlet-name>
-		<display-name>GreenseasV.10</display-name>
+		<portlet-name>Greenseas-1.0</portlet-name>
+		<display-name>Greenseas-1.0</display-name>
 
 		<portlet-class>nersc.greenseas.portlet.GreenseasPortlet</portlet-class>
 
@@ -19,9 +19,9 @@
 			<mime-type>text/html</mime-type>
 		</supports>
 		<portlet-info>
-			<title>GreenseasV.10</title>
-			<short-title>GreenseasV.10</short-title>
-			<keywords>GreenseasV.10</keywords>
+			<title>Greenseas-1.0</title>
+			<short-title>Greenseas-1.0</short-title>
+			<keywords>Greenseas-1.0</keywords>
 		</portlet-info>
 		<security-role-ref>
 			<role-name>administrator</role-name>
