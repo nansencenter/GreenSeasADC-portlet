@@ -104,6 +104,9 @@ myNamespace.matchup = (function($, ns) {
 	function addNewSelection() {
 		var selectionMethod = "<div id='timeMatchupVariableSelectionMethodDiv" + timeInterpolationVariables + "'>"
 				+ ns.utilities.setUpSelectorArray([ {
+					value : "dayOfMonth",
+					name : "Day of Month"
+				}, {
 					value : "month",
 					name : "Month"
 				}, {
