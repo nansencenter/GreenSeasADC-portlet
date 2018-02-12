@@ -351,8 +351,10 @@ myNamespace.tableConstructor = (function($, ns) {
 		$.each(data, function(id, val) {
 			var row = [];
 			row.push(id);
-			row.push(val.geometry.coordinates[0]);
+			// lat
 			row.push(val.geometry.coordinates[1]);
+			// lon
+			row.push(val.geometry.coordinates[0]);
 
 			var properties = val.properties;
 			for (var i = 0, l = selected.length; i < l; i++) {

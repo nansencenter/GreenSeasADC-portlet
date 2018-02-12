@@ -444,8 +444,8 @@ myNamespace.matchup = (function($, ns) {
 					}
 				}
 				var pos = dataPoint.geometry.coordinates;
-				point.lat = pos[0];
-				point.lon = pos[1];
+				point.lat = pos[1];
+				point.lon = pos[0];
 				var id = dataPoint.id;
 				if (typeof point.elevation !== 'undefined')
 					dataPoint.matchedElevation = point.elevation;
@@ -482,8 +482,8 @@ myNamespace.matchup = (function($, ns) {
 				var properties = {
 					id : data[i].id,
 					depth : data[i].properties[depthParameterName],
-					lat : data[i].geometry.coordinates[0],
-					lon : data[i].geometry.coordinates[1],
+					lat : data[i].geometry.coordinates[1],
+					lon : data[i].geometry.coordinates[0],
 					rasterLat : val.lat,
 					rasterLong : val.lon,
 					x : val.value,
