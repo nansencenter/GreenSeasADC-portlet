@@ -154,9 +154,10 @@ public class NetCDFReader {
 						Array data = grid.readDataSlice(p.time, elevation, gridCoords.getCoordinateValue(1),
 								gridCoords.getCoordinateValue(0));
 						// we know its a scalar //TODO?
-						if (data.getDouble(0) != Double.NaN) {
+						double value = data.getDouble(0);
+						if (!Double.isNaN(value)) {
 							Map<String, Double> values = new HashMap<String, Double>();
-							values.put("value", data.getDouble(0));
+							values.put("value", value);
 							LatLonPoint latlonP = gcs.getLatLon(gridCoords.getCoordinateValue(0),
 									gridCoords.getCoordinateValue(1));
 							values.put("lat", latlonP.getLatitude());
@@ -173,9 +174,10 @@ public class NetCDFReader {
 							elevation = -1;
 						Array data = grid.readDataSlice(p.time, elevation, xy[1], xy[0]);
 						// we know its a scalar //TODO?
-						if (data.getDouble(0) != Double.NaN) {
+						double value = data.getDouble(0);
+						if (!Double.isNaN(value)) {
 							Map<String, Double> values = new HashMap<String, Double>();
-							values.put("value", data.getDouble(0));
+							values.put("value", value);
 							LatLonPoint latlonP = gcs.getLatLon(xy[0], xy[1]);
 							values.put("lat", latlonP.getLatitude());
 							values.put("lon", latlonP.getLongitude());
