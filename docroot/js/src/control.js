@@ -1367,9 +1367,9 @@ myNamespace.control = (function($, OL, ns) {
 			}
 		});
 		var newParameters = [ "Model value for " + parameter, "Model time for " + parameter,
-				"Model lon for " + parameter ];
+		                      "Model lat for " + parameter, "Model lon for " + parameter ];
 		if (elevationTable) {
-			newParameters.append("Model lat for " + parameter);
+			newParameters.append("Model elevation for " + parameter);
 		}
 		ns.handleParameters.addNewParameters(newParameters);
 		updateSearchResultsTable();
