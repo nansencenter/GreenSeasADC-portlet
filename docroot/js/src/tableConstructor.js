@@ -360,8 +360,14 @@ myNamespace.tableConstructor = (function($, ns) {
 			for (var i = 0, l = selected.length; i < l; i++) {
 				var prop = selected[i];
 				if (properties.hasOwnProperty(prop)) {
-					if (properties[prop] !== null)
-						row.push(properties[prop]);
+					if (properties[prop] !== null){
+						var value = properties[prop];
+						if (prop == 'Date'){
+							if (value.length == 11 && value.substr(value.length - 1) == 'Z')
+								value = value.substr(0, value.length - 1);
+						}
+						row.push(value);
+					}
 					else
 						row.push("");
 				} else {
