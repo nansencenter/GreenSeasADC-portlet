@@ -362,7 +362,7 @@ myNamespace.tableConstructor = (function($, ns) {
 				if (properties.hasOwnProperty(prop)) {
 					if (properties[prop] !== null){
 						var value = properties[prop];
-						if (prop == 'Date'){
+						if (prop == 'date'){
 							if (value.length == 11 && value.substr(value.length - 1) == 'Z')
 								value = value.substr(0, value.length - 1);
 						}
